@@ -2149,7 +2149,7 @@ function getProfileList() {
 
 function showProfileChooser() {
   pendingProfileId = "";
-  els.familyWealthCard.classList.remove("hidden");
+  els.familyWealthCard.classList.add("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
   els.profileDebug.classList.remove("hidden");
