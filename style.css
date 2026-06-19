@@ -663,15 +663,17 @@ h1 {
 }
 
 .dashboard-progress-panel .dashboard-metric {
-  grid-row: span 2;
+  min-height: 112px;
 }
 
-.shared-village-card,
+.dashboard-progress-panel .simple-challenge {
+  grid-column: 1 / -1;
+}
+
 .collections-preview-card {
   max-width: 720px;
 }
 
-.shared-village-card p,
 .collections-preview-card p {
   margin: 0;
   color: var(--muted);
@@ -692,7 +694,7 @@ h1 {
   box-shadow: none;
 }
 
-.simple-challenge h4,
+.simple-challenge p,
 .continue-card p {
   margin: 0;
 }

@@ -435,9 +435,6 @@ const els = {
   levelCelebrationLevel: document.querySelector("#levelCelebrationLevel"),
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
   levelCelebrationClose: document.querySelector("#levelCelebrationClose"),
-  challengeTitle: document.querySelector("#challengeTitle"),
-  challengeDescription: document.querySelector("#challengeDescription"),
-  challengeStatus: document.querySelector("#challengeStatus"),
   controlPanel: document.querySelector("#controlPanel"),
   searchPanel: document.querySelector("#searchPanel"),
   statsGrid: document.querySelector("#statsGrid"),
@@ -1569,21 +1566,10 @@ function renderDashboard() {
   prepareProfileDailyState(profile);
   checkAchievements("dashboard");
   const familySummary = getFamilyWealthSummary();
-  const challenge = profile.dailyChallenge;
   profile.positions = normalizePositions(profile.positions);
   els.dashboardWelcome.textContent = `Welcome, ${profile.name}`;
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
-  const dailyChallenge = getDailyChallengeForDate(challenge.date);
-  const challengeProgress = getDailyChallengeProgress(challenge, dailyChallenge);
-  els.challengeTitle.classList.toggle("challenge-complete", challenge.completed);
-  els.challengeTitle.textContent = challenge.completed
-    ? "Daily Challenge Complete"
-    : dailyChallenge.name;
-  els.challengeDescription.textContent = challenge.completed
-    ? dailyChallenge.name
-    : dailyChallenge.description;
-  els.challengeStatus.textContent = `${challengeProgress.current} / ${dailyChallenge.goal}`;
   saveProfileStore();
 }
 
