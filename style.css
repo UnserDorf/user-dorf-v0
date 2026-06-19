@@ -581,7 +581,7 @@ h1 {
   overflow: auto;
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 18px;
   padding: clamp(6px, 1.4vw, 12px) 0;
 }
 
@@ -604,14 +604,14 @@ h1 {
   font-weight: 750;
 }
 
-.dashboard-summary {
+.dashboard-summary,
+.dashboard-progress-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .dashboard-metric,
-.dashboard-section,
 .continue-card {
   border: 1px solid rgba(222, 216, 203, 0.92);
   border-radius: 8px;
@@ -643,7 +643,23 @@ h1 {
 
 .dashboard-section {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+}
+
+.dashboard-progress-panel .dashboard-metric {
+  grid-row: span 2;
+}
+
+.shared-village-card,
+.collections-preview-card {
+  max-width: 720px;
+}
+
+.shared-village-card p,
+.collections-preview-card p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
 }
 
 .section-heading.simple h3 {
@@ -663,6 +679,14 @@ h1 {
 .simple-challenge h4,
 .continue-card p {
   margin: 0;
+}
+
+.simple-challenge span,
+.continue-card span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 850;
 }
 
 .household-list {

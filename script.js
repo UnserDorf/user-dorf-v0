@@ -1250,7 +1250,7 @@ function refreshVisibleProfileState() {
     showProfileScreen();
     return;
   }
-  els.currentProfileLabel.textContent = `${profile.emoji} ${profile.name}`;
+  els.currentProfileLabel.textContent = profile.name;
   if (currentView === "dashboard") {
     renderDashboard();
   } else if (currentView === "achievements") {
@@ -1341,7 +1341,7 @@ function completeProfileLogin(profileId) {
   recentMeaningMatchItems = normalizeRecentItemList(profile.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER);
   applyProfileSettings(profile.settings);
   saveProfileStore();
-  els.currentProfileLabel.textContent = `${profile.emoji} ${profile.name}`;
+  els.currentProfileLabel.textContent = profile.name;
   els.profileScreen.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.appShell.classList.remove("locked");
@@ -1558,27 +1558,22 @@ function renderDashboard() {
   profile.positions = normalizePositions(profile.positions);
   els.dashboardWelcome.textContent = `Welcome, ${profile.name}`;
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
-  els.dashboardFamilyLevel.textContent = `${familySummary.level.icon} ${familySummary.level.name}`;
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
-  els.dashboardFamilyProgressFill.style.width = `${familySummary.progressPercent}%`;
-  els.dashboardFamilyProgressText.textContent = familySummary.nextLevel.next
-    ? `${familySummary.totalCoins} / ${familySummary.nextLevel.next} toward ${familySummary.nextFamilyLevel.icon} ${familySummary.nextFamilyLevel.name}`
-    : "Max family level reached";
   const dailyChallenge = getDailyChallengeForDate(challenge.date);
   const challengeProgress = getDailyChallengeProgress(challenge, dailyChallenge);
   els.challengeTitle.classList.toggle("challenge-complete", challenge.completed);
   els.challengeTitle.textContent = challenge.completed
-    ? "🎉 Daily Challenge Complete!"
-    : `${dailyChallenge.icon} ${dailyChallenge.name}`;
+    ? "Daily Challenge Complete"
+    : dailyChallenge.name;
   els.challengeDescription.textContent = challenge.completed
-    ? `${dailyChallenge.icon} ${dailyChallenge.name}`
+    ? dailyChallenge.name
     : dailyChallenge.description;
   els.challengeStatus.textContent = `${challengeProgress.current} / ${dailyChallenge.goal}`;
-  renderHouseholdMembers();
   saveProfileStore();
 }
 
 function renderHouseholdMembers() {
+  if (!els.householdList) return;
   const rows = getProfileList()
     .map((profileInfo) => profileStore.profiles[profileInfo.id])
     .filter(Boolean);
