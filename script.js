@@ -17,21 +17,8 @@ const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
 const FAMILY_SYNC_ID = "unser-dorf-household";
 
-const DEFAULT_PROFILES = [
-  { id: "anna", name: "Anna", emoji: "⭐", avatar: "anna.png" },
-  { id: "omar", name: "Omar", emoji: "🚀", avatar: "omar.png" },
-  { id: "leila", name: "Leila", emoji: "🌸", avatar: "leila.png" },
-  { id: "david", name: "David", emoji: "📚", avatar: "david.png" }
-];
-
-const LEGACY_PROFILE_MAPPINGS = {
-  mineko: "anna",
-  sami: "omar",
-  mai: "leila",
-  ziad: "david"
-};
-
-const LEADERBOARD_PROFILE_IDS = ["anna", "omar", "leila"];
+const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
+const LEADERBOARD_PROFILE_IDS = [];
 const ACHIEVEMENTS = [
   {
     id: "first-correct-answer",
@@ -398,6 +385,7 @@ const els = {
   profileScreen: document.querySelector("#profileScreen"),
   profileGrid: document.querySelector("#profileGrid"),
   profileActions: document.querySelector("#profileActions"),
+  emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
   profileDebug: document.querySelector("#profileDebug"),
   familyWealthCard: document.querySelector("#familyWealthCard"),
   createProfileToggle: document.querySelector("#createProfileToggle"),
@@ -713,14 +701,14 @@ function loadProfileStore() {
     }
   };
 
-  migrateLegacyProfiles(store);
-  DEFAULT_PROFILES.forEach((profile) => {
-    store.profiles[profile.id] = normalizeProfileData(store.profiles[profile.id], profile);
-  });
   Object.keys(store.profiles).forEach((profileId) => {
-    if (DEFAULT_PROFILES.some((profile) => profile.id === profileId)) return;
+    if (LEGACY_PROFILE_IDS.has(profileId)) {
+      delete store.profiles[profileId];
+      return;
+    }
     store.profiles[profileId] = normalizeProfileData(store.profiles[profileId], store.profiles[profileId]);
   });
+  if (LEGACY_PROFILE_IDS.has(store.currentProfile)) store.currentProfile = "";
   store.familyLevelsReached = normalizeFamilyLevelsReached(store.familyLevelsReached, store.profiles);
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
   promoteFamilyAchievements(store);
@@ -729,43 +717,11 @@ function loadProfileStore() {
     const legacyProgress = readStorageObject(STORAGE_KEY);
     const legacyArticleProgress = readStorageObject(ARTICLE_STORAGE_KEY);
     const hasLegacyData = Object.keys(legacyProgress).length > 0 || Object.keys(legacyArticleProgress).length > 0;
-    store.profiles.anna.progress = {
-      ...legacyProgress,
-      ...store.profiles.anna.progress
-    };
-    store.profiles.anna.articleProgress = {
-      ...legacyArticleProgress,
-      ...store.profiles.anna.articleProgress
-    };
-    store.profiles.anna.progress = normalizeMeaningProgress(store.profiles.anna.progress);
-    store.profiles.anna.articleProgress = normalizeArticleProgress(store.profiles.anna.articleProgress);
-    if (hasLegacyData) store.currentProfile = store.currentProfile || "anna";
     store.migratedLegacyProgress = true;
   }
 
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(store));
   return store;
-}
-
-function migrateLegacyProfiles(store) {
-  if (!store?.profiles) return;
-  Object.entries(LEGACY_PROFILE_MAPPINGS).forEach(([legacyId, neutralId]) => {
-    const legacyProfile = store.profiles[legacyId];
-    const neutralProfile = DEFAULT_PROFILES.find((profile) => profile.id === neutralId);
-    if (!legacyProfile) return;
-    store.profiles[neutralId] = {
-      ...store.profiles[neutralId],
-      ...legacyProfile,
-      id: neutralId,
-      name: neutralProfile?.name || store.profiles[neutralId]?.name || "Profile",
-      emoji: neutralProfile?.emoji || store.profiles[neutralId]?.emoji || "🏡",
-      avatar: neutralProfile?.avatar || store.profiles[neutralId]?.avatar || ""
-    };
-    delete store.profiles[legacyId];
-  });
-  if (LEGACY_PROFILE_MAPPINGS[store.currentProfile]) {
-    store.currentProfile = LEGACY_PROFILE_MAPPINGS[store.currentProfile];
-  }
 }
 
 function createProfileStore() {
@@ -775,10 +731,7 @@ function createProfileStore() {
     migratedLegacyProgress: false,
     familyLevelsReached: [],
     familyAchievementsUnlocked: [],
-    profiles: DEFAULT_PROFILES.reduce((profiles, profile) => {
-      profiles[profile.id] = normalizeProfileData(null, profile);
-      return profiles;
-    }, {})
+    profiles: {}
   };
 }
 
@@ -1153,16 +1106,10 @@ function mergeProfileStores(localStore, remoteStore) {
     profiles: {}
   };
 
-  DEFAULT_PROFILES.forEach((profile) => {
-    const localProfile = localStore?.profiles?.[profile.id];
-    const remoteProfile = remoteStore?.profiles?.[profile.id];
-    baseStore.profiles[profile.id] = mergeProfileData(localProfile, remoteProfile, profile);
-  });
-  const defaultIds = new Set(DEFAULT_PROFILES.map((profile) => profile.id));
   const customIds = new Set([
     ...Object.keys(localStore?.profiles || {}),
     ...Object.keys(remoteStore?.profiles || {})
-  ].filter((profileId) => !defaultIds.has(profileId)));
+  ].filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId)));
   customIds.forEach((profileId) => {
     const localProfile = localStore?.profiles?.[profileId];
     const remoteProfile = remoteStore?.profiles?.[profileId];
@@ -1295,6 +1242,10 @@ function refreshVisibleProfileState() {
     return;
   }
   const profile = getCurrentProfile();
+  if (!profile) {
+    showProfileScreen();
+    return;
+  }
   els.currentProfileLabel.textContent = `${profile.emoji} ${profile.name}`;
   if (currentView === "dashboard") {
     renderDashboard();
@@ -1365,7 +1316,7 @@ function selectProfile(profileId) {
 }
 
 function getCurrentProfile() {
-  return profileStore.profiles[currentProfileId || profileStore.currentProfile || "anna"];
+  return profileStore.profiles[currentProfileId || profileStore.currentProfile] || null;
 }
 
 function applyProfileSettings(settings) {
@@ -2146,13 +2097,12 @@ function renderProfileCards() {
   els.profileGrid.replaceChildren(
     ...profileCards
   );
+  els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
 function getProfileList() {
-  const defaultIds = new Set(DEFAULT_PROFILES.map((profile) => profile.id));
-  const customProfiles = Object.values(profileStore.profiles || {})
-    .filter((profile) => !defaultIds.has(profile.id))
+  return Object.values(profileStore.profiles || {})
     .map((profile) => ({
       id: profile.id,
       name: profile.name,
@@ -2160,13 +2110,13 @@ function getProfileList() {
       avatar: profile.avatar || "",
       password: profile.password || ""
     }));
-  return [...DEFAULT_PROFILES, ...customProfiles];
 }
 
 function showProfileChooser() {
   els.familyWealthCard.classList.remove("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
+  els.emptyProfileMessage.classList.remove("hidden");
   els.profileDebug.classList.remove("hidden");
   els.createProfileForm.classList.add("hidden");
   els.createProfileForm.reset();
@@ -2178,6 +2128,7 @@ function showCreateProfileScreen() {
   els.familyWealthCard.classList.add("hidden");
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
+  els.emptyProfileMessage.classList.add("hidden");
   els.profileDebug.classList.add("hidden");
   els.createProfileForm.classList.remove("hidden");
   els.createProfileName.focus();
@@ -2251,10 +2202,7 @@ function getFamilyWealthSummary() {
 }
 
 function getFamilyCoinTotal(profiles) {
-  return DEFAULT_PROFILES.reduce((total, profileInfo) => {
-    const profile = profiles?.[profileInfo.id];
-    return total + normalizeCoinCount(profile?.coins);
-  }, 0);
+  return Object.values(profiles || {}).reduce((total, profile) => total + normalizeCoinCount(profile?.coins), 0);
 }
 
 function getFamilyWealthLevel(coinsValue) {

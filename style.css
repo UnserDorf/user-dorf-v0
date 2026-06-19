@@ -250,6 +250,19 @@ body {
   text-align: center;
 }
 
+.empty-profile-message {
+  margin: 0;
+  border: 1px solid rgba(222, 216, 203, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+  padding: clamp(18px, 3vw, 28px);
+  color: var(--ink);
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+  font-weight: 850;
+  text-align: center;
+}
+
 .avatar-wrap {
   width: 48px;
   height: 48px;
