@@ -15,16 +15,16 @@ const PROFILE_STORE_VERSION = 1;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
-const FAMILY_SYNC_ID = "zaghrout";
+const FAMILY_SYNC_ID = "unser-dorf-household";
 
 const DEFAULT_PROFILES = [
-  { id: "mineko", name: "Mineko", emoji: "⭐", avatar: "mineko.png" },
-  { id: "sami", name: "Sami", emoji: "🚀", avatar: "sami.png" },
-  { id: "mai", name: "Mai", emoji: "🌸", avatar: "mai.png" },
-  { id: "ziad", name: "Ziad", emoji: "📚", avatar: "ziad.png" }
+  { id: "anna", name: "Anna", emoji: "⭐", avatar: "anna.png" },
+  { id: "omar", name: "Omar", emoji: "🚀", avatar: "omar.png" },
+  { id: "leila", name: "Leila", emoji: "🌸", avatar: "leila.png" },
+  { id: "david", name: "David", emoji: "📚", avatar: "david.png" }
 ];
 
-const LEADERBOARD_PROFILE_IDS = ["mineko", "sami", "mai"];
+const LEADERBOARD_PROFILE_IDS = ["anna", "omar", "leila"];
 const ACHIEVEMENTS = [
   {
     id: "first-correct-answer",
@@ -721,17 +721,17 @@ function loadProfileStore() {
     const legacyProgress = readStorageObject(STORAGE_KEY);
     const legacyArticleProgress = readStorageObject(ARTICLE_STORAGE_KEY);
     const hasLegacyData = Object.keys(legacyProgress).length > 0 || Object.keys(legacyArticleProgress).length > 0;
-    store.profiles.mineko.progress = {
+    store.profiles.anna.progress = {
       ...legacyProgress,
-      ...store.profiles.mineko.progress
+      ...store.profiles.anna.progress
     };
-    store.profiles.mineko.articleProgress = {
+    store.profiles.anna.articleProgress = {
       ...legacyArticleProgress,
-      ...store.profiles.mineko.articleProgress
+      ...store.profiles.anna.articleProgress
     };
-    store.profiles.mineko.progress = normalizeMeaningProgress(store.profiles.mineko.progress);
-    store.profiles.mineko.articleProgress = normalizeArticleProgress(store.profiles.mineko.articleProgress);
-    if (hasLegacyData) store.currentProfile = store.currentProfile || "mineko";
+    store.profiles.anna.progress = normalizeMeaningProgress(store.profiles.anna.progress);
+    store.profiles.anna.articleProgress = normalizeArticleProgress(store.profiles.anna.articleProgress);
+    if (hasLegacyData) store.currentProfile = store.currentProfile || "anna";
     store.migratedLegacyProgress = true;
   }
 
@@ -1336,7 +1336,7 @@ function selectProfile(profileId) {
 }
 
 function getCurrentProfile() {
-  return profileStore.profiles[currentProfileId || profileStore.currentProfile || "mineko"];
+  return profileStore.profiles[currentProfileId || profileStore.currentProfile || "anna"];
 }
 
 function applyProfileSettings(settings) {
@@ -3041,7 +3041,7 @@ function celebrateFamilyLevelIfNeeded() {
 
 function showFamilyLevelCelebration(level) {
   els.levelCelebrationTitle.textContent = "🎉 Family Wealth Level Up!";
-  els.levelCelebrationProfile.textContent = "The Zaghrout Family reached:";
+  els.levelCelebrationProfile.textContent = "Unser Dorf Household reached:";
   els.levelCelebrationLevel.textContent = `${level.icon} ${level.name}`;
   els.levelCelebrationBonus.textContent = "";
   els.levelCelebrationBonus.classList.add("hidden");

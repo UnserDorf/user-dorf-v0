@@ -1,6 +1,6 @@
 # Unser Dorf
 
-For the Zaghrout Family
+For Unser Dorf Household
 
 A plain HTML, CSS, and JavaScript flashcard app for Goethe B1 German vocabulary. It runs entirely in the browser, stores progress in `localStorage`, and loads vocabulary from a CSV file.
 
