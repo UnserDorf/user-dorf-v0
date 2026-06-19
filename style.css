@@ -130,6 +130,15 @@ body {
   font-weight: 650;
 }
 
+.profile-signin-heading {
+  text-align: center;
+}
+
+.profile-signin-heading h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+}
+
 .family-wealth-card {
   border: 1px solid rgba(222, 216, 203, 0.92);
   border-radius: 8px;

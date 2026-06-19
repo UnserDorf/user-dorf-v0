@@ -383,6 +383,7 @@ const els = {
   passwordInput: document.querySelector("#passwordInput"),
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
+  profileSignInHeading: document.querySelector("#profileSignInHeading"),
   profileGrid: document.querySelector("#profileGrid"),
   profileActions: document.querySelector("#profileActions"),
   emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
@@ -1300,6 +1301,7 @@ function showProfileLogin(profileId) {
   if (!profile) return;
   pendingProfileId = profileId;
   els.familyWealthCard.classList.add("hidden");
+  els.profileSignInHeading.classList.add("hidden");
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
@@ -2133,6 +2135,7 @@ function renderProfileCards() {
     ...profileCards
   );
   els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
+  els.profileSignInHeading.classList.toggle("hidden", profileCards.length === 0);
   els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
@@ -2150,7 +2153,9 @@ function getProfileList() {
 
 function showProfileChooser() {
   pendingProfileId = "";
+  const hasProfiles = getProfileList().length > 0;
   els.familyWealthCard.classList.add("hidden");
+  els.profileSignInHeading.classList.toggle("hidden", !hasProfiles);
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
   els.profileDebug.classList.add("hidden");
@@ -2166,6 +2171,7 @@ function showProfileChooser() {
 
 function showCreateProfileScreen() {
   els.familyWealthCard.classList.add("hidden");
+  els.profileSignInHeading.classList.add("hidden");
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
@@ -2182,6 +2188,7 @@ function createCustomProfile(name, password) {
     { id, name, password, emoji: "🏡", avatar: "" }
   );
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
+  return id;
 }
 
 function createCustomProfileId(name) {
@@ -2209,9 +2216,8 @@ function handleCreateProfile(event) {
     els.createProfileError.classList.remove("hidden");
     return;
   }
-  createCustomProfile(name, password);
-  showProfileChooser();
-  renderProfileCards();
+  const profileId = createCustomProfile(name, password);
+  completeProfileLogin(profileId);
 }
 
 function renderFamilyWealth() {
@@ -2277,7 +2283,13 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
 
-function logoutToSharedPassword() {
+function logoutToProfileScreen() {
+  saveCurrentPosition();
+  closeSettingsMenu();
+  showProfileScreen();
+}
+
+function lockSharedPasswordScreen() {
   saveCurrentPosition();
   closeSettingsMenu();
   localStorage.removeItem(UNLOCK_STORAGE_KEY);
@@ -2460,7 +2472,7 @@ function bindEvents() {
     closeSettingsMenu();
     showProfileScreen();
   });
-  els.logoutButton.addEventListener("click", logoutToSharedPassword);
+  els.logoutButton.addEventListener("click", logoutToProfileScreen);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
@@ -2476,7 +2488,7 @@ function bindEvents() {
   });
 
   els.lockApp.addEventListener("click", () => {
-    logoutToSharedPassword();
+    lockSharedPasswordScreen();
   });
 
   els.resetProgress.addEventListener("click", () => {

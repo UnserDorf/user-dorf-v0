@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=95">
+    <link rel="stylesheet" href="style.css?v=96">
   </head>
   <body>
     <section class="lock-screen" id="lockScreen" aria-label="Password required">
@@ -53,6 +53,10 @@
           </div>
           <p class="progress-note"><span id="familyWealthProgressText">0 / 500</span></p>
         </section>
+        <div class="profile-signin-heading hidden" id="profileSignInHeading">
+          <p class="eyebrow">Sign In</p>
+          <h2>Choose your profile</h2>
+        </div>
         <div class="profile-grid" id="profileGrid"></div>
         <div class="empty-profile-message hidden" id="emptyProfileMessage">
           <p>Willkommen bei Unser Dorf.</p>
@@ -61,7 +65,7 @@
           <p>Create your first profile.</p>
         </div>
         <div class="profile-actions" id="profileActions">
-          <button class="ghost-button" id="createProfileToggle" type="button">Profil erstellen / Create Profile</button>
+          <button class="ghost-button" id="createProfileToggle" type="button">Create New Profile</button>
         </div>
         <p class="profile-debug" id="profileDebug">Profiles loaded: 0</p>
         <form class="profile-login-card hidden" id="profileLoginForm" aria-label="Profile login">
@@ -528,6 +532,6 @@
       <p class="app-version">Unser Dorf v1.20</p>
     </main>
 
-    <script type="module" src="script.js?v=95"></script>
+    <script type="module" src="script.js?v=96"></script>
   </body>
 </html>
