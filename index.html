@@ -117,127 +117,66 @@
 
       <section class="dashboard-screen" id="dashboardScreen" aria-label="Home dashboard">
         <div class="dashboard-heading">
-          <span class="avatar-wrap dashboard-avatar" id="dashboardAvatar" aria-hidden="true"></span>
           <div>
             <p class="eyebrow">Home</p>
-            <h2 id="dashboardWelcome">Welcome back</h2>
+            <h2 id="dashboardWelcome">Welcome</h2>
           </div>
         </div>
 
-        <article class="level-card" aria-label="Coin level">
-          <div>
-            <p class="eyebrow">Current Level</p>
-            <h3><span id="levelIcon">🪙</span> <span id="levelName">Coin Pouch</span></h3>
-            <strong><span id="levelProfileName">My</span> Coins: <span id="levelCoins">0</span></strong>
-          </div>
-          <div class="progress-track" aria-hidden="true">
-            <span id="levelProgressFill"></span>
-          </div>
-          <p class="progress-note" id="levelProgressText">0 / 50 coins</p>
-        </article>
-
-        <article class="dashboard-family-wealth-card" aria-label="Family wealth">
-          <div>
-            <p class="eyebrow">🏦 Family Wealth</p>
-            <h3 id="dashboardFamilyLevel">🏚️ Broke Family</h3>
-            <strong>Family Wealth: <span id="dashboardFamilyCoins">0</span> Coins</strong>
-          </div>
-          <div class="progress-track" aria-hidden="true">
-            <span id="dashboardFamilyProgressFill"></span>
-          </div>
-          <p class="progress-note" id="dashboardFamilyProgressText">0 / 100 toward 🛒 Corner Shop</p>
-        </article>
-
-        <article class="earn-coins-card" aria-label="Earn coins">
-          <div>
-            <h3>⭐ Earn Coins</h3>
-            <p>Complete challenges, earn coins, and level up.</p>
-          </div>
-          <button class="start-earning-button" type="button" data-dashboard-action="earn-coins">Start</button>
-        </article>
-
-        <div class="dashboard-motivation" aria-label="Daily motivation">
-          <article class="streak-card" aria-label="Study streak">
-            <h3>🔥 Streak</h3>
-            <strong id="streakCurrent">0 Days</strong>
-            <p id="streakBest">Best: 0 days</p>
+        <section class="dashboard-summary" aria-label="Personal and family progress">
+          <article class="dashboard-metric" aria-label="My coins">
+            <span>My Coins</span>
+            <strong id="levelCoins">0</strong>
           </article>
-          <article class="challenge-card" aria-label="Daily challenge">
-            <div class="challenge-heading">
-              <h3 id="challengeTitle">🎯 Today's Challenge</h3>
-              <strong id="challengeReward">+10 coins</strong>
-            </div>
-            <p class="challenge-description" id="challengeDescription">Answer 20 article questions.</p>
-            <p id="challengeStatus">0 / 20</p>
+          <article class="dashboard-metric" aria-label="Family coins">
+            <span>Family Coins</span>
+            <strong id="dashboardFamilyCoins">0</strong>
+          </article>
+          <article class="dashboard-metric" aria-label="Family wealth">
+            <span>Family Wealth</span>
+            <strong id="dashboardFamilyLevel">Broke Family</strong>
+          </article>
+          <article class="dashboard-metric wide" aria-label="Progress to next wealth level">
+            <span>Progress to Next Wealth Level</span>
             <div class="progress-track" aria-hidden="true">
-              <span id="challengeProgressFill"></span>
+              <span id="dashboardFamilyProgressFill"></span>
             </div>
+            <p class="progress-note" id="dashboardFamilyProgressText">0 / 500</p>
           </article>
-        </div>
-
-        <section class="leaderboard-card" aria-label="Family coin leaderboard">
-          <h3>🏆 Family Coin Leaderboard</h3>
-          <div class="leaderboard-list" id="leaderboardList"></div>
         </section>
 
-        <div class="dashboard-progress" aria-label="Dashboard progress">
-          <article class="dashboard-card learned">
-            <span>📚 Words</span>
-            <div class="article-state-counts" aria-label="Word learning progress">
-              <span>New <strong id="dashboardWordNew">0</strong></span>
-              <span>Learned <strong id="dashboardWordLearned">0</strong></span>
-              <span>Mastered <strong id="dashboardWordMastered">0</strong></span>
-            </div>
-          </article>
-          <article class="dashboard-card articles">
-            <span>🏷 Articles</span>
-            <div class="article-state-counts" aria-label="Article learning progress">
-              <span>New <strong id="dashboardArticleNew">0</strong></span>
-              <span>Learned <strong id="dashboardArticleLearned">0</strong></span>
-              <span>Mastered <strong id="dashboardArticleMastered">0</strong></span>
-            </div>
-          </article>
-          <article class="dashboard-card noun-verb">
-            <span>🌍 Meaning Match</span>
-            <div class="article-state-counts" aria-label="Meaning Match learning progress">
-              <span>New <strong id="dashboardNounVerbNew">0</strong></span>
-              <span>Learned <strong id="dashboardNounVerbLearned">0</strong></span>
-              <span>Mastered <strong id="dashboardNounVerbMastered">0</strong></span>
-            </div>
-          </article>
-          <article class="dashboard-card prepositions">
-            <span>🎯 Prepositions</span>
-            <div class="article-state-counts" aria-label="Preposition learning progress">
-              <span>New <strong id="dashboardPrepositionNew">0</strong></span>
-              <span>Learned <strong id="dashboardPrepositionLearned">0</strong></span>
-              <span>Mastered <strong id="dashboardPrepositionMastered">0</strong></span>
-            </div>
-          </article>
-        </div>
-
-        <section class="achievements-card" aria-label="Achievements">
-          <div class="section-heading">
-            <h3>🏅 Achievements</h3>
-            <button class="small-link-button" type="button" data-dashboard-action="achievements">Collection</button>
+        <section class="dashboard-section" aria-label="Today's challenge">
+          <div class="section-heading simple">
+            <h3>Today's Challenge</h3>
           </div>
-          <div class="achievement-summary">
-            <section aria-label="Recently earned achievements">
-              <h4>🏆 Recently Earned</h4>
-              <div class="achievement-strip" id="recentAchievements"></div>
-            </section>
-            <section aria-label="Next achievement goals">
-              <h4>⭐ Next Goals</h4>
-              <div class="achievement-strip" id="nextAchievements"></div>
-            </section>
-          </div>
+          <article class="challenge-card simple-challenge">
+            <div>
+              <h4 id="challengeTitle">Today's Challenge</h4>
+              <p class="challenge-description" id="challengeDescription">Answer 20 article questions.</p>
+              <p id="challengeStatus">0 / 20</p>
+            </div>
+            <button class="primary-button" type="button" data-dashboard-action="earn-coins">Start Challenge</button>
+          </article>
         </section>
 
-        <div class="dashboard-actions" aria-label="Dashboard actions">
-          <button type="button" data-dashboard-action="continue">Continue Vocabulary Study</button>
-          <button type="button" data-dashboard-action="articles">Practice Articles</button>
-          <button type="button" data-dashboard-action="search">Search Vocabulary</button>
-          <button type="button" data-dashboard-action="statistics">Statistics</button>
-        </div>
+        <section class="dashboard-section" aria-label="Continue learning">
+          <div class="section-heading simple">
+            <h3>Continue Learning</h3>
+          </div>
+          <article class="continue-card">
+            <div>
+              <p>Resume where the user left off</p>
+            </div>
+            <button class="primary-button" type="button" data-dashboard-action="continue">Continue</button>
+          </article>
+        </section>
+
+        <section class="dashboard-section" aria-label="Household members">
+          <div class="section-heading simple">
+            <h3>Household Members</h3>
+          </div>
+          <div class="household-list" id="householdList"></div>
+        </section>
       </section>
 
       <section class="achievement-collection-screen hidden" id="achievementCollectionScreen" aria-label="Achievement collection">

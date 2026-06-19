@@ -410,22 +410,8 @@ const els = {
   dashboardScreen: document.querySelector("#dashboardScreen"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
-  dashboardAvatar: document.querySelector("#dashboardAvatar"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
-  dashboardWordNew: document.querySelector("#dashboardWordNew"),
-  dashboardWordLearned: document.querySelector("#dashboardWordLearned"),
-  dashboardWordMastered: document.querySelector("#dashboardWordMastered"),
-  dashboardArticleNew: document.querySelector("#dashboardArticleNew"),
-  dashboardArticleLearned: document.querySelector("#dashboardArticleLearned"),
-  dashboardArticleMastered: document.querySelector("#dashboardArticleMastered"),
-  dashboardNounVerbNew: document.querySelector("#dashboardNounVerbNew"),
-  dashboardNounVerbLearned: document.querySelector("#dashboardNounVerbLearned"),
-  dashboardNounVerbMastered: document.querySelector("#dashboardNounVerbMastered"),
-  dashboardPrepositionNew: document.querySelector("#dashboardPrepositionNew"),
-  dashboardPrepositionLearned: document.querySelector("#dashboardPrepositionLearned"),
-  dashboardPrepositionMastered: document.querySelector("#dashboardPrepositionMastered"),
-  recentAchievements: document.querySelector("#recentAchievements"),
-  nextAchievements: document.querySelector("#nextAchievements"),
+  householdList: document.querySelector("#householdList"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
   challengeArticleProgressLabel: document.querySelector("#challengeArticleProgressLabel"),
@@ -437,12 +423,7 @@ const els = {
   challengeMeaningMatchProgressLabel: document.querySelector("#challengeMeaningMatchProgressLabel"),
   challengePrepositionProgressBar: document.querySelector("#challengePrepositionProgressBar"),
   challengePrepositionProgressLabel: document.querySelector("#challengePrepositionProgressLabel"),
-  levelIcon: document.querySelector("#levelIcon"),
-  levelName: document.querySelector("#levelName"),
-  levelProfileName: document.querySelector("#levelProfileName"),
   levelCoins: document.querySelector("#levelCoins"),
-  levelProgressFill: document.querySelector("#levelProgressFill"),
-  levelProgressText: document.querySelector("#levelProgressText"),
   dashboardFamilyLevel: document.querySelector("#dashboardFamilyLevel"),
   dashboardFamilyCoins: document.querySelector("#dashboardFamilyCoins"),
   dashboardFamilyProgressFill: document.querySelector("#dashboardFamilyProgressFill"),
@@ -454,13 +435,8 @@ const els = {
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
   levelCelebrationClose: document.querySelector("#levelCelebrationClose"),
   challengeTitle: document.querySelector("#challengeTitle"),
-  challengeReward: document.querySelector("#challengeReward"),
   challengeDescription: document.querySelector("#challengeDescription"),
   challengeStatus: document.querySelector("#challengeStatus"),
-  challengeProgressFill: document.querySelector("#challengeProgressFill"),
-  streakCurrent: document.querySelector("#streakCurrent"),
-  streakBest: document.querySelector("#streakBest"),
-  leaderboardList: document.querySelector("#leaderboardList"),
   controlPanel: document.querySelector("#controlPanel"),
   searchPanel: document.querySelector("#searchPanel"),
   statsGrid: document.querySelector("#statsGrid"),
@@ -1561,37 +1537,11 @@ function renderDashboard() {
   const profile = getCurrentProfile();
   prepareProfileDailyState(profile);
   checkAchievements("dashboard");
-  const wordSummary = getWordLearningSummary();
-  const articleSummary = getArticleSummary();
-  const meaningMatchSummary = getMeaningMatchSummary();
-  const prepositionSummary = getPrepositionSummary();
-  const level = getCoinLevel(profile.coins);
-  const levelPercent = getLevelProgressPercent(profile.coins, level);
   const familySummary = getFamilyWealthSummary();
   const challenge = profile.dailyChallenge;
-  const streak = getDisplayStreak(profile);
   profile.positions = normalizePositions(profile.positions);
-  els.dashboardWelcome.textContent = `Welcome back, ${profile.name}`;
-  els.dashboardWordNew.textContent = wordSummary.new;
-  els.dashboardWordLearned.textContent = wordSummary.learned;
-  els.dashboardWordMastered.textContent = wordSummary.mastered;
-  els.dashboardArticleNew.textContent = articleSummary.new;
-  els.dashboardArticleLearned.textContent = articleSummary.learned;
-  els.dashboardArticleMastered.textContent = articleSummary.mastered;
-  els.dashboardNounVerbNew.textContent = meaningMatchSummary.new;
-  els.dashboardNounVerbLearned.textContent = meaningMatchSummary.learned;
-  els.dashboardNounVerbMastered.textContent = meaningMatchSummary.mastered;
-  els.dashboardPrepositionNew.textContent = prepositionSummary.new;
-  els.dashboardPrepositionLearned.textContent = prepositionSummary.learned;
-  els.dashboardPrepositionMastered.textContent = prepositionSummary.mastered;
-  els.levelIcon.textContent = level.icon;
-  els.levelName.textContent = level.name;
-  els.levelProfileName.textContent = `${profile.name}'s`;
+  els.dashboardWelcome.textContent = `Welcome, ${profile.name}`;
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
-  els.levelProgressFill.style.width = `${levelPercent}%`;
-  els.levelProgressText.textContent = level.next
-    ? `${normalizeCoinCount(profile.coins)} / ${level.next} coins to next level`
-    : "Max level reached";
   els.dashboardFamilyLevel.textContent = `${familySummary.level.icon} ${familySummary.level.name}`;
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
   els.dashboardFamilyProgressFill.style.width = `${familySummary.progressPercent}%`;
@@ -1607,17 +1557,28 @@ function renderDashboard() {
   els.challengeDescription.textContent = challenge.completed
     ? `${dailyChallenge.icon} ${dailyChallenge.name}`
     : dailyChallenge.description;
-  els.challengeReward.textContent = challenge.completed
-    ? `Reward: 🪙 +${dailyChallenge.reward} Coins Earned`
-    : `Reward: 🪙 +${dailyChallenge.reward} Coins`;
   els.challengeStatus.textContent = `${challengeProgress.current} / ${dailyChallenge.goal}`;
-  els.challengeProgressFill.style.width = `${Math.min((challengeProgress.current / dailyChallenge.goal) * 100, 100)}%`;
-  els.streakCurrent.textContent = `${streak.current} ${streak.current === 1 ? "Day" : "Days"}`;
-  els.streakBest.textContent = `Best: ${streak.best} days`;
-  renderAvatar(els.dashboardAvatar, profile);
-  renderCoinLeaderboard();
-  renderAchievements();
+  renderHouseholdMembers();
   saveProfileStore();
+}
+
+function renderHouseholdMembers() {
+  const rows = getProfileList()
+    .map((profileInfo) => profileStore.profiles[profileInfo.id])
+    .filter(Boolean);
+
+  els.householdList.replaceChildren(
+    ...rows.map((profile) => {
+      const row = document.createElement("div");
+      row.className = "household-row";
+      row.classList.toggle("current", profile.id === currentProfileId);
+      row.replaceChildren(
+        createTextElement("span", "household-name", profile.name),
+        createTextElement("strong", "household-coins", normalizeCoinCount(profile.coins))
+      );
+      return row;
+    })
+  );
 }
 
 function renderCoinChallenges() {
@@ -1668,6 +1629,7 @@ function createProgressSegment(className, percent, label) {
 }
 
 function renderCoinLeaderboard() {
+  if (!els.leaderboardList) return;
   const medals = ["🥇", "🥈", "🥉"];
   const rows = LEADERBOARD_PROFILE_IDS
     .map((profileId) => profileStore.profiles[profileId])

@@ -557,6 +557,93 @@ h1 {
   font-weight: 750;
 }
 
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-metric,
+.dashboard-section,
+.continue-card {
+  border: 1px solid rgba(222, 216, 203, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+  padding: clamp(14px, 2.4vw, 20px);
+}
+
+.dashboard-metric {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-metric.wide {
+  grid-column: 1 / -1;
+}
+
+.dashboard-metric span,
+.household-name {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.dashboard-metric strong {
+  color: var(--ink);
+  font-size: clamp(1.45rem, 3.8vw, 2.2rem);
+  line-height: 1.05;
+}
+
+.dashboard-section {
+  display: grid;
+  gap: 12px;
+}
+
+.section-heading.simple h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+}
+
+.simple-challenge,
+.continue-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
+  gap: 12px;
+  align-items: center;
+  box-shadow: none;
+}
+
+.simple-challenge h4,
+.continue-card p {
+  margin: 0;
+}
+
+.household-list {
+  display: grid;
+  gap: 8px;
+}
+
+.household-row {
+  min-height: 44px;
+  border: 1px solid rgba(222, 216, 203, 0.72);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.78);
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.household-row.current {
+  background: var(--violet-soft);
+}
+
+.household-coins {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
 .challenge-selection-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2011,6 +2098,12 @@ select,
   .study-stage {
     min-height: auto;
     overflow: visible;
+  }
+
+  .dashboard-summary,
+  .simple-challenge,
+  .continue-card {
+    grid-template-columns: 1fr;
   }
 
   .clean-quiz-mode .study-stage,
