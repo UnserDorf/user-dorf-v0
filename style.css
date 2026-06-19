@@ -266,6 +266,18 @@ body {
   text-align: center;
 }
 
+.empty-profile-message p {
+  margin: 0;
+}
+
+.empty-profile-message p + p {
+  margin-top: 6px;
+}
+
+.empty-profile-message p:nth-child(3) {
+  margin-top: 18px;
+}
+
 .profile-grid:not(:empty) + .empty-profile-message {
   display: none !important;
 }
