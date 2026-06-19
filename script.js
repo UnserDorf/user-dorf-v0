@@ -972,7 +972,8 @@ function normalizeDailyChallenge(value) {
     challengeId: typeof value?.challengeId === "string" ? value.challengeId : "",
     articleQuestions: normalizeCounter(value?.articleQuestions),
     correctArticleAnswers: normalizeCounter(value?.correctArticleAnswers),
-    completed: Boolean(value?.completed)
+    completed: Boolean(value?.completed),
+    rewardAwardedFor: typeof value?.rewardAwardedFor === "string" ? value.rewardAwardedFor : ""
   };
 }
 
@@ -1216,7 +1217,8 @@ function pickLatestDailyChallenge(localChallenge, remoteChallenge) {
     challengeId: localChallenge?.challengeId || remoteChallenge?.challengeId || getDailyChallengeForDate(localDate || remoteDate || getTodayKey()).id,
     articleQuestions: Math.max(normalizeCounter(localChallenge?.articleQuestions), normalizeCounter(remoteChallenge?.articleQuestions)),
     correctArticleAnswers: Math.max(normalizeCounter(localChallenge?.correctArticleAnswers), normalizeCounter(remoteChallenge?.correctArticleAnswers)),
-    completed: Boolean(localChallenge?.completed || remoteChallenge?.completed)
+    completed: Boolean(localChallenge?.completed || remoteChallenge?.completed),
+    rewardAwardedFor: localChallenge?.rewardAwardedFor || remoteChallenge?.rewardAwardedFor || ""
   };
 }
 
@@ -1939,7 +1941,8 @@ function prepareProfileDailyState(profile) {
       challengeId: todayChallenge.id,
       articleQuestions: 0,
       correctArticleAnswers: 0,
-      completed: false
+      completed: false,
+      rewardAwardedFor: ""
     };
   }
 
@@ -1983,7 +1986,7 @@ function handleDashboardAction(action) {
   const routes = {
     continue: { mode: "de-en", filter: "all", resume: true },
     articles: { mode: "article", filter: "smartArticle", resume: true },
-    "earn-coins": "coin-challenges",
+    "earn-coins": { mode: "article-quiz", filter: "smartArticle", resume: true },
     "unknown-meanings": { mode: "de-en", filter: "unknownMeaning" },
     "unknown-articles": { mode: "article", filter: "newArticles" },
     search: { mode: "de-en", filter: "all", focusSearch: true },
@@ -3017,7 +3020,8 @@ function updateArticleLearningProgress(card, isCorrect) {
 
 function awardCoins(amount) {
   if (!currentProfileId) return;
-  const profile = getCurrentProfile();
+  const profile = profileStore?.profiles?.[currentProfileId];
+  if (!profile) return;
   profile.coins = normalizeCoinCount(profile.coins) + normalizeCounter(amount);
   awardLevelBonusIfNeeded(profile);
   celebrateFamilyLevelIfNeeded();
@@ -3207,7 +3211,10 @@ function recordDailyActivity(type, details = {}) {
     const challengeProgress = getDailyChallengeProgress(profile.dailyChallenge, dailyChallenge);
     if (!profile.dailyChallenge.completed && challengeProgress.raw >= dailyChallenge.goal) {
       profile.dailyChallenge.completed = true;
-      awardCoins(dailyChallenge.reward);
+      if (profile.dailyChallenge.rewardAwardedFor !== dailyChallenge.id) {
+        profile.dailyChallenge.rewardAwardedFor = dailyChallenge.id;
+        awardCoins(dailyChallenge.reward);
+      }
       showDailyChallengeComplete(dailyChallenge);
     }
   }
