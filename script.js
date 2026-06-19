@@ -443,6 +443,7 @@ const els = {
   statsGrid: document.querySelector("#statsGrid"),
   studyStage: document.querySelector("#studyStage"),
   studyChallengeBack: document.querySelector("#studyChallengeBack"),
+  articleDashboardBack: document.querySelector("#articleDashboardBack"),
   nounVerbStage: document.querySelector("#nounVerbStage"),
   nounVerbChallengeBack: document.querySelector("#nounVerbChallengeBack"),
   nounVerbCounter: document.querySelector("#nounVerbCounter"),
@@ -496,10 +497,12 @@ const els = {
   cardMode: document.querySelector("#cardMode"),
   promptLabel: document.querySelector("#promptLabel"),
   questionText: document.querySelector("#questionText"),
+  questionTranslation: document.querySelector("#questionTranslation"),
   articleGuess: document.querySelector("#articleGuess"),
   articleQuiz: document.querySelector("#articleQuiz"),
   articleQuizOptions: document.querySelector("#articleQuizOptions"),
   articleQuizResult: document.querySelector("#articleQuizResult"),
+  articleQuizNext: document.querySelector("#articleQuizNext"),
   answerPanel: document.querySelector("#answerPanel"),
   answerArticle: document.querySelector("#answerArticle"),
   answerMeaning: document.querySelector("#answerMeaning"),
@@ -1285,6 +1288,7 @@ function showProfileScreen() {
   recentMeaningMatchItems = [];
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.add("locked");
   els.profileScreen.classList.remove("hidden");
@@ -1381,6 +1385,7 @@ function showDashboard() {
   currentView = "dashboard";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderDashboard();
@@ -1399,6 +1404,7 @@ function showCoinChallenges() {
   currentView = "coin-challenges";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderCoinChallenges();
@@ -1417,6 +1423,7 @@ function showAchievementCollection() {
   currentView = "achievements";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderAchievementCollection();
@@ -1433,20 +1440,22 @@ function showAchievementCollection() {
 
 function showStudyView(options = {}) {
   currentView = "study";
-  const cleanArticlePractice = els.modeSelect.value === "article" && !options.focusSearch && !options.openStats;
-  setChallengeBackButtons(cleanArticlePractice, false);
+  const isArticleQuiz = els.modeSelect.value === "article-quiz";
+  const cleanArticlePractice = (els.modeSelect.value === "article" || isArticleQuiz) && !options.focusSearch && !options.openStats;
+  setChallengeBackButtons(cleanArticlePractice && !isArticleQuiz, false);
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.appShell.classList.toggle("clean-article-practice", cleanArticlePractice);
   els.appShell.classList.toggle("clean-quiz-mode", cleanArticlePractice);
+  els.appShell.classList.toggle("article-quiz-mode", isArticleQuiz);
   els.appShell.classList.remove("meaning-match-mode");
   els.controlPanel.classList.toggle("hidden", options.hideControls === true || cleanArticlePractice);
   els.searchPanel.classList.toggle("hidden", cleanArticlePractice);
   els.statsGrid.classList.toggle("hidden", cleanArticlePractice);
   els.studyStage.classList.remove("hidden");
-  els.actionBar.classList.remove("hidden");
+  els.actionBar.classList.toggle("hidden", isArticleQuiz);
   if (options.focusSearch) {
     window.setTimeout(() => els.wordSearchInput.focus(), 0);
   }
@@ -1462,6 +1471,7 @@ function showNounVerbQuiz() {
   setChallengeBackButtons(false, true);
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -1483,6 +1493,7 @@ function showVocabularyReviewQuiz() {
   setChallengeBackButtons(false, true);
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -1503,6 +1514,7 @@ function showMeaningMatchQuiz() {
   setChallengeBackButtons(false, true);
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.add("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -1523,6 +1535,7 @@ function showPrepositionQuiz() {
   setChallengeBackButtons(false, true);
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -2397,6 +2410,12 @@ function bindEvents() {
   });
 
   els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
+  els.articleDashboardBack.addEventListener("click", () => {
+    saveCurrentPosition();
+    closeSettingsMenu();
+    showDashboard();
+  });
+  els.articleQuizNext.addEventListener("click", () => moveCard(1));
   els.nounVerbChallengeBack.addEventListener("click", returnToCoinChallenges);
 
   els.ratingButtons.addEventListener("click", (event) => {
@@ -2814,18 +2833,25 @@ function renderCard() {
   const card = visibleCards[currentIndex];
   const mode = els.modeSelect.value;
   const modeText = getModeText(mode);
+  const isArticleQuiz = mode === "article-quiz";
 
-  els.cardMode.textContent = modeText;
-  els.cardCounter.textContent = visibleCards.length ? `Card ${currentIndex + 1} of ${visibleCards.length}` : "Card 0 of 0";
+  els.cardMode.textContent = isArticleQuiz ? "Article Practice" : modeText;
+  els.cardCounter.textContent = visibleCards.length
+    ? `${isArticleQuiz ? "Question" : "Card"} ${currentIndex + 1} of ${visibleCards.length}`
+    : `${isArticleQuiz ? "Question" : "Card"} 0 of 0`;
   els.emptyState.classList.toggle("hidden", Boolean(card));
   els.previousCard.disabled = visibleCards.length < 2;
   els.nextCard.disabled = visibleCards.length < 2;
+  els.actionBar.classList.toggle("hidden", isArticleQuiz);
+  els.articleDashboardBack.classList.toggle("hidden", !isArticleQuiz);
+  els.articleQuizNext.classList.toggle("hidden", !isArticleQuiz || !articleQuizAnswered);
+  els.flashcard.classList.toggle("article-quiz-card", isArticleQuiz);
   els.showAnswer.disabled = !card;
-  els.showAnswer.classList.toggle("hidden", mode === "article-quiz" || mode === "article" || !card || answerShown);
-  els.ratingButtons.classList.toggle("hidden", mode === "article-quiz" || mode === "article" || !card || !answerShown);
-  els.answerPanel.classList.toggle("hidden", mode === "article-quiz" || mode === "article" || !card || !answerShown);
-  els.articleGuess.classList.toggle("hidden", mode === "article-quiz" || !card || mode !== "article" || articleQuizAnswered);
-  els.articleQuiz.classList.toggle("hidden", mode !== "article-quiz" || !card || articleQuizAnswered);
+  els.showAnswer.classList.toggle("hidden", isArticleQuiz || mode === "article" || !card || answerShown);
+  els.ratingButtons.classList.toggle("hidden", isArticleQuiz || mode === "article" || !card || !answerShown);
+  els.answerPanel.classList.toggle("hidden", isArticleQuiz || mode === "article" || !card || !answerShown);
+  els.articleGuess.classList.toggle("hidden", isArticleQuiz || !card || mode !== "article" || articleQuizAnswered);
+  els.articleQuiz.classList.toggle("hidden", !isArticleQuiz || !card || articleQuizAnswered);
   els.ratingButtons.classList.toggle("article-rating-mode", mode === "article");
   updateRatingButtonLabels(mode);
 
@@ -2833,14 +2859,16 @@ function renderCard() {
     els.promptLabel.textContent = "No cards";
     els.articleQuizResult.classList.add("hidden");
     els.questionText.textContent = "Nothing to study";
+    els.questionTranslation.textContent = "";
+    els.questionTranslation.classList.add("hidden");
     return;
   }
 
   if (mode === "en-de") {
     els.promptLabel.textContent = "English";
     els.questionText.textContent = card.english;
-  } else if (mode === "article-quiz") {
-    els.promptLabel.textContent = "Choose der, die, or das";
+  } else if (isArticleQuiz) {
+    els.promptLabel.textContent = "Article Practice";
     els.questionText.textContent = card.word;
   } else if (mode === "article") {
     els.promptLabel.textContent = "Choose the article";
@@ -2849,6 +2877,9 @@ function renderCard() {
     els.promptLabel.textContent = "German";
     els.questionText.textContent = card.word;
   }
+  const translation = isArticleQuiz ? (card.english || "").trim() : "";
+  els.questionTranslation.textContent = translation;
+  els.questionTranslation.classList.toggle("hidden", !translation);
 
   els.answerArticle.textContent = card.article || "none";
   els.answerMeaning.textContent = mode === "en-de" ? `${card.article ? `${card.article} ` : ""}${card.word}` : card.english;
@@ -2927,27 +2958,30 @@ function renderArticleResult(card) {
   if (!["article", "article-quiz"].includes(mode) || !card) {
     els.articleQuizResult.classList.add("hidden");
     els.flashcard.classList.remove("quiz-result-visible");
+    els.articleQuizNext.classList.add("hidden");
     return;
   }
 
   const fullAnswer = `${card.article} ${card.word}`;
+  const meaning = card.english ? `<span class="quiz-result-meaning">${escapeHtml(card.english)}</span>` : "";
   const isCorrect = selectedQuizArticle === card.article;
   els.articleQuizResult.innerHTML = isCorrect
     ? `
-      <span class="quiz-result-label">✅ Correct</span>
+      <span class="quiz-result-label">Correct</span>
       <span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>
-      <span class="quiz-result-meaning">${escapeHtml(card.english)}</span>
+      ${meaning}
     `
     : `
-      <span class="quiz-result-label">❌ Wrong</span>
+      <span class="quiz-result-label">Not quite</span>
       <span class="quiz-result-correction">Correct answer:</span>
       <span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>
-      <span class="quiz-result-meaning">${escapeHtml(card.english)}</span>
+      ${meaning}
     `;
   els.articleQuizResult.classList.toggle("hidden", !articleQuizAnswered);
   els.articleQuizResult.classList.toggle("success", articleQuizAnswered && isCorrect);
   els.articleQuizResult.classList.toggle("error", articleQuizAnswered && !isCorrect);
   els.flashcard.classList.toggle("quiz-result-visible", articleQuizAnswered);
+  els.articleQuizNext.classList.toggle("hidden", mode !== "article-quiz" || !articleQuizAnswered);
 
   els.articleGuess.querySelectorAll("button").forEach((button) => {
     const article = button.dataset.article;

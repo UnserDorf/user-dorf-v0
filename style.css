@@ -114,6 +114,10 @@ body {
   padding-bottom: 18px;
 }
 
+.profile-screen:not(.first-use) .profile-panel {
+  justify-items: center;
+}
+
 .profile-screen.first-use .profile-panel {
   width: min(430px, 100%);
 }
@@ -122,6 +126,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-self: stretch;
 }
 
 .profile-heading p {
@@ -185,8 +190,10 @@ body {
 }
 
 .profile-grid {
+  width: min(760px, 100%);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+  justify-content: center;
   gap: 12px;
 }
 
@@ -242,17 +249,17 @@ body {
 .profile-card {
   width: 100%;
   max-width: 100%;
-  min-height: 130px;
+  min-height: 118px;
   border: 1px solid rgba(222, 216, 203, 0.95);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.92);
   box-shadow: var(--shadow);
   color: var(--ink);
-  padding: 18px;
+  padding: 20px;
   display: grid;
-  align-content: start;
+  place-content: center;
   gap: 8px;
-  text-align: left;
+  text-align: center;
 }
 
 .profile-signin-note {
@@ -1592,7 +1599,8 @@ select,
   justify-content: center;
 }
 
-.challenge-back-button {
+.challenge-back-button,
+.article-dashboard-back {
   justify-self: start;
   min-height: 42px;
   border: 1px solid rgba(109, 74, 160, 0.22);
@@ -1604,13 +1612,18 @@ select,
   font-weight: 850;
 }
 
-.challenge-back-button:active {
+.challenge-back-button:active,
+.article-dashboard-back:active {
   transform: translateY(1px);
 }
 
 .clean-article-practice #cardCounter,
 .clean-quiz-mode #nounVerbCounter {
   display: none;
+}
+
+.article-quiz-mode #cardCounter {
+  display: inline;
 }
 
 .clean-article-practice #cardMode,
@@ -1712,6 +1725,14 @@ select,
   font-size: clamp(3rem, 8.4vw, 6.7rem);
   line-height: 1;
   letter-spacing: 0;
+}
+
+.question-translation {
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2.3vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 .article-guess {
@@ -1823,6 +1844,45 @@ select,
   opacity: 1;
 }
 
+.article-quiz-card {
+  max-width: 760px;
+  margin: 0 auto;
+  grid-template-rows: auto auto minmax(180px, 1fr) auto auto auto;
+}
+
+.article-quiz-card .card-meta {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.article-quiz-card .question-area {
+  align-self: center;
+  gap: 12px;
+}
+
+.article-quiz-card .eyebrow {
+  color: var(--violet);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.article-quiz-card #questionText {
+  font-size: clamp(3.7rem, 9vw, 6.4rem);
+}
+
+.article-quiz-card .article-quiz {
+  width: min(100%, 620px);
+  justify-self: center;
+}
+
+.article-quiz-card .article-quiz-options {
+  gap: 12px;
+}
+
+.article-quiz-card .article-quiz-options button {
+  min-height: 76px;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+}
+
 .article-quiz-result {
   max-width: 100%;
   min-width: 0;
@@ -1865,6 +1925,15 @@ select,
 .article-quiz-result.error {
   background: var(--red-soft);
   color: var(--red);
+}
+
+.article-quiz-next {
+  width: min(100%, 360px);
+  min-height: 58px;
+  justify-self: center;
+  background: var(--violet);
+  color: white;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
 }
 
 .answer {
@@ -1999,11 +2068,11 @@ select,
   }
 
   .profile-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(170px, 220px));
   }
 
   .profile-card {
-    min-height: 168px;
+    min-height: 112px;
     padding: 14px;
   }
 
@@ -2280,6 +2349,24 @@ select,
     line-height: 1;
   }
 
+  .article-quiz-card.quiz-result-visible #questionText {
+    font-size: clamp(2.4rem, 12vw, 4.2rem);
+  }
+
+  .article-quiz-card.quiz-result-visible .question-area {
+    align-self: center;
+    gap: 7px;
+  }
+
+  .article-quiz-card .question-translation {
+    font-size: 1rem;
+  }
+
+  .article-quiz-card .article-quiz-options button {
+    min-height: 60px;
+    font-size: 1.15rem;
+  }
+
   .profile-screen {
     display: block;
     overflow-y: auto;
@@ -2292,12 +2379,13 @@ select,
   }
 
   .profile-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, min(100%, 260px));
+    justify-content: center;
     gap: 10px;
   }
 
   .profile-card {
-    min-height: 132px;
+    min-height: 108px;
   }
 
   .dashboard-motivation {
@@ -2422,7 +2510,7 @@ select,
   }
 
   .profile-card {
-    min-height: 160px;
+    min-height: 104px;
   }
 
   .dashboard-heading h2 {
@@ -2555,6 +2643,11 @@ select,
   .article-quiz-options button {
     min-height: 44px;
     font-size: 0.94rem;
+  }
+
+  .article-quiz-card .article-quiz-options button {
+    min-height: 58px;
+    font-size: 1.1rem;
   }
 
   .article-quiz-result {
