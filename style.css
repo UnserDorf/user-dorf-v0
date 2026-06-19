@@ -242,7 +242,7 @@ body {
 .profile-card {
   width: 100%;
   max-width: 100%;
-  min-height: 190px;
+  min-height: 130px;
   border: 1px solid rgba(222, 216, 203, 0.95);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.92);
@@ -253,6 +253,12 @@ body {
   align-content: start;
   gap: 8px;
   text-align: left;
+}
+
+.profile-signin-note {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 800;
 }
 
 .profile-card:active {

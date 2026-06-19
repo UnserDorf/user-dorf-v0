@@ -2117,7 +2117,6 @@ function renderProfileCards() {
   renderFamilyWealth();
   const profileCards = getProfileList().map((profileInfo) => {
     const profile = profileStore.profiles[profileInfo.id];
-    const level = getCoinLevel(profile.coins);
     const button = document.createElement("button");
     button.className = "profile-card";
     button.type = "button";
@@ -2126,8 +2125,7 @@ function renderProfileCards() {
     button.replaceChildren(
       createAvatarElement(profile, "profile-avatar"),
       createTextElement("span", "profile-name", profile.name),
-      createTextElement("span", "profile-level", `${level.icon} ${level.name}`),
-      createTextElement("span", "profile-coins", `${normalizeCoinCount(profile.coins)} Coins`)
+      createTextElement("span", "profile-signin-note", "Sign in")
     );
     return button;
   });
