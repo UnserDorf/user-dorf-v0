@@ -2133,6 +2133,7 @@ function renderProfileCards() {
     ...profileCards
   );
   els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
+  els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
@@ -2152,7 +2153,7 @@ function showProfileChooser() {
   els.familyWealthCard.classList.add("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
-  els.profileDebug.classList.remove("hidden");
+  els.profileDebug.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.profileLoginForm.reset();
   els.profileLoginError.classList.add("hidden");

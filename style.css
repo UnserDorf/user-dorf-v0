@@ -114,6 +114,10 @@ body {
   padding-bottom: 18px;
 }
 
+.profile-screen.first-use .profile-panel {
+  width: min(430px, 100%);
+}
+
 .profile-heading {
   display: flex;
   align-items: center;
@@ -255,12 +259,7 @@ body {
 }
 
 .empty-profile-message {
-  margin: 0;
-  border: 1px solid rgba(222, 216, 203, 0.92);
-  border-radius: 8px;
-  background: rgba(255, 253, 248, 0.9);
-  box-shadow: var(--shadow);
-  padding: clamp(18px, 3vw, 28px);
+  margin: 6px 0 0;
   color: var(--ink);
   font-size: clamp(1.1rem, 3vw, 1.45rem);
   font-weight: 850;
