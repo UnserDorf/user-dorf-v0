@@ -444,7 +444,6 @@ const els = {
   statsGrid: document.querySelector("#statsGrid"),
   studyStage: document.querySelector("#studyStage"),
   studyChallengeBack: document.querySelector("#studyChallengeBack"),
-  articleDashboardBack: document.querySelector("#articleDashboardBack"),
   nounVerbStage: document.querySelector("#nounVerbStage"),
   nounVerbChallengeBack: document.querySelector("#nounVerbChallengeBack"),
   nounVerbCounter: document.querySelector("#nounVerbCounter"),
@@ -2497,11 +2496,6 @@ function bindEvents() {
   });
 
   els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
-  els.articleDashboardBack.addEventListener("click", () => {
-    saveCurrentPosition();
-    closeSettingsMenu();
-    showDashboard();
-  });
   els.articleQuizNext.addEventListener("click", () => moveCard(1));
   els.nounVerbChallengeBack.addEventListener("click", returnToCoinChallenges);
 
@@ -2925,7 +2919,6 @@ function renderCard() {
   els.previousCard.disabled = visibleCards.length < 2;
   els.nextCard.disabled = visibleCards.length < 2;
   els.actionBar.classList.toggle("hidden", isArticleQuiz);
-  els.articleDashboardBack.classList.toggle("hidden", !isArticleQuiz);
   els.articleQuizNext.classList.toggle("hidden", !isArticleQuiz || !articleQuizAnswered);
   els.flashcard.classList.toggle("article-quiz-card", isArticleQuiz);
   els.showAnswer.disabled = !card;

@@ -1646,8 +1646,7 @@ select,
   justify-content: center;
 }
 
-.challenge-back-button,
-.article-dashboard-back {
+.challenge-back-button {
   justify-self: start;
   min-height: 42px;
   border: 1px solid rgba(109, 74, 160, 0.22);
@@ -1659,8 +1658,7 @@ select,
   font-weight: 850;
 }
 
-.challenge-back-button:active,
-.article-dashboard-back:active {
+.challenge-back-button:active {
   transform: translateY(1px);
 }
 
