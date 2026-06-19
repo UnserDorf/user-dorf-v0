@@ -123,8 +123,8 @@ const ACHIEVEMENTS = [
   {
     id: "family-home",
     icon: "🏠",
-    name: "Family Home",
-    description: "Reach 500 family coins together.",
+    name: "Village Home",
+    description: "Reach 500 shared village coins together.",
     reward: 0,
     scope: "family",
     metric: "familyCoins",
@@ -133,8 +133,8 @@ const ACHIEVEMENTS = [
   {
     id: "family-1000-coins",
     icon: "🚗",
-    name: "Two-Car Family",
-    description: "Reach 1000 family coins together.",
+    name: "Village Path",
+    description: "Reach 1000 shared village coins together.",
     reward: 0,
     scope: "family",
     metric: "familyCoins",
@@ -143,8 +143,8 @@ const ACHIEVEMENTS = [
   {
     id: "family-business",
     icon: "🏦",
-    name: "Family Business",
-    description: "Reach 2000 family coins together.",
+    name: "Village Workshop",
+    description: "Reach 2000 shared village coins together.",
     reward: 0,
     scope: "family",
     metric: "familyCoins",
@@ -255,15 +255,15 @@ const FAMILY_MILESTONES = [
   { coins: 10000, reward: "" }
 ];
 const FAMILY_WEALTH_LEVELS = [
-  { min: 0, next: 100, icon: "🏚️", name: "Broke Family" },
-  { min: 100, next: 250, icon: "🛒", name: "Corner Shop" },
-  { min: 250, next: 500, icon: "🏠", name: "Family Home" },
-  { min: 500, next: 1000, icon: "🏡", name: "Comfortable Living" },
-  { min: 1000, next: 2000, icon: "🚗", name: "Two-Car Family" },
-  { min: 2000, next: 4000, icon: "🏦", name: "Family Business" },
-  { min: 4000, next: 8000, icon: "🏢", name: "Small Empire" },
-  { min: 8000, next: 15000, icon: "🏰", name: "Language Dynasty" },
-  { min: 15000, next: null, icon: "🌎", name: "Global Conglomerate" }
+  { min: 0, next: 100, icon: "", name: "Village Foundation" },
+  { min: 100, next: 250, icon: "", name: "Community Garden" },
+  { min: 250, next: 500, icon: "", name: "Village Home" },
+  { min: 500, next: 1000, icon: "", name: "Learning Circle" },
+  { min: 1000, next: 2000, icon: "", name: "Village Path" },
+  { min: 2000, next: 4000, icon: "", name: "Village Workshop" },
+  { min: 4000, next: 8000, icon: "", name: "Community Hub" },
+  { min: 8000, next: 15000, icon: "", name: "Village Network" },
+  { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
@@ -2121,7 +2121,6 @@ function renderProfileCards() {
     button.dataset.profileId = profile.id;
     button.addEventListener("click", () => selectProfile(profile.id));
     button.replaceChildren(
-      createAvatarElement(profile, "profile-avatar"),
       createTextElement("span", "profile-name", profile.name),
       createTextElement("span", "profile-signin-note", "Sign in")
     );
@@ -2219,12 +2218,12 @@ function handleCreateProfile(event) {
 
 function renderFamilyWealth() {
   const summary = getFamilyWealthSummary();
-  els.familyWealthLevel.textContent = `${summary.level.icon} ${summary.level.name}`;
+  els.familyWealthLevel.textContent = summary.level.name;
   els.familyWealthCoins.textContent = summary.totalCoins;
   els.familyNextLevelName.textContent = summary.nextLevel.next
-    ? `${summary.nextFamilyLevel.icon} ${summary.nextFamilyLevel.name}`
-    : "Max Family Level";
-  els.familyGoalCoins.textContent = summary.nextLevel.next ? `${summary.nextLevel.next} Coins` : "Max Family Level";
+    ? summary.nextFamilyLevel.name
+    : "Shared Village Complete";
+  els.familyGoalCoins.textContent = summary.nextLevel.next ? `${summary.nextLevel.next} Coins` : "Shared Village Complete";
   els.familyGoalRemaining.textContent = summary.remaining;
   els.familyWealthProgressFill.style.width = `${summary.progressPercent}%`;
   els.familyWealthProgressText.textContent = summary.nextLevel.next
@@ -3067,9 +3066,9 @@ function celebrateFamilyLevelIfNeeded() {
 }
 
 function showFamilyLevelCelebration(level) {
-  els.levelCelebrationTitle.textContent = "🎉 Family Wealth Level Up!";
-  els.levelCelebrationProfile.textContent = "Unser Dorf Household reached:";
-  els.levelCelebrationLevel.textContent = `${level.icon} ${level.name}`;
+  els.levelCelebrationTitle.textContent = "Shared Village Milestone";
+  els.levelCelebrationProfile.textContent = "Unser Dorf reached:";
+  els.levelCelebrationLevel.textContent = level.name;
   els.levelCelebrationBonus.textContent = "";
   els.levelCelebrationBonus.classList.add("hidden");
   els.levelCelebration.classList.remove("hidden");
