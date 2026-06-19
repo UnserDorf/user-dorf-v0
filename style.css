@@ -144,6 +144,11 @@ body {
   font-size: clamp(1.35rem, 4vw, 1.85rem);
 }
 
+.profile-signin-heading h2 span,
+#createProfileToggle span {
+  display: block;
+}
+
 .family-wealth-card {
   border: 1px solid rgba(222, 216, 203, 0.92);
   border-radius: 8px;
@@ -200,6 +205,10 @@ body {
 .profile-actions {
   display: flex;
   justify-content: center;
+}
+
+.profile-actions button {
+  line-height: 1.2;
 }
 
 .create-profile-card,

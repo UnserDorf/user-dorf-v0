@@ -1999,7 +1999,8 @@ function handleDashboardAction(action) {
   const routes = {
     continue: { mode: "de-en", filter: "all", resume: true },
     articles: { mode: "article", filter: "smartArticle", resume: true },
-    "earn-coins": { mode: "article-quiz", filter: "smartArticle", resume: true },
+    challenges: "coin-challenges",
+    "earn-coins": "coin-challenges",
     "unknown-meanings": { mode: "de-en", filter: "unknownMeaning" },
     "unknown-articles": { mode: "article", filter: "newArticles" },
     search: { mode: "de-en", filter: "all", focusSearch: true },
@@ -2016,7 +2017,7 @@ function handleDashboardAction(action) {
 
 function handleChallengeAction(action) {
   const routes = {
-    articles: { mode: "article", filter: "smartArticle", resume: true }
+    articles: { mode: "article-quiz", filter: "smartArticle", resume: true }
   };
   if (action === "noun-verb") {
     showNounVerbQuiz();
@@ -2135,7 +2136,7 @@ function renderProfileCards() {
     button.addEventListener("click", () => selectProfile(profile.id));
     button.replaceChildren(
       createTextElement("span", "profile-name", profile.name),
-      createTextElement("span", "profile-signin-note", "Sign in")
+      createTextElement("span", "profile-signin-note", "Anmelden / Sign in")
     );
     return button;
   });
@@ -2145,7 +2146,10 @@ function renderProfileCards() {
   els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
   els.profileSignInHeading.classList.toggle("hidden", profileCards.length === 0);
   els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
-  els.createProfileToggle.textContent = profileCards.length === 0 ? "Create Profile" : "Create New Profile";
+  els.createProfileToggle.replaceChildren(
+    document.createTextNode(profileCards.length === 0 ? "Profil erstellen" : "Neues Profil erstellen"),
+    createTextElement("span", "", profileCards.length === 0 ? "Create Profile" : "Create New Profile")
+  );
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
@@ -2154,7 +2158,7 @@ function getProfileList() {
     .map((profile) => ({
       id: profile.id,
       name: profile.name,
-      emoji: profile.emoji || "🏡",
+      emoji: profile.emoji || "",
       avatar: profile.avatar || "",
       password: profile.password || ""
     }));
@@ -2193,8 +2197,8 @@ function showCreateProfileScreen() {
 function createCustomProfile(name, password) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
-    { id, name, password, emoji: "🏡", avatar: "" },
-    { id, name, password, emoji: "🏡", avatar: "" }
+    { id, name, password, emoji: "", avatar: "" },
+    { id, name, password, emoji: "", avatar: "" }
   );
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
   return id;

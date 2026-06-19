@@ -54,8 +54,11 @@
           <p class="progress-note"><span id="familyWealthProgressText">0 / 500</span></p>
         </section>
         <div class="profile-signin-heading hidden" id="profileSignInHeading">
-          <p class="eyebrow">Sign In</p>
-          <h2>Choose your profile</h2>
+          <p class="eyebrow">ANMELDEN / SIGN IN</p>
+          <h2>
+            <span>Profil auswählen</span>
+            <span>Choose your profile</span>
+          </h2>
         </div>
         <div class="profile-grid" id="profileGrid"></div>
         <div class="empty-profile-message hidden" id="emptyProfileMessage">
@@ -65,7 +68,10 @@
           <p>Create your first profile.</p>
         </div>
         <div class="profile-actions" id="profileActions">
-          <button class="ghost-button" id="createProfileToggle" type="button">Create New Profile</button>
+          <button class="ghost-button" id="createProfileToggle" type="button">
+            Neues Profil erstellen
+            <span>Create New Profile</span>
+          </button>
         </div>
         <p class="profile-debug" id="profileDebug">Profiles loaded: 0</p>
         <form class="profile-login-card hidden" id="profileLoginForm" aria-label="Profile login">
@@ -158,14 +164,14 @@
               <span>My Coins</span>
               <strong id="levelCoins">0</strong>
             </article>
-            <article class="challenge-card simple-challenge" aria-label="Today's challenge">
+            <article class="challenge-card simple-challenge" aria-label="Challenges">
               <div>
-                <span>Today's Challenge</span>
+                <span>Challenges</span>
                 <h4 id="challengeTitle">Today's Challenge</h4>
                 <p class="challenge-description" id="challengeDescription">Answer 20 article questions.</p>
                 <p id="challengeStatus">0 / 20</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="earn-coins">Start Challenge</button>
+              <button class="primary-button" type="button" data-dashboard-action="challenges">Challenges</button>
             </article>
             <article class="continue-card" aria-label="Continue learning">
               <div>
@@ -212,21 +218,20 @@
         <div class="achievements-grid collection-grid" id="achievementsGrid"></div>
       </section>
 
-      <section class="coin-challenges-screen hidden" id="coinChallengesScreen" aria-label="Coin challenges">
+      <section class="coin-challenges-screen hidden" id="coinChallengesScreen" aria-label="Challenge Hub">
         <div class="dashboard-heading">
-          <span class="brand-mark" aria-hidden="true">⭐</span>
           <div>
-            <p class="eyebrow">Earn Coins</p>
-            <h2>Coin Challenges</h2>
-            <p>Choose how you want to earn coins.</p>
+            <p class="eyebrow">Challenges</p>
+            <h2>Challenge Hub</h2>
+            <p>Choose a learning challenge.</p>
           </div>
         </div>
 
         <div class="challenge-selection-grid">
           <article class="coin-challenge-card">
             <div>
-              <h3>🏷 Articles</h3>
-              <p>Practice der, die, das</p>
+              <h3>Article Challenge</h3>
+              <p>Practice der/die/das.</p>
             </div>
             <div class="challenge-reward">
               <span>Reward:</span>
@@ -236,13 +241,13 @@
               <div class="stacked-progress" id="challengeArticleProgressBar"></div>
               <p id="challengeArticleProgressLabel">Learned 0% · Mastered 0%</p>
             </div>
-            <button type="button" data-challenge-action="articles">Play</button>
+            <button type="button" data-challenge-action="articles">Start Article Challenge</button>
           </article>
 
           <article class="coin-challenge-card">
             <div>
-              <h3>📚 Vocabulary Review</h3>
-              <p>Test the full vocabulary deck.</p>
+              <h3>Vocabulary Challenge</h3>
+              <p>Review vocabulary words.</p>
             </div>
             <div class="challenge-reward">
               <span>Reward:</span>
@@ -252,13 +257,13 @@
               <div class="stacked-progress" id="challengeVocabularyProgressBar"></div>
               <p id="challengeVocabularyProgressLabel">Learned 0% · Mastered 0%</p>
             </div>
-            <button type="button" data-challenge-action="vocabulary-review">Play</button>
+            <button type="button" data-challenge-action="vocabulary-review">Start Vocabulary Challenge</button>
           </article>
 
           <article class="coin-challenge-card">
             <div>
-              <h3>🌍 Meaning Match</h3>
-              <p>Connect English meanings with German collocations.</p>
+              <h3>Meaning Match Challenge</h3>
+              <p>Match German words with meanings.</p>
             </div>
             <div class="challenge-reward">
               <span>Reward:</span>
@@ -268,39 +273,7 @@
               <div class="stacked-progress" id="challengeMeaningMatchProgressBar"></div>
               <p id="challengeMeaningMatchProgressLabel">Learned 0% · Mastered 0%</p>
             </div>
-            <button type="button" data-challenge-action="meaning-match">Play</button>
-          </article>
-
-          <article class="coin-challenge-card">
-            <div>
-              <h3>🔗 Noun-Verb Pairs</h3>
-              <p>Practice German collocations</p>
-            </div>
-            <div class="challenge-reward">
-              <span>Reward:</span>
-              <strong>🪙🪙 +2 Coins</strong>
-            </div>
-            <div class="challenge-progress" aria-label="Noun-verb challenge progress">
-              <div class="stacked-progress" id="challengeNounVerbProgressBar"></div>
-              <p id="challengeNounVerbProgressLabel">Learned 0% · Mastered 0%</p>
-            </div>
-            <button type="button" data-challenge-action="noun-verb">Play</button>
-          </article>
-
-          <article class="coin-challenge-card">
-            <div>
-              <h3>🎯 Preposition Master</h3>
-              <p>Practice common German prepositions.</p>
-            </div>
-            <div class="challenge-reward">
-              <span>Reward:</span>
-              <strong>🪙🪙 +2 Coins</strong>
-            </div>
-            <div class="challenge-progress" aria-label="Preposition challenge progress">
-              <div class="stacked-progress" id="challengePrepositionProgressBar"></div>
-              <p id="challengePrepositionProgressLabel">Learned 0% · Mastered 0%</p>
-            </div>
-            <button type="button" data-challenge-action="prepositions">Play</button>
+            <button type="button" data-challenge-action="meaning-match">Start Meaning Match</button>
           </article>
         </div>
       </section>
