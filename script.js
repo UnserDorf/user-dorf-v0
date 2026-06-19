@@ -471,16 +471,12 @@ const els = {
   logoutButton: document.querySelector("#logoutButton"),
   settingsToggle: document.querySelector("#settingsToggle"),
   settingsPanel: document.querySelector("#settingsPanel"),
-  lockApp: document.querySelector("#lockApp"),
-  resetProgress: document.querySelector("#resetProgress"),
-  restartVocabularyPosition: document.querySelector("#restartVocabularyPosition"),
-  restartArticlePosition: document.querySelector("#restartArticlePosition"),
-  testPersonalAchievement: document.querySelector("#testPersonalAchievement"),
-  testFamilyAchievement: document.querySelector("#testFamilyAchievement"),
-  debugCurrentProfile: document.querySelector("#debugCurrentProfile"),
-  debugPersonalAchievements: document.querySelector("#debugPersonalAchievements"),
-  debugFamilyAchievements: document.querySelector("#debugFamilyAchievements"),
-  debugAchievementSource: document.querySelector("#debugAchievementSource"),
+  settingsVillageName: document.querySelector("#settingsVillageName"),
+  editVillageName: document.querySelector("#editVillageName"),
+  settingsProfileName: document.querySelector("#settingsProfileName"),
+  changeProfilePassword: document.querySelector("#changeProfilePassword"),
+  resetLocalTestData: document.querySelector("#resetLocalTestData"),
+  settingsBackDashboard: document.querySelector("#settingsBackDashboard"),
   statWordsLearned: document.querySelector("#statWordsLearned"),
   statWordsTotal: document.querySelector("#statWordsTotal"),
   statArticlesLearned: document.querySelector("#statArticlesLearned"),
@@ -766,6 +762,7 @@ function renderVillageName() {
   const villageName = getVillageName();
   if (els.dashboardVillageName) els.dashboardVillageName.textContent = villageName;
   if (els.challengeHubVillageName) els.challengeHubVillageName.textContent = villageName;
+  if (els.settingsVillageName) els.settingsVillageName.textContent = villageName;
 }
 
 function promoteFamilyAchievements(store) {
@@ -1633,6 +1630,14 @@ function renderDashboard() {
   saveProfileStore();
 }
 
+function renderSettingsPanel() {
+  renderVillageName();
+  const profile = getCurrentProfile();
+  if (els.settingsProfileName) {
+    els.settingsProfileName.textContent = profile?.name || "No profile";
+  }
+}
+
 function renderHouseholdMembers() {
   if (!els.householdList) return;
   const rows = getProfileList()
@@ -2171,6 +2176,35 @@ function confirmAndResetSavedPosition(key) {
   return true;
 }
 
+function resetCurrentProfileTestData() {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  progress = {};
+  articleProgress = {};
+  nounVerbProgress = {};
+  meaningMatchProgress = {};
+  prepositionProgress = {};
+  vocabularyProgress = {};
+  profile.progress = progress;
+  profile.articleProgress = articleProgress;
+  profile.nounVerbProgress = nounVerbProgress;
+  profile.meaningMatchProgress = meaningMatchProgress;
+  profile.prepositionProgress = prepositionProgress;
+  profile.vocabularyProgress = vocabularyProgress;
+  profile.vocabularyReviewStats = normalizeVocabularyReviewStats({});
+  profile.positions = normalizePositions({});
+  profile.history = [];
+  profile.lastStudyDate = "";
+  currentIndex = 0;
+  nounVerbCurrentIndex = 0;
+  vocabularyReviewCurrentIndex = 0;
+  meaningMatchCurrentIndex = 0;
+  prepositionCurrentIndex = 0;
+  saveProfileStore();
+  applyModeAndFilter();
+  renderDashboard();
+}
+
 function renderProfileCards() {
   renderFamilyWealth();
   const profileCards = getProfileList().map((profileInfo) => {
@@ -2543,7 +2577,7 @@ function bindEvents() {
     els.settingsPanel.classList.toggle("hidden", isOpen);
     els.settingsToggle.setAttribute("aria-expanded", String(!isOpen));
     if (isOpen) return;
-    renderAchievementDebugPanel();
+    renderSettingsPanel();
   });
 
   document.addEventListener("click", (event) => {
@@ -2551,45 +2585,40 @@ function bindEvents() {
     closeSettingsMenu();
   });
 
-  els.lockApp.addEventListener("click", () => {
-    lockSharedPasswordScreen();
+  els.editVillageName.addEventListener("click", () => {
+    const nextName = window.prompt("Village name", getVillageName());
+    if (nextName === null) return;
+    saveVillageName(nextName);
+    renderVillageName();
+    renderSettingsPanel();
   });
 
-  els.resetProgress.addEventListener("click", () => {
+  els.changeProfilePassword.addEventListener("click", () => {
+    const profile = getCurrentProfile();
+    if (!profile) return;
+    const nextPassword = window.prompt(`New password for ${profile.name}`);
+    if (nextPassword === null) return;
+    const normalizedPassword = nextPassword.trim();
+    if (!normalizedPassword) {
+      window.alert("Password was not changed.");
+      return;
+    }
+    profile.password = normalizedPassword;
+    saveProfileStore();
+    renderSettingsPanel();
+  });
+
+  els.resetLocalTestData.addEventListener("click", () => {
     closeSettingsMenu();
     const profile = getCurrentProfile();
-    if (!window.confirm(`Reset saved progress for ${profile.name}?`)) return;
-    progress = {};
-    articleProgress = {};
-    nounVerbProgress = {};
-    meaningMatchProgress = {};
-    profile.history = [];
-    profile.lastStudyDate = "";
-    saveProgress();
-    saveArticleProgress();
-    saveNounVerbProgress();
-    saveMeaningMatchProgress();
-    saveProfileStore();
-    currentIndex = 0;
-    applyModeAndFilter();
+    if (!profile) return;
+    if (!window.confirm(`Reset local test data for ${profile.name}? This keeps profiles and the village name.`)) return;
+    resetCurrentProfileTestData();
   });
 
-  els.restartVocabularyPosition.addEventListener("click", () => {
+  els.settingsBackDashboard.addEventListener("click", () => {
     closeSettingsMenu();
-    confirmAndResetSavedPosition("vocabulary");
-  });
-
-  els.restartArticlePosition.addEventListener("click", () => {
-    closeSettingsMenu();
-    confirmAndResetSavedPosition("article");
-  });
-
-  els.testPersonalAchievement.addEventListener("click", async () => {
-    await testPersonalAchievement();
-  });
-
-  els.testFamilyAchievement.addEventListener("click", async () => {
-    await testFamilyAchievement();
+    showDashboard();
   });
 
   if (els.csvInput) {

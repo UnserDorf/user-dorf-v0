@@ -140,19 +140,25 @@
           <div class="settings-menu">
             <button class="icon-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings">⚙️</button>
             <div class="settings-panel hidden" id="settingsPanel">
-              <button type="button" id="lockApp">Lock App</button>
-              <button type="button" id="resetProgress">Reset Progress</button>
-              <button type="button" id="restartVocabularyPosition">Restart Vocabulary Position</button>
-              <button type="button" id="restartArticlePosition">Restart Article Position</button>
-              <button type="button" id="testPersonalAchievement">🧪 Test Achievement</button>
-              <button type="button" id="testFamilyAchievement">🧪 Test Family Achievement</button>
-              <div class="achievement-debug-panel" aria-label="Achievement debug panel">
-                <strong>Achievement Debug</strong>
-                <p>Current Profile:<br><span id="debugCurrentProfile">None</span></p>
-                <p>Personal Achievements:<br><span id="debugPersonalAchievements">None</span></p>
-                <p>Family Achievements:<br><span id="debugFamilyAchievements">None</span></p>
-                <p>Source:<br><span id="debugAchievementSource">Local Storage</span></p>
-              </div>
+              <section class="settings-section" aria-label="Village settings">
+                <h3>Village Settings</h3>
+                <p>Village name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
+                <button type="button" id="editVillageName">Edit village name</button>
+              </section>
+              <section class="settings-section" aria-label="Profile settings">
+                <h3>Profile Settings</h3>
+                <p>Current profile<br><strong id="settingsProfileName">No profile</strong></p>
+                <button type="button" id="changeProfilePassword">Change profile password</button>
+              </section>
+              <section class="settings-section" aria-label="Prototype testing tools">
+                <h3>Test / Developer Tools</h3>
+                <p>This is for prototype testing only.</p>
+                <button type="button" id="resetLocalTestData">Reset local test data</button>
+              </section>
+              <section class="settings-section" aria-label="Settings navigation">
+                <h3>Navigation</h3>
+                <button type="button" id="settingsBackDashboard">Back to Dashboard</button>
+              </section>
             </div>
           </div>
         </div>
