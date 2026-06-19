@@ -1307,7 +1307,7 @@ function showProfileLogin(profileId) {
   els.emptyProfileMessage.classList.add("hidden");
   els.profileDebug.classList.add("hidden");
   els.createProfileForm.classList.add("hidden");
-  els.profileLoginTitle.textContent = `Enter password for ${profile.name}`;
+  els.profileLoginTitle.textContent = profile.name;
   els.profileLoginPassword.value = "";
   els.profileLoginError.classList.add("hidden");
   els.profileLoginForm.classList.remove("hidden");
@@ -2135,6 +2135,7 @@ function renderProfileCards() {
   els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
   els.profileSignInHeading.classList.toggle("hidden", profileCards.length === 0);
   els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
+  els.createProfileToggle.textContent = profileCards.length === 0 ? "Create Profile" : "Create New Profile";
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
@@ -2465,12 +2466,8 @@ function bindEvents() {
     moveNounVerbCard(1);
   });
 
-  els.switchProfile.addEventListener("click", () => {
-    saveCurrentPosition();
-    closeSettingsMenu();
-    showProfileScreen();
-  });
-  els.logoutButton.addEventListener("click", logoutToProfileScreen);
+  els.switchProfile.addEventListener("click", logoutToProfileScreen);
+  els.logoutButton.addEventListener("click", lockSharedPasswordScreen);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
