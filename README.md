@@ -9,7 +9,7 @@ A plain HTML, CSS, and JavaScript flashcard app for Goethe B1 German vocabulary.
 - `index.html` - app structure
 - `style.css` - responsive iPad, iPhone, and desktop layout
 - `script.js` - CSV loading, study modes, filters, and progress tracking
-- `vocabulary.csv` - personal Goethe B1 headword deck
+- `vocabulary.csv` - Goethe B1 headword deck
 
 ## Password Curtain
 
@@ -52,7 +52,7 @@ Use the Article Quiz filter to review all noun articles, known articles, kind of
 
 ## Vocabulary CSV
 
-The app loads `vocabulary.csv` by default. This copy contains a personal-use Goethe B1 headword deck extracted from the Goethe-Zertifikat B1 word list PDF. Most cards use original example sentences extracted from the PDF; cards whose examples could not be matched cleanly use a simple fallback sentence. Many cards still use `add English meaning` as a placeholder, so you can improve meanings over time while keeping the German headwords, articles, and examples in place.
+The app loads `vocabulary.csv` by default. This copy contains a Goethe B1 headword deck extracted from the Goethe-Zertifikat B1 word list PDF. Most cards use original example sentences extracted from the PDF; cards whose examples could not be matched cleanly use a simple fallback sentence.
 
 Required columns:
 
