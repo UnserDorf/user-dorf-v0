@@ -383,6 +383,8 @@ const els = {
   passwordInput: document.querySelector("#passwordInput"),
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
+  villageNameForm: document.querySelector("#villageNameForm"),
+  villageNameInput: document.querySelector("#villageNameInput"),
   profileSignInHeading: document.querySelector("#profileSignInHeading"),
   profileGrid: document.querySelector("#profileGrid"),
   profileActions: document.querySelector("#profileActions"),
@@ -412,6 +414,8 @@ const els = {
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
+  dashboardVillageName: document.querySelector("#dashboardVillageName"),
+  challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
   householdList: document.querySelector("#householdList"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
@@ -715,6 +719,7 @@ function loadProfileStore() {
   if (LEGACY_PROFILE_IDS.has(store.currentProfile)) store.currentProfile = "";
   store.familyLevelsReached = normalizeFamilyLevelsReached(store.familyLevelsReached, store.profiles);
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
+  store.villageName = normalizeVillageName(store.villageName);
   promoteFamilyAchievements(store);
 
   if (!store.migratedLegacyProgress) {
@@ -732,11 +737,35 @@ function createProfileStore() {
   return {
     version: PROFILE_STORE_VERSION,
     currentProfile: "",
+    villageName: "",
     migratedLegacyProgress: false,
     familyLevelsReached: [],
     familyAchievementsUnlocked: [],
     profiles: {}
   };
+}
+
+function normalizeVillageName(value) {
+  return String(value || "").trim();
+}
+
+function getVillageName() {
+  return normalizeVillageName(profileStore?.villageName) || "Unser Dorf";
+}
+
+function hasVillageName() {
+  return Boolean(normalizeVillageName(profileStore?.villageName));
+}
+
+function saveVillageName(value) {
+  profileStore.villageName = normalizeVillageName(value) || "Unser Dorf";
+  saveProfileStore();
+}
+
+function renderVillageName() {
+  const villageName = getVillageName();
+  if (els.dashboardVillageName) els.dashboardVillageName.textContent = villageName;
+  if (els.challengeHubVillageName) els.challengeHubVillageName.textContent = villageName;
 }
 
 function promoteFamilyAchievements(store) {
@@ -1132,6 +1161,7 @@ function mergeProfileStores(localStore, remoteStore) {
   });
 
   baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
+  baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
   baseStore.familyLevelsReached = Array.from(
     new Set([
       ...(Array.isArray(localStore?.familyLevelsReached) ? localStore.familyLevelsReached : []),
@@ -1290,6 +1320,33 @@ function showProfileScreen() {
   els.appShell.classList.add("locked");
   els.profileScreen.classList.remove("hidden");
   renderProfileCards();
+  if (!hasVillageName()) {
+    showVillageNameSetup();
+  } else {
+    showProfileChooser();
+  }
+}
+
+function showVillageNameSetup() {
+  els.familyWealthCard.classList.add("hidden");
+  els.profileSignInHeading.classList.add("hidden");
+  els.profileGrid.classList.add("hidden");
+  els.profileActions.classList.add("hidden");
+  els.emptyProfileMessage.classList.add("hidden");
+  els.profileDebug.classList.add("hidden");
+  els.profileLoginForm.classList.add("hidden");
+  els.createProfileForm.classList.add("hidden");
+  els.villageNameForm.classList.remove("hidden");
+  els.profileScreen.classList.add("first-use");
+  els.villageNameInput.value = "";
+  els.villageNameInput.focus();
+}
+
+function handleVillageNameSubmit(event) {
+  event.preventDefault();
+  saveVillageName(els.villageNameInput.value);
+  renderVillageName();
+  renderProfileCards();
   showProfileChooser();
 }
 
@@ -1309,6 +1366,7 @@ function showProfileLogin(profileId) {
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
   els.profileDebug.classList.add("hidden");
+  els.villageNameForm.classList.add("hidden");
   els.createProfileForm.classList.add("hidden");
   els.profileLoginTitle.textContent = profile.name;
   els.profileLoginPassword.value = "";
@@ -1408,6 +1466,7 @@ function showCoinChallenges() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.remove("hidden");
+  renderVillageName();
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -1568,6 +1627,7 @@ function renderDashboard() {
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
   els.dashboardWelcome.textContent = `Welcome, ${profile.name}`;
+  renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
   saveProfileStore();
@@ -2154,6 +2214,7 @@ function showProfileChooser() {
   pendingProfileId = "";
   const hasProfiles = getProfileList().length > 0;
   els.familyWealthCard.classList.add("hidden");
+  els.villageNameForm.classList.add("hidden");
   els.profileSignInHeading.classList.toggle("hidden", !hasProfiles);
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
@@ -2176,6 +2237,7 @@ function showCreateProfileScreen() {
   els.emptyProfileMessage.classList.add("hidden");
   els.profileDebug.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
+  els.villageNameForm.classList.add("hidden");
   els.createProfileForm.classList.remove("hidden");
   els.createProfileName.focus();
 }
@@ -2298,6 +2360,7 @@ function lockSharedPasswordScreen() {
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
+  els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
   els.cancelCreateProfile.addEventListener("click", showProfileChooser);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);

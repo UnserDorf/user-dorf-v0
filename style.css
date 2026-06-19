@@ -211,6 +211,7 @@ body {
   line-height: 1.2;
 }
 
+.village-name-card,
 .create-profile-card,
 .profile-login-card {
   width: min(430px, 100%);
@@ -224,12 +225,14 @@ body {
   gap: 16px;
 }
 
+.village-name-card h2,
 .create-profile-card h2,
 .profile-login-card h2 {
   margin: 0;
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
 
+.village-name-card label,
 .create-profile-card label,
 .profile-login-card label {
   display: grid;
@@ -238,6 +241,7 @@ body {
   font-weight: 800;
 }
 
+.village-name-card input,
 .create-profile-card input,
 .profile-login-card input {
   min-height: 56px;

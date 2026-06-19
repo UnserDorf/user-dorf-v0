@@ -53,6 +53,17 @@
           </div>
           <p class="progress-note"><span id="familyWealthProgressText">0 / 500</span></p>
         </section>
+        <form class="village-name-card hidden" id="villageNameForm" aria-label="Name your village">
+          <div>
+            <p class="eyebrow">Setup</p>
+            <h2>Name your village</h2>
+          </div>
+          <label>
+            <span>Village name</span>
+            <input id="villageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
+          </label>
+          <button class="primary-button" type="submit">Continue</button>
+        </form>
         <div class="profile-signin-heading hidden" id="profileSignInHeading">
           <p class="eyebrow">ANMELDEN / SIGN IN</p>
           <h2>
@@ -152,6 +163,7 @@
           <div>
             <p class="eyebrow">Home</p>
             <h2 id="dashboardWelcome">Welcome</h2>
+            <p id="dashboardVillageName">Unser Dorf</p>
           </div>
         </div>
 
@@ -207,7 +219,7 @@
           <div>
             <p class="eyebrow">Challenges</p>
             <h2>Challenge Hub</h2>
-            <p>Choose a learning challenge.</p>
+            <p><span id="challengeHubVillageName">Unser Dorf</span> · Choose a learning challenge.</p>
           </div>
         </div>
 
