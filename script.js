@@ -24,6 +24,13 @@ const DEFAULT_PROFILES = [
   { id: "david", name: "David", emoji: "📚", avatar: "david.png" }
 ];
 
+const LEGACY_PROFILE_MAPPINGS = {
+  mineko: "anna",
+  sami: "omar",
+  mai: "leila",
+  ziad: "david"
+};
+
 const LEADERBOARD_PROFILE_IDS = ["anna", "omar", "leila"];
 const ACHIEVEMENTS = [
   {
@@ -706,6 +713,7 @@ function loadProfileStore() {
     }
   };
 
+  migrateLegacyProfiles(store);
   DEFAULT_PROFILES.forEach((profile) => {
     store.profiles[profile.id] = normalizeProfileData(store.profiles[profile.id], profile);
   });
@@ -737,6 +745,27 @@ function loadProfileStore() {
 
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(store));
   return store;
+}
+
+function migrateLegacyProfiles(store) {
+  if (!store?.profiles) return;
+  Object.entries(LEGACY_PROFILE_MAPPINGS).forEach(([legacyId, neutralId]) => {
+    const legacyProfile = store.profiles[legacyId];
+    const neutralProfile = DEFAULT_PROFILES.find((profile) => profile.id === neutralId);
+    if (!legacyProfile) return;
+    store.profiles[neutralId] = {
+      ...store.profiles[neutralId],
+      ...legacyProfile,
+      id: neutralId,
+      name: neutralProfile?.name || store.profiles[neutralId]?.name || "Profile",
+      emoji: neutralProfile?.emoji || store.profiles[neutralId]?.emoji || "🏡",
+      avatar: neutralProfile?.avatar || store.profiles[neutralId]?.avatar || ""
+    };
+    delete store.profiles[legacyId];
+  });
+  if (LEGACY_PROFILE_MAPPINGS[store.currentProfile]) {
+    store.currentProfile = LEGACY_PROFILE_MAPPINGS[store.currentProfile];
+  }
 }
 
 function createProfileStore() {
