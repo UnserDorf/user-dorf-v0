@@ -36,7 +36,7 @@
             <p>For the Zaghrout Family</p>
           </div>
         </div>
-        <section class="family-wealth-card" aria-label="Family wealth">
+        <section class="family-wealth-card" id="familyWealthCard" aria-label="Family wealth">
           <h2 id="familyWealthLevel">🏚️ Broke Family</h2>
           <div class="family-wealth-main">
             <p class="eyebrow">🏦 Family Wealth</p>
@@ -54,7 +54,29 @@
           <p class="progress-note"><span id="familyWealthProgressText">0 / 500</span></p>
         </section>
         <div class="profile-grid" id="profileGrid"></div>
+        <div class="profile-actions" id="profileActions">
+          <button class="ghost-button" id="createProfileToggle" type="button">Create Profile</button>
+        </div>
         <p class="profile-debug" id="profileDebug">Profiles loaded: 0</p>
+        <form class="create-profile-card hidden" id="createProfileForm" aria-label="Create profile">
+          <div>
+            <p class="eyebrow">New learner</p>
+            <h2>Create Profile</h2>
+          </div>
+          <label>
+            <span>Name</span>
+            <input id="createProfileName" type="text" autocomplete="name" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="createProfilePassword" type="password" autocomplete="new-password" required>
+          </label>
+          <div class="create-profile-buttons">
+            <button class="primary-button" type="submit">Create Profile</button>
+            <button class="ghost-button" id="cancelCreateProfile" type="button">Cancel</button>
+          </div>
+          <p class="lock-error hidden" id="createProfileError"></p>
+        </form>
       </div>
     </section>
 

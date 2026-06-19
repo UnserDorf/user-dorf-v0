@@ -390,7 +390,15 @@ const els = {
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
   profileGrid: document.querySelector("#profileGrid"),
+  profileActions: document.querySelector("#profileActions"),
   profileDebug: document.querySelector("#profileDebug"),
+  familyWealthCard: document.querySelector("#familyWealthCard"),
+  createProfileToggle: document.querySelector("#createProfileToggle"),
+  createProfileForm: document.querySelector("#createProfileForm"),
+  createProfileName: document.querySelector("#createProfileName"),
+  createProfilePassword: document.querySelector("#createProfilePassword"),
+  cancelCreateProfile: document.querySelector("#cancelCreateProfile"),
+  createProfileError: document.querySelector("#createProfileError"),
   familyWealthCoins: document.querySelector("#familyWealthCoins"),
   familyWealthLevel: document.querySelector("#familyWealthLevel"),
   familyNextLevelName: document.querySelector("#familyNextLevelName"),
@@ -725,6 +733,10 @@ function loadProfileStore() {
   DEFAULT_PROFILES.forEach((profile) => {
     store.profiles[profile.id] = normalizeProfileData(store.profiles[profile.id], profile);
   });
+  Object.keys(store.profiles).forEach((profileId) => {
+    if (DEFAULT_PROFILES.some((profile) => profile.id === profileId)) return;
+    store.profiles[profileId] = normalizeProfileData(store.profiles[profileId], store.profiles[profileId]);
+  });
   store.familyLevelsReached = normalizeFamilyLevelsReached(store.familyLevelsReached, store.profiles);
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
   promoteFamilyAchievements(store);
@@ -800,6 +812,7 @@ function normalizeProfileData(data, profile) {
     name: data?.name || profile.name,
     emoji: profile.emoji,
     avatar: data?.avatar || profile.avatar,
+    password: data?.password || profile.password || "",
     coins: normalizeCoinCount(data?.coins),
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
@@ -1140,6 +1153,26 @@ function mergeProfileStores(localStore, remoteStore) {
     const remoteProfile = remoteStore?.profiles?.[profile.id];
     baseStore.profiles[profile.id] = mergeProfileData(localProfile, remoteProfile, profile);
   });
+  const defaultIds = new Set(DEFAULT_PROFILES.map((profile) => profile.id));
+  const customIds = new Set([
+    ...Object.keys(localStore?.profiles || {}),
+    ...Object.keys(remoteStore?.profiles || {})
+  ].filter((profileId) => !defaultIds.has(profileId)));
+  customIds.forEach((profileId) => {
+    const localProfile = localStore?.profiles?.[profileId];
+    const remoteProfile = remoteStore?.profiles?.[profileId];
+    const customProfile = localProfile || remoteProfile;
+    baseStore.profiles[profileId] = normalizeProfileData(
+      { ...(remoteProfile || {}), ...(localProfile || {}) },
+      {
+        id: profileId,
+        name: customProfile?.name || "Profile",
+        emoji: customProfile?.emoji || "🏡",
+        avatar: customProfile?.avatar || "",
+        password: customProfile?.password || ""
+      }
+    );
+  });
 
   baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
   baseStore.familyLevelsReached = Array.from(
@@ -1293,11 +1326,19 @@ function showProfileScreen() {
   els.appShell.classList.add("locked");
   els.profileScreen.classList.remove("hidden");
   renderProfileCards();
+  showProfileChooser();
 }
 
 function selectProfile(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
+  if (profile.password) {
+    const enteredPassword = window.prompt(`Enter password for ${profile.name}`);
+    if (enteredPassword !== profile.password) {
+      window.alert("Incorrect password.");
+      return;
+    }
+  }
   currentProfileId = profileId;
   profileStore.currentProfile = profileId;
   progress = profile.progress;
@@ -2096,7 +2137,7 @@ function confirmAndResetSavedPosition(key) {
 
 function renderProfileCards() {
   renderFamilyWealth();
-  const profileCards = DEFAULT_PROFILES.map((profileInfo) => {
+  const profileCards = getProfileList().map((profileInfo) => {
     const profile = profileStore.profiles[profileInfo.id];
     const level = getCoinLevel(profile.coins);
     const button = document.createElement("button");
@@ -2115,6 +2156,79 @@ function renderProfileCards() {
     ...profileCards
   );
   els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
+}
+
+function getProfileList() {
+  const defaultIds = new Set(DEFAULT_PROFILES.map((profile) => profile.id));
+  const customProfiles = Object.values(profileStore.profiles || {})
+    .filter((profile) => !defaultIds.has(profile.id))
+    .map((profile) => ({
+      id: profile.id,
+      name: profile.name,
+      emoji: profile.emoji || "🏡",
+      avatar: profile.avatar || "",
+      password: profile.password || ""
+    }));
+  return [...DEFAULT_PROFILES, ...customProfiles];
+}
+
+function showProfileChooser() {
+  els.familyWealthCard.classList.remove("hidden");
+  els.profileGrid.classList.remove("hidden");
+  els.profileActions.classList.remove("hidden");
+  els.profileDebug.classList.remove("hidden");
+  els.createProfileForm.classList.add("hidden");
+  els.createProfileForm.reset();
+  els.createProfileError.classList.add("hidden");
+  els.createProfileError.textContent = "";
+}
+
+function showCreateProfileScreen() {
+  els.familyWealthCard.classList.add("hidden");
+  els.profileGrid.classList.add("hidden");
+  els.profileActions.classList.add("hidden");
+  els.profileDebug.classList.add("hidden");
+  els.createProfileForm.classList.remove("hidden");
+  els.createProfileName.focus();
+}
+
+function createCustomProfile(name, password) {
+  const id = createCustomProfileId(name);
+  profileStore.profiles[id] = normalizeProfileData(
+    { id, name, password, emoji: "🏡", avatar: "" },
+    { id, name, password, emoji: "🏡", avatar: "" }
+  );
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
+  renderProfileCards();
+}
+
+function createCustomProfileId(name) {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    || "profile";
+  return `custom-${Date.now().toString(36)}-${slug}`;
+}
+
+function handleCreateProfile(event) {
+  event.preventDefault();
+  const name = els.createProfileName.value.trim();
+  const password = els.createProfilePassword.value;
+  if (!name || !password) {
+    els.createProfileError.textContent = "Enter a name and password.";
+    els.createProfileError.classList.remove("hidden");
+    return;
+  }
+  const nameExists = Object.values(profileStore.profiles || {})
+    .some((profile) => profile.name.toLowerCase() === name.toLowerCase());
+  if (nameExists) {
+    els.createProfileError.textContent = "A profile with that name already exists.";
+    els.createProfileError.classList.remove("hidden");
+    return;
+  }
+  createCustomProfile(name, password);
+  showProfileChooser();
 }
 
 function renderFamilyWealth() {
@@ -2191,6 +2305,9 @@ function bindEvents() {
     if (!button) return;
     selectProfile(button.dataset.profileId);
   });
+  els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
+  els.cancelCreateProfile.addEventListener("click", showProfileChooser);
+  els.createProfileForm.addEventListener("submit", handleCreateProfile);
 
   els.dashboardScreen.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-dashboard-action]");
