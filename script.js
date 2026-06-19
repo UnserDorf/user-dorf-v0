@@ -265,6 +265,45 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 8000, next: 15000, icon: "", name: "Village Network" },
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
+const AUSTRIA_ALBUM_REWARDS = [
+  { id: "schoenbrunn-palace", coins: 25, title: "Schönbrunn Palace", image: "SP", description: "A famous palace and garden in Vienna." },
+  { id: "prater", coins: 50, title: "Prater", image: "PR", description: "A classic Vienna park and amusement area." },
+  { id: "stephansdom", coins: 100, title: "Stephansdom", image: "ST", description: "Vienna's landmark cathedral in the city center." },
+  { id: "vienna-state-opera", coins: 150, title: "Vienna State Opera", image: "OP", description: "A historic home for music and performance." },
+  { id: "tiergarten-schoenbrunn", coins: 200, title: "Tiergarten Schönbrunn", image: "TG", description: "A well-known Vienna family destination." },
+  { id: "danube-river", coins: 250, title: "Danube River", image: "DR", description: "The river that flows through Vienna." },
+  { id: "salzburg", coins: 300, title: "Salzburg", image: "SZ", description: "A city known for music, history, and mountains." },
+  { id: "hallstatt", coins: 350, title: "Hallstatt", image: "HA", description: "A lakeside village in the Austrian mountains." },
+  { id: "austrian-alps", coins: 400, title: "Austrian Alps", image: "AL", description: "Mountain landscapes across Austria." },
+  { id: "kunsthistorisches-museum", coins: 450, title: "Kunsthistorisches Museum", image: "KM", description: "A major art museum in Vienna." },
+  { id: "belvedere", coins: 500, title: "Belvedere", image: "BV", description: "A palace museum with Austrian art." },
+  { id: "wachau", coins: 550, title: "Wachau", image: "WA", description: "A scenic Danube valley." },
+  { id: "innsbruck", coins: 600, title: "Innsbruck", image: "IB", description: "A city surrounded by alpine views." },
+  { id: "graz", coins: 650, title: "Graz", image: "GZ", description: "Austria's second-largest city." },
+  { id: "linz", coins: 700, title: "Linz", image: "LZ", description: "A Danube city with culture and technology." },
+  { id: "melk-abbey", coins: 750, title: "Melk Abbey", image: "MA", description: "A historic abbey above the Danube." },
+  { id: "vienna-city-hall", coins: 800, title: "Vienna City Hall", image: "VH", description: "A landmark public building in Vienna." },
+  { id: "austrian-national-library", coins: 850, title: "Austrian National Library", image: "NL", description: "A beautiful historic library." },
+  { id: "naschmarkt", coins: 900, title: "Naschmarkt", image: "NM", description: "A popular market in Vienna." },
+  { id: "vienna-woods", coins: 950, title: "Vienna Woods", image: "VW", description: "Green hills and paths near Vienna." }
+];
+const TOWN_CENTER_STAGES = [
+  { id: "empty-square", coins: 0, stage: 1, icon: "□", title: "Empty Square", description: "The town center is ready for its first shared milestone." },
+  { id: "flowers", coins: 100, stage: 2, icon: "✿", title: "Flowers", description: "A little color appears in the shared space." },
+  { id: "bench", coins: 250, stage: 3, icon: "▭", title: "Bench", description: "A quiet place to sit and rest." },
+  { id: "fountain", coins: 500, stage: 4, icon: "◌", title: "Fountain", description: "The center begins to feel alive." },
+  { id: "swing-set", coins: 800, stage: 5, icon: "⌁", title: "Swing Set", description: "The square becomes more welcoming for families." },
+  { id: "community-garden", coins: 1200, stage: 6, icon: "✦", title: "Community Garden", description: "Shared learning helps something grow." },
+  { id: "market-stall", coins: 1800, stage: 7, icon: "▣", title: "Market Stall", description: "A small place for exchange and gathering." },
+  { id: "music-pavilion", coins: 2500, stage: 8, icon: "♪", title: "Music Pavilion", description: "The town center becomes a place to celebrate." }
+];
+const VILLAGE_ALBUM_REWARDS = [
+  { id: "train-adventure", coins: 250, title: "Train Adventure", image: "TA", description: "A shared journey begins." },
+  { id: "vienna-transit-day", coins: 500, title: "Vienna Transit Day", image: "VT", description: "A day of moving through the city together." },
+  { id: "community-excursion", coins: 1000, title: "Community Excursion", image: "CE", description: "A shared outing for the whole village." },
+  { id: "wienerwald-outing", coins: 1500, title: "Wienerwald Outing", image: "WO", description: "A green escape near Vienna." },
+  { id: "alpine-adventure", coins: 2500, title: "Alpine Adventure", image: "AA", description: "A special shared mountain memory." }
+];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
   { min: 50, next: 150, icon: "👛", name: "Wallet" },
@@ -718,6 +757,7 @@ function loadProfileStore() {
   store.familyLevelsReached = normalizeFamilyLevelsReached(store.familyLevelsReached, store.profiles);
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
   store.villageName = normalizeVillageName(store.villageName);
+  store.villageAlbumSeenRewards = normalizeRewardIdList(store.villageAlbumSeenRewards);
   promoteFamilyAchievements(store);
 
   if (!store.migratedLegacyProgress) {
@@ -736,6 +776,7 @@ function createProfileStore() {
     version: PROFILE_STORE_VERSION,
     currentProfile: "",
     villageName: "",
+    villageAlbumSeenRewards: [],
     migratedLegacyProgress: false,
     familyLevelsReached: [],
     familyAchievementsUnlocked: [],
@@ -745,6 +786,10 @@ function createProfileStore() {
 
 function normalizeVillageName(value) {
   return String(value || "").trim();
+}
+
+function normalizeRewardIdList(value) {
+  return Array.isArray(value) ? Array.from(new Set(value.map(String).filter(Boolean))) : [];
 }
 
 function getVillageName() {
@@ -808,6 +853,7 @@ function normalizeProfileData(data, profile) {
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
     streak: normalizeStreak(data?.streak),
     achievementsUnlocked: normalizeAchievementList(data?.achievementsUnlocked || data?.achievements),
+    austriaAlbumSeenRewards: normalizeRewardIdList(data?.austriaAlbumSeenRewards),
     decks: data?.decks || {},
     progress: normalizeMeaningProgress(data?.progress || {}),
     vocabularyProgress: normalizeVocabularyProgress(data?.vocabularyProgress || {}),
@@ -1161,6 +1207,12 @@ function mergeProfileStores(localStore, remoteStore) {
 
   baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
   baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
+  baseStore.villageAlbumSeenRewards = Array.from(
+    new Set([
+      ...normalizeRewardIdList(localStore?.villageAlbumSeenRewards),
+      ...normalizeRewardIdList(remoteStore?.villageAlbumSeenRewards)
+    ])
+  );
   baseStore.familyLevelsReached = Array.from(
     new Set([
       ...(Array.isArray(localStore?.familyLevelsReached) ? localStore.familyLevelsReached : []),
@@ -1202,6 +1254,10 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       },
       levelBonusesAwarded: Array.from(new Set([...(local.levelBonusesAwarded || []), ...(remote.levelBonusesAwarded || [])])),
       achievementsUnlocked: Array.from(new Set([...(local.achievementsUnlocked || []), ...(remote.achievementsUnlocked || [])])),
+      austriaAlbumSeenRewards: Array.from(new Set([
+        ...normalizeRewardIdList(local.austriaAlbumSeenRewards),
+        ...normalizeRewardIdList(remote.austriaAlbumSeenRewards)
+      ])),
       history: mergeHistory(local.history, remote.history),
       lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
       settings: remote.settings || local.settings
@@ -1745,10 +1801,99 @@ function renderAchievements() {
 
 function renderAchievementCollection() {
   if (!els.achievementsGrid || !profileStore || !currentProfileId) return;
-  const achievementStates = getAchievementStates();
+  renderRewardsPage();
+}
+
+function renderRewardsPage() {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  const personalCoins = normalizeCoinCount(profile.coins);
+  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
+  const unlockedAustria = getUnlockedRewards(AUSTRIA_ALBUM_REWARDS, personalCoins);
+  const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
+  const townCenter = getTownCenterProgress(sharedCoins);
   els.achievementsGrid.replaceChildren(
-    ...achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress))
+    createRewardSection(
+      "My Austria Album",
+      `Unlocked: ${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
+      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, personalCoins >= reward.coins, `${reward.coins} Coins`))
+    ),
+    createTownCenterSection(townCenter, sharedCoins),
+    createRewardSection(
+      "Village Album",
+      `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
+      VILLAGE_ALBUM_REWARDS.map((reward) => createRewardCard(reward, sharedCoins >= reward.coins, `${reward.coins} Shared Village Coins`))
+    )
   );
+}
+
+function getUnlockedRewards(rewards, coins) {
+  return rewards.filter((reward) => normalizeCoinCount(coins) >= reward.coins);
+}
+
+function getTownCenterProgress(sharedCoins) {
+  const current = [...TOWN_CENTER_STAGES]
+    .reverse()
+    .find((stage) => sharedCoins >= stage.coins) || TOWN_CENTER_STAGES[0];
+  const next = TOWN_CENTER_STAGES.find((stage) => stage.coins > sharedCoins) || null;
+  return { current, next };
+}
+
+function createRewardSection(title, summary, cards) {
+  const section = document.createElement("section");
+  section.className = "reward-section";
+  const heading = document.createElement("div");
+  heading.className = "reward-section-heading";
+  heading.replaceChildren(
+    createTextElement("h3", "", title),
+    createTextElement("p", "", summary)
+  );
+  const grid = document.createElement("div");
+  grid.className = "reward-card-grid";
+  grid.replaceChildren(...cards);
+  section.replaceChildren(heading, grid);
+  return section;
+}
+
+function createRewardCard(reward, unlocked, requirementText) {
+  const card = document.createElement("article");
+  card.className = "reward-card";
+  card.classList.toggle("unlocked", unlocked);
+  card.classList.toggle("locked", !unlocked);
+  card.replaceChildren(
+    createTextElement("span", "reward-image-placeholder", unlocked ? reward.image : "LOCK"),
+    createTextElement("strong", "", reward.title),
+    createTextElement("span", "", unlocked ? reward.description : `Unlocks at ${requirementText}`)
+  );
+  return card;
+}
+
+function createTownCenterSection(progress, sharedCoins) {
+  const current = progress.current;
+  const next = progress.next;
+  const section = document.createElement("section");
+  section.className = "reward-section town-center-section";
+  section.replaceChildren(
+    createTextElement("h3", "", "Town Center"),
+    createTextElement("p", "reward-summary", `Shared Village Coins: ${sharedCoins}`),
+    createTownCenterCard("Current Level:", current),
+    next
+      ? createTownCenterCard("Next:", next)
+      : createTextElement("p", "reward-summary", "All Version 0 town center stages unlocked.")
+  );
+  return section;
+}
+
+function createTownCenterCard(label, stage) {
+  const card = document.createElement("article");
+  card.className = "town-center-card";
+  card.replaceChildren(
+    createTextElement("span", "reward-summary", label),
+    createTextElement("strong", "", `Stage ${stage.stage} - ${stage.title}`),
+    createTextElement("span", "reward-image-placeholder", stage.icon),
+    createTextElement("p", "", stage.description)
+  );
+  return card;
 }
 
 function getAchievementStates() {
@@ -3167,7 +3312,40 @@ function awardCoins(amount) {
   awardLevelBonusIfNeeded(profile);
   celebrateFamilyLevelIfNeeded();
   checkAchievements("coins");
+  checkRewardUnlocks(profile);
   saveProfileStore();
+}
+
+function checkRewardUnlocks(profile) {
+  if (!profile) return;
+  profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
+  profileStore.villageAlbumSeenRewards = normalizeRewardIdList(profileStore.villageAlbumSeenRewards);
+  const personalCoins = normalizeCoinCount(profile.coins);
+  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
+  const newPersonalReward = AUSTRIA_ALBUM_REWARDS.find((reward) => {
+    return personalCoins >= reward.coins && !profile.austriaAlbumSeenRewards.includes(reward.id);
+  });
+  if (newPersonalReward) {
+    profile.austriaAlbumSeenRewards.push(newPersonalReward.id);
+    showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
+    return;
+  }
+  const newVillageReward = VILLAGE_ALBUM_REWARDS.find((reward) => {
+    return sharedCoins >= reward.coins && !profileStore.villageAlbumSeenRewards.includes(reward.id);
+  });
+  if (newVillageReward) {
+    profileStore.villageAlbumSeenRewards.push(newVillageReward.id);
+    showRewardUnlockCelebration(newVillageReward, "Village Album");
+  }
+}
+
+function showRewardUnlockCelebration(reward, source) {
+  els.levelCelebrationTitle.textContent = "Congratulations!";
+  els.levelCelebrationProfile.textContent = "You unlocked:";
+  els.levelCelebrationLevel.textContent = reward.title;
+  els.levelCelebrationBonus.textContent = source;
+  els.levelCelebrationBonus.classList.remove("hidden");
+  els.levelCelebration.classList.remove("hidden");
 }
 
 function awardLevelBonusIfNeeded(profile) {

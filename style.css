@@ -1331,6 +1331,105 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.rewards-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.reward-section {
+  border: 1px solid rgba(222, 216, 203, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+  padding: clamp(14px, 2.4vw, 20px);
+  display: grid;
+  gap: 12px;
+}
+
+.reward-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.reward-section h3,
+.reward-section p {
+  margin: 0;
+}
+
+.reward-section h3 {
+  font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+}
+
+.reward-section-heading p,
+.reward-summary {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.reward-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.reward-card,
+.town-center-card {
+  min-width: 0;
+  border: 1px solid rgba(222, 216, 203, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.86);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.reward-card.locked {
+  opacity: 0.58;
+}
+
+.reward-card.unlocked {
+  border-color: rgba(36, 122, 85, 0.35);
+  background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.94));
+}
+
+.reward-image-placeholder {
+  width: 100%;
+  min-height: 68px;
+  border-radius: 8px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.reward-card strong,
+.town-center-card strong {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.reward-card span:not(.reward-image-placeholder),
+.town-center-card p {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.28;
+}
+
+.town-center-section {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.town-center-section h3,
+.town-center-section > .reward-summary {
+  grid-column: 1 / -1;
+}
+
 .next-achievement-card {
   border: 1px solid rgba(109, 74, 160, 0.24);
   border-radius: 8px;
@@ -2305,7 +2404,8 @@ select,
 
   .dashboard-summary,
   .simple-challenge,
-  .continue-card {
+  .continue-card,
+  .town-center-section {
     grid-template-columns: 1fr;
   }
 
