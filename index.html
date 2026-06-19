@@ -142,17 +142,30 @@
             <div class="settings-panel hidden" id="settingsPanel">
               <section class="settings-section" aria-label="Village settings">
                 <h3>Village Settings</h3>
-                <p>Village name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
-                <button type="button" id="editVillageName">Edit village name</button>
+                <p>Village Name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
+                <label>
+                  <span>Village Name</span>
+                  <input id="settingsVillageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
+                </label>
+                <button type="button" id="saveVillageName">Save Village Name</button>
               </section>
               <section class="settings-section" aria-label="Profile settings">
                 <h3>Profile Settings</h3>
-                <p>Current profile<br><strong id="settingsProfileName">No profile</strong></p>
-                <button type="button" id="changeProfilePassword">Change profile password</button>
+                <p>Current Profile Name<br><strong id="settingsProfileName">No profile</strong></p>
+                <label>
+                  <span>Profile Name</span>
+                  <input id="settingsProfileNameInput" type="text" autocomplete="name">
+                </label>
+                <button type="button" id="saveProfileName">Save Profile Name</button>
+              </section>
+              <section class="settings-section" aria-label="Security settings">
+                <h3>Security</h3>
+                <button type="button" id="changeProfilePassword">Change Password</button>
               </section>
               <section class="settings-section" aria-label="Prototype testing tools">
                 <h3>Test / Developer Tools</h3>
                 <p>This is for prototype testing only.</p>
+                <p>Prototype version. Profiles are stored on this device.</p>
                 <button type="button" id="resetLocalTestData">Reset local test data</button>
               </section>
               <section class="settings-section" aria-label="Settings navigation">

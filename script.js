@@ -471,8 +471,11 @@ const els = {
   settingsToggle: document.querySelector("#settingsToggle"),
   settingsPanel: document.querySelector("#settingsPanel"),
   settingsVillageName: document.querySelector("#settingsVillageName"),
-  editVillageName: document.querySelector("#editVillageName"),
+  settingsVillageNameInput: document.querySelector("#settingsVillageNameInput"),
+  saveVillageName: document.querySelector("#saveVillageName"),
   settingsProfileName: document.querySelector("#settingsProfileName"),
+  settingsProfileNameInput: document.querySelector("#settingsProfileNameInput"),
+  saveProfileName: document.querySelector("#saveProfileName"),
   changeProfilePassword: document.querySelector("#changeProfilePassword"),
   resetLocalTestData: document.querySelector("#resetLocalTestData"),
   settingsBackDashboard: document.querySelector("#settingsBackDashboard"),
@@ -1632,8 +1635,14 @@ function renderDashboard() {
 function renderSettingsPanel() {
   renderVillageName();
   const profile = getCurrentProfile();
+  if (els.settingsVillageNameInput) {
+    els.settingsVillageNameInput.value = getVillageName();
+  }
   if (els.settingsProfileName) {
     els.settingsProfileName.textContent = profile?.name || "No profile";
+  }
+  if (els.settingsProfileNameInput) {
+    els.settingsProfileNameInput.value = profile?.name || "";
   }
 }
 
@@ -2294,6 +2303,28 @@ function createCustomProfileId(name) {
   return `custom-${Date.now().toString(36)}-${slug}`;
 }
 
+function renameCurrentProfile(nextName) {
+  const profile = getCurrentProfile();
+  const normalizedName = String(nextName || "").trim();
+  if (!profile || !normalizedName) {
+    window.alert("Profile name was not changed.");
+    return false;
+  }
+  const nameExists = Object.values(profileStore.profiles || {})
+    .some((existingProfile) => existingProfile.id !== profile.id && existingProfile.name.toLowerCase() === normalizedName.toLowerCase());
+  if (nameExists) {
+    window.alert("A profile with that name already exists.");
+    return false;
+  }
+  profile.name = normalizedName;
+  saveProfileStore();
+  els.currentProfileLabel.textContent = profile.name;
+  renderProfileCards();
+  renderDashboard();
+  renderSettingsPanel();
+  return true;
+}
+
 function handleCreateProfile(event) {
   event.preventDefault();
   const name = els.createProfileName.value.trim();
@@ -2579,12 +2610,14 @@ function bindEvents() {
     closeSettingsMenu();
   });
 
-  els.editVillageName.addEventListener("click", () => {
-    const nextName = window.prompt("Village name", getVillageName());
-    if (nextName === null) return;
-    saveVillageName(nextName);
+  els.saveVillageName.addEventListener("click", () => {
+    saveVillageName(els.settingsVillageNameInput.value);
     renderVillageName();
     renderSettingsPanel();
+  });
+
+  els.saveProfileName.addEventListener("click", () => {
+    renameCurrentProfile(els.settingsProfileNameInput.value);
   });
 
   els.changeProfilePassword.addEventListener("click", () => {
