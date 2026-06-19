@@ -263,6 +263,10 @@ body {
   text-align: center;
 }
 
+.profile-grid:not(:empty) + .empty-profile-message {
+  display: none !important;
+}
+
 .avatar-wrap {
   width: 48px;
   height: 48px;

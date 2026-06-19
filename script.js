@@ -2086,6 +2086,7 @@ function renderProfileCards() {
     button.className = "profile-card";
     button.type = "button";
     button.dataset.profileId = profile.id;
+    button.addEventListener("click", () => selectProfile(profile.id));
     button.replaceChildren(
       createAvatarElement(profile, "profile-avatar"),
       createTextElement("span", "profile-name", profile.name),
@@ -2116,7 +2117,6 @@ function showProfileChooser() {
   els.familyWealthCard.classList.remove("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
-  els.emptyProfileMessage.classList.remove("hidden");
   els.profileDebug.classList.remove("hidden");
   els.createProfileForm.classList.add("hidden");
   els.createProfileForm.reset();
@@ -2141,7 +2141,6 @@ function createCustomProfile(name, password) {
     { id, name, password, emoji: "🏡", avatar: "" }
   );
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
-  renderProfileCards();
 }
 
 function createCustomProfileId(name) {
@@ -2171,6 +2170,7 @@ function handleCreateProfile(event) {
   }
   createCustomProfile(name, password);
   showProfileChooser();
+  renderProfileCards();
 }
 
 function renderFamilyWealth() {
@@ -2239,11 +2239,6 @@ function formatDate(value) {
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
-  els.profileGrid.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-profile-id]");
-    if (!button) return;
-    selectProfile(button.dataset.profileId);
-  });
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
   els.cancelCreateProfile.addEventListener("click", showProfileChooser);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
