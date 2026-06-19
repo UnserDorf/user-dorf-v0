@@ -182,7 +182,8 @@ body {
   justify-content: center;
 }
 
-.create-profile-card {
+.create-profile-card,
+.profile-login-card {
   width: min(430px, 100%);
   justify-self: center;
   border: 1px solid rgba(222, 216, 203, 0.95);
@@ -194,19 +195,22 @@ body {
   gap: 16px;
 }
 
-.create-profile-card h2 {
+.create-profile-card h2,
+.profile-login-card h2 {
   margin: 0;
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
 
-.create-profile-card label {
+.create-profile-card label,
+.profile-login-card label {
   display: grid;
   gap: 8px;
   color: var(--muted);
   font-weight: 800;
 }
 
-.create-profile-card input {
+.create-profile-card input,
+.profile-login-card input {
   min-height: 56px;
   border: 1px solid var(--line);
   border-radius: 8px;

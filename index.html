@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=91">
+    <link rel="stylesheet" href="style.css?v=92">
   </head>
   <body>
     <section class="lock-screen" id="lockScreen" aria-label="Password required">
@@ -59,6 +59,21 @@
           <button class="ghost-button" id="createProfileToggle" type="button">Create Profile</button>
         </div>
         <p class="profile-debug" id="profileDebug">Profiles loaded: 0</p>
+        <form class="profile-login-card hidden" id="profileLoginForm" aria-label="Profile login">
+          <div>
+            <p class="eyebrow">Profile Login</p>
+            <h2 id="profileLoginTitle">Enter password</h2>
+          </div>
+          <label>
+            <span>Personal password</span>
+            <input id="profileLoginPassword" type="password" autocomplete="current-password" required>
+          </label>
+          <div class="create-profile-buttons">
+            <button class="primary-button" type="submit">Login</button>
+            <button class="ghost-button" id="cancelProfileLogin" type="button">Back</button>
+          </div>
+          <p class="lock-error hidden" id="profileLoginError">Incorrect password.</p>
+        </form>
         <form class="create-profile-card hidden" id="createProfileForm" aria-label="Create profile">
           <div>
             <p class="eyebrow">New learner</p>
@@ -95,6 +110,7 @@
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
           <button class="ghost-button" id="switchProfile" type="button">Switch Profile</button>
+          <button class="ghost-button" id="logoutButton" type="button">Logout</button>
           <div class="settings-menu">
             <button class="icon-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings">⚙️</button>
             <div class="settings-panel hidden" id="settingsPanel">
@@ -507,6 +523,6 @@
       <p class="app-version">Unser Dorf v1.20</p>
     </main>
 
-    <script type="module" src="script.js?v=91"></script>
+    <script type="module" src="script.js?v=92"></script>
   </body>
 </html>

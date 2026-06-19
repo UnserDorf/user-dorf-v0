@@ -387,6 +387,11 @@ const els = {
   profileActions: document.querySelector("#profileActions"),
   emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
   profileDebug: document.querySelector("#profileDebug"),
+  profileLoginForm: document.querySelector("#profileLoginForm"),
+  profileLoginTitle: document.querySelector("#profileLoginTitle"),
+  profileLoginPassword: document.querySelector("#profileLoginPassword"),
+  cancelProfileLogin: document.querySelector("#cancelProfileLogin"),
+  profileLoginError: document.querySelector("#profileLoginError"),
   familyWealthCard: document.querySelector("#familyWealthCard"),
   createProfileToggle: document.querySelector("#createProfileToggle"),
   createProfileForm: document.querySelector("#createProfileForm"),
@@ -460,6 +465,7 @@ const els = {
   csvInput: document.querySelector("#csvInput"),
   homeButton: document.querySelector("#homeButton"),
   switchProfile: document.querySelector("#switchProfile"),
+  logoutButton: document.querySelector("#logoutButton"),
   settingsToggle: document.querySelector("#settingsToggle"),
   settingsPanel: document.querySelector("#settingsPanel"),
   lockApp: document.querySelector("#lockApp"),
@@ -563,6 +569,7 @@ let prepositionProgress = {};
 let profileStore = null;
 let checkingAchievements = false;
 let currentProfileId = "";
+let pendingProfileId = "";
 let searchResults = [];
 let randomSessionKey = "";
 let randomSessionIds = [];
@@ -625,11 +632,7 @@ async function unlockApp() {
     console.warn("Could not load preposition questions.", error);
     prepositionItems = [];
   }
-  if (profileStore.currentProfile) {
-    selectProfile(profileStore.currentProfile);
-  } else {
-    showProfileScreen();
-  }
+  showProfileScreen();
 }
 
 async function initializeFamilySync() {
@@ -1269,6 +1272,7 @@ function refreshVisibleProfileState() {
 
 function showProfileScreen() {
   currentProfileId = "";
+  pendingProfileId = "";
   progress = {};
   vocabularyProgress = {};
   articleProgress = {};
@@ -1288,14 +1292,43 @@ function showProfileScreen() {
 function selectProfile(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
-  if (profile.password) {
-    const enteredPassword = window.prompt(`Enter password for ${profile.name}`);
-    if (enteredPassword !== profile.password) {
-      window.alert("Incorrect password.");
-      return;
-    }
+  showProfileLogin(profileId);
+}
+
+function showProfileLogin(profileId) {
+  const profile = profileStore.profiles[profileId];
+  if (!profile) return;
+  pendingProfileId = profileId;
+  els.familyWealthCard.classList.add("hidden");
+  els.profileGrid.classList.add("hidden");
+  els.profileActions.classList.add("hidden");
+  els.emptyProfileMessage.classList.add("hidden");
+  els.profileDebug.classList.add("hidden");
+  els.createProfileForm.classList.add("hidden");
+  els.profileLoginTitle.textContent = `Enter password for ${profile.name}`;
+  els.profileLoginPassword.value = "";
+  els.profileLoginError.classList.add("hidden");
+  els.profileLoginForm.classList.remove("hidden");
+  els.profileLoginPassword.focus();
+}
+
+function handleProfileLogin(event) {
+  event.preventDefault();
+  const profile = profileStore.profiles[pendingProfileId];
+  if (!profile || els.profileLoginPassword.value !== profile.password) {
+    els.profileLoginError.textContent = "Incorrect password.";
+    els.profileLoginError.classList.remove("hidden");
+    els.profileLoginPassword.select();
+    return;
   }
+  completeProfileLogin(pendingProfileId);
+}
+
+function completeProfileLogin(profileId) {
+  const profile = profileStore.profiles[profileId];
+  if (!profile) return;
   currentProfileId = profileId;
+  pendingProfileId = "";
   profileStore.currentProfile = profileId;
   progress = profile.progress;
   vocabularyProgress = profile.vocabularyProgress;
@@ -1308,6 +1341,7 @@ function selectProfile(profileId) {
   saveProfileStore();
   els.currentProfileLabel.textContent = `${profile.emoji} ${profile.name}`;
   els.profileScreen.classList.add("hidden");
+  els.profileLoginForm.classList.add("hidden");
   els.appShell.classList.remove("locked");
   updateFilterOptions();
   currentIndex = 0;
@@ -2114,10 +2148,15 @@ function getProfileList() {
 }
 
 function showProfileChooser() {
+  pendingProfileId = "";
   els.familyWealthCard.classList.remove("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
   els.profileDebug.classList.remove("hidden");
+  els.profileLoginForm.classList.add("hidden");
+  els.profileLoginForm.reset();
+  els.profileLoginError.classList.add("hidden");
+  els.profileLoginError.textContent = "Incorrect password.";
   els.createProfileForm.classList.add("hidden");
   els.createProfileForm.reset();
   els.createProfileError.classList.add("hidden");
@@ -2130,6 +2169,7 @@ function showCreateProfileScreen() {
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
   els.profileDebug.classList.add("hidden");
+  els.profileLoginForm.classList.add("hidden");
   els.createProfileForm.classList.remove("hidden");
   els.createProfileName.focus();
 }
@@ -2236,12 +2276,21 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
 
+function logoutToSharedPassword() {
+  saveCurrentPosition();
+  closeSettingsMenu();
+  localStorage.removeItem(UNLOCK_STORAGE_KEY);
+  window.location.reload();
+}
+
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
   els.cancelCreateProfile.addEventListener("click", showProfileChooser);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
+  els.cancelProfileLogin.addEventListener("click", showProfileChooser);
+  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
 
   els.dashboardScreen.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-dashboard-action]");
@@ -2410,6 +2459,7 @@ function bindEvents() {
     closeSettingsMenu();
     showProfileScreen();
   });
+  els.logoutButton.addEventListener("click", logoutToSharedPassword);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
@@ -2425,9 +2475,7 @@ function bindEvents() {
   });
 
   els.lockApp.addEventListener("click", () => {
-    closeSettingsMenu();
-    localStorage.removeItem(UNLOCK_STORAGE_KEY);
-    window.location.reload();
+    logoutToSharedPassword();
   });
 
   els.resetProgress.addEventListener("click", () => {
