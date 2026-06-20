@@ -288,14 +288,14 @@ const AUSTRIA_ALBUM_REWARDS = [
   { id: "vienna-woods", coins: 950, title: "Vienna Woods", image: "VW", description: "Green hills and paths near Vienna." }
 ];
 const TOWN_CENTER_STAGES = [
-  { id: "empty-square", coins: 0, stage: 1, icon: "□", title: "Empty Square", description: "The town center is ready for its first shared milestone." },
-  { id: "flowers", coins: 100, stage: 2, icon: "✿", title: "Flowers", description: "A little color appears in the shared space." },
-  { id: "bench", coins: 250, stage: 3, icon: "▭", title: "Bench", description: "A quiet place to sit and rest." },
-  { id: "fountain", coins: 500, stage: 4, icon: "◌", title: "Fountain", description: "The center begins to feel alive." },
-  { id: "swing-set", coins: 800, stage: 5, icon: "⌁", title: "Swing Set", description: "The square becomes more welcoming for families." },
-  { id: "community-garden", coins: 1200, stage: 6, icon: "✦", title: "Community Garden", description: "Shared learning helps something grow." },
-  { id: "market-stall", coins: 1800, stage: 7, icon: "▣", title: "Market Stall", description: "A small place for exchange and gathering." },
-  { id: "music-pavilion", coins: 2500, stage: 8, icon: "♪", title: "Music Pavilion", description: "The town center becomes a place to celebrate." }
+  { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Empty Square", description: "The town center is ready for its first shared milestone." },
+  { id: "flowers", coins: 100, stage: 2, icon: "🌷", title: "Flowers", description: "Flowers bring color to the shared square." },
+  { id: "bench", coins: 250, stage: 3, icon: "🪑", title: "Bench", description: "A bench gives the village a simple place to pause." },
+  { id: "fountain", coins: 500, stage: 4, icon: "⛲", title: "Fountain", description: "A fountain makes the town center feel more alive." },
+  { id: "swing-set", coins: 1000, stage: 5, icon: "🎠", title: "Swing Set", description: "The square becomes more welcoming for families." },
+  { id: "community-garden", coins: 2000, stage: 6, icon: "🌳", title: "Community Garden", description: "Shared learning helps something grow." },
+  { id: "market-stall", coins: 3500, stage: 7, icon: "☕", title: "Market Stall", description: "A small place for exchange and gathering." },
+  { id: "music-pavilion", coins: 5000, stage: 8, icon: "🎵", title: "Music Pavilion", description: "The town center becomes a place to celebrate." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
   { id: "train-adventure", coins: 250, title: "Train Adventure", image: "TA", description: "A shared journey begins." },
@@ -764,6 +764,7 @@ function loadProfileStore() {
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
   store.villageName = normalizeVillageName(store.villageName);
   store.villageAlbumSeenRewards = normalizeRewardIdList(store.villageAlbumSeenRewards);
+  store.townCenterStagesSeen = normalizeRewardIdList(store.townCenterStagesSeen);
   promoteFamilyAchievements(store);
 
   if (!store.migratedLegacyProgress) {
@@ -783,6 +784,7 @@ function createProfileStore() {
     currentProfile: "",
     villageName: "",
     villageAlbumSeenRewards: [],
+    townCenterStagesSeen: [],
     migratedLegacyProgress: false,
     familyLevelsReached: [],
     familyAchievementsUnlocked: [],
@@ -1217,6 +1219,12 @@ function mergeProfileStores(localStore, remoteStore) {
     new Set([
       ...normalizeRewardIdList(localStore?.villageAlbumSeenRewards),
       ...normalizeRewardIdList(remoteStore?.villageAlbumSeenRewards)
+    ])
+  );
+  baseStore.townCenterStagesSeen = Array.from(
+    new Set([
+      ...normalizeRewardIdList(localStore?.townCenterStagesSeen),
+      ...normalizeRewardIdList(remoteStore?.townCenterStagesSeen)
     ])
   );
   baseStore.familyLevelsReached = Array.from(
@@ -1697,15 +1705,19 @@ function renderDashboard() {
 
 function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
   if (!profile) return;
-  const personalCoins = normalizeCoinCount(profile.coins);
-  const unlockedAustria = getUnlockedRewards(AUSTRIA_ALBUM_REWARDS, personalCoins);
+  const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.austriaAlbumPreview) {
-    els.austriaAlbumPreview.textContent = `${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`;
+    els.austriaAlbumPreview.textContent = `${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`;
   }
   if (els.townCenterPreview) {
-    els.townCenterPreview.textContent = `Current Stage: ${townCenter.current.title}`;
+    els.townCenterPreview.replaceChildren(
+      createTextElement("span", "", "Current Stage:"),
+      createTextElement("strong", "", getTownCenterStageName(townCenter.current)),
+      createTextElement("span", "", `Village Coins: ${sharedCoins}`),
+      createTextElement("span", "", `Next: ${townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked"}`)
+    );
   }
   if (els.villageAlbumPreview) {
     els.villageAlbumPreview.textContent = `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`;
@@ -1831,9 +1843,8 @@ function renderAchievementCollection(page = "austria-album") {
 function renderRewardsPage(page = "austria-album") {
   const profile = getCurrentProfile();
   if (!profile) return;
-  const personalCoins = normalizeCoinCount(profile.coins);
   const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
-  const unlockedAustria = getUnlockedRewards(AUSTRIA_ALBUM_REWARDS, personalCoins);
+  const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (page === "town-center") {
@@ -1855,12 +1866,12 @@ function renderRewardsPage(page = "austria-album") {
     return;
   }
   els.rewardPageTitle.textContent = "My Austria Album";
-  els.rewardPageSummary.textContent = `Unlocked: ${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
+  els.rewardPageSummary.textContent = `Unlocked: ${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
   els.achievementsGrid.replaceChildren(
     createRewardSection(
       "My Austria Album",
-      `Unlocked: ${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
-      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, personalCoins >= reward.coins, `${reward.coins} Coins`))
+      `Unlocked: ${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
+      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, unlockedAustriaIds.includes(reward.id), `${reward.coins} Coins`))
     )
   );
 }
@@ -1869,12 +1880,36 @@ function getUnlockedRewards(rewards, coins) {
   return rewards.filter((reward) => normalizeCoinCount(coins) >= reward.coins);
 }
 
+function getAustriaAlbumUnlockedRewardIds(profile, backfillFromCoins = false) {
+  const unlockedIds = new Set(normalizeRewardIdList(profile?.austriaAlbumSeenRewards));
+  if (backfillFromCoins && profile) {
+    const personalCoins = normalizeCoinCount(profile.coins);
+    AUSTRIA_ALBUM_REWARDS.forEach((reward) => {
+      if (personalCoins >= reward.coins) unlockedIds.add(reward.id);
+    });
+    profile.austriaAlbumSeenRewards = Array.from(unlockedIds);
+  }
+  return Array.from(unlockedIds);
+}
+
 function getTownCenterProgress(sharedCoins) {
+  const coins = normalizeCoinCount(sharedCoins);
   const current = [...TOWN_CENTER_STAGES]
     .reverse()
-    .find((stage) => sharedCoins >= stage.coins) || TOWN_CENTER_STAGES[0];
-  const next = TOWN_CENTER_STAGES.find((stage) => stage.coins > sharedCoins) || null;
-  return { current, next };
+    .find((stage) => coins >= stage.coins) || TOWN_CENTER_STAGES[0];
+  const next = TOWN_CENTER_STAGES.find((stage) => stage.coins > coins) || null;
+  const previousThreshold = current.coins;
+  const nextThreshold = next?.coins || current.coins;
+  const stageSpan = Math.max(nextThreshold - previousThreshold, 1);
+  const progressPercent = next
+    ? Math.min(Math.max(((coins - previousThreshold) / stageSpan) * 100, 0), 100)
+    : 100;
+  const coinsRemaining = next ? Math.max(next.coins - coins, 0) : 0;
+  return { current, next, coins, coinsRemaining, progressPercent };
+}
+
+function getTownCenterStageName(stage) {
+  return `${stage.icon} ${stage.title}`;
 }
 
 function createRewardSection(title, summary, cards) {
@@ -1909,22 +1944,35 @@ function createRewardCard(reward, unlocked, requirementText) {
 function createTownCenterPage(progress, sharedCoins) {
   const current = progress.current;
   const next = progress.next;
-  const coinsRemaining = next ? Math.max(next.coins - normalizeCoinCount(sharedCoins), 0) : 0;
+  const coins = normalizeCoinCount(sharedCoins);
   const section = document.createElement("section");
   section.className = "reward-section town-center-page";
   const currentCard = document.createElement("article");
   currentCard.className = "town-center-card";
   currentCard.replaceChildren(
     createTextElement("span", "reward-summary", "Current Stage:"),
-    createTextElement("strong", "", current.title),
-    createTextElement("p", "", current.description)
+    createTextElement("strong", "", getTownCenterStageName(current)),
+    createTextElement("p", "", current.description),
+    createTextElement("p", "reward-summary", `Village Coins: ${coins}`)
   );
   const nextCard = document.createElement("article");
   nextCard.className = "town-center-card";
   nextCard.replaceChildren(
     createTextElement("span", "reward-summary", "Next Stage:"),
-    createTextElement("strong", "", next ? next.title : "All stages unlocked"),
-    createTextElement("p", "", next ? `Coins Remaining: ${coinsRemaining}` : "Coins Remaining: 0")
+    createTextElement("strong", "", next ? getTownCenterStageName(next) : "All stages unlocked"),
+    createTextElement("p", "", `Coins Remaining: ${progress.coinsRemaining}`)
+  );
+  const progressBlock = document.createElement("div");
+  progressBlock.className = "town-center-progress-block";
+  const progressTrack = document.createElement("div");
+  progressTrack.className = "town-center-progress-track";
+  const progressFill = document.createElement("span");
+  progressFill.style.width = `${progress.progressPercent}%`;
+  progressTrack.replaceChildren(progressFill);
+  progressBlock.replaceChildren(
+    createTextElement("span", "reward-summary", "Progress to next stage"),
+    progressTrack,
+    createTextElement("p", "", next ? `${coins} / ${next.coins} Shared Village Coins` : "All stages complete")
   );
   const stageList = document.createElement("div");
   stageList.className = "town-center-stage-list";
@@ -1932,19 +1980,33 @@ function createTownCenterPage(progress, sharedCoins) {
     createTextElement("h3", "", "Stages"),
     ...TOWN_CENTER_STAGES.map((stage) => {
       const stageCard = document.createElement("article");
-      const unlocked = sharedCoins >= stage.coins;
+      const unlocked = coins >= stage.coins;
+      const isNext = next?.id === stage.id;
       stageCard.className = "town-center-stage-card";
       stageCard.classList.toggle("unlocked", unlocked);
+      stageCard.classList.toggle("next", isNext);
       stageCard.replaceChildren(
-        createTextElement("span", "reward-summary", unlocked ? "Unlocked" : `${stage.coins} Shared Village Coins`),
-        createTextElement("strong", "", `Stage ${stage.stage} - ${stage.title}`),
+        createTextElement("span", "reward-summary", getTownCenterStageStatus(stage, coins, next)),
+        createTextElement("strong", "", `${getTownCenterStageMarker(stage, coins, next)} ${stage.title}`),
         createTextElement("p", "", stage.description)
       );
       return stageCard;
     })
   );
-  section.replaceChildren(currentCard, nextCard, stageList);
+  section.replaceChildren(currentCard, nextCard, progressBlock, stageList);
   return section;
+}
+
+function getTownCenterStageMarker(stage, coins, next) {
+  if (coins >= stage.coins) return "✓";
+  if (next?.id === stage.id) return "⏳";
+  return "🔒";
+}
+
+function getTownCenterStageStatus(stage, coins, next) {
+  if (coins >= stage.coins) return `Unlocked · ${stage.coins} Shared Village Coins`;
+  if (next?.id === stage.id) return `Next · ${stage.coins} Shared Village Coins`;
+  return `${stage.coins} Shared Village Coins`;
 }
 
 function createTownCenterSection(progress, sharedCoins) {
@@ -3403,6 +3465,7 @@ function awardCoins(amount) {
   celebrateFamilyLevelIfNeeded();
   checkAchievements("coins");
   checkRewardUnlocks(profile);
+  checkTownCenterStageUnlocks();
   saveProfileStore();
 }
 
@@ -3435,20 +3498,44 @@ function showRewardUnlockCelebration(reward, source) {
   els.levelCelebrationLevel.textContent = reward.title;
   els.levelCelebrationBonus.textContent = source;
   els.levelCelebrationBonus.classList.remove("hidden");
-  showRewardCelebrationActions(source === "Village Album" ? "village-album" : "austria-album");
+  showRewardCelebrationActions(source === "Village Album" ? "village-album" : "austria-album", "View Album");
   els.levelCelebration.classList.remove("hidden");
 }
 
-function showRewardCelebrationActions(page) {
+function showRewardCelebrationActions(page, label = "View Album") {
   els.levelCelebrationViewAlbum.dataset.rewardPage = page;
+  els.levelCelebrationViewAlbum.textContent = label;
   els.levelCelebrationViewAlbum.classList.remove("hidden");
   els.levelCelebrationClose.textContent = "Continue";
 }
 
 function hideRewardCelebrationActions() {
   els.levelCelebrationViewAlbum.dataset.rewardPage = "";
+  els.levelCelebrationViewAlbum.textContent = "View Album";
   els.levelCelebrationViewAlbum.classList.add("hidden");
   els.levelCelebrationClose.textContent = "Nice!";
+}
+
+function checkTownCenterStageUnlocks() {
+  if (!profileStore) return;
+  profileStore.townCenterStagesSeen = normalizeRewardIdList(profileStore.townCenterStagesSeen);
+  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
+  const newStage = TOWN_CENTER_STAGES.find((stage) => {
+    return stage.coins > 0 && sharedCoins >= stage.coins && !profileStore.townCenterStagesSeen.includes(stage.id);
+  });
+  if (!newStage) return;
+  profileStore.townCenterStagesSeen.push(newStage.id);
+  showTownCenterStageCelebration(newStage);
+}
+
+function showTownCenterStageCelebration(stage) {
+  els.levelCelebrationTitle.textContent = "Village Upgrade!";
+  els.levelCelebrationProfile.textContent = "The Town Center has unlocked:";
+  els.levelCelebrationLevel.textContent = getTownCenterStageName(stage);
+  els.levelCelebrationBonus.textContent = "";
+  els.levelCelebrationBonus.classList.add("hidden");
+  showRewardCelebrationActions("town-center", "View Progress");
+  els.levelCelebration.classList.remove("hidden");
 }
 
 function awardLevelBonusIfNeeded(profile) {
