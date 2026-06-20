@@ -711,7 +711,7 @@ h1 {
 .dashboard-summary,
 .dashboard-progress-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -858,7 +858,7 @@ h1 {
 
 .dashboard-metric strong {
   color: var(--ink);
-  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
   line-height: 1.05;
   font-weight: 850;
 }
@@ -874,6 +874,11 @@ h1 {
 
 .dashboard-progress-panel .simple-challenge {
   min-height: 136px;
+}
+
+.dashboard-progress-grid > article {
+  min-width: 0;
+  min-height: 148px;
 }
 
 .section-heading.simple h3 {
@@ -907,6 +912,15 @@ h1 {
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 800;
+}
+
+.simple-challenge strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  line-height: 1.08;
+  font-weight: 900;
 }
 
 .household-list {
@@ -2939,7 +2953,7 @@ select,
   }
 
   .dashboard-progress-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .dashboard-progress-panel .simple-challenge {
@@ -3085,7 +3099,7 @@ select,
   }
 
   .dashboard-progress-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .dashboard-progress-panel .simple-challenge {

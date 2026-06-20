@@ -354,6 +354,8 @@ const els = {
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
+  dashboardChallengeStatus: document.querySelector("#dashboardChallengeStatus"),
+  dashboardStreak: document.querySelector("#dashboardStreak"),
   achievementPreview: document.querySelector("#achievementPreview"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
@@ -1608,9 +1610,24 @@ function renderDashboard() {
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
+  renderProgressCards(profile);
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
   saveProfileStore();
+}
+
+function renderProgressCards(profile) {
+  if (els.dashboardStreak) {
+    const streak = getDisplayStreak(profile).current;
+    els.dashboardStreak.textContent = streak > 0 ? `${streak} ${streak === 1 ? "Day" : "Days"}` : "No streak yet";
+  }
+  if (els.dashboardChallengeStatus) {
+    const challenge = getDailyChallengeForDate(profile.dailyChallenge.date);
+    const progress = getDailyChallengeProgress(profile.dailyChallenge, challenge);
+    els.dashboardChallengeStatus.textContent = profile.dailyChallenge.completed
+      ? "Completed today"
+      : `${progress.current} / ${challenge.goal}`;
+  }
 }
 
 function renderAchievementPreview(achievementStates = getAchievementStates()) {
