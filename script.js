@@ -359,7 +359,6 @@ const els = {
   achievementPreview: document.querySelector("#achievementPreview"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
-  townCenterDashboardImageDebug: document.querySelector("#townCenterDashboardImageDebug"),
   townCenterDashboardStage: document.querySelector("#townCenterDashboardStage"),
   townCenterDashboardStageCount: document.querySelector("#townCenterDashboardStageCount"),
   villageAlbumPreview: document.querySelector("#villageAlbumPreview"),
@@ -1924,27 +1923,13 @@ function getTownCenterImageSrc(stage) {
 function setTownCenterImage(image, stage) {
   if (!image) return;
   const imagePath = getTownCenterImageSrc(stage);
-  const debugLine = getTownCenterImageDebugElement(image);
   image.classList.remove("is-missing");
   image.alt = `${stage?.title || "Town Center"} Town Center`;
-  if (debugLine) {
-    debugLine.classList.remove("is-error");
-    debugLine.textContent = `Current image path: ${imagePath}`;
-  }
   image.onerror = () => {
     image.classList.add("is-missing");
-    if (debugLine) {
-      debugLine.classList.add("is-error");
-      debugLine.textContent = `Image not found: ${imagePath}`;
-    }
     image.removeAttribute("src");
   };
   image.src = imagePath;
-}
-
-function getTownCenterImageDebugElement(image) {
-  if (image.id === "townCenterDashboardImage") return els.townCenterDashboardImageDebug;
-  return image.parentElement?.querySelector(".town-center-image-debug") || null;
 }
 
 function createRewardSection(title, summary, cards) {
@@ -2075,8 +2060,7 @@ function createTownCenterPage(progress, sharedCoins) {
   media.className = "town-center-hero-media";
   const image = document.createElement("img");
   image.loading = "lazy";
-  const debugLine = createTextElement("p", "town-center-image-debug", "");
-  media.replaceChildren(image, debugLine);
+  media.replaceChildren(image);
   setTownCenterImage(image, current);
   const details = document.createElement("div");
   details.className = "town-center-hero-details";

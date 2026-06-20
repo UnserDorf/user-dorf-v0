@@ -769,20 +769,6 @@ h1 {
   text-align: center;
 }
 
-.town-center-image-debug {
-  margin: 0;
-  padding: 8px 10px;
-  background: rgba(255, 250, 241, 0.9);
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 850;
-  overflow-wrap: anywhere;
-}
-
-.town-center-image-debug.is-error {
-  color: var(--red);
-}
-
 .dashboard-town-center-content {
   padding: clamp(18px, 2.8vw, 30px);
   display: grid;
