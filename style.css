@@ -726,6 +726,15 @@ h1 {
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.75fr);
 }
 
+.dashboard-town-center-card[data-dashboard-action] {
+  cursor: pointer;
+}
+
+.dashboard-town-center-card[data-dashboard-action]:focus-visible {
+  outline: 3px solid rgba(71, 115, 91, 0.32);
+  outline-offset: 3px;
+}
+
 .dashboard-town-center-image-wrap {
   min-height: clamp(260px, 38vw, 420px);
   background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.85));
@@ -1689,7 +1698,54 @@ h1 {
 }
 
 .town-center-page {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: clamp(14px, 2.4vw, 22px);
+  gap: 16px;
+}
+
+.town-center-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.75fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.town-center-hero img {
+  display: block;
+  width: 100%;
+  min-height: clamp(280px, 42vw, 500px);
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.85));
+}
+
+.town-center-hero-details {
+  border: 1px solid rgba(222, 216, 203, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.92);
+  padding: clamp(14px, 2.4vw, 22px);
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.town-center-hero-details span {
+  display: grid;
+  gap: 3px;
+}
+
+.town-center-hero-details small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.town-center-hero-details strong {
+  color: var(--ink);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.12;
+  font-weight: 900;
 }
 
 .town-center-progress-block {
@@ -1726,6 +1782,7 @@ h1 {
 .town-center-stage-list {
   grid-column: 1 / -1;
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
 }
 
@@ -1750,6 +1807,11 @@ h1 {
 .town-center-stage-card.next {
   border-color: rgba(166, 99, 0, 0.28);
   background: rgba(255, 241, 216, 0.58);
+}
+
+.town-center-stage-card.current {
+  border-color: rgba(71, 115, 91, 0.48);
+  background: linear-gradient(135deg, var(--green-soft), rgba(255, 250, 241, 0.98));
 }
 
 .town-center-stage-card strong,
@@ -2678,6 +2740,10 @@ select,
   }
 
   .dashboard-town-center-card {
+    grid-template-columns: 1fr;
+  }
+
+  .town-center-hero {
     grid-template-columns: 1fr;
   }
 

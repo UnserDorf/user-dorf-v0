@@ -288,11 +288,11 @@ const AUSTRIA_ALBUM_REWARDS = [
   { id: "austrian-alps", coins: 950, title: "See the Austrian Alps", category: "Austria Trips", image: "⛰️", description: "Take in Austria's mountain landscapes." }
 ];
 const TOWN_CENTER_STAGES = [
-  { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Empty Square", description: "The town center is ready for its first shared milestone." },
-  { id: "flowers", coins: 100, stage: 2, icon: "🌷", title: "Flowers", description: "Flowers bring color to the shared square." },
-  { id: "bench", coins: 250, stage: 3, icon: "🪑", title: "Bench", description: "A bench gives the village a simple place to pause." },
+  { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Open Village Green", description: "The village has a shared green space ready to grow." },
+  { id: "flowers", coins: 100, stage: 2, icon: "🌷", title: "Flower Beds", description: "Flower beds bring color to the shared green." },
+  { id: "bench", coins: 250, stage: 3, icon: "🪑", title: "Village Bench", description: "A bench gives the village a simple place to pause." },
   { id: "fountain", coins: 500, stage: 4, icon: "⛲", title: "Fountain", description: "A fountain makes the town center feel more alive." },
-  { id: "swing-set", coins: 1000, stage: 5, icon: "🎠", title: "Swing Set", description: "The square becomes more welcoming for families." },
+  { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Flower Arch", description: "A flower arch makes the Town Center feel welcoming." },
   { id: "community-garden", coins: 2000, stage: 6, icon: "🌳", title: "Community Garden", description: "Shared learning helps something grow." },
   { id: "market-stall", coins: 3500, stage: 7, icon: "☕", title: "Market Stall", description: "A small place for exchange and gathering." },
   { id: "music-pavilion", coins: 5000, stage: 8, icon: "🎵", title: "Music Pavilion", description: "The town center becomes a place to celebrate." }
@@ -456,7 +456,6 @@ const els = {
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
-  townCenterPreview: document.querySelector("#townCenterPreview"),
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
   townCenterDashboardStage: document.querySelector("#townCenterDashboardStage"),
   townCenterDashboardNext: document.querySelector("#townCenterDashboardNext"),
@@ -1718,13 +1717,6 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFa
       createRewardPreviewLatest(latestAustriaReward ? getRewardDisplayName(latestAustriaReward) : "None Yet")
     );
   }
-  if (els.townCenterPreview) {
-    els.townCenterPreview.replaceChildren(
-      createRewardPreviewMetric("Current Stage:", getTownCenterStageName(townCenter.current)),
-      createRewardPreviewMetric("Village Coins:", sharedCoins),
-      createRewardPreviewMetric("Next:", townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked")
-    );
-  }
   renderDashboardTownCenter(townCenter, sharedCoins);
   if (els.villageAlbumPreview) {
     const latestVillageReward = unlockedVillage[unlockedVillage.length - 1] || null;
@@ -1902,7 +1894,7 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (page === "town-center") {
-    els.rewardPageTitle.textContent = "Town Center";
+    els.rewardPageTitle.textContent = `🏡 ${getVillageName()} Town Center`;
     els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
     els.achievementsGrid.replaceChildren(createTownCenterPage(townCenter, sharedCoins));
     return;
@@ -2010,21 +2002,23 @@ function createTownCenterPage(progress, sharedCoins) {
   const coins = normalizeCoinCount(sharedCoins);
   const section = document.createElement("section");
   section.className = "reward-section town-center-page";
-  const currentCard = document.createElement("article");
-  currentCard.className = "town-center-card";
-  currentCard.replaceChildren(
-    createTextElement("span", "reward-summary", "Current Stage:"),
-    createTextElement("strong", "", getTownCenterStageName(current)),
-    createTextElement("p", "", current.description),
-    createTextElement("p", "reward-summary", `Village Coins: ${coins}`)
+
+  const hero = document.createElement("article");
+  hero.className = "town-center-hero";
+  const image = document.createElement("img");
+  image.src = getTownCenterImageSrc(current);
+  image.alt = `${current.title} Town Center`;
+  image.loading = "lazy";
+  const details = document.createElement("div");
+  details.className = "town-center-hero-details";
+  details.replaceChildren(
+    createTownCenterDetail("Current Stage:", getTownCenterStageName(current)),
+    createTownCenterDetail("Village Coins:", coins),
+    createTownCenterDetail("Next Upgrade:", next ? getTownCenterStageName(next) : "All stages unlocked"),
+    createTownCenterDetail("Coins Remaining:", progress.coinsRemaining)
   );
-  const nextCard = document.createElement("article");
-  nextCard.className = "town-center-card";
-  nextCard.replaceChildren(
-    createTextElement("span", "reward-summary", "Next Stage:"),
-    createTextElement("strong", "", next ? getTownCenterStageName(next) : "All stages unlocked"),
-    createTextElement("p", "", `Coins Remaining: ${progress.coinsRemaining}`)
-  );
+  hero.replaceChildren(image, details);
+
   const progressBlock = document.createElement("div");
   progressBlock.className = "town-center-progress-block";
   const progressTrack = document.createElement("div");
@@ -2033,43 +2027,51 @@ function createTownCenterPage(progress, sharedCoins) {
   progressFill.style.width = `${progress.progressPercent}%`;
   progressTrack.replaceChildren(progressFill);
   progressBlock.replaceChildren(
-    createTextElement("span", "reward-summary", "Progress to next stage"),
+    createTextElement("span", "reward-summary", "Progress to next upgrade"),
     progressTrack,
     createTextElement("p", "", next ? `${coins} / ${next.coins} Shared Village Coins` : "All stages complete")
   );
+
   const stageList = document.createElement("div");
   stageList.className = "town-center-stage-list";
   stageList.replaceChildren(
-    createTextElement("h3", "", "Stages"),
-    ...TOWN_CENTER_STAGES.map((stage) => {
+    createTextElement("h3", "", "Village Growth"),
+    ...getVisibleTownCenterStages().map((stage) => {
       const stageCard = document.createElement("article");
       const unlocked = coins >= stage.coins;
-      const isNext = next?.id === stage.id;
+      const isCurrent = current.id === stage.id;
       stageCard.className = "town-center-stage-card";
       stageCard.classList.toggle("unlocked", unlocked);
-      stageCard.classList.toggle("next", isNext);
+      stageCard.classList.toggle("current", isCurrent);
       stageCard.replaceChildren(
-        createTextElement("span", "reward-summary", getTownCenterStageStatus(stage, coins, next)),
-        createTextElement("strong", "", `${getTownCenterStageMarker(stage, coins, next)} ${stage.title}`),
+        createTextElement("span", "reward-summary", getTownCenterStageStatus(stage, coins, current)),
+        createTextElement("strong", "", `Stage ${stage.stage}: ${stage.title}`),
         createTextElement("p", "", stage.description)
       );
       return stageCard;
     })
   );
-  section.replaceChildren(currentCard, nextCard, progressBlock, stageList);
+  section.replaceChildren(hero, progressBlock, stageList);
   return section;
 }
 
-function getTownCenterStageMarker(stage, coins, next) {
-  if (coins >= stage.coins) return "✓";
-  if (next?.id === stage.id) return "⏳";
-  return "🔒";
+function createTownCenterDetail(label, value) {
+  const wrapper = document.createElement("span");
+  wrapper.replaceChildren(
+    createTextElement("small", "", label),
+    createTextElement("strong", "", value)
+  );
+  return wrapper;
 }
 
-function getTownCenterStageStatus(stage, coins, next) {
-  if (coins >= stage.coins) return `Unlocked · ${stage.coins} Shared Village Coins`;
-  if (next?.id === stage.id) return `Next · ${stage.coins} Shared Village Coins`;
-  return `${stage.coins} Shared Village Coins`;
+function getVisibleTownCenterStages() {
+  return TOWN_CENTER_STAGES.filter((stage) => stage.stage <= 5);
+}
+
+function getTownCenterStageStatus(stage, coins, current) {
+  if (current?.id === stage.id) return "Current";
+  if (coins >= stage.coins) return "✓ Unlocked";
+  return "🔒 Locked";
 }
 
 function createTownCenterSection(progress, sharedCoins) {
@@ -2786,9 +2788,17 @@ function bindEvents() {
   els.profileLoginForm.addEventListener("submit", handleProfileLogin);
 
   els.appShell.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-dashboard-action]");
-    if (!button) return;
-    handleDashboardAction(button.dataset.dashboardAction);
+    const actionTarget = event.target.closest("[data-dashboard-action]");
+    if (!actionTarget) return;
+    handleDashboardAction(actionTarget.dataset.dashboardAction);
+  });
+
+  els.appShell.addEventListener("keydown", (event) => {
+    if (!["Enter", " "].includes(event.key)) return;
+    const actionTarget = event.target.closest('[role="button"][data-dashboard-action]');
+    if (!actionTarget) return;
+    event.preventDefault();
+    handleDashboardAction(actionTarget.dataset.dashboardAction);
   });
 
   els.coinChallengesScreen.addEventListener("click", (event) => {
