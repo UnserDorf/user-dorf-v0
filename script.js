@@ -24,169 +24,81 @@ const ACHIEVEMENTS = [
     id: "first-correct-answer",
     icon: "✅",
     name: "First Correct Answer",
-    description: "Answer any quiz question correctly.",
-    reward: 5,
+    description: "Answer your first question correctly.",
+    reward: 0,
     scope: "profile",
     metric: "correctAnswers",
     target: 1
   },
   {
+    id: "one-hundred-correct-answers",
+    icon: "✅",
+    name: "100 Correct Answers",
+    description: "Reach 100 correct answers.",
+    reward: 0,
+    scope: "profile",
+    metric: "totalCorrectAnswers",
+    target: 100
+  },
+  {
     id: "first-100-coins",
     icon: "🪙",
     name: "First 100 Coins",
-    description: "Reach 100 total coins.",
-    reward: 10,
-    scope: "profile",
-    metric: "coins",
-    target: 100
-  },
-  {
-    id: "five-hundred-coins",
-    icon: "💰",
-    name: "500 Coins",
-    description: "Reach 500 total coins.",
+    description: "Earn your first 100 coins.",
     reward: 0,
     scope: "profile",
     metric: "coins",
-    target: 500
-  },
-  {
-    id: "one-thousand-coins",
-    icon: "🏦",
-    name: "1000 Coins",
-    description: "Reach 1000 total coins.",
-    reward: 0,
-    scope: "profile",
-    metric: "coins",
-    target: 1000
-  },
-  {
-    id: "ten-day-streak",
-    icon: "🔥",
-    name: "10-Day Streak",
-    description: "Reach a 10-day streak.",
-    reward: 25,
-    scope: "profile",
-    metric: "streak",
-    target: 10
-  },
-  {
-    id: "thirty-day-streak",
-    icon: "🔥",
-    name: "30-Day Streak",
-    description: "Reach a 30-day streak.",
-    reward: 0,
-    scope: "profile",
-    metric: "streak",
-    target: 30
-  },
-  {
-    id: "hundred-day-streak",
-    icon: "🔥",
-    name: "100-Day Streak",
-    description: "Reach a 100-day streak.",
-    reward: 0,
-    scope: "profile",
-    metric: "streak",
     target: 100
   },
   {
-    id: "ten-articles-mastered",
-    icon: "🏷",
-    name: "10 Articles Mastered",
-    description: "Master 10 article nouns.",
-    reward: 0,
-    scope: "profile",
-    metric: "articlesMastered",
-    target: 10
-  },
-  {
-    id: "hundred-articles-mastered",
-    icon: "🏷",
-    name: "100 Articles Mastered",
-    description: "Master 100 article nouns.",
-    reward: 25,
-    scope: "profile",
-    metric: "articlesMastered",
-    target: 100
-  },
-  {
-    id: "five-hundred-articles-mastered",
-    icon: "🏷",
-    name: "500 Articles Mastered",
-    description: "Master 500 article nouns.",
-    reward: 0,
-    scope: "profile",
-    metric: "articlesMastered",
-    target: 500
-  },
-  {
-    id: "family-home",
-    icon: "🏠",
-    name: "Village Home",
-    description: "Reach 500 shared village coins together.",
-    reward: 0,
-    scope: "family",
-    metric: "familyCoins",
-    target: 500
-  },
-  {
-    id: "family-1000-coins",
-    icon: "🚗",
-    name: "Village Path",
-    description: "Reach 1000 shared village coins together.",
-    reward: 0,
-    scope: "family",
-    metric: "familyCoins",
-    target: 1000
-  },
-  {
-    id: "family-business",
-    icon: "🏦",
-    name: "Village Workshop",
-    description: "Reach 2000 shared village coins together.",
-    reward: 0,
-    scope: "family",
-    metric: "familyCoins",
-    target: 2000
-  },
-  {
-    id: "noun-verb-explorer",
-    icon: "🔗",
-    name: "Noun-Verb Explorer",
-    description: "Answer 20 Noun-Verb questions correctly.",
-    reward: 20,
-    scope: "profile",
-    metric: "nounVerbCorrect",
-    target: 20
-  },
-  {
-    id: "noun-verb-scholar",
-    icon: "🔗",
-    name: "Noun-Verb Scholar",
-    description: "Answer 100 Noun-Verb questions correctly.",
-    reward: 0,
-    scope: "profile",
-    metric: "nounVerbCorrect",
-    target: 100
-  },
-  {
-    id: "test-personal-achievement",
-    icon: "🏆",
-    name: "Test Personal Achievement",
-    description: "Temporary test badge for the current profile only.",
-    reward: 1,
-    scope: "profile",
-    testOnly: true
-  },
-  {
-    id: "test-family-achievement",
+    id: "first-village-upgrade",
     icon: "🏡",
-    name: "Test Family Achievement",
-    description: "Temporary test badge shared by the whole family.",
+    name: "First Village Upgrade",
+    description: "Help unlock the village's first upgrade.",
     reward: 0,
     scope: "family",
-    testOnly: true
+    metric: "familyCoins",
+    target: 200
+  },
+  {
+    id: "three-day-streak",
+    icon: "🔥",
+    name: "3-Day Streak",
+    description: "Study for 3 days in a row.",
+    reward: 0,
+    scope: "profile",
+    metric: "streak",
+    target: 3
+  },
+  {
+    id: "seven-day-streak",
+    icon: "🔥",
+    name: "7-Day Streak",
+    description: "Study for 7 days in a row.",
+    reward: 0,
+    scope: "profile",
+    metric: "streak",
+    target: 7
+  },
+  {
+    id: "first-austria-adventure",
+    icon: "🇦🇹",
+    name: "First Austria Adventure",
+    description: "Unlock your first Austria Album reward.",
+    reward: 0,
+    scope: "profile",
+    metric: "austriaAlbumRewards",
+    target: 1
+  },
+  {
+    id: "first-village-memory",
+    icon: "🎉",
+    name: "First Village Memory",
+    description: "Unlock your first Village Memory.",
+    reward: 0,
+    scope: "family",
+    metric: "villageMemories",
+    target: 1
   }
 ];
 const DAILY_CHALLENGES = [
@@ -2343,7 +2255,7 @@ function createAchievementBody(achievement, unlocked, progress) {
   const body = document.createElement("div");
   const rewardText = achievement.reward > 0
     ? `Reward: +${achievement.reward} coins`
-    : "Family achievement";
+    : "Learning milestone";
   const children = [
     createTextElement("strong", "", achievement.name),
     createTextElement("span", "", achievement.description),
@@ -2378,11 +2290,14 @@ function getAchievementProgress(achievement, profile = getCurrentProfile()) {
 
 function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) {
   if (achievement.metric === "correctAnswers") return hasAnyCorrectQuizAnswer(profile) ? 1 : 0;
+  if (achievement.metric === "totalCorrectAnswers") return getTotalCorrectAnswerCount(profile);
   if (achievement.metric === "coins") return normalizeCoinCount(profile?.coins);
   if (achievement.metric === "streak") return normalizeCounter(profile?.streak?.current);
   if (achievement.metric === "articlesMastered") return getArticleSummary().mastered;
   if (achievement.metric === "nounVerbCorrect") return getNounVerbCorrectAnswerCount(profile);
   if (achievement.metric === "familyCoins") return getFamilyCoinTotal(profileStore.profiles);
+  if (achievement.metric === "austriaAlbumRewards") return getAustriaAlbumUnlockedCount(profile, true);
+  if (achievement.metric === "villageMemories") return getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getFamilyCoinTotal(profileStore.profiles)).length;
   return 0;
 }
 
@@ -3860,6 +3775,21 @@ function getNounVerbCorrectAnswerCount(profile) {
   }, 0);
 }
 
+function getTotalCorrectAnswerCount(profile) {
+  if (!profile) return 0;
+  return [
+    profile.articleProgress,
+    profile.vocabularyProgress,
+    profile.nounVerbProgress,
+    profile.meaningMatchProgress,
+    profile.prepositionProgress
+  ].reduce((total, progress) => {
+    return total + Object.values(progress || {}).reduce((progressTotal, entry) => {
+      return progressTotal + normalizeCounter(entry.articleCorrectCount ?? entry.correctCount);
+    }, 0);
+  }, 0);
+}
+
 function unlockAchievement(achievement, profile, reason = "") {
   if (achievement.scope === "family") {
     profileStore.familyAchievementsUnlocked.push(achievement.id);
@@ -3879,13 +3809,13 @@ function unlockAchievement(achievement, profile, reason = "") {
 
 function showAchievementCelebration(achievement) {
   els.levelCelebrationTitle.textContent = "🎉 Achievement Unlocked!";
-  els.levelCelebrationProfile.textContent = achievement.scope === "family" ? "Family achievement:" : "Achievement:";
+  els.levelCelebrationProfile.textContent = achievement.scope === "family" ? "Shared achievement:" : "Achievement:";
   els.levelCelebrationLevel.textContent = `${achievement.icon} ${achievement.name}`;
   if (achievement.reward > 0) {
     els.levelCelebrationBonus.textContent = `+${achievement.reward} Bonus ${achievement.reward === 1 ? "Coin" : "Coins"}`;
     els.levelCelebrationBonus.classList.remove("hidden");
   } else {
-    els.levelCelebrationBonus.textContent = "Celebration only";
+    els.levelCelebrationBonus.textContent = "Learning milestone";
     els.levelCelebrationBonus.classList.remove("hidden");
   }
   hideRewardCelebrationActions();
