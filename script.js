@@ -1701,8 +1701,7 @@ function renderDashboard() {
 
 function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
   if (!profile) return;
-  const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
-  const unlockedCurrentAustriaIds = getUnlockedCurrentRewardIds(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
+  const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.austriaAlbumPreview) {
@@ -1883,8 +1882,7 @@ function renderRewardsPage(page = "austria-album") {
   const profile = getCurrentProfile();
   if (!profile) return;
   const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
-  const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
-  const unlockedCurrentAustriaIds = getUnlockedCurrentRewardIds(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
+  const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (page === "town-center") {
@@ -1926,15 +1924,21 @@ function getUnlockedRewards(rewards, coins) {
 }
 
 function getAustriaAlbumUnlockedRewardIds(profile, backfillFromCoins = false) {
-  const unlockedIds = new Set(normalizeRewardIdList(profile?.austriaAlbumSeenRewards));
-  if (backfillFromCoins && profile) {
-    const personalCoins = normalizeCoinCount(profile.coins);
-    AUSTRIA_ALBUM_REWARDS.forEach((reward) => {
-      if (personalCoins >= reward.coins) unlockedIds.add(reward.id);
-    });
-    profile.austriaAlbumSeenRewards = Array.from(unlockedIds);
-  }
-  return Array.from(unlockedIds);
+  const unlockedCount = getAustriaAlbumUnlockedCount(profile, backfillFromCoins);
+  const sequentialIds = AUSTRIA_ALBUM_REWARDS
+    .slice(0, unlockedCount)
+    .map((reward) => reward.id);
+  if (backfillFromCoins && profile) profile.austriaAlbumSeenRewards = sequentialIds;
+  return sequentialIds;
+}
+
+function getAustriaAlbumUnlockedCount(profile, includeCoinProgress = false) {
+  if (!profile) return 0;
+  const savedCount = Math.min(normalizeRewardIdList(profile.austriaAlbumSeenRewards).length, AUSTRIA_ALBUM_REWARDS.length);
+  if (!includeCoinProgress) return savedCount;
+  const personalCoins = normalizeCoinCount(profile.coins);
+  const coinProgressCount = AUSTRIA_ALBUM_REWARDS.filter((reward) => personalCoins >= reward.coins).length;
+  return Math.min(Math.max(savedCount, coinProgressCount), AUSTRIA_ALBUM_REWARDS.length);
 }
 
 function getTownCenterProgress(sharedCoins) {
@@ -3665,13 +3669,17 @@ function checkRewardUnlocks(profile) {
   if (!profile) return;
   profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
   profileStore.villageAlbumSeenRewards = normalizeRewardIdList(profileStore.villageAlbumSeenRewards);
-  const personalCoins = normalizeCoinCount(profile.coins);
   const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
-  const newPersonalReward = AUSTRIA_ALBUM_REWARDS.find((reward) => {
-    return personalCoins >= reward.coins && !profile.austriaAlbumSeenRewards.includes(reward.id);
-  });
+  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, false);
+  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, true);
+  const sequentialPersonalRewardIds = AUSTRIA_ALBUM_REWARDS
+    .slice(0, earnedPersonalRewardCount)
+    .map((reward) => reward.id);
+  const newPersonalReward = earnedPersonalRewardCount > previousPersonalRewardCount
+    ? AUSTRIA_ALBUM_REWARDS[previousPersonalRewardCount]
+    : null;
+  profile.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
   if (newPersonalReward) {
-    profile.austriaAlbumSeenRewards.push(newPersonalReward.id);
     showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
     return;
   }
