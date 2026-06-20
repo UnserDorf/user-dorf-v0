@@ -1749,10 +1749,12 @@ h1 {
   display: none;
 }
 
+.austria-album-card.unlocked,
 .village-memory-card.unlocked {
   cursor: pointer;
 }
 
+.austria-album-card.unlocked:focus-visible,
 .village-memory-card.unlocked:focus-visible {
   outline: 3px solid rgba(71, 115, 91, 0.34);
   outline-offset: 3px;

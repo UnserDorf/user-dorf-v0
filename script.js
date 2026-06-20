@@ -266,9 +266,9 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const AUSTRIA_ALBUM_REWARDS = [
-  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "🏰", description: "Explore the palace gardens and fountains." },
-  { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "🚂", description: "Take a learning journey by train." },
+  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
+  { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "assets/train-adventure.png", icon: "🚂", description: "Take a learning journey by train." },
   { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Salzburg", image: "⛰", description: "Explore Salzburg's old town and fortress." },
   { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Hallstatt", image: "🏞", description: "Discover the beautiful lakeside village." },
   { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "🌳", description: "Enjoy nature and fresh air in the Vienna Woods." },
@@ -477,6 +477,7 @@ const els = {
   memoryDetailModal: document.querySelector("#memoryDetailModal"),
   memoryDetailClose: document.querySelector("#memoryDetailClose"),
   memoryDetailImage: document.querySelector("#memoryDetailImage"),
+  memoryDetailSource: document.querySelector("#memoryDetailSource"),
   memoryDetailTitle: document.querySelector("#memoryDetailTitle"),
   memoryDetailDescription: document.querySelector("#memoryDetailDescription"),
   controlPanel: document.querySelector("#controlPanel"),
@@ -1910,7 +1911,7 @@ function renderRewardsPage(page = "austria-album") {
     createRewardSection(
       "My Austria Album",
       `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
-      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, unlockedCurrentAustriaIds.includes(reward.id), `${reward.coins} Coins`))
+      AUSTRIA_ALBUM_REWARDS.map((reward) => createAustriaAlbumCard(reward, unlockedCurrentAustriaIds.includes(reward.id)))
     )
   );
 }
@@ -2020,6 +2021,22 @@ function createRewardCard(reward, unlocked, requirementText) {
   return card;
 }
 
+function createAustriaAlbumCard(reward, unlocked) {
+  const card = createRewardCard(reward, unlocked, `${reward.coins} Coins`);
+  card.classList.add("austria-album-card");
+  if (!unlocked) return card;
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-label", `Open ${reward.title}`);
+  card.addEventListener("click", () => showRewardDetail(reward, "My Austria Album", "← Back to Album"));
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    showRewardDetail(reward, "My Austria Album", "← Back to Album");
+  });
+  return card;
+}
+
 function createVillageMemoryCard(reward, unlocked) {
   const card = createRewardCard(reward, unlocked, `${reward.coins} Shared Village Coins`);
   card.classList.add("village-memory-card");
@@ -2027,11 +2044,11 @@ function createVillageMemoryCard(reward, unlocked) {
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `Open ${reward.title}`);
-  card.addEventListener("click", () => showVillageMemoryDetail(reward));
+  card.addEventListener("click", () => showRewardDetail(reward, "Village Memories", "← Back to Memories"));
   card.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    showVillageMemoryDetail(reward);
+    showRewardDetail(reward, "Village Memories", "← Back to Memories");
   });
   return card;
 }
@@ -2058,19 +2075,21 @@ function isImagePath(value) {
   return typeof value === "string" && /\.(png|jpe?g|webp|gif)$/i.test(value);
 }
 
-function showVillageMemoryDetail(reward) {
+function showRewardDetail(reward, source = "Village Memories", closeText = "← Back") {
   if (!reward || !els.memoryDetailModal) return;
+  els.memoryDetailClose.textContent = closeText;
+  els.memoryDetailSource.textContent = source;
   els.memoryDetailTitle.textContent = reward.title;
   els.memoryDetailDescription.textContent = reward.description;
-  els.memoryDetailImage.replaceChildren(createVillageMemoryDetailImage(reward));
+  els.memoryDetailImage.replaceChildren(createRewardDetailImage(reward));
   els.memoryDetailModal.classList.remove("hidden");
 }
 
-function hideVillageMemoryDetail() {
+function hideRewardDetail() {
   els.memoryDetailModal?.classList.add("hidden");
 }
 
-function createVillageMemoryDetailImage(reward) {
+function createRewardDetailImage(reward) {
   if (!isImagePath(reward.image)) return createTextElement("span", "memory-detail-placeholder", reward.icon || "Memory");
   const image = document.createElement("img");
   image.src = reward.image;
@@ -3127,12 +3146,12 @@ function bindEvents() {
     showAchievementCollection(page);
   });
 
-  els.memoryDetailClose?.addEventListener("click", hideVillageMemoryDetail);
+  els.memoryDetailClose?.addEventListener("click", hideRewardDetail);
   els.memoryDetailModal?.addEventListener("click", (event) => {
-    if (event.target === els.memoryDetailModal) hideVillageMemoryDetail();
+    if (event.target === els.memoryDetailModal) hideRewardDetail();
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") hideVillageMemoryDetail();
+    if (event.key === "Escape") hideRewardDetail();
   });
 }
 
