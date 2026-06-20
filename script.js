@@ -267,34 +267,29 @@ const FAMILY_WEALTH_LEVELS = [
 ];
 const AUSTRIA_ALBUM_REWARDS = [
   { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "schoenbrunn-palace", coins: 50, title: "Schönbrunn Gardens", category: "Vienna", image: "🏰", description: "Walk through the gardens at Schönbrunn." },
+  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "🏰", description: "Explore the palace gardens and fountains." },
   { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "🚂", description: "Take a learning journey by train." },
-  { id: "hallstatt", coins: 100, title: "Hallstatt Discovery", category: "Austria Trips", image: "🏞", description: "Discover a lakeside village surrounded by mountains." },
-  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Austria Trips", image: "⛰", description: "Travel to a city known for music and mountains." },
-  { id: "vienna-woods", coins: 150, title: "Vienna Woods Walk", category: "Nature", image: "🌳", description: "Take a quiet walk through Vienna's nearby woods." },
-  { id: "tiergarten-schoenbrunn", coins: 175, title: "Zoo Visit", category: "Vienna", image: "🦁", description: "Visit a favorite family place in Vienna." },
-  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Transport", image: "🚋", description: "Ride through the city and notice Vienna from the street." },
-  { id: "danube-river", coins: 225, title: "Danube Picnic", category: "Nature", image: "🌊", description: "Enjoy a simple picnic near the Danube." },
-  { id: "austrian-alps", coins: 250, title: "Alpine Day", category: "Austria Trips", image: "🏔", description: "Take in Austria's mountain landscapes." }
+  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Salzburg", image: "⛰", description: "Explore Salzburg's old town and fortress." },
+  { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Hallstatt", image: "🏞", description: "Discover the beautiful lakeside village." },
+  { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "🌳", description: "Enjoy nature and fresh air in the Vienna Woods." },
+  { id: "tiergarten-schoenbrunn", coins: 175, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "🦁", description: "Visit Austria's famous zoo." },
+  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Vienna", image: "🚋", description: "Ride Vienna's historic trams." },
+  { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Vienna", image: "🌊", description: "Relax beside the Danube." },
+  { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austria", image: "🏔", description: "Enjoy breathtaking mountain views." }
 ];
 const TOWN_CENTER_STAGES = [
   { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Open Village Green", description: "The village has a shared green space ready to grow." },
-  { id: "flowers", coins: 100, stage: 2, icon: "🌷", title: "Flower Beds", description: "Flower beds bring color to the shared green." },
-  { id: "bench", coins: 250, stage: 3, icon: "🪑", title: "Village Bench", description: "A bench gives the village a simple place to pause." },
-  { id: "fountain", coins: 500, stage: 4, icon: "⛲", title: "Fountain", description: "A fountain makes the town center feel more alive." },
+  { id: "flowers", coins: 200, stage: 2, icon: "🌷", title: "Flower Beds", description: "Flower beds bring color to the shared green." },
+  { id: "bench", coins: 400, stage: 3, icon: "🪑", title: "Village Bench", description: "A bench gives the village a simple place to pause." },
+  { id: "fountain", coins: 700, stage: 4, icon: "⛲", title: "Fountain", description: "A fountain makes the town center feel more alive." },
   { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: "saturday-market", coins: 200, title: "Saturday Market", image: "assets/village-memory-1.png", icon: "🧺", description: "A shared morning at the village market." },
-  { id: "community-picnic", coins: 400, title: "Community Picnic", image: "assets/village-memory-2.png", icon: "🥪", description: "A simple picnic earned through shared learning." },
-  { id: "music-day", coins: 700, title: "Music Day", image: "assets/village-memory-3.png", icon: "🎶", description: "A day when the village fills with music." },
-  { id: "village-carnival", coins: 1000, title: "Village Carnival", image: "assets/village-memory-4.png", icon: "🎡", description: "A cheerful event for the whole village." },
-  { id: "lantern-evening", coins: 1500, title: "Lantern Evening", image: "assets/village-memory-5.png", icon: "🏮", description: "A warm evening memory shared together." },
-  { id: "art-fair", coins: 2000, title: "Art Fair", image: "assets/village-memory-6.png", icon: "🎨", description: "A creative village event." },
-  { id: "reading-day", coins: 2750, title: "Reading Day", image: "assets/village-memory-7.png", icon: "📚", description: "A shared celebration of stories and learning." },
-  { id: "village-performance", coins: 3500, title: "Village Performance", image: "assets/village-memory-8.png", icon: "🎭", description: "A performance created by the village." },
-  { id: "harvest-celebration", coins: 4250, title: "Harvest Celebration", image: "assets/village-memory-9.png", icon: "🌻", description: "A seasonal celebration of shared progress." },
-  { id: "grand-village-festival", coins: 5000, title: "Grand Village Festival", image: "assets/village-memory-10.png", icon: "🎉", description: "A major village event unlocked together." }
+  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/village-memory-1.png", icon: "🧺", description: "A shared morning at the village market." },
+  { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/village-memory-2.png", icon: "🥪", description: "A simple picnic earned through shared learning." },
+  { id: "music-day", coins: 500, title: "Music Day", image: "assets/village-memory-3.png", icon: "🎶", description: "A day when the village fills with music." },
+  { id: "village-carnival", coins: 850, title: "Village Carnival", image: "assets/village-memory-4.png", icon: "🎡", description: "A cheerful event for the whole village." },
+  { id: "lantern-evening", coins: 1250, title: "Lantern Evening", image: "assets/village-memory-5.png", icon: "🏮", description: "A warm evening memory shared together." }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
