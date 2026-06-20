@@ -1474,6 +1474,42 @@ h1 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.town-center-stage-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+}
+
+.town-center-stage-list h3 {
+  margin: 0;
+}
+
+.town-center-stage-card {
+  border: 1px solid rgba(222, 216, 203, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.76);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.town-center-stage-card.unlocked {
+  border-color: rgba(36, 122, 85, 0.35);
+  background: rgba(230, 244, 234, 0.7);
+}
+
+.town-center-stage-card strong,
+.town-center-stage-card p {
+  margin: 0;
+}
+
+.town-center-stage-card p {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.28;
+}
+
 .town-center-section h3,
 .town-center-section > .reward-summary {
   grid-column: 1 / -1;

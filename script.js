@@ -1926,7 +1926,24 @@ function createTownCenterPage(progress, sharedCoins) {
     createTextElement("strong", "", next ? next.title : "All stages unlocked"),
     createTextElement("p", "", next ? `Coins Remaining: ${coinsRemaining}` : "Coins Remaining: 0")
   );
-  section.replaceChildren(currentCard, nextCard);
+  const stageList = document.createElement("div");
+  stageList.className = "town-center-stage-list";
+  stageList.replaceChildren(
+    createTextElement("h3", "", "Stages"),
+    ...TOWN_CENTER_STAGES.map((stage) => {
+      const stageCard = document.createElement("article");
+      const unlocked = sharedCoins >= stage.coins;
+      stageCard.className = "town-center-stage-card";
+      stageCard.classList.toggle("unlocked", unlocked);
+      stageCard.replaceChildren(
+        createTextElement("span", "reward-summary", unlocked ? "Unlocked" : `${stage.coins} Shared Village Coins`),
+        createTextElement("strong", "", `Stage ${stage.stage} - ${stage.title}`),
+        createTextElement("p", "", stage.description)
+      );
+      return stageCard;
+    })
+  );
+  section.replaceChildren(currentCard, nextCard, stageList);
   return section;
 }
 
@@ -2643,13 +2660,7 @@ function bindEvents() {
   els.cancelProfileLogin.addEventListener("click", showProfileChooser);
   els.profileLoginForm.addEventListener("submit", handleProfileLogin);
 
-  els.dashboardScreen.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-dashboard-action]");
-    if (!button) return;
-    handleDashboardAction(button.dataset.dashboardAction);
-  });
-
-  els.achievementCollectionScreen.addEventListener("click", (event) => {
+  els.appShell.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-dashboard-action]");
     if (!button) return;
     handleDashboardAction(button.dataset.dashboardAction);
@@ -2883,7 +2894,7 @@ function bindEvents() {
     els.levelCelebration.classList.add("hidden");
   });
 
-  els.levelCelebrationViewAlbum.addEventListener("click", () => {
+  els.levelCelebrationViewAlbum?.addEventListener("click", () => {
     const page = els.levelCelebrationViewAlbum.dataset.rewardPage || "austria-album";
     els.levelCelebration.classList.add("hidden");
     showAchievementCollection(page);
