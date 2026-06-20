@@ -1390,15 +1390,22 @@ h1 {
 
 .reward-preview-card {
   min-width: 0;
-  min-height: 136px;
+  min-height: 178px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.9);
   box-shadow: var(--shadow);
   padding: clamp(14px, 2.2vw, 20px);
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   align-content: space-between;
   gap: 14px;
+}
+
+.reward-preview-card > div {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
 }
 
 .reward-preview-card h4,
@@ -1418,18 +1425,45 @@ h1 {
   font-size: 0.9rem;
   font-weight: 780;
   line-height: 1.25;
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
 }
 
 .reward-preview-card p span,
-.reward-preview-card p strong {
+.reward-preview-card p strong,
+.reward-preview-metric,
+.reward-preview-latest {
   display: block;
 }
 
-.reward-preview-card p strong {
+.reward-preview-card p strong,
+.reward-preview-metric strong,
+.reward-preview-latest strong {
   margin: 2px 0 5px;
   color: var(--ink);
   font-size: 1rem;
   font-weight: 900;
+}
+
+.reward-preview-count {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.reward-preview-latest {
+  margin-top: auto;
+}
+
+.reward-preview-latest > span,
+.reward-preview-metric > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.reward-preview-latest strong {
+  margin-bottom: 0;
 }
 
 .rewards-grid {

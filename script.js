@@ -1709,19 +1709,55 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFa
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.austriaAlbumPreview) {
-    els.austriaAlbumPreview.textContent = `${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`;
+    const latestAustriaReward = getLatestRewardById(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
+    els.austriaAlbumPreview.replaceChildren(
+      createTextElement("span", "reward-preview-count", `${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`),
+      createRewardPreviewLatest(latestAustriaReward ? getRewardDisplayName(latestAustriaReward) : "None Yet")
+    );
   }
   if (els.townCenterPreview) {
     els.townCenterPreview.replaceChildren(
-      createTextElement("span", "", "Current Stage:"),
-      createTextElement("strong", "", getTownCenterStageName(townCenter.current)),
-      createTextElement("span", "", `Village Coins: ${sharedCoins}`),
-      createTextElement("span", "", `Next: ${townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked"}`)
+      createRewardPreviewMetric("Current Stage:", getTownCenterStageName(townCenter.current)),
+      createRewardPreviewMetric("Village Coins:", sharedCoins),
+      createRewardPreviewMetric("Next:", townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked")
     );
   }
   if (els.villageAlbumPreview) {
-    els.villageAlbumPreview.textContent = `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`;
+    const latestVillageReward = unlockedVillage[unlockedVillage.length - 1] || null;
+    els.villageAlbumPreview.replaceChildren(
+      createTextElement("span", "reward-preview-count", `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
+      createRewardPreviewLatest(latestVillageReward ? getRewardDisplayName(latestVillageReward) : "None Yet")
+    );
   }
+}
+
+function getLatestRewardById(rewards, unlockedIds) {
+  const latestId = normalizeRewardIdList(unlockedIds).at(-1);
+  return rewards.find((reward) => reward.id === latestId) || null;
+}
+
+function getRewardDisplayName(reward) {
+  return `${reward.image} ${reward.title}`;
+}
+
+function createRewardPreviewLatest(value) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "reward-preview-latest";
+  wrapper.replaceChildren(
+    createTextElement("span", "", "Latest:"),
+    createTextElement("strong", "", value)
+  );
+  return wrapper;
+}
+
+function createRewardPreviewMetric(label, value) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "reward-preview-metric";
+  wrapper.replaceChildren(
+    createTextElement("span", "", label),
+    createTextElement("strong", "", value)
+  );
+  return wrapper;
 }
 
 function renderSettingsPanel() {
