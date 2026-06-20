@@ -815,7 +815,7 @@ function saveVillageName(value) {
 
 function renderVillageName() {
   const villageName = getVillageName();
-  if (els.dashboardVillageName) els.dashboardVillageName.textContent = villageName;
+  if (els.dashboardVillageName) els.dashboardVillageName.textContent = `🏡 ${villageName}`;
   if (els.challengeHubVillageName) els.challengeHubVillageName.textContent = villageName;
   if (els.settingsVillageName) els.settingsVillageName.textContent = villageName;
 }
@@ -1695,7 +1695,7 @@ function renderDashboard() {
   checkAchievements("dashboard");
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
-  els.dashboardWelcome.textContent = `Welcome, ${profile.name}`;
+  els.dashboardWelcome.textContent = `Welcome back, ${profile.name}`;
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;

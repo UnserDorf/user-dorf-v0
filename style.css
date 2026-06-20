@@ -678,20 +678,21 @@ h1 {
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.72);
-  padding: clamp(16px, 2.4vw, 22px);
+  padding: clamp(12px, 2vw, 18px);
 }
 
 .dashboard-heading h2 {
-  margin-top: 4px;
-  font-size: clamp(1.45rem, 3vw, 2rem);
+  margin-top: 2px;
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
   line-height: 1.12;
-  font-weight: 850;
+  font-weight: 900;
 }
 
 .dashboard-heading p {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--muted);
-  font-weight: 750;
+  font-size: 0.96rem;
+  font-weight: 760;
 }
 
 .reward-page-heading {
