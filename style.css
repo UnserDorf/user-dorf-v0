@@ -829,9 +829,9 @@ h1 {
 
 .coin-challenge-card {
   min-height: 260px;
-  border: 1px solid rgba(222, 216, 203, 0.92);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
-  background: rgba(255, 253, 248, 0.9);
+  background: rgba(255, 250, 241, 0.9);
   box-shadow: var(--shadow);
   padding: clamp(14px, 2.4vw, 20px);
   display: grid;
@@ -841,8 +841,10 @@ h1 {
 
 .coin-challenge-card h3 {
   margin: 0 0 6px;
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  line-height: 1.05;
+  color: var(--ink);
+  font-size: clamp(1.08rem, 2.1vw, 1.34rem);
+  font-weight: 900;
+  line-height: 1.12;
 }
 
 .coin-challenge-card p {
@@ -861,8 +863,9 @@ h1 {
 }
 
 .challenge-reward {
+  border: 1px solid rgba(190, 177, 153, 0.46);
   border-radius: 8px;
-  background: var(--amber-soft);
+  background: rgba(246, 241, 231, 0.78);
   padding: 10px 12px;
   display: grid;
   gap: 4px;
@@ -875,8 +878,9 @@ h1 {
 }
 
 .challenge-reward strong {
-  color: var(--ink);
-  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  color: var(--green);
+  font-size: clamp(1.05rem, 2.2vw, 1.28rem);
+  font-weight: 900;
 }
 
 .challenge-progress {
@@ -893,12 +897,12 @@ h1 {
 
 .stacked-progress {
   width: 100%;
-  height: 16px;
+  height: 14px;
   border-radius: 999px;
   overflow: hidden;
   display: flex;
-  background: #EDF2F7;
-  box-shadow: inset 0 0 0 1px rgba(58, 50, 42, 0.08);
+  background: rgba(222, 213, 196, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(55, 49, 36, 0.08);
 }
 
 .stacked-progress span {
@@ -909,24 +913,29 @@ h1 {
 }
 
 .stacked-progress .progress-new {
-  background: #EDF2F7;
+  background: rgba(222, 213, 196, 0.72);
 }
 
 .stacked-progress .progress-learned {
-  background: #83C5BE;
+  background: rgba(126, 157, 127, 0.66);
 }
 
 .stacked-progress .progress-mastered {
-  background: #006D77;
+  background: var(--green);
 }
 
 .coin-challenge-card button {
   min-height: 58px;
+  border-radius: 8px;
   margin-top: auto;
-  background: var(--violet);
+  background: var(--green);
   color: white;
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-size: clamp(0.95rem, 2vw, 1.08rem);
   font-weight: 900;
+}
+
+.coin-challenge-card button:hover {
+  filter: brightness(0.97);
 }
 
 .level-card,
