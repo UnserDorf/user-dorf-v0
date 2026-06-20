@@ -2020,6 +2020,11 @@ select,
   align-items: stretch;
 }
 
+.article-quiz-mode .study-stage {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .clean-quiz-mode .flashcard,
 .clean-quiz-mode .noun-verb-card {
   min-height: 0;
@@ -2035,10 +2040,10 @@ select,
 .challenge-back-button {
   justify-self: start;
   min-height: 42px;
-  border: 1px solid rgba(109, 74, 160, 0.22);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
-  background: var(--violet-soft);
-  color: var(--violet);
+  background: rgba(255, 253, 248, 0.7);
+  color: var(--green);
   padding: 0 14px;
   font-size: 0.98rem;
   font-weight: 850;
@@ -2057,7 +2062,11 @@ select,
   display: inline;
 }
 
-.clean-article-practice #cardMode,
+.article-quiz-mode #cardMode {
+  color: var(--green);
+}
+
+.clean-article-practice:not(.article-quiz-mode) #cardMode,
 .clean-quiz-mode .noun-verb-card .card-meta span:last-child {
   color: var(--violet);
   font-size: clamp(1.05rem, 2.4vw, 1.45rem);
@@ -2203,8 +2212,9 @@ select,
 }
 
 .article-quiz-options button {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: rgba(255, 250, 241, 0.94);
+  color: var(--green);
+  border-color: var(--card-border);
 }
 
 .noun-verb-options {
@@ -2256,7 +2266,13 @@ select,
 }
 
 .article-quiz-options button.selected {
-  background: var(--blue);
+  background: var(--green-soft);
+  color: var(--green);
+  border-color: rgba(85, 121, 83, 0.34);
+}
+
+.article-quiz-options button.selected.correct,
+.article-quiz-options button.selected.incorrect {
   color: white;
 }
 
@@ -2276,9 +2292,14 @@ select,
 }
 
 .article-quiz-card {
-  max-width: 760px;
+  max-width: 680px;
   margin: 0 auto;
-  grid-template-rows: auto auto minmax(180px, 1fr) auto auto auto;
+  height: auto;
+  min-height: min(650px, calc(100dvh - 120px));
+  padding: clamp(16px, 2.8vw, 28px);
+  gap: clamp(10px, 1.6vw, 16px);
+  grid-template-rows: auto auto minmax(116px, auto) auto auto auto;
+  overflow: visible;
 }
 
 .article-quiz-card .card-meta {
@@ -2288,51 +2309,51 @@ select,
 
 .article-quiz-card .question-area {
   align-self: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .article-quiz-card .eyebrow {
-  color: var(--violet);
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--green);
+  font-size: clamp(0.88rem, 1.8vw, 1.05rem);
 }
 
 .article-quiz-card #questionText {
-  font-size: clamp(3.7rem, 9vw, 6.4rem);
+  font-size: clamp(2.8rem, 7vw, 5rem);
 }
 
 .article-quiz-card .article-quiz {
-  width: min(100%, 620px);
+  width: min(100%, 560px);
   justify-self: center;
 }
 
 .article-quiz-card .article-quiz-options {
-  gap: 12px;
+  gap: 10px;
 }
 
 .article-quiz-card .article-quiz-options button {
-  min-height: 76px;
-  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  min-height: 62px;
+  font-size: clamp(1.2rem, 2.4vw, 1.55rem);
 }
 
 .article-quiz-result {
   max-width: 100%;
   min-width: 0;
   border-radius: 8px;
-  padding: clamp(14px, 2.4vw, 24px);
+  padding: clamp(10px, 1.8vw, 16px);
   text-align: center;
   font-weight: 900;
   line-height: 1.25;
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .quiz-result-label {
-  font-size: clamp(2.1rem, 6vw, 4.2rem);
+  font-size: clamp(1.35rem, 4vw, 2.6rem);
   line-height: 1;
 }
 
 .quiz-result-answer {
-  font-size: clamp(1.35rem, 3.4vw, 2.2rem);
+  font-size: clamp(1.05rem, 2.4vw, 1.55rem);
   overflow-wrap: anywhere;
 }
 
@@ -2360,11 +2381,11 @@ select,
 
 .article-quiz-next {
   width: min(100%, 360px);
-  min-height: 58px;
+  min-height: 50px;
   justify-self: center;
-  background: var(--violet);
+  background: var(--green);
   color: white;
-  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  font-size: clamp(1rem, 2vw, 1.12rem);
 }
 
 .answer {
@@ -2707,6 +2728,13 @@ select,
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
 
+  .app-shell.clean-quiz-mode.article-quiz-mode {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    grid-template-rows: auto auto auto;
+  }
+
   .study-stage {
     min-height: auto;
     overflow: visible;
@@ -2733,6 +2761,10 @@ select,
     overflow: hidden;
   }
 
+  .article-quiz-mode .study-stage {
+    overflow: visible;
+  }
+
   .flashcard {
     height: auto;
     min-height: 0;
@@ -2749,6 +2781,13 @@ select,
     padding: 16px 12px;
     gap: 10px;
     grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .article-quiz-mode .flashcard.article-quiz-card {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    grid-template-rows: auto auto auto auto auto auto;
   }
 
   .challenge-back-button {
@@ -2830,7 +2869,7 @@ select,
   }
 
   .article-quiz-card.quiz-result-visible #questionText {
-    font-size: clamp(2.4rem, 12vw, 4.2rem);
+    font-size: clamp(1.9rem, 9vw, 3rem);
   }
 
   .article-quiz-card.quiz-result-visible .question-area {
@@ -2843,8 +2882,8 @@ select,
   }
 
   .article-quiz-card .article-quiz-options button {
-    min-height: 60px;
-    font-size: 1.15rem;
+    min-height: 54px;
+    font-size: 1.08rem;
   }
 
   .profile-screen {
