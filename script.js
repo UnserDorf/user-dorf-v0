@@ -266,43 +266,35 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const AUSTRIA_ALBUM_REWARDS = [
-  { id: "schoenbrunn-palace", coins: 25, title: "Visit Schönbrunn Palace", category: "Vienna Landmarks", image: "🏰", description: "Explore one of Vienna's most famous landmarks." },
-  { id: "prater", coins: 50, title: "Ride the Giant Ferris Wheel", category: "Vienna Landmarks", image: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "stephansdom", coins: 100, title: "Explore Stephansdom", category: "Vienna Landmarks", image: "⛪", description: "Visit the landmark cathedral at the heart of Vienna." },
-  { id: "vienna-tram-ride", coins: 150, title: "Take a Vienna Tram Ride", category: "Transport", image: "🚋", description: "Ride through the city and notice Vienna from the street." },
-  { id: "tiergarten-schoenbrunn", coins: 200, title: "Visit Schönbrunn Zoo", category: "Vienna Landmarks", image: "🦒", description: "Spend time at one of Vienna's best-known family destinations." },
-  { id: "danube-river", coins: 250, title: "Picnic on Donauinsel", category: "Nature", image: "🧺", description: "Enjoy a simple picnic by the Danube." },
-  { id: "vienna-woods", coins: 300, title: "Walk in the Wienerwald", category: "Nature", image: "🌲", description: "Take a quiet walk through Vienna's nearby woods." },
-  { id: "natural-history-museum", coins: 350, title: "Visit the Natural History Museum", category: "Culture", image: "🦕", description: "Explore nature, science, and history in Vienna." },
-  { id: "belvedere", coins: 400, title: "See Art at Belvedere", category: "Culture", image: "🖼️", description: "Discover Austrian art in a historic palace setting." },
-  { id: "kunsthistorisches-museum", coins: 450, title: "Visit the Kunsthistorisches Museum", category: "Culture", image: "🏛️", description: "Explore one of Vienna's great art museums." },
-  { id: "classical-concert", coins: 500, title: "Attend a Classical Concert", category: "Culture", image: "🎻", description: "Experience Vienna's music tradition." },
-  { id: "vienna-state-opera", coins: 550, title: "Visit the Vienna State Opera", category: "Culture", image: "🎭", description: "Step into one of Vienna's most famous music houses." },
-  { id: "christmas-market", coins: 600, title: "Explore a Christmas Market", category: "Culture", image: "🎄", description: "Walk through a warm seasonal market in Vienna." },
-  { id: "danube-boat-ride", coins: 650, title: "Take a Boat Ride on the Danube", category: "Nature", image: "⛴️", description: "See the river from the water." },
-  { id: "austrian-parliament", coins: 700, title: "Visit the Austrian Parliament", category: "Vienna Landmarks", image: "🏛️", description: "Learn about one of Austria's important public buildings." },
-  { id: "salzburg", coins: 750, title: "Take a Train Trip to Salzburg", category: "Austria Trips", image: "🚆", description: "Travel by train to a city known for music and mountains." },
-  { id: "hallstatt", coins: 800, title: "Explore Hallstatt", category: "Austria Trips", image: "🏞️", description: "Visit a lakeside village surrounded by mountains." },
-  { id: "melk-abbey", coins: 850, title: "Visit Melk Abbey", category: "Austria Trips", image: "⛪", description: "See a historic abbey above the Danube." },
-  { id: "wachau", coins: 900, title: "Walk Through the Wachau Valley", category: "Austria Trips", image: "🍇", description: "Explore a scenic valley along the Danube." },
-  { id: "austrian-alps", coins: 950, title: "See the Austrian Alps", category: "Austria Trips", image: "⛰️", description: "Take in Austria's mountain landscapes." }
+  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "schoenbrunn-palace", coins: 50, title: "Schönbrunn Gardens", category: "Vienna", image: "🏰", description: "Walk through the gardens at Schönbrunn." },
+  { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "🚂", description: "Take a learning journey by train." },
+  { id: "hallstatt", coins: 100, title: "Hallstatt Discovery", category: "Austria Trips", image: "🏞", description: "Discover a lakeside village surrounded by mountains." },
+  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Austria Trips", image: "⛰", description: "Travel to a city known for music and mountains." },
+  { id: "vienna-woods", coins: 150, title: "Vienna Woods Walk", category: "Nature", image: "🌳", description: "Take a quiet walk through Vienna's nearby woods." },
+  { id: "tiergarten-schoenbrunn", coins: 175, title: "Zoo Visit", category: "Vienna", image: "🦁", description: "Visit a favorite family place in Vienna." },
+  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Transport", image: "🚋", description: "Ride through the city and notice Vienna from the street." },
+  { id: "danube-river", coins: 225, title: "Danube Picnic", category: "Nature", image: "🌊", description: "Enjoy a simple picnic near the Danube." },
+  { id: "austrian-alps", coins: 250, title: "Alpine Day", category: "Austria Trips", image: "🏔", description: "Take in Austria's mountain landscapes." }
 ];
 const TOWN_CENTER_STAGES = [
   { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Open Village Green", description: "The village has a shared green space ready to grow." },
   { id: "flowers", coins: 100, stage: 2, icon: "🌷", title: "Flower Beds", description: "Flower beds bring color to the shared green." },
   { id: "bench", coins: 250, stage: 3, icon: "🪑", title: "Village Bench", description: "A bench gives the village a simple place to pause." },
   { id: "fountain", coins: 500, stage: 4, icon: "⛲", title: "Fountain", description: "A fountain makes the town center feel more alive." },
-  { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Flower Arch", description: "A flower arch makes the Town Center feel welcoming." },
-  { id: "community-garden", coins: 2000, stage: 6, icon: "🌳", title: "Community Garden", description: "Shared learning helps something grow." },
-  { id: "market-stall", coins: 3500, stage: 7, icon: "☕", title: "Market Stall", description: "A small place for exchange and gathering." },
-  { id: "music-pavilion", coins: 5000, stage: 8, icon: "🎵", title: "Music Pavilion", description: "The town center becomes a place to celebrate." }
+  { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: "train-adventure", coins: 250, title: "Train Adventure", image: "TA", description: "A shared journey begins." },
-  { id: "vienna-transit-day", coins: 500, title: "Vienna Transit Day", image: "VT", description: "A day of moving through the city together." },
-  { id: "community-excursion", coins: 1000, title: "Community Excursion", image: "CE", description: "A shared outing for the whole village." },
-  { id: "wienerwald-outing", coins: 1500, title: "Wienerwald Outing", image: "WO", description: "A green escape near Vienna." },
-  { id: "alpine-adventure", coins: 2500, title: "Alpine Adventure", image: "AA", description: "A special shared mountain memory." }
+  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "🧺", description: "A shared morning at the village market." },
+  { id: "community-picnic", coins: 250, title: "Community Picnic", image: "🥪", description: "A simple picnic earned through shared learning." },
+  { id: "music-day", coins: 500, title: "Music Day", image: "🎶", description: "A day when the village fills with music." },
+  { id: "village-carnival", coins: 750, title: "Village Carnival", image: "🎡", description: "A cheerful event for the whole village." },
+  { id: "lantern-evening", coins: 1000, title: "Lantern Evening", image: "🏮", description: "A warm evening memory shared together." },
+  { id: "art-fair", coins: 1500, title: "Art Fair", image: "🎨", description: "A creative village event." },
+  { id: "reading-day", coins: 2000, title: "Reading Day", image: "📚", description: "A shared celebration of stories and learning." },
+  { id: "village-performance", coins: 3000, title: "Village Performance", image: "🎭", description: "A performance created by the village." },
+  { id: "harvest-celebration", coins: 4000, title: "Harvest Celebration", image: "🌻", description: "A seasonal celebration of shared progress." },
+  { id: "grand-village-festival", coins: 5000, title: "Grand Village Festival", image: "🎉", description: "A major village event unlocked together." }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
@@ -459,7 +451,7 @@ const els = {
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
   townCenterDashboardImageDebug: document.querySelector("#townCenterDashboardImageDebug"),
   townCenterDashboardStage: document.querySelector("#townCenterDashboardStage"),
-  townCenterDashboardNext: document.querySelector("#townCenterDashboardNext"),
+  townCenterDashboardStageCount: document.querySelector("#townCenterDashboardStageCount"),
   villageAlbumPreview: document.querySelector("#villageAlbumPreview"),
   householdList: document.querySelector("#householdList"),
   rewardPageTitle: document.querySelector("#rewardPageTitle"),
@@ -1709,12 +1701,13 @@ function renderDashboard() {
 function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
   if (!profile) return;
   const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
+  const unlockedCurrentAustriaIds = getUnlockedCurrentRewardIds(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.austriaAlbumPreview) {
-    const latestAustriaReward = getLatestRewardById(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
+    const latestAustriaReward = getLatestRewardById(AUSTRIA_ALBUM_REWARDS, unlockedCurrentAustriaIds);
     els.austriaAlbumPreview.replaceChildren(
-      createTextElement("span", "reward-preview-count", `${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`),
+      createTextElement("span", "reward-preview-count", `${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`),
       createRewardPreviewLatest(latestAustriaReward ? getRewardDisplayName(latestAustriaReward) : "None Yet")
     );
   }
@@ -1731,9 +1724,8 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFa
 function renderDashboardTownCenter(townCenter, sharedCoins) {
   if (!townCenter?.current) return;
   const stageName = getTownCenterStageName(townCenter.current);
-  const nextStageName = townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked";
   if (els.townCenterDashboardStage) els.townCenterDashboardStage.textContent = stageName;
-  if (els.townCenterDashboardNext) els.townCenterDashboardNext.textContent = nextStageName;
+  if (els.townCenterDashboardStageCount) els.townCenterDashboardStageCount.textContent = `Stage ${townCenter.current.stage} / ${TOWN_CENTER_STAGES.length}`;
   if (els.townCenterDashboardImage) {
     setTownCenterImage(els.townCenterDashboardImage, townCenter.current);
   }
@@ -1891,6 +1883,7 @@ function renderRewardsPage(page = "austria-album") {
   if (!profile) return;
   const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
   const unlockedAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
+  const unlockedCurrentAustriaIds = getUnlockedCurrentRewardIds(AUSTRIA_ALBUM_REWARDS, unlockedAustriaIds);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (page === "town-center") {
@@ -1900,11 +1893,11 @@ function renderRewardsPage(page = "austria-album") {
     return;
   }
   if (page === "village-album") {
-    els.rewardPageTitle.textContent = "Village Album";
+    els.rewardPageTitle.textContent = "Village Memories";
     els.rewardPageSummary.textContent = `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`;
     els.achievementsGrid.replaceChildren(
       createRewardSection(
-        "Village Album",
+        "Village Memories",
         `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
         VILLAGE_ALBUM_REWARDS.map((reward) => createRewardCard(reward, sharedCoins >= reward.coins, `${reward.coins} Shared Village Coins`))
       )
@@ -1912,14 +1905,19 @@ function renderRewardsPage(page = "austria-album") {
     return;
   }
   els.rewardPageTitle.textContent = "My Austria Album";
-  els.rewardPageSummary.textContent = `Unlocked: ${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
+  els.rewardPageSummary.textContent = `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
   els.achievementsGrid.replaceChildren(
     createRewardSection(
       "My Austria Album",
-      `Unlocked: ${unlockedAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
-      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, unlockedAustriaIds.includes(reward.id), `${reward.coins} Coins`))
+      `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
+      AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, unlockedCurrentAustriaIds.includes(reward.id), `${reward.coins} Coins`))
     )
   );
+}
+
+function getUnlockedCurrentRewardIds(rewards, unlockedIds) {
+  const currentIds = new Set(rewards.map((reward) => reward.id));
+  return normalizeRewardIdList(unlockedIds).filter((rewardId) => currentIds.has(rewardId));
 }
 
 function getUnlockedRewards(rewards, coins) {
@@ -3590,7 +3588,7 @@ function checkRewardUnlocks(profile) {
   });
   if (newVillageReward) {
     profileStore.villageAlbumSeenRewards.push(newVillageReward.id);
-    showRewardUnlockCelebration(newVillageReward, "Village Album");
+    showRewardUnlockCelebration(newVillageReward, "Village Memories");
   }
 }
 
@@ -3600,7 +3598,7 @@ function showRewardUnlockCelebration(reward, source) {
   els.levelCelebrationLevel.textContent = reward.title;
   els.levelCelebrationBonus.textContent = source;
   els.levelCelebrationBonus.classList.remove("hidden");
-  showRewardCelebrationActions(source === "Village Album" ? "village-album" : "austria-album", "View Album");
+  showRewardCelebrationActions(source === "Village Memories" ? "village-album" : "austria-album", source === "Village Memories" ? "View Memories" : "View Album");
   els.levelCelebration.classList.remove("hidden");
 }
 
