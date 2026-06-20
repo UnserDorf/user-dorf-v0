@@ -1445,6 +1445,7 @@ h1 {
 
 .reward-card,
 .town-center-card {
+  position: relative;
   min-width: 0;
   border: 1px solid rgba(222, 216, 203, 0.9);
   border-radius: 8px;
@@ -1455,12 +1456,29 @@ h1 {
 }
 
 .reward-card.locked {
-  opacity: 0.58;
+  opacity: 0.54;
+  background: rgba(244, 239, 229, 0.74);
+  box-shadow: none;
 }
 
 .reward-card.unlocked {
-  border-color: rgba(36, 122, 85, 0.35);
-  background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.94));
+  opacity: 1;
+  border-color: rgba(71, 115, 91, 0.42);
+  background: linear-gradient(135deg, rgba(230, 239, 229, 0.96), rgba(255, 250, 241, 0.98));
+  box-shadow: 0 12px 28px rgba(55, 49, 36, 0.08);
+}
+
+.reward-card.unlocked::after {
+  content: "Unlocked";
+  justify-self: start;
+  border: 1px solid rgba(71, 115, 91, 0.24);
+  border-radius: 999px;
+  background: rgba(230, 239, 229, 0.88);
+  color: var(--green);
+  padding: 4px 9px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0;
 }
 
 .reward-image-placeholder {
@@ -1475,11 +1493,32 @@ h1 {
   font-weight: 900;
 }
 
+.reward-card.locked .reward-image-placeholder {
+  background: rgba(222, 213, 196, 0.52);
+  color: var(--muted);
+  font-size: 1.55rem;
+}
+
+.reward-card.unlocked .reward-image-placeholder {
+  background: rgba(71, 115, 91, 0.12);
+  color: var(--green);
+  font-size: 0.96rem;
+}
+
 .reward-card strong,
 .town-center-card strong {
   color: var(--ink);
   font-size: 1rem;
   line-height: 1.1;
+}
+
+.reward-card.unlocked strong {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.reward-card.locked strong {
+  color: var(--muted);
 }
 
 .reward-card span:not(.reward-image-placeholder),
@@ -1488,6 +1527,10 @@ h1 {
   font-size: 0.86rem;
   font-weight: 750;
   line-height: 1.28;
+}
+
+.reward-card.locked span:not(.reward-image-placeholder) {
+  display: none;
 }
 
 .town-center-section {
