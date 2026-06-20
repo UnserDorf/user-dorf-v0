@@ -273,9 +273,9 @@ const AUSTRIA_ALBUM_REWARDS = [
   { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
   { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
   { id: "tiergarten-schoenbrunn", coins: 175, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
-  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Vienna", image: "🚋", description: "Ride Vienna's historic trams." },
-  { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Vienna", image: "🌊", description: "Relax beside the Danube." },
-  { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austria", image: "🏔", description: "Enjoy breathtaking mountain views." }
+  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Vienna", image: "assets/vienna-tram-ride.png", icon: "🚋", description: "Explore Vienna aboard its iconic red-and-white trams." },
+  { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Danube Region", image: "assets/danube-river.png", icon: "🌊", description: "Enjoy a relaxing summer day beside the Danube." },
+  { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austrian Alps", image: "assets/austrian-alps.png", icon: "🏔", description: "Discover breathtaking mountain landscapes and alpine trails." }
 ];
 const TOWN_CENTER_STAGES = [
   { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Open Village Green", description: "The village has a shared green space ready to grow." },
