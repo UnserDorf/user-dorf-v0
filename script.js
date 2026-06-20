@@ -285,11 +285,11 @@ const TOWN_CENTER_STAGES = [
   { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/village-memory-1.png", icon: "🧺", description: "A shared morning at the village market." },
-  { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/village-memory-2.png", icon: "🥪", description: "A simple picnic earned through shared learning." },
-  { id: "music-day", coins: 500, title: "Music Day", image: "assets/village-memory-3.png", icon: "🎶", description: "A day when the village fills with music." },
-  { id: "village-carnival", coins: 850, title: "Village Carnival", image: "assets/village-memory-4.png", icon: "🎡", description: "A cheerful event for the whole village." },
-  { id: "lantern-evening", coins: 1250, title: "Lantern Evening", image: "assets/village-memory-5.png", icon: "🏮", description: "A warm evening memory shared together." }
+  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
+  { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/community-picnic.png", icon: "🥪", description: "Families gather together for a picnic in the village square." },
+  { id: "music-day", coins: 500, title: "Music Day", image: "assets/music-day.png", icon: "🎶", description: "A small village music event brings everyone together." },
+  { id: "outdoor-movie", coins: 850, title: "Outdoor Movie Night", image: "assets/outdoor-movie.png", icon: "🎬", description: "The village enjoys a movie under the stars." },
+  { id: "village-carnival", coins: 1250, title: "Village Carnival", image: "assets/village-carnival.png", icon: "🎡", description: "The biggest celebration yet arrives in the village." }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
@@ -474,6 +474,11 @@ const els = {
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
   levelCelebrationViewAlbum: document.querySelector("#levelCelebrationViewAlbum"),
   levelCelebrationClose: document.querySelector("#levelCelebrationClose"),
+  memoryDetailModal: document.querySelector("#memoryDetailModal"),
+  memoryDetailClose: document.querySelector("#memoryDetailClose"),
+  memoryDetailImage: document.querySelector("#memoryDetailImage"),
+  memoryDetailTitle: document.querySelector("#memoryDetailTitle"),
+  memoryDetailDescription: document.querySelector("#memoryDetailDescription"),
   controlPanel: document.querySelector("#controlPanel"),
   searchPanel: document.querySelector("#searchPanel"),
   statsGrid: document.querySelector("#statsGrid"),
