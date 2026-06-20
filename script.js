@@ -266,14 +266,14 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const AUSTRIA_ALBUM_REWARDS = [
-  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
-  { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "assets/train-adventure.png", icon: "🚂", description: "Take a learning journey by train." },
-  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
-  { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
-  { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
-  { id: "tiergarten-schoenbrunn", coins: 175, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
   { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Vienna", image: "assets/vienna-tram-ride.png", icon: "🚋", description: "Explore Vienna aboard its iconic red-and-white trams." },
+  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
+  { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
+  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
+  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "tiergarten-schoenbrunn", coins: 175, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
+  { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
+  { id: "train-adventure", coins: 75, title: "Train Adventure", category: "Austria Trips", image: "assets/train-adventure.png", icon: "🚂", description: "Take a learning journey by train." },
   { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Danube Region", image: "assets/danube-river.png", icon: "🌊", description: "Enjoy a relaxing summer day beside the Danube." },
   { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austrian Alps", image: "assets/austrian-alps.png", icon: "🏔", description: "Discover breathtaking mountain landscapes and alpine trails." }
 ];
