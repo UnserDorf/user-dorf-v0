@@ -1312,7 +1312,7 @@ function showVillageNameSetup() {
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug.classList.add("hidden");
+  els.profileDebug?.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.createProfileForm.classList.add("hidden");
   els.villageNameForm.classList.remove("hidden");
@@ -1344,7 +1344,7 @@ function showProfileLogin(profileId) {
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug.classList.add("hidden");
+  els.profileDebug?.classList.add("hidden");
   els.villageNameForm.classList.add("hidden");
   els.createProfileForm.classList.add("hidden");
   els.profileLoginTitle.textContent = profile.name;
@@ -2651,7 +2651,7 @@ function renderProfileCards() {
     document.createTextNode(profileCards.length === 0 ? "Profil erstellen" : "Neues Profil erstellen"),
     createTextElement("span", "", profileCards.length === 0 ? "Create Profile" : "Create New Profile")
   );
-  els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
+  if (els.profileDebug) els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
 function getProfileList() {
@@ -2673,7 +2673,7 @@ function showProfileChooser() {
   els.profileSignInHeading.classList.toggle("hidden", !hasProfiles);
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
-  els.profileDebug.classList.add("hidden");
+  els.profileDebug?.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.profileLoginForm.reset();
   els.profileLoginError.classList.add("hidden");
@@ -2690,7 +2690,7 @@ function showCreateProfileScreen() {
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug.classList.add("hidden");
+  els.profileDebug?.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.villageNameForm.classList.add("hidden");
   els.createProfileForm.classList.remove("hidden");
@@ -3056,7 +3056,7 @@ function bindEvents() {
     renderSettingsPanel();
   });
 
-  els.resetLocalTestData.addEventListener("click", () => {
+  els.resetLocalTestData?.addEventListener("click", () => {
     closeSettingsMenu();
     const profile = getCurrentProfile();
     if (!profile) return;
@@ -4104,7 +4104,7 @@ function renderNounVerbQuiz() {
     nounVerbCurrentIndex = visibleNounVerbPairs.findIndex((item) => item.id === pair.id);
   }
   els.nounVerbTitle.textContent = "Noun-Verb Pairs";
-  els.vocabularyReviewDebug.classList.add("hidden");
+  els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the verb";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", nounVerbQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
@@ -4274,8 +4274,7 @@ function renderVocabularyReviewQuiz() {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
   els.nounVerbTitle.textContent = "Vocabulary Review";
-  els.vocabularyReviewDebug.classList.remove("hidden");
-  els.vocabularyReviewDebug.textContent = `Vocabulary Review Pool: ${cards.length} words · Recent Buffer: ${RECENT_VOCABULARY_WORD_BUFFER} words`;
+  els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the English meaning";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
@@ -4560,8 +4559,7 @@ function renderMeaningMatchQuiz() {
     meaningMatchCurrentIndex = visibleMeaningMatchPairs.findIndex((item) => item.id === pair.id);
   }
   els.nounVerbTitle.textContent = "Meaning Match";
-  els.vocabularyReviewDebug.classList.remove("hidden");
-  els.vocabularyReviewDebug.textContent = `Meaning Match Pool: ${meaningMatchItems.filter(isMeaningMatchEligiblePair).length} · Recent History: ${recentMeaningMatchItems.length} / ${MEANING_MATCH_RECENT_BUFFER}`;
+  els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the better German sentence";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", meaningMatchQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
@@ -5064,7 +5062,7 @@ function renderPrepositionQuiz() {
     prepositionCurrentIndex = visiblePrepositionItems.findIndex((entry) => entry.id === item.id);
   }
   els.nounVerbTitle.textContent = "Preposition Master";
-  els.vocabularyReviewDebug.classList.add("hidden");
+  els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the preposition";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", prepositionQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");

@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=110">
+    <link rel="stylesheet" href="style.css?v=111">
   </head>
   <body>
     <section class="lock-screen" id="lockScreen" aria-label="Password required">
@@ -84,7 +84,6 @@
             <span>Create New Profile</span>
           </button>
         </div>
-        <p class="profile-debug" id="profileDebug">Profiles loaded: 0</p>
         <form class="profile-login-card hidden" id="profileLoginForm" aria-label="Profile login">
           <div>
             <p class="eyebrow">Profile Login</p>
@@ -161,12 +160,6 @@
               <section class="settings-section" aria-label="Security settings">
                 <h3>Security</h3>
                 <button type="button" id="changeProfilePassword">Change Password</button>
-              </section>
-              <section class="settings-section" aria-label="Prototype testing tools">
-                <h3>Test / Developer Tools</h3>
-                <p>This is for prototype testing only.</p>
-                <p>Prototype version. Profiles are stored on this device.</p>
-                <button type="button" id="resetLocalTestData">Reset local test data</button>
               </section>
               <section class="settings-section" aria-label="Settings navigation">
                 <h3>Navigation</h3>
@@ -548,8 +541,6 @@
             <span id="nounVerbCounter">0 / 0</span>
             <span id="nounVerbTitle">Noun-Verb Pairs</span>
           </div>
-          <p class="quiz-debug-line hidden" id="vocabularyReviewDebug">Vocabulary Review Pool: 0 words · Recent Buffer: 100 words</p>
-
           <div class="question-area">
             <p class="eyebrow" id="nounVerbInstruction">Choose the verb</p>
             <h2 id="nounVerbPrompt">Loading</h2>
@@ -591,9 +582,8 @@
         </div>
       </div>
 
-      <p class="app-version">Unser Dorf v1.20</p>
     </main>
 
-    <script type="module" src="script.js?v=110"></script>
+    <script type="module" src="script.js?v=111"></script>
   </body>
 </html>

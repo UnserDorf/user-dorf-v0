@@ -288,14 +288,6 @@ body {
   transform: scale(0.99);
 }
 
-.profile-debug {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 800;
-  text-align: center;
-}
-
 .empty-profile-message {
   margin: 6px 0 0;
   color: var(--ink);
@@ -417,18 +409,6 @@ input:focus-visible {
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   gap: 12px;
-}
-
-.app-version {
-  position: fixed;
-  right: max(10px, env(safe-area-inset-right));
-  bottom: max(4px, env(safe-area-inset-bottom));
-  z-index: 5;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  pointer-events: none;
 }
 
 .topbar,
@@ -621,33 +601,6 @@ h1 {
 
 .settings-panel button:active {
   background: var(--violet-soft);
-}
-
-.achievement-debug-panel {
-  border-top: 1px solid var(--line);
-  margin-top: 4px;
-  padding: 10px;
-  display: grid;
-  gap: 7px;
-  color: var(--muted);
-  font-size: 0.76rem;
-  line-height: 1.25;
-  white-space: normal;
-}
-
-.achievement-debug-panel strong {
-  color: var(--ink);
-  font-size: 0.84rem;
-}
-
-.achievement-debug-panel p {
-  margin: 0;
-  font-weight: 750;
-}
-
-.achievement-debug-panel span {
-  color: var(--violet);
-  overflow-wrap: anywhere;
 }
 
 .control-panel {
@@ -2355,14 +2308,6 @@ select,
 .clean-quiz-mode .noun-verb-card .card-meta span:last-child {
   color: var(--green);
   font-size: clamp(0.98rem, 2vw, 1.2rem);
-}
-
-.quiz-debug-line {
-  margin: -4px 0 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-align: center;
 }
 
 .clean-quiz-mode .question-area {
