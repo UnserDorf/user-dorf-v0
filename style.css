@@ -1577,7 +1577,7 @@ h1 {
 .reward-card.unlocked .reward-image-placeholder {
   background: rgba(71, 115, 91, 0.12);
   color: var(--green);
-  font-size: 0.96rem;
+  font-size: 1.55rem;
 }
 
 .reward-card strong,
@@ -1602,6 +1602,12 @@ h1 {
   font-size: 0.86rem;
   font-weight: 750;
   line-height: 1.28;
+}
+
+.reward-card .reward-category {
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .reward-card.locked span:not(.reward-image-placeholder) {

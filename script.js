@@ -266,26 +266,26 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const AUSTRIA_ALBUM_REWARDS = [
-  { id: "schoenbrunn-palace", coins: 25, title: "Schönbrunn Palace", image: "SP", description: "A famous palace and garden in Vienna." },
-  { id: "prater", coins: 50, title: "Prater", image: "PR", description: "A classic Vienna park and amusement area." },
-  { id: "stephansdom", coins: 100, title: "Stephansdom", image: "ST", description: "Vienna's landmark cathedral in the city center." },
-  { id: "vienna-state-opera", coins: 150, title: "Vienna State Opera", image: "OP", description: "A historic home for music and performance." },
-  { id: "tiergarten-schoenbrunn", coins: 200, title: "Tiergarten Schönbrunn", image: "TG", description: "A well-known Vienna family destination." },
-  { id: "danube-river", coins: 250, title: "Danube River", image: "DR", description: "The river that flows through Vienna." },
-  { id: "salzburg", coins: 300, title: "Salzburg", image: "SZ", description: "A city known for music, history, and mountains." },
-  { id: "hallstatt", coins: 350, title: "Hallstatt", image: "HA", description: "A lakeside village in the Austrian mountains." },
-  { id: "austrian-alps", coins: 400, title: "Austrian Alps", image: "AL", description: "Mountain landscapes across Austria." },
-  { id: "kunsthistorisches-museum", coins: 450, title: "Kunsthistorisches Museum", image: "KM", description: "A major art museum in Vienna." },
-  { id: "belvedere", coins: 500, title: "Belvedere", image: "BV", description: "A palace museum with Austrian art." },
-  { id: "wachau", coins: 550, title: "Wachau", image: "WA", description: "A scenic Danube valley." },
-  { id: "innsbruck", coins: 600, title: "Innsbruck", image: "IB", description: "A city surrounded by alpine views." },
-  { id: "graz", coins: 650, title: "Graz", image: "GZ", description: "Austria's second-largest city." },
-  { id: "linz", coins: 700, title: "Linz", image: "LZ", description: "A Danube city with culture and technology." },
-  { id: "melk-abbey", coins: 750, title: "Melk Abbey", image: "MA", description: "A historic abbey above the Danube." },
-  { id: "vienna-city-hall", coins: 800, title: "Vienna City Hall", image: "VH", description: "A landmark public building in Vienna." },
-  { id: "austrian-national-library", coins: 850, title: "Austrian National Library", image: "NL", description: "A beautiful historic library." },
-  { id: "naschmarkt", coins: 900, title: "Naschmarkt", image: "NM", description: "A popular market in Vienna." },
-  { id: "vienna-woods", coins: 950, title: "Vienna Woods", image: "VW", description: "Green hills and paths near Vienna." }
+  { id: "schoenbrunn-palace", coins: 25, title: "Visit Schönbrunn Palace", category: "Vienna Landmarks", image: "🏰", description: "Explore one of Vienna's most famous landmarks." },
+  { id: "prater", coins: 50, title: "Ride the Giant Ferris Wheel", category: "Vienna Landmarks", image: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "stephansdom", coins: 100, title: "Explore Stephansdom", category: "Vienna Landmarks", image: "⛪", description: "Visit the landmark cathedral at the heart of Vienna." },
+  { id: "vienna-tram-ride", coins: 150, title: "Take a Vienna Tram Ride", category: "Transport", image: "🚋", description: "Ride through the city and notice Vienna from the street." },
+  { id: "tiergarten-schoenbrunn", coins: 200, title: "Visit Schönbrunn Zoo", category: "Vienna Landmarks", image: "🦒", description: "Spend time at one of Vienna's best-known family destinations." },
+  { id: "danube-river", coins: 250, title: "Picnic on Donauinsel", category: "Nature", image: "🧺", description: "Enjoy a simple picnic by the Danube." },
+  { id: "vienna-woods", coins: 300, title: "Walk in the Wienerwald", category: "Nature", image: "🌲", description: "Take a quiet walk through Vienna's nearby woods." },
+  { id: "natural-history-museum", coins: 350, title: "Visit the Natural History Museum", category: "Culture", image: "🦕", description: "Explore nature, science, and history in Vienna." },
+  { id: "belvedere", coins: 400, title: "See Art at Belvedere", category: "Culture", image: "🖼️", description: "Discover Austrian art in a historic palace setting." },
+  { id: "kunsthistorisches-museum", coins: 450, title: "Visit the Kunsthistorisches Museum", category: "Culture", image: "🏛️", description: "Explore one of Vienna's great art museums." },
+  { id: "classical-concert", coins: 500, title: "Attend a Classical Concert", category: "Culture", image: "🎻", description: "Experience Vienna's music tradition." },
+  { id: "vienna-state-opera", coins: 550, title: "Visit the Vienna State Opera", category: "Culture", image: "🎭", description: "Step into one of Vienna's most famous music houses." },
+  { id: "christmas-market", coins: 600, title: "Explore a Christmas Market", category: "Culture", image: "🎄", description: "Walk through a warm seasonal market in Vienna." },
+  { id: "danube-boat-ride", coins: 650, title: "Take a Boat Ride on the Danube", category: "Nature", image: "⛴️", description: "See the river from the water." },
+  { id: "austrian-parliament", coins: 700, title: "Visit the Austrian Parliament", category: "Vienna Landmarks", image: "🏛️", description: "Learn about one of Austria's important public buildings." },
+  { id: "salzburg", coins: 750, title: "Take a Train Trip to Salzburg", category: "Austria Trips", image: "🚆", description: "Travel by train to a city known for music and mountains." },
+  { id: "hallstatt", coins: 800, title: "Explore Hallstatt", category: "Austria Trips", image: "🏞️", description: "Visit a lakeside village surrounded by mountains." },
+  { id: "melk-abbey", coins: 850, title: "Visit Melk Abbey", category: "Austria Trips", image: "⛪", description: "See a historic abbey above the Danube." },
+  { id: "wachau", coins: 900, title: "Walk Through the Wachau Valley", category: "Austria Trips", image: "🍇", description: "Explore a scenic valley along the Danube." },
+  { id: "austrian-alps", coins: 950, title: "See the Austrian Alps", category: "Austria Trips", image: "⛰️", description: "Take in Austria's mountain landscapes." }
 ];
 const TOWN_CENTER_STAGES = [
   { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Empty Square", description: "The town center is ready for its first shared milestone." },
@@ -1732,8 +1732,10 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFa
 }
 
 function getLatestRewardById(rewards, unlockedIds) {
-  const latestId = normalizeRewardIdList(unlockedIds).at(-1);
-  return rewards.find((reward) => reward.id === latestId) || null;
+  const rewardById = new Map(rewards.map((reward) => [reward.id, reward]));
+  return [...normalizeRewardIdList(unlockedIds)].reverse()
+    .map((rewardId) => rewardById.get(rewardId))
+    .find(Boolean) || null;
 }
 
 function getRewardDisplayName(reward) {
@@ -1969,11 +1971,15 @@ function createRewardCard(reward, unlocked, requirementText) {
   card.className = "reward-card";
   card.classList.toggle("unlocked", unlocked);
   card.classList.toggle("locked", !unlocked);
-  card.replaceChildren(
-    createTextElement("span", "reward-image-placeholder", unlocked ? "Photo Placeholder" : "🔒"),
+  const children = [
+    createTextElement("span", "reward-image-placeholder", unlocked ? reward.image : "🔒"),
     createTextElement("strong", "", unlocked ? reward.title : "Locked"),
     createTextElement("span", "", unlocked ? reward.description : `Unlocks at ${requirementText}`)
-  );
+  ];
+  if (unlocked && reward.category) {
+    children.splice(2, 0, createTextElement("span", "reward-category", reward.category));
+  }
+  card.replaceChildren(...children);
   return card;
 }
 
