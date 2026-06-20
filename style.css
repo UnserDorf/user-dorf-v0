@@ -963,6 +963,17 @@ h1 {
   padding: 0 22px;
 }
 
+.celebration-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.celebration-actions button:only-child,
+.celebration-actions button.hidden + button {
+  grid-column: 1 / -1;
+}
+
 .earn-coins-card {
   background: linear-gradient(135deg, var(--amber-soft), rgba(255, 253, 248, 0.94));
   grid-template-columns: auto minmax(0, 1fr);
@@ -1331,6 +1342,40 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.reward-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reward-preview-card {
+  min-width: 0;
+  border: 1px solid rgba(222, 216, 203, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+  padding: clamp(12px, 2vw, 16px);
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+}
+
+.reward-preview-card h4,
+.reward-preview-card p {
+  margin: 0;
+}
+
+.reward-preview-card h4 {
+  color: var(--ink);
+  font-size: clamp(1rem, 2vw, 1.18rem);
+}
+
+.reward-preview-card p {
+  color: var(--muted);
+  font-weight: 850;
+  line-height: 1.25;
+}
+
 .rewards-grid {
   display: grid;
   gap: 16px;
@@ -1422,6 +1467,10 @@ h1 {
 }
 
 .town-center-section {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.town-center-page {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -2239,7 +2288,8 @@ select,
   }
 
   .dashboard-screen,
-  .coin-challenges-screen {
+  .coin-challenges-screen,
+  .achievement-collection-screen {
     gap: 10px;
   }
 
@@ -2287,6 +2337,10 @@ select,
 
   .achievements-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reward-preview-grid {
+    grid-template-columns: 1fr;
   }
 
   .achievement-strip {
@@ -2405,7 +2459,8 @@ select,
   .dashboard-summary,
   .simple-challenge,
   .continue-card,
-  .town-center-section {
+  .town-center-section,
+  .town-center-page {
     grid-template-columns: 1fr;
   }
 

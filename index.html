@@ -209,16 +209,33 @@
           </div>
         </section>
 
-        <section class="dashboard-section collections-preview-section" aria-label="Collections preview">
+        <section class="dashboard-section collections-preview-section" aria-label="Reward previews">
           <div class="section-heading simple">
-            <h3>Collections</h3>
+            <h3>Rewards</h3>
           </div>
-          <article class="continue-card collections-preview-card">
-            <div>
-              <p>Albums and shared village rewards.</p>
-            </div>
-            <button class="primary-button" type="button" data-dashboard-action="achievements">Open Rewards</button>
-          </article>
+          <div class="reward-preview-grid">
+            <article class="reward-preview-card">
+              <div>
+                <h4>My Austria Album</h4>
+                <p id="austriaAlbumPreview">0 / 20 unlocked</p>
+              </div>
+              <button class="primary-button" type="button" data-dashboard-action="austria-album">Open Album</button>
+            </article>
+            <article class="reward-preview-card">
+              <div>
+                <h4>Town Center</h4>
+                <p id="townCenterPreview">Current Stage: Empty Square</p>
+              </div>
+              <button class="primary-button" type="button" data-dashboard-action="town-center">View Progress</button>
+            </article>
+            <article class="reward-preview-card">
+              <div>
+                <h4>Village Album</h4>
+                <p id="villageAlbumPreview">0 / 5 unlocked</p>
+              </div>
+              <button class="primary-button" type="button" data-dashboard-action="village-album">Open Village Album</button>
+            </article>
+          </div>
         </section>
       </section>
 
@@ -226,9 +243,10 @@
         <div class="dashboard-heading">
           <div>
             <p class="eyebrow">Rewards</p>
-            <h2>Collections</h2>
-            <p>Simple Version 0 rewards for learning and shared progress.</p>
+            <h2 id="rewardPageTitle">My Austria Album</h2>
+            <p id="rewardPageSummary">Unlocked: 0 / 20</p>
           </div>
+          <button type="button" class="small-link-button" data-dashboard-action="dashboard">Back to Dashboard</button>
         </div>
         <div class="rewards-grid" id="achievementsGrid"></div>
       </section>
@@ -316,7 +334,10 @@
           <p id="levelCelebrationProfile">You reached:</p>
           <strong id="levelCelebrationLevel">🪙 Coin Pouch</strong>
           <p id="levelCelebrationBonus">+25 bonus coins</p>
-          <button type="button" id="levelCelebrationClose">Nice!</button>
+          <div class="celebration-actions">
+            <button type="button" class="primary-button hidden" id="levelCelebrationViewAlbum">View Album</button>
+            <button type="button" id="levelCelebrationClose">Nice!</button>
+          </div>
         </div>
       </div>
 

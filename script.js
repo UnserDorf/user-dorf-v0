@@ -455,7 +455,12 @@ const els = {
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
+  austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
+  townCenterPreview: document.querySelector("#townCenterPreview"),
+  villageAlbumPreview: document.querySelector("#villageAlbumPreview"),
   householdList: document.querySelector("#householdList"),
+  rewardPageTitle: document.querySelector("#rewardPageTitle"),
+  rewardPageSummary: document.querySelector("#rewardPageSummary"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
   challengeArticleProgressLabel: document.querySelector("#challengeArticleProgressLabel"),
@@ -477,6 +482,7 @@ const els = {
   levelCelebrationProfile: document.querySelector("#levelCelebrationProfile"),
   levelCelebrationLevel: document.querySelector("#levelCelebrationLevel"),
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
+  levelCelebrationViewAlbum: document.querySelector("#levelCelebrationViewAlbum"),
   levelCelebrationClose: document.querySelector("#levelCelebrationClose"),
   controlPanel: document.querySelector("#controlPanel"),
   searchPanel: document.querySelector("#searchPanel"),
@@ -1530,14 +1536,14 @@ function showCoinChallenges() {
   els.actionBar.classList.add("hidden");
 }
 
-function showAchievementCollection() {
-  currentView = "achievements";
+function showAchievementCollection(page = "austria-album") {
+  currentView = page;
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-  renderAchievementCollection();
+  renderAchievementCollection(page);
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.remove("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -1685,7 +1691,25 @@ function renderDashboard() {
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
+  renderRewardPreviews(profile, familySummary.totalCoins);
   saveProfileStore();
+}
+
+function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
+  if (!profile) return;
+  const personalCoins = normalizeCoinCount(profile.coins);
+  const unlockedAustria = getUnlockedRewards(AUSTRIA_ALBUM_REWARDS, personalCoins);
+  const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
+  const townCenter = getTownCenterProgress(sharedCoins);
+  if (els.austriaAlbumPreview) {
+    els.austriaAlbumPreview.textContent = `${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`;
+  }
+  if (els.townCenterPreview) {
+    els.townCenterPreview.textContent = `Current Stage: ${townCenter.current.title}`;
+  }
+  if (els.villageAlbumPreview) {
+    els.villageAlbumPreview.textContent = `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`;
+  }
 }
 
 function renderSettingsPanel() {
@@ -1799,12 +1823,12 @@ function renderAchievements() {
   renderDashboardAchievements(getAchievementStates());
 }
 
-function renderAchievementCollection() {
+function renderAchievementCollection(page = "austria-album") {
   if (!els.achievementsGrid || !profileStore || !currentProfileId) return;
-  renderRewardsPage();
+  renderRewardsPage(page);
 }
 
-function renderRewardsPage() {
+function renderRewardsPage(page = "austria-album") {
   const profile = getCurrentProfile();
   if (!profile) return;
   const personalCoins = normalizeCoinCount(profile.coins);
@@ -1812,17 +1836,31 @@ function renderRewardsPage() {
   const unlockedAustria = getUnlockedRewards(AUSTRIA_ALBUM_REWARDS, personalCoins);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
+  if (page === "town-center") {
+    els.rewardPageTitle.textContent = "Town Center";
+    els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
+    els.achievementsGrid.replaceChildren(createTownCenterPage(townCenter, sharedCoins));
+    return;
+  }
+  if (page === "village-album") {
+    els.rewardPageTitle.textContent = "Village Album";
+    els.rewardPageSummary.textContent = `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`;
+    els.achievementsGrid.replaceChildren(
+      createRewardSection(
+        "Village Album",
+        `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
+        VILLAGE_ALBUM_REWARDS.map((reward) => createRewardCard(reward, sharedCoins >= reward.coins, `${reward.coins} Shared Village Coins`))
+      )
+    );
+    return;
+  }
+  els.rewardPageTitle.textContent = "My Austria Album";
+  els.rewardPageSummary.textContent = `Unlocked: ${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
   els.achievementsGrid.replaceChildren(
     createRewardSection(
       "My Austria Album",
       `Unlocked: ${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
       AUSTRIA_ALBUM_REWARDS.map((reward) => createRewardCard(reward, personalCoins >= reward.coins, `${reward.coins} Coins`))
-    ),
-    createTownCenterSection(townCenter, sharedCoins),
-    createRewardSection(
-      "Village Album",
-      `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
-      VILLAGE_ALBUM_REWARDS.map((reward) => createRewardCard(reward, sharedCoins >= reward.coins, `${reward.coins} Shared Village Coins`))
     )
   );
 }
@@ -1861,11 +1899,35 @@ function createRewardCard(reward, unlocked, requirementText) {
   card.classList.toggle("unlocked", unlocked);
   card.classList.toggle("locked", !unlocked);
   card.replaceChildren(
-    createTextElement("span", "reward-image-placeholder", unlocked ? reward.image : "LOCK"),
-    createTextElement("strong", "", reward.title),
+    createTextElement("span", "reward-image-placeholder", unlocked ? "Photo Placeholder" : "🔒"),
+    createTextElement("strong", "", unlocked ? reward.title : "Locked"),
     createTextElement("span", "", unlocked ? reward.description : `Unlocks at ${requirementText}`)
   );
   return card;
+}
+
+function createTownCenterPage(progress, sharedCoins) {
+  const current = progress.current;
+  const next = progress.next;
+  const coinsRemaining = next ? Math.max(next.coins - normalizeCoinCount(sharedCoins), 0) : 0;
+  const section = document.createElement("section");
+  section.className = "reward-section town-center-page";
+  const currentCard = document.createElement("article");
+  currentCard.className = "town-center-card";
+  currentCard.replaceChildren(
+    createTextElement("span", "reward-summary", "Current Stage:"),
+    createTextElement("strong", "", current.title),
+    createTextElement("p", "", current.description)
+  );
+  const nextCard = document.createElement("article");
+  nextCard.className = "town-center-card";
+  nextCard.replaceChildren(
+    createTextElement("span", "reward-summary", "Next Stage:"),
+    createTextElement("strong", "", next ? next.title : "All stages unlocked"),
+    createTextElement("p", "", next ? `Coins Remaining: ${coinsRemaining}` : "Coins Remaining: 0")
+  );
+  section.replaceChildren(currentCard, nextCard);
+  return section;
 }
 
 function createTownCenterSection(progress, sharedCoins) {
@@ -2183,8 +2245,13 @@ function getDisplayStreak(profile) {
 }
 
 function handleDashboardAction(action) {
-  if (action === "achievements") {
-    showAchievementCollection();
+  if (action === "dashboard") {
+    showDashboard();
+    return;
+  }
+
+  if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
+    showAchievementCollection(action === "achievements" ? "austria-album" : action);
     return;
   }
 
@@ -2582,6 +2649,12 @@ function bindEvents() {
     handleDashboardAction(button.dataset.dashboardAction);
   });
 
+  els.achievementCollectionScreen.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-dashboard-action]");
+    if (!button) return;
+    handleDashboardAction(button.dataset.dashboardAction);
+  });
+
   els.coinChallengesScreen.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-challenge-action]");
     if (!button) return;
@@ -2808,6 +2881,12 @@ function bindEvents() {
 
   els.levelCelebrationClose.addEventListener("click", () => {
     els.levelCelebration.classList.add("hidden");
+  });
+
+  els.levelCelebrationViewAlbum.addEventListener("click", () => {
+    const page = els.levelCelebrationViewAlbum.dataset.rewardPage || "austria-album";
+    els.levelCelebration.classList.add("hidden");
+    showAchievementCollection(page);
   });
 }
 
@@ -3345,7 +3424,20 @@ function showRewardUnlockCelebration(reward, source) {
   els.levelCelebrationLevel.textContent = reward.title;
   els.levelCelebrationBonus.textContent = source;
   els.levelCelebrationBonus.classList.remove("hidden");
+  showRewardCelebrationActions(source === "Village Album" ? "village-album" : "austria-album");
   els.levelCelebration.classList.remove("hidden");
+}
+
+function showRewardCelebrationActions(page) {
+  els.levelCelebrationViewAlbum.dataset.rewardPage = page;
+  els.levelCelebrationViewAlbum.classList.remove("hidden");
+  els.levelCelebrationClose.textContent = "Continue";
+}
+
+function hideRewardCelebrationActions() {
+  els.levelCelebrationViewAlbum.dataset.rewardPage = "";
+  els.levelCelebrationViewAlbum.classList.add("hidden");
+  els.levelCelebrationClose.textContent = "Nice!";
 }
 
 function awardLevelBonusIfNeeded(profile) {
@@ -3370,6 +3462,7 @@ function showLevelCelebration(profile, level) {
   els.levelCelebrationLevel.textContent = `${level.icon} ${level.name}`;
   els.levelCelebrationBonus.textContent = `+${LEVEL_UP_BONUS} bonus coins`;
   els.levelCelebrationBonus.classList.remove("hidden");
+  hideRewardCelebrationActions();
   els.levelCelebration.classList.remove("hidden");
 }
 
@@ -3391,6 +3484,7 @@ function showFamilyLevelCelebration(level) {
   els.levelCelebrationLevel.textContent = level.name;
   els.levelCelebrationBonus.textContent = "";
   els.levelCelebrationBonus.classList.add("hidden");
+  hideRewardCelebrationActions();
   els.levelCelebration.classList.remove("hidden");
 }
 
@@ -3400,6 +3494,7 @@ function showDailyChallengeComplete(challenge) {
   els.levelCelebrationLevel.textContent = `${challenge.icon} ${challenge.name}`;
   els.levelCelebrationBonus.textContent = `Reward: 🪙 +${challenge.reward} Coins`;
   els.levelCelebrationBonus.classList.remove("hidden");
+  hideRewardCelebrationActions();
   els.levelCelebration.classList.remove("hidden");
 }
 
@@ -3469,6 +3564,7 @@ function showAchievementCelebration(achievement) {
     els.levelCelebrationBonus.textContent = "Celebration only";
     els.levelCelebrationBonus.classList.remove("hidden");
   }
+  hideRewardCelebrationActions();
   els.levelCelebration.classList.remove("hidden");
 }
 
