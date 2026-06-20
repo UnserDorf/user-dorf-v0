@@ -180,11 +180,39 @@
       <section class="dashboard-screen" id="dashboardScreen" aria-label="Home dashboard">
         <div class="dashboard-heading">
           <div>
-            <p class="eyebrow">Home</p>
             <h2 id="dashboardVillageName">🏡 Unser Dorf</h2>
             <p id="dashboardWelcome">Welcome back</p>
           </div>
         </div>
+
+        <section class="dashboard-section dashboard-town-center-panel" aria-label="Town Center">
+          <article class="dashboard-town-center-card">
+            <div class="dashboard-town-center-image-wrap">
+              <img id="townCenterDashboardImage" src="assets/town-center-stage-1.png" alt="Town Center" loading="lazy">
+            </div>
+            <div class="dashboard-town-center-content">
+              <div>
+                <h3>Town Center</h3>
+                <p>See how your village has grown together.</p>
+              </div>
+              <div class="dashboard-town-center-stats">
+                <span>
+                  <small>Current Stage:</small>
+                  <strong id="townCenterDashboardStage">🌱 Empty Square</strong>
+                </span>
+                <span>
+                  <small>Village Coins:</small>
+                  <strong id="dashboardFamilyCoins">0</strong>
+                </span>
+                <span>
+                  <small>Next Upgrade:</small>
+                  <strong id="townCenterDashboardNext">🌷 Flowers</strong>
+                </span>
+              </div>
+              <button class="primary-button" type="button" data-dashboard-action="town-center">View Progress</button>
+            </div>
+          </article>
+        </section>
 
         <section class="dashboard-section dashboard-progress-panel" aria-label="My progress">
           <div class="section-heading simple">
@@ -202,10 +230,6 @@
               <span>My Coins</span>
               <strong id="levelCoins">0</strong>
             </article>
-            <article class="dashboard-metric" aria-label="Shared village coins">
-              <span>Shared Village Coins</span>
-              <strong id="dashboardFamilyCoins">0</strong>
-            </article>
           </div>
         </section>
 
@@ -220,13 +244,6 @@
                 <p id="austriaAlbumPreview">0 / 20 unlocked</p>
               </div>
               <button class="primary-button" type="button" data-dashboard-action="austria-album">Open Album</button>
-            </article>
-            <article class="reward-preview-card">
-              <div>
-                <h4>Town Center</h4>
-                <p id="townCenterPreview">Current Stage: Empty Square</p>
-              </div>
-              <button class="primary-button" type="button" data-dashboard-action="town-center">View Progress</button>
             </article>
             <article class="reward-preview-card">
               <div>

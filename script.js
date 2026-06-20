@@ -457,6 +457,9 @@ const els = {
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
   townCenterPreview: document.querySelector("#townCenterPreview"),
+  townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
+  townCenterDashboardStage: document.querySelector("#townCenterDashboardStage"),
+  townCenterDashboardNext: document.querySelector("#townCenterDashboardNext"),
   villageAlbumPreview: document.querySelector("#villageAlbumPreview"),
   householdList: document.querySelector("#householdList"),
   rewardPageTitle: document.querySelector("#rewardPageTitle"),
@@ -1722,12 +1725,25 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFa
       createRewardPreviewMetric("Next:", townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked")
     );
   }
+  renderDashboardTownCenter(townCenter, sharedCoins);
   if (els.villageAlbumPreview) {
     const latestVillageReward = unlockedVillage[unlockedVillage.length - 1] || null;
     els.villageAlbumPreview.replaceChildren(
       createTextElement("span", "reward-preview-count", `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
       createRewardPreviewLatest(latestVillageReward ? getRewardDisplayName(latestVillageReward) : "None Yet")
     );
+  }
+}
+
+function renderDashboardTownCenter(townCenter, sharedCoins) {
+  if (!townCenter?.current) return;
+  const stageName = getTownCenterStageName(townCenter.current);
+  const nextStageName = townCenter.next ? getTownCenterStageName(townCenter.next) : "All stages unlocked";
+  if (els.townCenterDashboardStage) els.townCenterDashboardStage.textContent = stageName;
+  if (els.townCenterDashboardNext) els.townCenterDashboardNext.textContent = nextStageName;
+  if (els.townCenterDashboardImage) {
+    els.townCenterDashboardImage.src = getTownCenterImageSrc(townCenter.current);
+    els.townCenterDashboardImage.alt = `${townCenter.current.title} Town Center`;
   }
 }
 
@@ -1948,6 +1964,11 @@ function getTownCenterProgress(sharedCoins) {
 
 function getTownCenterStageName(stage) {
   return `${stage.icon} ${stage.title}`;
+}
+
+function getTownCenterImageSrc(stage) {
+  const stageNumber = Math.min(Math.max(Number(stage?.stage) || 1, 1), 5);
+  return `assets/town-center-stage-${stageNumber}.png`;
 }
 
 function createRewardSection(title, summary, cards) {
