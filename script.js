@@ -1887,7 +1887,7 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (page === "town-center") {
-    els.rewardPageTitle.textContent = `🏡 ${getVillageName()} Town Center`;
+    els.rewardPageTitle.textContent = "🏡 Town Center";
     els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
     els.achievementsGrid.replaceChildren(createTownCenterPage(townCenter, sharedCoins));
     return;
@@ -2040,6 +2040,7 @@ function createTownCenterPage(progress, sharedCoins) {
   details.className = "town-center-hero-details";
   details.replaceChildren(
     createTownCenterDetail("Current Stage:", getTownCenterStageName(current)),
+    createTownCenterDetail("Stage:", `${current.stage} / ${TOWN_CENTER_STAGES.length}`),
     createTownCenterDetail("Village Coins:", coins),
     createTownCenterDetail("Next Upgrade:", next ? getTownCenterStageName(next) : "All stages unlocked"),
     createTownCenterDetail("Coins Remaining:", progress.coinsRemaining)
@@ -2096,7 +2097,7 @@ function getVisibleTownCenterStages() {
 }
 
 function getTownCenterStageStatus(stage, coins, current) {
-  if (current?.id === stage.id) return "Current";
+  if (current?.id === stage.id) return "🌟 Current";
   if (coins >= stage.coins) return "✓ Unlocked";
   return "🔒 Locked";
 }
