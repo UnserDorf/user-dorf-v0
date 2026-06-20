@@ -285,16 +285,16 @@ const TOWN_CENTER_STAGES = [
   { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "🧺", description: "A shared morning at the village market." },
-  { id: "community-picnic", coins: 250, title: "Community Picnic", image: "🥪", description: "A simple picnic earned through shared learning." },
-  { id: "music-day", coins: 500, title: "Music Day", image: "🎶", description: "A day when the village fills with music." },
-  { id: "village-carnival", coins: 750, title: "Village Carnival", image: "🎡", description: "A cheerful event for the whole village." },
-  { id: "lantern-evening", coins: 1000, title: "Lantern Evening", image: "🏮", description: "A warm evening memory shared together." },
-  { id: "art-fair", coins: 1500, title: "Art Fair", image: "🎨", description: "A creative village event." },
-  { id: "reading-day", coins: 2000, title: "Reading Day", image: "📚", description: "A shared celebration of stories and learning." },
-  { id: "village-performance", coins: 3000, title: "Village Performance", image: "🎭", description: "A performance created by the village." },
-  { id: "harvest-celebration", coins: 4000, title: "Harvest Celebration", image: "🌻", description: "A seasonal celebration of shared progress." },
-  { id: "grand-village-festival", coins: 5000, title: "Grand Village Festival", image: "🎉", description: "A major village event unlocked together." }
+  { id: "saturday-market", coins: 200, title: "Saturday Market", image: "assets/village-memory-1.png", icon: "🧺", description: "A shared morning at the village market." },
+  { id: "community-picnic", coins: 400, title: "Community Picnic", image: "assets/village-memory-2.png", icon: "🥪", description: "A simple picnic earned through shared learning." },
+  { id: "music-day", coins: 700, title: "Music Day", image: "assets/village-memory-3.png", icon: "🎶", description: "A day when the village fills with music." },
+  { id: "village-carnival", coins: 1000, title: "Village Carnival", image: "assets/village-memory-4.png", icon: "🎡", description: "A cheerful event for the whole village." },
+  { id: "lantern-evening", coins: 1500, title: "Lantern Evening", image: "assets/village-memory-5.png", icon: "🏮", description: "A warm evening memory shared together." },
+  { id: "art-fair", coins: 2000, title: "Art Fair", image: "assets/village-memory-6.png", icon: "🎨", description: "A creative village event." },
+  { id: "reading-day", coins: 2750, title: "Reading Day", image: "assets/village-memory-7.png", icon: "📚", description: "A shared celebration of stories and learning." },
+  { id: "village-performance", coins: 3500, title: "Village Performance", image: "assets/village-memory-8.png", icon: "🎭", description: "A performance created by the village." },
+  { id: "harvest-celebration", coins: 4250, title: "Harvest Celebration", image: "assets/village-memory-9.png", icon: "🌻", description: "A seasonal celebration of shared progress." },
+  { id: "grand-village-festival", coins: 5000, title: "Grand Village Festival", image: "assets/village-memory-10.png", icon: "🎉", description: "A major village event unlocked together." }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
@@ -1739,7 +1739,7 @@ function getLatestRewardById(rewards, unlockedIds) {
 }
 
 function getRewardDisplayName(reward) {
-  return `${reward.image} ${reward.title}`;
+  return `${reward.icon || reward.image} ${reward.title}`;
 }
 
 function createRewardPreviewLatest(value) {
@@ -2009,7 +2009,7 @@ function createRewardCard(reward, unlocked, requirementText) {
   card.classList.toggle("unlocked", unlocked);
   card.classList.toggle("locked", !unlocked);
   const children = [
-    createTextElement("span", "reward-image-placeholder", unlocked ? reward.image : "🔒"),
+    createRewardImageElement(reward, unlocked),
     createTextElement("strong", "", unlocked ? reward.title : "Locked"),
     createTextElement("span", "", unlocked ? reward.description : `Unlocks at ${requirementText}`)
   ];
@@ -2018,6 +2018,28 @@ function createRewardCard(reward, unlocked, requirementText) {
   }
   card.replaceChildren(...children);
   return card;
+}
+
+function createRewardImageElement(reward, unlocked) {
+  if (!unlocked) return createTextElement("span", "reward-image-placeholder", "🔒");
+  if (!isImagePath(reward.image)) return createTextElement("span", "reward-image-placeholder", reward.image || reward.icon || "");
+  const wrapper = document.createElement("span");
+  wrapper.className = "reward-image-placeholder reward-image-frame";
+  const image = document.createElement("img");
+  image.src = reward.image;
+  image.alt = reward.title;
+  image.loading = "lazy";
+  image.onerror = () => {
+    image.remove();
+    wrapper.classList.add("is-missing");
+    wrapper.textContent = reward.icon || "Memory";
+  };
+  wrapper.replaceChildren(image);
+  return wrapper;
+}
+
+function isImagePath(value) {
+  return typeof value === "string" && /\.(png|jpe?g|webp|gif)$/i.test(value);
 }
 
 function createTownCenterPage(progress, sharedCoins) {

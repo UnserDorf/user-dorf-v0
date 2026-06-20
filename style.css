@@ -1682,6 +1682,27 @@ h1 {
   font-weight: 900;
 }
 
+.reward-image-frame {
+  min-height: 112px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.reward-image-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 112px;
+  object-fit: cover;
+}
+
+.reward-image-frame.is-missing {
+  border: 1px dashed rgba(71, 115, 91, 0.32);
+  background: rgba(230, 239, 229, 0.76);
+  color: var(--green);
+  font-size: 1.55rem;
+}
+
 .reward-card.locked .reward-image-placeholder {
   background: rgba(222, 213, 196, 0.52);
   color: var(--muted);
