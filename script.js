@@ -1734,8 +1734,7 @@ function renderDashboardTownCenter(townCenter, sharedCoins) {
   if (els.townCenterDashboardStage) els.townCenterDashboardStage.textContent = stageName;
   if (els.townCenterDashboardNext) els.townCenterDashboardNext.textContent = nextStageName;
   if (els.townCenterDashboardImage) {
-    els.townCenterDashboardImage.src = getTownCenterImageSrc(townCenter.current);
-    els.townCenterDashboardImage.alt = `${townCenter.current.title} Town Center`;
+    setTownCenterImage(els.townCenterDashboardImage, townCenter.current);
   }
 }
 
@@ -1963,6 +1962,17 @@ function getTownCenterImageSrc(stage) {
   return `assets/town-center-stage-${stageNumber}.png`;
 }
 
+function setTownCenterImage(image, stage) {
+  if (!image) return;
+  image.classList.remove("is-missing");
+  image.alt = `${stage?.title || "Town Center"} Town Center`;
+  image.onerror = () => {
+    image.classList.add("is-missing");
+    image.removeAttribute("src");
+  };
+  image.src = getTownCenterImageSrc(stage);
+}
+
 function createRewardSection(title, summary, cards) {
   const section = document.createElement("section");
   section.className = "reward-section";
@@ -2006,9 +2016,8 @@ function createTownCenterPage(progress, sharedCoins) {
   const hero = document.createElement("article");
   hero.className = "town-center-hero";
   const image = document.createElement("img");
-  image.src = getTownCenterImageSrc(current);
-  image.alt = `${current.title} Town Center`;
   image.loading = "lazy";
+  setTownCenterImage(image, current);
   const details = document.createElement("div");
   details.className = "town-center-hero-details";
   details.replaceChildren(

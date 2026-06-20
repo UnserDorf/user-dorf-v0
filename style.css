@@ -738,6 +738,9 @@ h1 {
 .dashboard-town-center-image-wrap {
   min-height: clamp(260px, 38vw, 420px);
   background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.85));
+  position: relative;
+  display: grid;
+  place-items: center;
 }
 
 .dashboard-town-center-image-wrap img {
@@ -746,6 +749,23 @@ h1 {
   height: 100%;
   min-height: inherit;
   object-fit: cover;
+}
+
+.dashboard-town-center-image-wrap img.is-missing,
+.town-center-hero img.is-missing {
+  display: none;
+}
+
+.dashboard-town-center-image-wrap:has(img.is-missing)::after,
+.town-center-hero:has(img.is-missing)::before {
+  content: "Town Center image coming soon";
+  border: 1px dashed rgba(71, 115, 91, 0.32);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.82);
+  color: var(--green);
+  padding: 16px;
+  font-weight: 900;
+  text-align: center;
 }
 
 .dashboard-town-center-content {
@@ -1707,6 +1727,12 @@ h1 {
   grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.75fr);
   gap: 16px;
   align-items: stretch;
+}
+
+.town-center-hero:has(img.is-missing)::before {
+  min-height: clamp(280px, 42vw, 500px);
+  display: grid;
+  place-items: center;
 }
 
 .town-center-hero img {
