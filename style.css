@@ -694,6 +694,19 @@ h1 {
   font-weight: 750;
 }
 
+.reward-page-heading {
+  align-items: flex-start;
+}
+
+.reward-title-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.reward-title-stack .eyebrow {
+  margin-top: 4px;
+}
+
 .dashboard-summary,
 .dashboard-progress-grid {
   display: grid;
@@ -1322,12 +1335,18 @@ h1 {
 
 .small-link-button {
   min-height: 34px;
-  border: 1px solid rgba(109, 74, 160, 0.28);
-  background: var(--violet-soft);
-  color: var(--violet);
-  padding: 0 10px;
+  justify-self: start;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.58);
+  color: var(--green);
+  padding: 0 11px;
   font-size: 0.82rem;
   font-weight: 900;
+}
+
+.small-link-button:hover {
+  background: rgba(230, 239, 229, 0.72);
 }
 
 .achievements-grid {
