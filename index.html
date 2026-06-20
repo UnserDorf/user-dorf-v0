@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=111">
+    <link rel="stylesheet" href="style.css?v=112">
   </head>
   <body>
     <section class="lock-screen" id="lockScreen" aria-label="Password required">
@@ -36,6 +36,10 @@
             <p>by Common Ground</p>
           </div>
         </div>
+        <label class="context-select profile-group-select">
+          <span>Current Group</span>
+          <select id="profileGroupSelect"></select>
+        </label>
         <section class="family-wealth-card" id="familyWealthCard" aria-label="Shared village">
           <h2 id="familyWealthLevel">Shared Village</h2>
           <div class="family-wealth-main">
@@ -131,6 +135,16 @@
             <p class="brand-profile"><span id="currentProfileLabel">No profile</span></p>
             <span class="sr-only" id="deckStatus">Loading vocabulary...</span>
           </div>
+        </div>
+        <div class="context-switchers" aria-label="Current group and user">
+          <label class="context-select">
+            <span>Current Group</span>
+            <select id="currentGroupSelect"></select>
+          </label>
+          <label class="context-select">
+            <span>Current User</span>
+            <select id="currentUserSelect"></select>
+          </label>
         </div>
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
@@ -584,6 +598,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=111"></script>
+    <script type="module" src="script.js?v=112"></script>
   </body>
 </html>

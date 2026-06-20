@@ -12,6 +12,12 @@ const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
 const PROFILE_STORE_VERSION = 1;
+const DEFAULT_GROUP_ID = "family-z";
+const DEFAULT_GROUPS = [
+  { id: "family-z", name: "Family Z" },
+  { id: "test-group", name: "Test Group" },
+  { id: "b2-class", name: "B2 Class" }
+];
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
@@ -354,6 +360,9 @@ const els = {
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
+  currentGroupSelect: document.querySelector("#currentGroupSelect"),
+  currentUserSelect: document.querySelector("#currentUserSelect"),
+  profileGroupSelect: document.querySelector("#profileGroupSelect"),
   dashboardChallengeStatus: document.querySelector("#dashboardChallengeStatus"),
   dashboardStreak: document.querySelector("#dashboardStreak"),
   achievementPreview: document.querySelector("#achievementPreview"),
@@ -527,6 +536,7 @@ let prepositionProgress = {};
 let profileStore = null;
 let checkingAchievements = false;
 let currentProfileId = "";
+let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
 let searchResults = [];
 let randomSessionKey = "";
@@ -675,6 +685,9 @@ function loadProfileStore() {
   store.villageName = normalizeVillageName(store.villageName);
   store.villageAlbumSeenRewards = normalizeRewardIdList(store.villageAlbumSeenRewards);
   store.townCenterStagesSeen = normalizeRewardIdList(store.townCenterStagesSeen);
+  store.groups = normalizeGroups(store.groups, store);
+  store.currentGroup = normalizeGroupId(store.currentGroup, store.groups);
+  currentGroupId = store.currentGroup;
   promoteFamilyAchievements(store);
 
   if (!store.migratedLegacyProgress) {
@@ -691,6 +704,7 @@ function loadProfileStore() {
 function createProfileStore() {
   return {
     version: PROFILE_STORE_VERSION,
+    currentGroup: DEFAULT_GROUP_ID,
     currentProfile: "",
     villageName: "",
     villageAlbumSeenRewards: [],
@@ -698,8 +712,133 @@ function createProfileStore() {
     migratedLegacyProgress: false,
     familyLevelsReached: [],
     familyAchievementsUnlocked: [],
+    groups: createDefaultGroups(),
     profiles: {}
   };
+}
+
+function createDefaultGroups() {
+  return Object.fromEntries(DEFAULT_GROUPS.map((group) => [group.id, createGroupData(group)]));
+}
+
+function createGroupData(group, source = {}) {
+  return {
+    id: group.id,
+    name: group.name,
+    villageName: normalizeVillageName(source.villageName) || "",
+    villageAlbumSeenRewards: normalizeRewardIdList(source.villageAlbumSeenRewards),
+    townCenterStagesSeen: normalizeRewardIdList(source.townCenterStagesSeen),
+    familyLevelsReached: Array.isArray(source.familyLevelsReached) ? source.familyLevelsReached.map(String) : [],
+    familyAchievementsUnlocked: normalizeAchievementList(source.familyAchievementsUnlocked),
+    austriaAlbumSeenRewards: normalizeRewardIdList(source.austriaAlbumSeenRewards),
+    memberIds: normalizeGroupMemberIds(source.memberIds)
+  };
+}
+
+function normalizeGroups(groups, store = profileStore) {
+  const normalized = createDefaultGroups();
+  Object.entries(groups || {}).forEach(([groupId, group]) => {
+    const base = DEFAULT_GROUPS.find((item) => item.id === groupId) || { id: groupId, name: group?.name || "Group" };
+    normalized[groupId] = createGroupData(base, group);
+  });
+  const existingProfileIds = Object.keys(store?.profiles || {}).filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId));
+  if (!Object.values(normalized).some((group) => group.memberIds.length) && existingProfileIds.length) {
+    normalized[DEFAULT_GROUP_ID].memberIds = existingProfileIds.slice(0, 6);
+  }
+  if (!normalizeVillageName(normalized[DEFAULT_GROUP_ID].villageName)) {
+    normalized[DEFAULT_GROUP_ID].villageName = normalizeVillageName(store?.villageName);
+  }
+  normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards = normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards.length
+    ? normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards
+    : normalizeRewardIdList(store?.villageAlbumSeenRewards);
+  normalized[DEFAULT_GROUP_ID].townCenterStagesSeen = normalized[DEFAULT_GROUP_ID].townCenterStagesSeen.length
+    ? normalized[DEFAULT_GROUP_ID].townCenterStagesSeen
+    : normalizeRewardIdList(store?.townCenterStagesSeen);
+  normalized[DEFAULT_GROUP_ID].familyLevelsReached = normalized[DEFAULT_GROUP_ID].familyLevelsReached.length
+    ? normalized[DEFAULT_GROUP_ID].familyLevelsReached
+    : (Array.isArray(store?.familyLevelsReached) ? store.familyLevelsReached.map(String) : []);
+  normalized[DEFAULT_GROUP_ID].familyAchievementsUnlocked = normalized[DEFAULT_GROUP_ID].familyAchievementsUnlocked.length
+    ? normalized[DEFAULT_GROUP_ID].familyAchievementsUnlocked
+    : normalizeAchievementList(store?.familyAchievementsUnlocked);
+  return normalized;
+}
+
+function normalizeGroupMemberIds(value) {
+  return Array.isArray(value) ? Array.from(new Set(value.map(String).filter(Boolean))).slice(0, 6) : [];
+}
+
+function mergeGroupData(localStore, remoteStore, baseStore) {
+  const localGroups = normalizeGroups(localStore?.groups, {
+    ...(localStore || {}),
+    profiles: baseStore.profiles
+  });
+  const remoteGroups = normalizeGroups(remoteStore?.groups, {
+    ...(remoteStore || {}),
+    profiles: baseStore.profiles
+  });
+  const groupIds = new Set([
+    ...Object.keys(localGroups),
+    ...Object.keys(remoteGroups)
+  ]);
+  const groups = {};
+  groupIds.forEach((groupId) => {
+    const localGroup = localGroups[groupId];
+    const remoteGroup = remoteGroups[groupId];
+    const base = DEFAULT_GROUPS.find((group) => group.id === groupId) || {
+      id: groupId,
+      name: localGroup?.name || remoteGroup?.name || "Group"
+    };
+    groups[groupId] = createGroupData(base, {
+      villageName: normalizeVillageName(localGroup?.villageName) || normalizeVillageName(remoteGroup?.villageName),
+      villageAlbumSeenRewards: [
+        ...normalizeRewardIdList(localGroup?.villageAlbumSeenRewards),
+        ...normalizeRewardIdList(remoteGroup?.villageAlbumSeenRewards)
+      ],
+      townCenterStagesSeen: [
+        ...normalizeRewardIdList(localGroup?.townCenterStagesSeen),
+        ...normalizeRewardIdList(remoteGroup?.townCenterStagesSeen)
+      ],
+      familyLevelsReached: [
+        ...(Array.isArray(localGroup?.familyLevelsReached) ? localGroup.familyLevelsReached : []),
+        ...(Array.isArray(remoteGroup?.familyLevelsReached) ? remoteGroup.familyLevelsReached : [])
+      ],
+      familyAchievementsUnlocked: [
+        ...normalizeAchievementList(localGroup?.familyAchievementsUnlocked),
+        ...normalizeAchievementList(remoteGroup?.familyAchievementsUnlocked)
+      ],
+      austriaAlbumSeenRewards: [
+        ...normalizeRewardIdList(localGroup?.austriaAlbumSeenRewards),
+        ...normalizeRewardIdList(remoteGroup?.austriaAlbumSeenRewards)
+      ],
+      memberIds: [
+        ...normalizeGroupMemberIds(localGroup?.memberIds),
+        ...normalizeGroupMemberIds(remoteGroup?.memberIds)
+      ]
+    });
+  });
+  return normalizeGroups(groups, baseStore);
+}
+
+function normalizeGroupId(groupId, groups = profileStore?.groups) {
+  const id = String(groupId || "");
+  return groups?.[id] ? id : DEFAULT_GROUP_ID;
+}
+
+function getCurrentGroup(store = profileStore) {
+  if (!store?.groups) return null;
+  const groupId = normalizeGroupId(currentGroupId || store.currentGroup, store.groups);
+  if (store === profileStore) {
+    currentGroupId = groupId;
+    store.currentGroup = groupId;
+  }
+  return store.groups[groupId] || store.groups[DEFAULT_GROUP_ID];
+}
+
+function getCurrentGroupProfiles(store = profileStore) {
+  const group = getCurrentGroup(store);
+  return (group?.memberIds || [])
+    .map((profileId) => store?.profiles?.[profileId])
+    .filter(Boolean);
 }
 
 function normalizeVillageName(value) {
@@ -711,15 +850,17 @@ function normalizeRewardIdList(value) {
 }
 
 function getVillageName() {
-  return normalizeVillageName(profileStore?.villageName) || "Unser Dorf";
+  return normalizeVillageName(getCurrentGroup()?.villageName) || "Unser Dorf";
 }
 
 function hasVillageName() {
-  return Boolean(normalizeVillageName(profileStore?.villageName));
+  return Boolean(normalizeVillageName(getCurrentGroup()?.villageName));
 }
 
 function saveVillageName(value) {
-  profileStore.villageName = normalizeVillageName(value) || "Unser Dorf";
+  const group = getCurrentGroup();
+  if (group) group.villageName = normalizeVillageName(value) || "Unser Dorf";
+  profileStore.villageName = getVillageName();
   saveProfileStore();
 }
 
@@ -728,22 +869,76 @@ function renderVillageName() {
   if (els.dashboardVillageName) els.dashboardVillageName.textContent = `🏡 ${villageName}`;
   if (els.challengeHubVillageName) els.challengeHubVillageName.textContent = villageName;
   if (els.settingsVillageName) els.settingsVillageName.textContent = villageName;
+  renderGroupSelectors();
+}
+
+function renderGroupSelectors() {
+  if (!profileStore?.groups) return;
+  const groupOptions = Object.values(profileStore.groups).map((group) => {
+    const option = document.createElement("option");
+    option.value = group.id;
+    option.textContent = group.name;
+    return option;
+  });
+  [els.currentGroupSelect, els.profileGroupSelect].forEach((select) => {
+    if (!select) return;
+    select.replaceChildren(...groupOptions.map((option) => option.cloneNode(true)));
+    select.value = getCurrentGroup()?.id || DEFAULT_GROUP_ID;
+  });
+  if (els.currentUserSelect) {
+    const userOptions = getProfileList().map((profile) => {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profile.name;
+      return option;
+    });
+    els.currentUserSelect.replaceChildren(...userOptions);
+    els.currentUserSelect.value = currentProfileId || "";
+    els.currentUserSelect.disabled = userOptions.length === 0;
+  }
+}
+
+function switchGroup(groupId) {
+  if (!profileStore?.groups?.[groupId]) return;
+  currentGroupId = groupId;
+  profileStore.currentGroup = groupId;
+  saveProfileStore();
+  if (currentProfileId && !getCurrentGroup().memberIds.includes(currentProfileId)) {
+    showProfileScreen();
+  } else {
+    renderVillageName();
+    renderProfileCards();
+    if (currentProfileId) renderDashboard();
+  }
+}
+
+function handleGroupSelectChange(event) {
+  switchGroup(event.target.value);
+}
+
+function handleUserSelectChange(event) {
+  const profileId = event.target.value;
+  if (!profileId || profileId === currentProfileId) return;
+  showProfileLogin(profileId);
 }
 
 function promoteFamilyAchievements(store) {
   if (!store?.profiles) return store;
   const familyIds = new Set(getFamilyAchievementIds(store));
+  const group = getCurrentGroup(store);
+  if (group) group.familyAchievementsUnlocked = Array.from(familyIds);
   store.familyAchievementsUnlocked = Array.from(familyIds);
   return store;
 }
 
 function getFamilyAchievementIds(store = profileStore) {
   if (!store) return [];
-  const familyIds = new Set(normalizeAchievementList(store.familyAchievementsUnlocked));
+  const group = getCurrentGroup(store);
+  const familyIds = new Set(normalizeAchievementList(group?.familyAchievementsUnlocked || store.familyAchievementsUnlocked));
   const familyAchievementIds = new Set(ACHIEVEMENTS
     .filter((achievement) => achievement.scope === "family")
     .map((achievement) => achievement.id));
-  Object.values(store.profiles).forEach((profile) => {
+  getCurrentGroupProfiles(store).forEach((profile) => {
     normalizeAchievementList(profile?.achievementsUnlocked).forEach((achievementId) => {
       if (familyAchievementIds.has(achievementId)) familyIds.add(achievementId);
     });
@@ -1014,6 +1209,15 @@ function readStorageObject(key) {
 }
 
 function saveProfileStore() {
+  const group = getCurrentGroup();
+  if (group) {
+    profileStore.currentGroup = group.id;
+    profileStore.villageName = group.villageName;
+    profileStore.villageAlbumSeenRewards = group.villageAlbumSeenRewards;
+    profileStore.townCenterStagesSeen = group.townCenterStagesSeen;
+    profileStore.familyLevelsReached = group.familyLevelsReached;
+    profileStore.familyAchievementsUnlocked = group.familyAchievementsUnlocked;
+  }
   promoteFamilyAchievements(profileStore);
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
   scheduleCloudSave();
@@ -1149,6 +1353,9 @@ function mergeProfileStores(localStore, remoteStore) {
       ...(Array.isArray(remoteStore?.familyAchievementsUnlocked) ? remoteStore.familyAchievementsUnlocked : [])
     ].map(String))
   );
+  baseStore.groups = mergeGroupData(localStore, remoteStore, baseStore);
+  baseStore.currentGroup = normalizeGroupId(localStore?.currentGroup || remoteStore?.currentGroup, baseStore.groups);
+  currentGroupId = baseStore.currentGroup;
   baseStore.migratedLegacyProgress = Boolean(localStore?.migratedLegacyProgress || remoteStore?.migratedLegacyProgress);
   return promoteFamilyAchievements(baseStore);
 }
@@ -1298,6 +1505,7 @@ function showProfileScreen() {
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.add("locked");
   els.profileScreen.classList.remove("hidden");
+  renderGroupSelectors();
   renderProfileCards();
   if (!hasVillageName()) {
     showVillageNameSetup();
@@ -1372,6 +1580,8 @@ function completeProfileLogin(profileId) {
   currentProfileId = profileId;
   pendingProfileId = "";
   profileStore.currentProfile = profileId;
+  const group = getCurrentGroup();
+  if (group && !group.memberIds.includes(profileId) && group.memberIds.length < 6) group.memberIds.push(profileId);
   progress = profile.progress;
   vocabularyProgress = profile.vocabularyProgress;
   articleProgress = profile.articleProgress;
@@ -1382,6 +1592,7 @@ function completeProfileLogin(profileId) {
   applyProfileSettings(profile.settings);
   saveProfileStore();
   els.currentProfileLabel.textContent = profile.name;
+  renderGroupSelectors();
   els.profileScreen.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.appShell.classList.remove("locked");
@@ -1639,7 +1850,7 @@ function renderAchievementPreview(achievementStates = getAchievementStates()) {
   );
 }
 
-function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
+function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getGroupCoinTotal()) {
   if (!profile) return;
   const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
@@ -1718,9 +1929,7 @@ function renderSettingsPanel() {
 
 function renderHouseholdMembers() {
   if (!els.householdList) return;
-  const rows = getProfileList()
-    .map((profileInfo) => profileStore.profiles[profileInfo.id])
-    .filter(Boolean);
+  const rows = getCurrentGroupProfiles();
 
   els.householdList.replaceChildren(
     ...rows.map((profile) => {
@@ -1821,7 +2030,7 @@ function renderAchievementCollection(page = "austria-album") {
 function renderRewardsPage(page = "austria-album") {
   const profile = getCurrentProfile();
   if (!profile) return;
-  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
+  const sharedCoins = getGroupCoinTotal();
   const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
@@ -1877,21 +2086,22 @@ function getUnlockedRewards(rewards, coins) {
   return rewards.filter((reward) => normalizeCoinCount(coins) >= reward.coins);
 }
 
-function getAustriaAlbumUnlockedRewardIds(profile, backfillFromCoins = false) {
-  const unlockedCount = getAustriaAlbumUnlockedCount(profile, backfillFromCoins);
+function getAustriaAlbumUnlockedRewardIds(profileOrGroup, backfillFromCoins = false) {
+  const target = profileOrGroup?.memberIds ? profileOrGroup : getCurrentGroup();
+  const unlockedCount = getAustriaAlbumUnlockedCount(target, backfillFromCoins);
   const sequentialIds = AUSTRIA_ALBUM_REWARDS
     .slice(0, unlockedCount)
     .map((reward) => reward.id);
-  if (backfillFromCoins && profile) profile.austriaAlbumSeenRewards = sequentialIds;
+  if (backfillFromCoins && target) target.austriaAlbumSeenRewards = sequentialIds;
   return sequentialIds;
 }
 
-function getAustriaAlbumUnlockedCount(profile, includeCoinProgress = false) {
-  if (!profile) return 0;
-  const savedCount = Math.min(normalizeRewardIdList(profile.austriaAlbumSeenRewards).length, AUSTRIA_ALBUM_REWARDS.length);
+function getAustriaAlbumUnlockedCount(profileOrGroup, includeCoinProgress = false) {
+  if (!profileOrGroup) return 0;
+  const savedCount = Math.min(normalizeRewardIdList(profileOrGroup.austriaAlbumSeenRewards).length, AUSTRIA_ALBUM_REWARDS.length);
   if (!includeCoinProgress) return savedCount;
-  const personalCoins = normalizeCoinCount(profile.coins);
-  const coinProgressCount = AUSTRIA_ALBUM_REWARDS.filter((reward) => personalCoins >= reward.coins).length;
+  const coins = profileOrGroup.memberIds ? getGroupCoinTotal(profileOrGroup) : normalizeCoinCount(profileOrGroup.coins);
+  const coinProgressCount = AUSTRIA_ALBUM_REWARDS.filter((reward) => coins >= reward.coins).length;
   return Math.min(Math.max(savedCount, coinProgressCount), AUSTRIA_ALBUM_REWARDS.length);
 }
 
@@ -2296,9 +2506,9 @@ function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) 
   if (achievement.metric === "streak") return normalizeCounter(profile?.streak?.current);
   if (achievement.metric === "articlesMastered") return getArticleSummary().mastered;
   if (achievement.metric === "nounVerbCorrect") return getNounVerbCorrectAnswerCount(profile);
-  if (achievement.metric === "familyCoins") return getFamilyCoinTotal(profileStore.profiles);
+  if (achievement.metric === "familyCoins") return getGroupCoinTotal();
   if (achievement.metric === "austriaAlbumRewards") return getAustriaAlbumUnlockedCount(profile, true);
-  if (achievement.metric === "villageMemories") return getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getFamilyCoinTotal(profileStore.profiles)).length;
+  if (achievement.metric === "villageMemories") return getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getGroupCoinTotal()).length;
   return 0;
 }
 
@@ -2627,6 +2837,7 @@ function resetCurrentProfileTestData() {
 }
 
 function renderProfileCards() {
+  renderGroupSelectors();
   renderFamilyWealth();
   const profileCards = getProfileList().map((profileInfo) => {
     const profile = profileStore.profiles[profileInfo.id];
@@ -2651,11 +2862,12 @@ function renderProfileCards() {
     document.createTextNode(profileCards.length === 0 ? "Profil erstellen" : "Neues Profil erstellen"),
     createTextElement("span", "", profileCards.length === 0 ? "Create Profile" : "Create New Profile")
   );
-  if (els.profileDebug) els.profileDebug.textContent = `Profiles loaded: ${profileCards.length}`;
 }
 
 function getProfileList() {
+  const groupMemberIds = new Set(getCurrentGroup()?.memberIds || []);
   return Object.values(profileStore.profiles || {})
+    .filter((profile) => groupMemberIds.has(profile.id))
     .map((profile) => ({
       id: profile.id,
       name: profile.name,
@@ -2703,6 +2915,10 @@ function createCustomProfile(name, password) {
     { id, name, password, emoji: "", avatar: "" },
     { id, name, password, emoji: "", avatar: "" }
   );
+  const group = getCurrentGroup();
+  if (group && !group.memberIds.includes(id) && group.memberIds.length < 6) {
+    group.memberIds.push(id);
+  }
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
   return id;
 }
@@ -2723,7 +2939,7 @@ function renameCurrentProfile(nextName) {
     window.alert("Profile name was not changed.");
     return false;
   }
-  const nameExists = Object.values(profileStore.profiles || {})
+  const nameExists = getCurrentGroupProfiles()
     .some((existingProfile) => existingProfile.id !== profile.id && existingProfile.name.toLowerCase() === normalizedName.toLowerCase());
   if (nameExists) {
     window.alert("A profile with that name already exists.");
@@ -2747,7 +2963,12 @@ function handleCreateProfile(event) {
     els.createProfileError.classList.remove("hidden");
     return;
   }
-  const nameExists = Object.values(profileStore.profiles || {})
+  if ((getCurrentGroup()?.memberIds || []).length >= 6) {
+    els.createProfileError.textContent = "This group already has 6 members.";
+    els.createProfileError.classList.remove("hidden");
+    return;
+  }
+  const nameExists = getCurrentGroupProfiles()
     .some((profile) => profile.name.toLowerCase() === name.toLowerCase());
   if (nameExists) {
     els.createProfileError.textContent = "A profile with that name already exists.";
@@ -2774,7 +2995,7 @@ function renderFamilyWealth() {
 }
 
 function getFamilyWealthSummary() {
-  const totalCoins = getFamilyCoinTotal(profileStore.profiles);
+  const totalCoins = getGroupCoinTotal();
   const level = getFamilyWealthLevel(totalCoins);
   const nextGoal = FAMILY_MILESTONES.find((milestone) => totalCoins < milestone.coins)
     || FAMILY_MILESTONES[FAMILY_MILESTONES.length - 1];
@@ -2788,6 +3009,14 @@ function getFamilyWealthSummary() {
 
 function getFamilyCoinTotal(profiles) {
   return Object.values(profiles || {}).reduce((total, profile) => total + normalizeCoinCount(profile?.coins), 0);
+}
+
+function getGroupCoinTotal(group = getCurrentGroup()) {
+  return getFamilyCoinTotal(
+    Object.fromEntries((group?.memberIds || [])
+      .map((profileId) => [profileId, profileStore?.profiles?.[profileId]])
+      .filter(([, profile]) => Boolean(profile)))
+  );
 }
 
 function getFamilyWealthLevel(coinsValue) {
@@ -2838,6 +3067,9 @@ function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
+  els.currentGroupSelect?.addEventListener("change", handleGroupSelectChange);
+  els.profileGroupSelect?.addEventListener("change", handleGroupSelectChange);
+  els.currentUserSelect?.addEventListener("change", handleUserSelectChange);
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
   els.cancelCreateProfile.addEventListener("click", showProfileChooser);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
@@ -3609,27 +3841,29 @@ function awardCoins(amount) {
 
 function checkRewardUnlocks(profile) {
   if (!profile) return;
-  profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
-  profileStore.villageAlbumSeenRewards = normalizeRewardIdList(profileStore.villageAlbumSeenRewards);
-  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
-  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, false);
-  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, true);
+  const group = getCurrentGroup();
+  if (!group) return;
+  group.austriaAlbumSeenRewards = normalizeRewardIdList(group.austriaAlbumSeenRewards);
+  group.villageAlbumSeenRewards = normalizeRewardIdList(group.villageAlbumSeenRewards);
+  const sharedCoins = getGroupCoinTotal(group);
+  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(group, false);
+  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(group, true);
   const sequentialPersonalRewardIds = AUSTRIA_ALBUM_REWARDS
     .slice(0, earnedPersonalRewardCount)
     .map((reward) => reward.id);
   const newPersonalReward = earnedPersonalRewardCount > previousPersonalRewardCount
     ? AUSTRIA_ALBUM_REWARDS[previousPersonalRewardCount]
     : null;
-  profile.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
+  group.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
   if (newPersonalReward) {
     showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
     return;
   }
   const newVillageReward = VILLAGE_ALBUM_REWARDS.find((reward) => {
-    return sharedCoins >= reward.coins && !profileStore.villageAlbumSeenRewards.includes(reward.id);
+    return sharedCoins >= reward.coins && !group.villageAlbumSeenRewards.includes(reward.id);
   });
   if (newVillageReward) {
-    profileStore.villageAlbumSeenRewards.push(newVillageReward.id);
+    group.villageAlbumSeenRewards.push(newVillageReward.id);
     showRewardUnlockCelebration(newVillageReward, "Village Memories");
   }
 }
@@ -3660,13 +3894,15 @@ function hideRewardCelebrationActions() {
 
 function checkTownCenterStageUnlocks() {
   if (!profileStore) return;
-  profileStore.townCenterStagesSeen = normalizeRewardIdList(profileStore.townCenterStagesSeen);
-  const sharedCoins = getFamilyCoinTotal(profileStore.profiles);
+  const group = getCurrentGroup();
+  if (!group) return;
+  group.townCenterStagesSeen = normalizeRewardIdList(group.townCenterStagesSeen);
+  const sharedCoins = getGroupCoinTotal(group);
   const newStage = TOWN_CENTER_STAGES.find((stage) => {
-    return stage.coins > 0 && sharedCoins >= stage.coins && !profileStore.townCenterStagesSeen.includes(stage.id);
+    return stage.coins > 0 && sharedCoins >= stage.coins && !group.townCenterStagesSeen.includes(stage.id);
   });
   if (!newStage) return;
-  profileStore.townCenterStagesSeen.push(newStage.id);
+  group.townCenterStagesSeen.push(newStage.id);
   showTownCenterStageCelebration(newStage);
 }
 
@@ -3707,14 +3943,16 @@ function showLevelCelebration(profile, level) {
 }
 
 function celebrateFamilyLevelIfNeeded() {
-  profileStore.familyLevelsReached = normalizeFamilyLevelsReached(profileStore.familyLevelsReached, profileStore.profiles);
-  const familyLevel = getFamilyWealthLevel(getFamilyCoinTotal(profileStore.profiles));
+  const group = getCurrentGroup();
+  if (!group) return;
+  group.familyLevelsReached = normalizeFamilyLevelsReached(group.familyLevelsReached, Object.fromEntries(getCurrentGroupProfiles().map((profile) => [profile.id, profile])));
+  const familyLevel = getFamilyWealthLevel(getGroupCoinTotal(group));
   if (familyLevel.min === 0) return;
 
   const levelId = getFamilyLevelId(familyLevel);
-  if (profileStore.familyLevelsReached.includes(levelId)) return;
+  if (group.familyLevelsReached.includes(levelId)) return;
 
-  profileStore.familyLevelsReached.push(levelId);
+  group.familyLevelsReached.push(levelId);
   showFamilyLevelCelebration(familyLevel);
 }
 
@@ -3793,7 +4031,14 @@ function getTotalCorrectAnswerCount(profile) {
 
 function unlockAchievement(achievement, profile, reason = "") {
   if (achievement.scope === "family") {
-    profileStore.familyAchievementsUnlocked.push(achievement.id);
+    const group = getCurrentGroup();
+    if (group) {
+      group.familyAchievementsUnlocked = normalizeAchievementList(group.familyAchievementsUnlocked);
+      if (!group.familyAchievementsUnlocked.includes(achievement.id)) group.familyAchievementsUnlocked.push(achievement.id);
+      profileStore.familyAchievementsUnlocked = group.familyAchievementsUnlocked;
+    } else {
+      profileStore.familyAchievementsUnlocked.push(achievement.id);
+    }
     showAchievementCelebration(achievement);
     return;
   }
