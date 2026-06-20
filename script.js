@@ -442,6 +442,7 @@ const els = {
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
+  achievementPreview: document.querySelector("#achievementPreview"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
   townCenterDashboardImageDebug: document.querySelector("#townCenterDashboardImageDebug"),
@@ -1695,8 +1696,19 @@ function renderDashboard() {
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
+  renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
   saveProfileStore();
+}
+
+function renderAchievementPreview(achievementStates = getAchievementStates()) {
+  if (!els.achievementPreview) return;
+  const earnedAchievements = achievementStates.filter(({ achievement, unlocked }) => unlocked && !achievement.testOnly);
+  const latestAchievement = getRecentlyEarnedAchievements(achievementStates)[0]?.achievement || null;
+  els.achievementPreview.replaceChildren(
+    createTextElement("span", "reward-preview-count", `${earnedAchievements.length} earned`),
+    createRewardPreviewLatest(latestAchievement ? `${latestAchievement.icon} ${latestAchievement.name}` : "None Yet")
+  );
 }
 
 function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getFamilyCoinTotal(profileStore.profiles)) {
@@ -1885,6 +1897,20 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
+  if (page === "achievements") {
+    const achievementStates = getAchievementStates().filter(({ achievement }) => !achievement.testOnly);
+    const earnedCount = achievementStates.filter(({ unlocked }) => unlocked).length;
+    els.rewardPageTitle.textContent = "Achievements";
+    els.rewardPageSummary.textContent = `${earnedCount} earned`;
+    els.achievementsGrid.replaceChildren(
+      createRewardSection(
+        "Achievements",
+        `${earnedCount} earned`,
+        achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress))
+      )
+    );
+    return;
+  }
   if (page === "town-center") {
     els.rewardPageTitle.textContent = "🏡 Town Center";
     els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
@@ -2510,7 +2536,7 @@ function handleDashboardAction(action) {
   }
 
   if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
-    showAchievementCollection(action === "achievements" ? "austria-album" : action);
+    showAchievementCollection(action);
     return;
   }
 
