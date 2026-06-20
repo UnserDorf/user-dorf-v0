@@ -740,7 +740,8 @@ h1 {
   background: linear-gradient(135deg, var(--green-soft), rgba(255, 253, 248, 0.85));
   position: relative;
   display: grid;
-  place-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  place-items: stretch;
 }
 
 .dashboard-town-center-image-wrap img {
@@ -757,8 +758,8 @@ h1 {
 }
 
 .dashboard-town-center-image-wrap:has(img.is-missing)::after,
-.town-center-hero:has(img.is-missing)::before {
-  content: "Town Center image coming soon";
+.town-center-hero-media:has(img.is-missing)::before {
+  content: "Town Center image preview";
   border: 1px dashed rgba(71, 115, 91, 0.32);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.82);
@@ -766,6 +767,20 @@ h1 {
   padding: 16px;
   font-weight: 900;
   text-align: center;
+}
+
+.town-center-image-debug {
+  margin: 0;
+  padding: 8px 10px;
+  background: rgba(255, 250, 241, 0.9);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.town-center-image-debug.is-error {
+  color: var(--red);
 }
 
 .dashboard-town-center-content {
@@ -1729,7 +1744,12 @@ h1 {
   align-items: stretch;
 }
 
-.town-center-hero:has(img.is-missing)::before {
+.town-center-hero-media {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.town-center-hero-media:has(img.is-missing)::before {
   min-height: clamp(280px, 42vw, 500px);
   display: grid;
   place-items: center;
