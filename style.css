@@ -1749,6 +1749,82 @@ h1 {
   display: none;
 }
 
+.village-memory-card.unlocked {
+  cursor: pointer;
+}
+
+.village-memory-card.unlocked:focus-visible {
+  outline: 3px solid rgba(71, 115, 91, 0.34);
+  outline-offset: 3px;
+}
+
+.memory-detail-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(31, 38, 35, 0.36);
+}
+
+.memory-detail-card {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border: 1px solid rgba(222, 216, 203, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 22px 52px rgba(31, 38, 35, 0.24);
+  padding: clamp(16px, 4vw, 24px);
+  display: grid;
+  gap: 12px;
+}
+
+.memory-detail-close {
+  justify-self: start;
+}
+
+.memory-detail-image {
+  min-height: clamp(220px, 48vw, 360px);
+  border: 1px solid rgba(222, 216, 203, 0.9);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--green-soft), rgba(255, 250, 241, 0.95));
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.memory-detail-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+}
+
+.memory-detail-placeholder {
+  color: var(--green);
+  font-size: clamp(2.2rem, 10vw, 4rem);
+  font-weight: 900;
+}
+
+.memory-detail-card h3,
+.memory-detail-card p {
+  margin: 0;
+}
+
+.memory-detail-card h3 {
+  color: var(--ink);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.memory-detail-card p:not(.eyebrow) {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
 .town-center-section {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

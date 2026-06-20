@@ -1899,7 +1899,7 @@ function renderRewardsPage(page = "austria-album") {
       createRewardSection(
         "Village Memories",
         `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
-        VILLAGE_ALBUM_REWARDS.map((reward) => createRewardCard(reward, sharedCoins >= reward.coins, `${reward.coins} Shared Village Coins`))
+        VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins))
       )
     );
     return;
@@ -2020,6 +2020,22 @@ function createRewardCard(reward, unlocked, requirementText) {
   return card;
 }
 
+function createVillageMemoryCard(reward, unlocked) {
+  const card = createRewardCard(reward, unlocked, `${reward.coins} Shared Village Coins`);
+  card.classList.add("village-memory-card");
+  if (!unlocked) return card;
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-label", `Open ${reward.title}`);
+  card.addEventListener("click", () => showVillageMemoryDetail(reward));
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    showVillageMemoryDetail(reward);
+  });
+  return card;
+}
+
 function createRewardImageElement(reward, unlocked) {
   if (!unlocked) return createTextElement("span", "reward-image-placeholder", "🔒");
   if (!isImagePath(reward.image)) return createTextElement("span", "reward-image-placeholder", reward.image || reward.icon || "");
@@ -2040,6 +2056,32 @@ function createRewardImageElement(reward, unlocked) {
 
 function isImagePath(value) {
   return typeof value === "string" && /\.(png|jpe?g|webp|gif)$/i.test(value);
+}
+
+function showVillageMemoryDetail(reward) {
+  if (!reward || !els.memoryDetailModal) return;
+  els.memoryDetailTitle.textContent = reward.title;
+  els.memoryDetailDescription.textContent = reward.description;
+  els.memoryDetailImage.replaceChildren(createVillageMemoryDetailImage(reward));
+  els.memoryDetailModal.classList.remove("hidden");
+}
+
+function hideVillageMemoryDetail() {
+  els.memoryDetailModal?.classList.add("hidden");
+}
+
+function createVillageMemoryDetailImage(reward) {
+  if (!isImagePath(reward.image)) return createTextElement("span", "memory-detail-placeholder", reward.icon || "Memory");
+  const image = document.createElement("img");
+  image.src = reward.image;
+  image.alt = reward.title;
+  image.loading = "lazy";
+  image.onerror = () => {
+    image.remove();
+    const fallback = createTextElement("span", "memory-detail-placeholder", reward.icon || "Memory");
+    els.memoryDetailImage.replaceChildren(fallback);
+  };
+  return image;
 }
 
 function createTownCenterPage(progress, sharedCoins) {
@@ -3083,6 +3125,14 @@ function bindEvents() {
     const page = els.levelCelebrationViewAlbum.dataset.rewardPage || "austria-album";
     els.levelCelebration.classList.add("hidden");
     showAchievementCollection(page);
+  });
+
+  els.memoryDetailClose?.addEventListener("click", hideVillageMemoryDetail);
+  els.memoryDetailModal?.addEventListener("click", (event) => {
+    if (event.target === els.memoryDetailModal) hideVillageMemoryDetail();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") hideVillageMemoryDetail();
   });
 }
 
