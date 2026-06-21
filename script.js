@@ -903,7 +903,7 @@ function switchGroup(groupId) {
   currentGroupId = groupId;
   profileStore.currentGroup = groupId;
   saveProfileStore();
-  if (currentProfileId && !getCurrentGroup().memberIds.includes(currentProfileId)) {
+  if (!currentProfileId || !getCurrentGroup().memberIds.includes(currentProfileId)) {
     showProfileScreen();
   } else {
     renderVillageName();
