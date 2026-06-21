@@ -14,9 +14,9 @@ const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
 const PROFILE_STORE_VERSION = 2;
 const DEFAULT_GROUP_ID = "family-z";
 const DEFAULT_GROUPS = [
-  { id: "family-z", name: "Family Z", icon: "🏡", description: "Family learning village", password: "familyz" },
-  { id: "b2-class", name: "B2 Class", icon: "📚", description: "German learning group", password: "b2class" },
-  { id: "test-group", name: "Test Family", icon: "🧪", description: "Testing village", password: "test" }
+  { id: "family-z", name: "Family Z", icon: "🏡", description: "Unser Familienlern-Dorf", password: "familyz" },
+  { id: "b2-class", name: "B2 Class", icon: "📚", description: "Unser Deutschlern-Dorf", password: "b2class" },
+  { id: "test-group", name: "Test Family", icon: "🧪", description: "Test- und Übungs-Dorf", password: "test" }
 ];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
@@ -927,6 +927,7 @@ function selectVillage(groupId) {
 function showVillageSelection() {
   currentProfileId = "";
   pendingProfileId = "";
+  els.profileScreen.classList.add("village-landing-mode");
   els.profileScreen.classList.remove("first-use");
   hideProfileOnboardingPanels();
   els.villageSelection?.classList.remove("hidden");
@@ -937,6 +938,7 @@ function showVillageSelection() {
 function showVillagePassword() {
   const group = getCurrentGroup();
   if (!group) return;
+  els.profileScreen.classList.remove("village-landing-mode");
   hideProfileOnboardingPanels();
   els.villagePasswordTitle.textContent = group.name;
   els.villagePasswordInput.value = "";
@@ -965,6 +967,9 @@ function showVillageEntry() {
 }
 
 function hideProfileOnboardingPanels() {
+  if (!els.villageSelection || !els.villageSelection.classList.contains("hidden")) {
+    els.profileScreen?.classList.remove("first-use");
+  }
   els.villageSelection?.classList.add("hidden");
   els.villagePasswordForm?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
