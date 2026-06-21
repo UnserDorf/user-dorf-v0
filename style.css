@@ -1017,30 +1017,47 @@ h1 {
   font-weight: 900;
 }
 
-.household-list {
+.village-members-grid {
   display: grid;
-  gap: 8px;
-}
-
-.household-row {
-  min-height: 44px;
-  border: 1px solid rgba(222, 216, 203, 0.72);
-  border-radius: 8px;
-  background: rgba(255, 253, 248, 0.78);
-  padding: 10px 12px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 }
 
-.household-row.current {
-  background: var(--violet-soft);
+.village-member-card {
+  min-width: 0;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.9);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
 }
 
-.household-coins {
+.village-member-card.current {
+  border-color: rgba(71, 115, 91, 0.38);
+  background: rgba(234, 242, 229, 0.72);
+}
+
+.village-member-avatar {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.village-member-name {
   color: var(--ink);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.village-member-coins,
+.village-member-status {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.25;
+  font-weight: 800;
 }
 
 .challenge-selection-grid {
@@ -3145,6 +3162,10 @@ select,
 }
 
 @media (max-width: 480px) {
+  .village-members-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   body {
     overflow: auto;
   }

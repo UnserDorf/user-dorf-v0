@@ -1870,6 +1870,7 @@ function renderDashboard() {
   renderProgressCards(profile);
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
+  renderHouseholdMembers();
   saveProfileStore();
 }
 
@@ -1976,20 +1977,37 @@ function renderSettingsPanel() {
 
 function renderHouseholdMembers() {
   if (!els.householdList) return;
-  const rows = getCurrentGroupProfiles();
+  const rows = getOrderedVillageMembers();
 
   els.householdList.replaceChildren(
     ...rows.map((profile) => {
-      const row = document.createElement("div");
-      row.className = "household-row";
-      row.classList.toggle("current", profile.id === currentProfileId);
-      row.replaceChildren(
-        createTextElement("span", "household-name", profile.name),
-        createTextElement("strong", "household-coins", normalizeCoinCount(profile.coins))
+      const card = document.createElement("article");
+      card.className = "village-member-card";
+      card.classList.toggle("current", profile.id === currentProfileId);
+      card.replaceChildren(
+        createTextElement("span", "village-member-avatar", profile.emoji || "⭐"),
+        createTextElement("strong", "village-member-name", profile.name),
+        createTextElement("span", "village-member-coins", `${normalizeCoinCount(profile.coins)} coins`),
+        createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
       );
-      return row;
+      return card;
     })
   );
+}
+
+function getOrderedVillageMembers() {
+  const profiles = getCurrentGroupProfiles();
+  const current = profiles.filter((profile) => profile.id === currentProfileId);
+  const others = profiles.filter((profile) => profile.id !== currentProfileId);
+  return [...current, ...others];
+}
+
+function getVillageMemberStatus(profile) {
+  const streak = getDisplayStreak(profile).current;
+  if (streak > 0) return `${streak}-day streak`;
+  const coins = normalizeCoinCount(profile.coins);
+  if (coins > 0) return "Active today";
+  return "Just started";
 }
 
 function renderCoinChallenges() {
