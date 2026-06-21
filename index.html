@@ -8,10 +8,10 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=112">
+    <link rel="stylesheet" href="style.css?v=113">
   </head>
   <body>
-    <section class="lock-screen" id="lockScreen" aria-label="Password required">
+    <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
       <form class="lock-card" id="lockForm">
         <span class="brand-mark" aria-hidden="true">UD</span>
         <div class="brand-title-stack">
@@ -36,10 +36,28 @@
             <p>by Common Ground</p>
           </div>
         </div>
-        <label class="context-select profile-group-select">
-          <span>Current Group</span>
-          <select id="profileGroupSelect"></select>
-        </label>
+        <section class="village-selection" id="villageSelection" aria-label="Choose your village">
+          <div class="profile-signin-heading">
+            <p class="eyebrow">WELCOME</p>
+            <h2>Choose your village</h2>
+          </div>
+          <div class="village-card-grid" id="villageCardGrid"></div>
+        </section>
+        <form class="village-password-card hidden" id="villagePasswordForm" aria-label="Village password">
+          <div>
+            <p class="eyebrow">Village Password</p>
+            <h2 id="villagePasswordTitle">Village Name</h2>
+          </div>
+          <label>
+            <span>Enter village password</span>
+            <input id="villagePasswordInput" type="password" autocomplete="current-password" required>
+          </label>
+          <div class="create-profile-buttons">
+            <button class="primary-button" type="submit">Continue</button>
+            <button class="ghost-button" id="cancelVillagePassword" type="button">Back</button>
+          </div>
+          <p class="lock-error hidden" id="villagePasswordError">Incorrect village password.</p>
+        </form>
         <section class="family-wealth-card" id="familyWealthCard" aria-label="Shared village">
           <h2 id="familyWealthLevel">Shared Village</h2>
           <div class="family-wealth-main">
@@ -69,10 +87,9 @@
           <button class="primary-button" type="submit">Continue</button>
         </form>
         <div class="profile-signin-heading hidden" id="profileSignInHeading">
-          <p class="eyebrow">ANMELDEN / SIGN IN</p>
+          <p class="eyebrow" id="profileSignInEyebrow">WELCOME</p>
           <h2>
-            <span>Profil auswählen</span>
-            <span>Choose your profile</span>
+            <span id="profileSignInTitle">Choose Profile</span>
           </h2>
         </div>
         <div class="profile-grid" id="profileGrid"></div>
@@ -106,7 +123,8 @@
         <form class="create-profile-card hidden" id="createProfileForm" aria-label="Create profile">
           <div>
             <p class="eyebrow">New learner</p>
-            <h2>Create Profile</h2>
+            <h2 id="createProfileTitle">Create Profile</h2>
+            <p id="createProfileIntro">Create your profile</p>
           </div>
           <label>
             <span>Name</span>
@@ -116,6 +134,10 @@
             <span>Password</span>
             <input id="createProfilePassword" type="password" autocomplete="new-password" required>
           </label>
+          <div class="avatar-picker" aria-label="Choose avatar">
+            <span>Choose Avatar</span>
+            <div class="avatar-options" id="avatarOptions"></div>
+          </div>
           <div class="create-profile-buttons">
             <button class="primary-button" type="submit">Create Profile</button>
             <button class="ghost-button" id="cancelCreateProfile" type="button">Cancel</button>
@@ -136,15 +158,9 @@
             <span class="sr-only" id="deckStatus">Loading vocabulary...</span>
           </div>
         </div>
-        <div class="context-switchers" aria-label="Current group and user">
-          <label class="context-select">
-            <span>Current Group</span>
-            <select id="currentGroupSelect"></select>
-          </label>
-          <label class="context-select">
-            <span>Current User</span>
-            <select id="currentUserSelect"></select>
-          </label>
+        <div class="context-switchers" aria-label="Current village and user">
+          <span class="context-pill" id="currentGroupLabel">Current Village</span>
+          <span class="context-pill" id="currentUserLabel">Current User</span>
         </div>
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
@@ -598,6 +614,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=112"></script>
+    <script type="module" src="script.js?v=113"></script>
   </body>
 </html>

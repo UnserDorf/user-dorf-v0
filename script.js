@@ -11,13 +11,14 @@ const UNLOCK_STORAGE_KEY = "goethe-b1-flashcards-unlocked-v1";
 const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
-const PROFILE_STORE_VERSION = 1;
+const PROFILE_STORE_VERSION = 2;
 const DEFAULT_GROUP_ID = "family-z";
 const DEFAULT_GROUPS = [
-  { id: "family-z", name: "Family Z" },
-  { id: "test-group", name: "Test Group" },
-  { id: "b2-class", name: "B2 Class" }
+  { id: "family-z", name: "Family Z", icon: "🏡", description: "Family learning village", password: "familyz" },
+  { id: "b2-class", name: "B2 Class", icon: "📚", description: "German learning group", password: "b2class" },
+  { id: "test-group", name: "Test Family", icon: "🧪", description: "Testing village", password: "test" }
 ];
+const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
@@ -327,9 +328,18 @@ const els = {
   passwordInput: document.querySelector("#passwordInput"),
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
+  villageSelection: document.querySelector("#villageSelection"),
+  villageCardGrid: document.querySelector("#villageCardGrid"),
+  villagePasswordForm: document.querySelector("#villagePasswordForm"),
+  villagePasswordTitle: document.querySelector("#villagePasswordTitle"),
+  villagePasswordInput: document.querySelector("#villagePasswordInput"),
+  cancelVillagePassword: document.querySelector("#cancelVillagePassword"),
+  villagePasswordError: document.querySelector("#villagePasswordError"),
   villageNameForm: document.querySelector("#villageNameForm"),
   villageNameInput: document.querySelector("#villageNameInput"),
   profileSignInHeading: document.querySelector("#profileSignInHeading"),
+  profileSignInEyebrow: document.querySelector("#profileSignInEyebrow"),
+  profileSignInTitle: document.querySelector("#profileSignInTitle"),
   profileGrid: document.querySelector("#profileGrid"),
   profileActions: document.querySelector("#profileActions"),
   emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
@@ -342,8 +352,11 @@ const els = {
   familyWealthCard: document.querySelector("#familyWealthCard"),
   createProfileToggle: document.querySelector("#createProfileToggle"),
   createProfileForm: document.querySelector("#createProfileForm"),
+  createProfileTitle: document.querySelector("#createProfileTitle"),
+  createProfileIntro: document.querySelector("#createProfileIntro"),
   createProfileName: document.querySelector("#createProfileName"),
   createProfilePassword: document.querySelector("#createProfilePassword"),
+  avatarOptions: document.querySelector("#avatarOptions"),
   cancelCreateProfile: document.querySelector("#cancelCreateProfile"),
   createProfileError: document.querySelector("#createProfileError"),
   familyWealthCoins: document.querySelector("#familyWealthCoins"),
@@ -360,9 +373,8 @@ const els = {
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
-  currentGroupSelect: document.querySelector("#currentGroupSelect"),
-  currentUserSelect: document.querySelector("#currentUserSelect"),
-  profileGroupSelect: document.querySelector("#profileGroupSelect"),
+  currentGroupLabel: document.querySelector("#currentGroupLabel"),
+  currentUserLabel: document.querySelector("#currentUserLabel"),
   dashboardChallengeStatus: document.querySelector("#dashboardChallengeStatus"),
   dashboardStreak: document.querySelector("#dashboardStreak"),
   achievementPreview: document.querySelector("#achievementPreview"),
@@ -538,6 +550,7 @@ let checkingAchievements = false;
 let currentProfileId = "";
 let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
+let selectedAvatar = PROFILE_AVATARS[0];
 let searchResults = [];
 let randomSessionKey = "";
 let randomSessionIds = [];
@@ -551,17 +564,13 @@ document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   bindLockEvents();
-  if (!isUnlocked()) {
-    els.passwordInput.focus();
-    return;
-  }
   await unlockApp();
 }
 
 async function unlockApp() {
   els.lockScreen.classList.add("hidden");
   profileStore = loadProfileStore();
-  await initializeFamilySync();
+  syncEnabled = false;
   bindEvents();
   try {
     const response = await fetch(CSV_URL, { cache: "no-store" });
@@ -663,6 +672,12 @@ function loadProfileStore() {
     stored = null;
   }
 
+  if (stored?.version !== PROFILE_STORE_VERSION) {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(emptyStore));
+    currentGroupId = emptyStore.currentGroup;
+    return emptyStore;
+  }
+
   const store = {
     ...emptyStore,
     ...(stored || {}),
@@ -725,7 +740,10 @@ function createGroupData(group, source = {}) {
   return {
     id: group.id,
     name: group.name,
-    villageName: normalizeVillageName(source.villageName) || "",
+    icon: group.icon || source.icon || "🏡",
+    description: group.description || source.description || "Learning village",
+    password: group.password || source.password || "",
+    villageName: normalizeVillageName(source.villageName) || group.name,
     villageAlbumSeenRewards: normalizeRewardIdList(source.villageAlbumSeenRewards),
     townCenterStagesSeen: normalizeRewardIdList(source.townCenterStagesSeen),
     familyLevelsReached: Array.isArray(source.familyLevelsReached) ? source.familyLevelsReached.map(String) : [],
@@ -874,52 +892,89 @@ function renderVillageName() {
 
 function renderGroupSelectors() {
   if (!profileStore?.groups) return;
-  const groupOptions = Object.values(profileStore.groups).map((group) => {
-    const option = document.createElement("option");
-    option.value = group.id;
-    option.textContent = group.name;
-    return option;
-  });
-  [els.currentGroupSelect, els.profileGroupSelect].forEach((select) => {
-    if (!select) return;
-    select.replaceChildren(...groupOptions.map((option) => option.cloneNode(true)));
-    select.value = getCurrentGroup()?.id || DEFAULT_GROUP_ID;
-  });
-  if (els.currentUserSelect) {
-    const userOptions = getProfileList().map((profile) => {
-      const option = document.createElement("option");
-      option.value = profile.id;
-      option.textContent = profile.name;
-      return option;
-    });
-    els.currentUserSelect.replaceChildren(...userOptions);
-    els.currentUserSelect.value = currentProfileId || "";
-    els.currentUserSelect.disabled = userOptions.length === 0;
-  }
+  const group = getCurrentGroup();
+  const profile = currentProfileId ? getCurrentProfile() : null;
+  if (els.currentGroupLabel) els.currentGroupLabel.textContent = group ? `🏡 ${group.name}` : "Choose Village";
+  if (els.currentUserLabel) els.currentUserLabel.textContent = profile ? `${profile.emoji || "⭐"} ${profile.name}` : "No profile";
 }
 
-function switchGroup(groupId) {
+function renderVillageCards() {
+  if (!els.villageCardGrid || !profileStore?.groups) return;
+  const cards = Object.values(profileStore.groups).map((group) => {
+    const button = document.createElement("button");
+    button.className = "village-card";
+    button.type = "button";
+    button.dataset.groupId = group.id;
+    button.addEventListener("click", () => selectVillage(group.id));
+    button.replaceChildren(
+      createTextElement("span", "village-card-icon", group.icon || "🏡"),
+      createTextElement("strong", "", group.name),
+      createTextElement("span", "", group.description || "Learning village")
+    );
+    return button;
+  });
+  els.villageCardGrid.replaceChildren(...cards);
+}
+
+function selectVillage(groupId) {
   if (!profileStore?.groups?.[groupId]) return;
   currentGroupId = groupId;
   profileStore.currentGroup = groupId;
   saveProfileStore();
-  if (!currentProfileId || !getCurrentGroup().memberIds.includes(currentProfileId)) {
-    showProfileScreen();
-  } else {
-    renderVillageName();
-    renderProfileCards();
-    if (currentProfileId) renderDashboard();
+  showVillagePassword();
+}
+
+function showVillageSelection() {
+  currentProfileId = "";
+  pendingProfileId = "";
+  els.profileScreen.classList.remove("first-use");
+  hideProfileOnboardingPanels();
+  els.villageSelection?.classList.remove("hidden");
+  renderVillageCards();
+  renderGroupSelectors();
+}
+
+function showVillagePassword() {
+  const group = getCurrentGroup();
+  if (!group) return;
+  hideProfileOnboardingPanels();
+  els.villagePasswordTitle.textContent = group.name;
+  els.villagePasswordInput.value = "";
+  els.villagePasswordError.classList.add("hidden");
+  els.villagePasswordForm.classList.remove("hidden");
+  els.villagePasswordInput.focus();
+}
+
+function handleVillagePassword(event) {
+  event.preventDefault();
+  const group = getCurrentGroup();
+  if (!group || els.villagePasswordInput.value.trim() !== group.password) {
+    els.villagePasswordError.classList.remove("hidden");
+    els.villagePasswordInput.select();
+    return;
   }
+  showVillageEntry();
 }
 
-function handleGroupSelectChange(event) {
-  switchGroup(event.target.value);
+function showVillageEntry() {
+  if (getProfileList().length === 0) {
+    showCreateProfileScreen();
+    return;
+  }
+  showProfileChooser();
 }
 
-function handleUserSelectChange(event) {
-  const profileId = event.target.value;
-  if (!profileId || profileId === currentProfileId) return;
-  showProfileLogin(profileId);
+function hideProfileOnboardingPanels() {
+  els.villageSelection?.classList.add("hidden");
+  els.villagePasswordForm?.classList.add("hidden");
+  els.familyWealthCard?.classList.add("hidden");
+  els.villageNameForm?.classList.add("hidden");
+  els.profileSignInHeading?.classList.add("hidden");
+  els.profileGrid?.classList.add("hidden");
+  els.profileActions?.classList.add("hidden");
+  els.emptyProfileMessage?.classList.add("hidden");
+  els.profileLoginForm?.classList.add("hidden");
+  els.createProfileForm?.classList.add("hidden");
 }
 
 function promoteFamilyAchievements(store) {
@@ -1505,13 +1560,7 @@ function showProfileScreen() {
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.add("locked");
   els.profileScreen.classList.remove("hidden");
-  renderGroupSelectors();
-  renderProfileCards();
-  if (!hasVillageName()) {
-    showVillageNameSetup();
-  } else {
-    showProfileChooser();
-  }
+  showVillageSelection();
 }
 
 function showVillageNameSetup() {
@@ -1547,15 +1596,8 @@ function showProfileLogin(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
   pendingProfileId = profileId;
-  els.familyWealthCard.classList.add("hidden");
-  els.profileSignInHeading.classList.add("hidden");
-  els.profileGrid.classList.add("hidden");
-  els.profileActions.classList.add("hidden");
-  els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug?.classList.add("hidden");
-  els.villageNameForm.classList.add("hidden");
-  els.createProfileForm.classList.add("hidden");
-  els.profileLoginTitle.textContent = profile.name;
+  hideProfileOnboardingPanels();
+  els.profileLoginTitle.textContent = `${profile.emoji || "⭐"} ${profile.name}`;
   els.profileLoginPassword.value = "";
   els.profileLoginError.classList.add("hidden");
   els.profileLoginForm.classList.remove("hidden");
@@ -2838,7 +2880,6 @@ function resetCurrentProfileTestData() {
 
 function renderProfileCards() {
   renderGroupSelectors();
-  renderFamilyWealth();
   const profileCards = getProfileList().map((profileInfo) => {
     const profile = profileStore.profiles[profileInfo.id];
     const button = document.createElement("button");
@@ -2847,8 +2888,9 @@ function renderProfileCards() {
     button.dataset.profileId = profile.id;
     button.addEventListener("click", () => selectProfile(profile.id));
     button.replaceChildren(
+      createTextElement("span", "profile-card-avatar", profile.emoji || "⭐"),
       createTextElement("span", "profile-name", profile.name),
-      createTextElement("span", "profile-signin-note", "Anmelden / Sign in")
+      createTextElement("span", "profile-signin-note", "Enter password")
     );
     return button;
   });
@@ -2859,8 +2901,7 @@ function renderProfileCards() {
   els.profileSignInHeading.classList.toggle("hidden", profileCards.length === 0);
   els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
   els.createProfileToggle.replaceChildren(
-    document.createTextNode(profileCards.length === 0 ? "Profil erstellen" : "Neues Profil erstellen"),
-    createTextElement("span", "", profileCards.length === 0 ? "Create Profile" : "Create New Profile")
+    document.createTextNode(profileCards.length === 0 ? "Create Profile" : "Create New Profile")
   );
 }
 
@@ -2879,41 +2920,68 @@ function getProfileList() {
 
 function showProfileChooser() {
   pendingProfileId = "";
+  const group = getCurrentGroup();
   const hasProfiles = getProfileList().length > 0;
-  els.familyWealthCard.classList.add("hidden");
-  els.villageNameForm.classList.add("hidden");
-  els.profileSignInHeading.classList.toggle("hidden", !hasProfiles);
+  hideProfileOnboardingPanels();
+  if (els.profileSignInEyebrow) els.profileSignInEyebrow.textContent = `Welcome to ${group?.name || "your village"}`;
+  if (els.profileSignInTitle) els.profileSignInTitle.textContent = hasProfiles ? "Choose Profile" : "Create your profile";
+  els.profileSignInHeading.classList.remove("hidden");
   els.profileGrid.classList.remove("hidden");
   els.profileActions.classList.remove("hidden");
-  els.profileDebug?.classList.add("hidden");
-  els.profileLoginForm.classList.add("hidden");
   els.profileLoginForm.reset();
   els.profileLoginError.classList.add("hidden");
   els.profileLoginError.textContent = "Incorrect password.";
-  els.createProfileForm.classList.add("hidden");
   els.createProfileForm.reset();
   els.createProfileError.classList.add("hidden");
   els.createProfileError.textContent = "";
+  renderProfileCards();
 }
 
 function showCreateProfileScreen() {
-  els.familyWealthCard.classList.add("hidden");
-  els.profileSignInHeading.classList.add("hidden");
-  els.profileGrid.classList.add("hidden");
-  els.profileActions.classList.add("hidden");
-  els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug?.classList.add("hidden");
-  els.profileLoginForm.classList.add("hidden");
-  els.villageNameForm.classList.add("hidden");
+  const group = getCurrentGroup();
+  hideProfileOnboardingPanels();
+  if (els.createProfileTitle) els.createProfileTitle.textContent = `Welcome to ${group?.name || "your village"}`;
+  if (els.createProfileIntro) els.createProfileIntro.textContent = "Create your profile";
+  renderAvatarPicker();
+  els.createProfileForm.reset();
+  els.createProfileError.classList.add("hidden");
+  els.createProfileError.textContent = "";
   els.createProfileForm.classList.remove("hidden");
   els.createProfileName.focus();
 }
 
-function createCustomProfile(name, password) {
+function cancelCreateProfile() {
+  if (getProfileList().length === 0) {
+    showVillageSelection();
+    return;
+  }
+  showProfileChooser();
+}
+
+function renderAvatarPicker() {
+  selectedAvatar = selectedAvatar || PROFILE_AVATARS[0];
+  if (!els.avatarOptions) return;
+  const buttons = PROFILE_AVATARS.map((avatar) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "avatar-option";
+    button.textContent = avatar;
+    button.setAttribute("aria-label", `Choose ${avatar} avatar`);
+    button.classList.toggle("selected", avatar === selectedAvatar);
+    button.addEventListener("click", () => {
+      selectedAvatar = avatar;
+      renderAvatarPicker();
+    });
+    return button;
+  });
+  els.avatarOptions.replaceChildren(...buttons);
+}
+
+function createCustomProfile(name, password, emoji = selectedAvatar) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
-    { id, name, password, emoji: "", avatar: "" },
-    { id, name, password, emoji: "", avatar: "" }
+    { id, name, password, emoji, avatar: "" },
+    { id, name, password, emoji, avatar: "" }
   );
   const group = getCurrentGroup();
   if (group && !group.memberIds.includes(id) && group.memberIds.length < 6) {
@@ -2975,7 +3043,7 @@ function handleCreateProfile(event) {
     els.createProfileError.classList.remove("hidden");
     return;
   }
-  const profileId = createCustomProfile(name, password);
+  const profileId = createCustomProfile(name, password, selectedAvatar);
   completeProfileLogin(profileId);
 }
 
@@ -3053,25 +3121,27 @@ function formatDate(value) {
 function logoutToProfileScreen() {
   saveCurrentPosition();
   closeSettingsMenu();
-  showProfileScreen();
+  currentProfileId = "";
+  pendingProfileId = "";
+  els.appShell.classList.add("locked");
+  els.profileScreen.classList.remove("hidden");
+  showVillageEntry();
 }
 
 function lockSharedPasswordScreen() {
   saveCurrentPosition();
   closeSettingsMenu();
-  localStorage.removeItem(UNLOCK_STORAGE_KEY);
-  window.location.reload();
+  showProfileScreen();
 }
 
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
-  els.currentGroupSelect?.addEventListener("change", handleGroupSelectChange);
-  els.profileGroupSelect?.addEventListener("change", handleGroupSelectChange);
-  els.currentUserSelect?.addEventListener("change", handleUserSelectChange);
+  els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
+  els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
-  els.cancelCreateProfile.addEventListener("click", showProfileChooser);
+  els.cancelCreateProfile.addEventListener("click", cancelCreateProfile);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
   els.cancelProfileLogin.addEventListener("click", showProfileChooser);
   els.profileLoginForm.addEventListener("submit", handleProfileLogin);
