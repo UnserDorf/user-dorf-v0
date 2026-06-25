@@ -2,6 +2,16 @@ const CSV_URL = "vocabulary.csv";
 const NOUN_VERB_CSV_URL = "nomen_verb_verbindungen.csv";
 const MEANING_MATCH_CSV_URL = "meaning_match_items.csv";
 const PREPOSITIONS_CSV_URL = "prepositions.csv";
+const LEARNING_LEVELS = ["A1", "A2", "B1"];
+const LEVEL_DATASET_PATHS = Object.fromEntries(LEARNING_LEVELS.map((level) => {
+  const folder = level.toLowerCase();
+  return [level, {
+    flashcards: `data/${folder}/unserdorf_v0_${folder}_full_clean.csv`,
+    vocabulary: `data/${folder}/unserdorf_${folder}_vocabulary_quiz_items.csv`,
+    articles: `data/${folder}/unserdorf_${folder}_article_quiz_items.csv`,
+    problemReview: `data/${folder}/unserdorf_${folder}_problem_review.csv`
+  }];
+}));
 const RECENT_VOCABULARY_WORD_BUFFER = 100;
 const WRONG_VOCABULARY_WAIT_BUFFER = 20;
 const MEANING_MATCH_RECENT_BUFFER = 60;
@@ -546,6 +556,7 @@ const els = {
 
 let cards = [];
 let visibleCards = [];
+let levelDatasets = createEmptyLevelDatasets();
 let nounVerbPairs = [];
 let meaningMatchItems = [];
 let prepositionItems = [];
@@ -673,7 +684,45 @@ async function unlockApp() {
     console.warn("Could not load preposition questions.", error);
     prepositionItems = [];
   }
+  await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level)));
   showProfileScreen();
+}
+
+function createEmptyLevelDatasets() {
+  return Object.fromEntries(LEARNING_LEVELS.map((level) => [level, {
+    flashcards: [],
+    vocabulary: [],
+    articles: [],
+    problemReview: []
+  }]));
+}
+
+async function loadLevelDatasets(level) {
+  const paths = LEVEL_DATASET_PATHS[level];
+  if (!paths) return;
+  const [flashcards, vocabulary, articles, problemReview] = await Promise.all([
+    loadCsvRows(paths.flashcards),
+    loadCsvRows(paths.vocabulary),
+    loadCsvRows(paths.articles),
+    loadCsvRows(paths.problemReview)
+  ]);
+  levelDatasets[level] = {
+    flashcards: normalizeLevelCards(flashcards, level, "flashcards"),
+    vocabulary: normalizeLevelCards(vocabulary, level, "vocabulary"),
+    articles: normalizeArticleChallengeCards(articles, level),
+    problemReview
+  };
+}
+
+async function loadCsvRows(path) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) return [];
+    return parseCsv(await response.text());
+  } catch (error) {
+    console.warn(`Could not load ${path}.`, error);
+    return [];
+  }
 }
 
 async function initializeFamilySync() {
@@ -2985,7 +3034,8 @@ function getMostRecentFlashcardSession() {
     .map(([key, session]) => {
       const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(key);
       if (!match || session.completed || !session.deckIds.length) return null;
-      const validDeckIds = session.deckIds.filter((id) => cards.some((card) => card.id === id));
+      const levelCards = getFlashcardCardsForLevel(match[1]);
+      const validDeckIds = session.deckIds.filter((id) => levelCards.some((card) => card.id === id));
       if (!validDeckIds.length) return null;
       return {
         key,
@@ -3085,7 +3135,7 @@ function startLearningFlashcards() {
 }
 
 function getFlashcardLevel(card) {
-  if (["A1", "A2", "B1"].includes(card.level)) return card.level;
+  if (LEARNING_LEVELS.includes(card.level)) return card.level;
   const index = Math.max(cards.findIndex((item) => item.id === card.id), 0);
   const sectionSize = Math.max(Math.ceil(cards.length / 3), 1);
   if (index < sectionSize) return "A1";
@@ -3094,6 +3144,9 @@ function getFlashcardLevel(card) {
 }
 
 function getFlashcardCategory(card) {
+  if (card.wordType === "noun") return "nouns";
+  if (card.wordType === "verb") return "verbs";
+  if (card.wordType) return "other";
   if (card.isNoun) return "nouns";
   const word = String(card.word || "").trim();
   if (/^[a-zäöüß].*(en|ern|eln)$/.test(word)) return "verbs";
@@ -3144,10 +3197,16 @@ function getFlashcardSessionProfile() {
   return profile;
 }
 
+function getFlashcardCardsForLevel(level) {
+  const levelCards = levelDatasets[level]?.flashcards || [];
+  if (levelCards.length) return levelCards;
+  return cards.filter((card) => getFlashcardLevel(card) === level);
+}
+
 function loadOrCreateFlashcardSession(forceNew = false) {
   const profile = getFlashcardSessionProfile();
-  const availableCards = cards.filter((card) => getFlashcardLevel(card) === flashcardStudyLevel
-    && getFlashcardCategory(card) === flashcardStudyCategory);
+  const availableCards = getFlashcardCardsForLevel(flashcardStudyLevel)
+    .filter((card) => getFlashcardCategory(card) === flashcardStudyCategory);
   const availableById = new Map(availableCards.map((card) => [card.id, card]));
   const key = getFlashcardSessionKey();
   const saved = profile?.flashcardSessions?.[key];
@@ -3214,7 +3273,7 @@ function renderLearningFlashcard() {
   els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} · ${categoryLabel}`;
   els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
   els.learningFlashcardEnglish.textContent = card.english;
-  els.learningFlashcardCategory.textContent = categoryLabel;
+  els.learningFlashcardCategory.textContent = card.category || categoryLabel;
   els.learningFlashcardExample.textContent = card.example || "";
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !card.example);
   els.learningFlashcardPrevious.disabled = flashcardStudyIndex === 0;
@@ -3312,6 +3371,8 @@ function beginPendingChallenge() {
 function createEmptyChallengeSession() {
   return {
     type: "",
+    level: "",
+    questionIds: [],
     answered: 0,
     correct: 0,
     coinsEarned: 0,
@@ -3327,10 +3388,14 @@ function discardIncompleteChallengeSession() {
 }
 
 function startChallengeSession(type, level = selectedLearningLevel) {
+  const questionCards = type === "articles"
+    ? getArticleChallengeCards(level)
+    : getVocabularyChallengeCards(level);
   challengeSession = {
     ...createEmptyChallengeSession(),
     type,
-    level
+    level,
+    questionIds: shuffleCards(questionCards).slice(0, CHALLENGE_QUESTION_COUNT).map((card) => card.id)
   };
 }
 
@@ -4129,6 +4194,67 @@ function normalizeCards(rows) {
     }));
 }
 
+function normalizeLevelCards(rows, level, source) {
+  const seen = new Set();
+  return rows
+    .filter((row) => row.german && row.english)
+    .map((row, index) => {
+      const article = normalizeArticleValue(row.article);
+      const wordType = String(row.wordtype || "").trim().toLowerCase();
+      const id = String(row.id || "").trim()
+        || `${level.toLowerCase()}-${source}-${slugify(`${row.german}-${row.english}`) || index}`;
+      return {
+        id,
+        word: row.german.trim(),
+        article,
+        english: row.english.trim(),
+        example: String(row.examplesentence || "").trim(),
+        level,
+        wordType,
+        category: String(row.category || "").trim(),
+        isNoun: wordType === "noun" || Boolean(article),
+        datasetSource: source
+      };
+    })
+    .filter((card) => {
+      if (seen.has(card.id)) return false;
+      seen.add(card.id);
+      return true;
+    });
+}
+
+function normalizeArticleChallengeCards(rows, level) {
+  const seen = new Set();
+  return rows
+    .filter((row) => row.german && ["der", "die", "das"].includes(normalizeArticleValue(row.article)))
+    .map((row, index) => {
+      const id = String(row.id || "").trim()
+        || `${level.toLowerCase()}-articles-${slugify(row.german) || index}`;
+      return {
+        id,
+        word: row.german.trim(),
+        article: normalizeArticleValue(row.article),
+        english: String(row.english || "").trim(),
+        example: String(row.examplesentence || "").trim(),
+        level,
+        wordType: "noun",
+        category: String(row.category || "").trim(),
+        isNoun: true,
+        datasetSource: "articles"
+      };
+    })
+    .filter((card) => {
+      if (seen.has(card.id)) return false;
+      seen.add(card.id);
+      return true;
+    });
+}
+
+function normalizeArticleValue(value) {
+  const article = String(value || "").trim().toLowerCase();
+  return ["der", "die", "das"].includes(article) ? article : "";
+}
+
 function normalizeNounVerbPairs(rows) {
   const seen = new Set();
   return rows
@@ -4210,10 +4336,15 @@ function applyModeAndFilter() {
   const startLetter = els.startSelect.value;
   const order = els.orderSelect.value;
 
-  const filteredCards = cards.filter((card) => {
+  const sourceCards = mode === "article-quiz" && challengeSession.type === "articles"
+    ? getArticleChallengeCards(challengeSession.level)
+    : cards;
+  const challengeQuestionIds = new Set(challengeSession.questionIds || []);
+  const filteredCards = sourceCards.filter((card) => {
     if (mode === "article-quiz"
       && challengeSession.type === "articles"
-      && getFlashcardLevel(card) !== challengeSession.level) return false;
+      && (getFlashcardLevel(card) !== challengeSession.level
+        || (challengeQuestionIds.size && !challengeQuestionIds.has(card.id)))) return false;
     const meaningStatus = getMeaningStatus(card);
     const articleStatus = getArticleStatus(card);
     if (mode === "article-quiz" || mode === "article") {
@@ -4388,7 +4519,7 @@ function renderCard() {
     els.questionText.textContent = card.english;
   } else if (isArticleQuiz) {
     els.promptLabel.textContent = "Article Practice";
-    els.questionText.textContent = card.word;
+    els.questionText.textContent = challengeSession.type === "articles" ? `___ ${card.word}` : card.word;
   } else if (mode === "article") {
     els.promptLabel.textContent = "Choose the article";
     els.questionText.textContent = card.word;
@@ -5268,7 +5399,21 @@ function resetVocabularyReviewQuizState() {
 
 function getVocabularyReviewCards() {
   if (challengeSession.type !== "vocabulary") return cards;
-  return cards.filter((card) => getFlashcardLevel(card) === challengeSession.level);
+  const questionIds = new Set(challengeSession.questionIds || []);
+  return getVocabularyChallengeCards(challengeSession.level)
+    .filter((card) => !questionIds.size || questionIds.has(card.id));
+}
+
+function getVocabularyChallengeCards(level) {
+  const levelCards = levelDatasets[level]?.vocabulary || [];
+  if (levelCards.length) return levelCards;
+  return cards.filter((card) => getFlashcardLevel(card) === level);
+}
+
+function getArticleChallengeCards(level) {
+  const levelCards = levelDatasets[level]?.articles || [];
+  if (levelCards.length) return levelCards;
+  return cards.filter((card) => getFlashcardLevel(card) === level && card.isNoun);
 }
 
 function getCurrentVocabularyReviewCard() {
@@ -5374,8 +5519,9 @@ function renderVocabularyReviewQuiz() {
 }
 
 function buildVocabularyReviewChoices(card) {
+  const answerSource = getVocabularyChallengeCards(challengeSession.level || selectedLearningLevel);
   const wrongChoices = shuffleCards(
-    Array.from(new Set(cards
+    Array.from(new Set(answerSource
       .map((item) => item.english)
       .filter((english) => english && english !== card.english)))
   ).slice(0, 3);
