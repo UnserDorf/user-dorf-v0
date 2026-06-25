@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=119">
+    <link rel="stylesheet" href="style.css?v=120">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -296,21 +296,35 @@
         <div class="rewards-grid" id="achievementsGrid"></div>
       </section>
 
+      <section class="level-selection-screen hidden" id="levelSelectionScreen" aria-label="Choose level">
+        <div class="level-selection-heading">
+          <button class="small-link-button" id="levelSelectionBack" type="button">← Home</button>
+          <h2>Choose Level</h2>
+          <p>Select the German level you would like to use.</p>
+        </div>
+        <div class="level-selection-grid">
+          <button class="level-selection-card" type="button" data-learning-level="A1">
+            <strong>🟢 A1</strong>
+            <span>Beginner German</span>
+          </button>
+          <button class="level-selection-card" type="button" data-learning-level="A2">
+            <strong>🟡 A2</strong>
+            <span>Elementary German</span>
+          </button>
+          <button class="level-selection-card" type="button" data-learning-level="B1">
+            <strong>🔵 B1</strong>
+            <span>Intermediate German</span>
+          </button>
+        </div>
+      </section>
+
       <section class="flashcard-setup-screen hidden" id="flashcardSetupScreen" aria-label="Flashcard setup">
         <div class="flashcard-page-heading">
-          <button class="small-link-button" id="flashcardSetupBack" type="button">← Home</button>
+          <button class="small-link-button" id="flashcardSetupBack" type="button">← Levels</button>
           <h2>📇 Flashcards</h2>
-          <p>Choose what you would like to learn.</p>
+          <p><span id="flashcardSetupLevel">A1</span> · Choose a category.</p>
         </div>
         <form class="flashcard-setup-card" id="flashcardSetupForm">
-          <fieldset>
-            <legend>Level</legend>
-            <div class="flashcard-choice-grid">
-              <label><input type="radio" name="flashcardLevel" value="A1" checked><span>A1</span></label>
-              <label><input type="radio" name="flashcardLevel" value="A2"><span>A2</span></label>
-              <label><input type="radio" name="flashcardLevel" value="B1"><span>B1</span></label>
-            </div>
-          </fieldset>
           <fieldset>
             <legend>Category</legend>
             <div class="flashcard-choice-grid flashcard-category-grid">
@@ -350,8 +364,9 @@
 
       <section class="coin-challenges-screen hidden" id="coinChallengesScreen" aria-label="Challenges">
         <div class="dashboard-heading challenge-page-heading">
+          <button class="small-link-button" id="challengeLevelBack" type="button">← Levels</button>
           <h2>Challenges</h2>
-          <p>Choose what you would like to practice.</p>
+          <p><span id="challengeSelectedLevel">A1</span> · Choose what you would like to practice.</p>
         </div>
 
         <div class="challenge-selection-grid">
@@ -639,6 +654,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=119"></script>
+    <script type="module" src="script.js?v=120"></script>
   </body>
 </html>
