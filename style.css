@@ -1185,6 +1185,61 @@ h1 {
   filter: brightness(0.97);
 }
 
+.challenge-results-screen {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 36px) 0;
+}
+
+.challenge-results-card {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.94);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 5vw, 38px);
+  display: grid;
+  gap: 22px;
+  text-align: center;
+}
+
+.challenge-results-card h2,
+.challenge-results-card p {
+  margin: 0;
+}
+
+.challenge-results-summary {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.challenge-results-summary div {
+  border: 1px solid rgba(190, 177, 153, 0.42);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.78);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.challenge-results-summary dt {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.challenge-results-summary dd {
+  margin: 0;
+  color: var(--green);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.challenge-results-card .primary-button {
+  min-height: 54px;
+}
+
 .level-card,
 .dashboard-family-wealth-card,
 .earn-coins-card,
