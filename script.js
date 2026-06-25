@@ -4170,7 +4170,7 @@ function parseCsv(text) {
   row.push(cell);
   if (row.some((value) => value.trim() !== "")) rows.push(row);
 
-  const headers = rows.shift()?.map((header) => header.trim().toLowerCase()) || [];
+  const headers = rows.shift()?.map((header) => header.replace(/^\uFEFF/, "").trim().toLowerCase()) || [];
   return rows.map((values) => {
     const entry = {};
     headers.forEach((header, index) => {
@@ -4196,19 +4196,22 @@ function normalizeCards(rows) {
 
 function normalizeLevelCards(rows, level, source) {
   const seen = new Set();
+  const fallbackCards = new Map(cards.map((card) => [normalizeDatasetWord(card.word), card]));
   return rows
-    .filter((row) => row.german && row.english)
     .map((row, index) => {
+      const fallbackCard = fallbackCards.get(normalizeDatasetWord(row.german));
+      const english = String(row.english || fallbackCard?.english || "").trim();
+      const example = String(row.examplesentence || fallbackCard?.example || "").trim();
       const article = normalizeArticleValue(row.article);
       const wordType = String(row.wordtype || "").trim().toLowerCase();
       const id = String(row.id || "").trim()
         || `${level.toLowerCase()}-${source}-${slugify(`${row.german}-${row.english}`) || index}`;
       return {
         id,
-        word: row.german.trim(),
+        word: String(row.german || "").trim(),
         article,
-        english: row.english.trim(),
-        example: String(row.examplesentence || "").trim(),
+        english,
+        example,
         level,
         wordType,
         category: String(row.category || "").trim(),
@@ -4216,11 +4219,16 @@ function normalizeLevelCards(rows, level, source) {
         datasetSource: source
       };
     })
+    .filter((card) => card.word && card.english)
     .filter((card) => {
       if (seen.has(card.id)) return false;
       seen.add(card.id);
       return true;
     });
+}
+
+function normalizeDatasetWord(value) {
+  return String(value || "").trim().toLocaleLowerCase("de");
 }
 
 function normalizeArticleChallengeCards(rows, level) {
