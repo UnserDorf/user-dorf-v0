@@ -112,20 +112,10 @@ body {
 
 .profile-screen.village-landing-mode {
   position: relative;
-  background-image:
-    linear-gradient(rgba(255, 253, 248, 0.32), rgba(255, 253, 248, 0.5)),
-    url("assets/villages-homepage.png");
+  background-image: url("assets/villages-homepage.png");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-}
-
-.profile-screen.village-landing-mode::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at center top, rgba(255, 253, 248, 0.52), rgba(255, 253, 248, 0.14) 58%, rgba(60, 44, 31, 0.18));
 }
 
 .profile-panel {
@@ -214,19 +204,12 @@ body {
   color: var(--ink);
   padding: 18px 22px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  justify-items: start;
-  column-gap: 14px;
-  row-gap: 4px;
-  text-align: left;
+  grid-template-columns: 1fr;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
   backdrop-filter: blur(6px);
-}
-
-.village-card-icon {
-  grid-row: span 2;
-  font-size: 2rem;
-  line-height: 1;
 }
 
 .village-card strong {
@@ -1243,6 +1226,36 @@ h1 {
   background: var(--violet);
   color: white;
   padding: 0 22px;
+}
+
+.naming-ceremony-form {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.naming-ceremony-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.naming-ceremony-form input {
+  min-height: 52px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.naming-ceremony-form button {
+  width: 100%;
+  background: var(--green);
 }
 
 .celebration-actions {

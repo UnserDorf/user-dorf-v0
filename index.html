@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=114">
+    <link rel="stylesheet" href="style.css?v=115">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -390,6 +390,13 @@
           <p id="levelCelebrationProfile">You reached:</p>
           <strong id="levelCelebrationLevel">🪙 Coin Pouch</strong>
           <p id="levelCelebrationBonus">+25 bonus coins</p>
+          <form class="naming-ceremony-form hidden" id="namingCeremonyForm">
+            <label>
+              <span>What would you like to call your village?</span>
+              <input id="namingCeremonyInput" type="text" autocomplete="organization" required>
+            </label>
+            <button type="submit" class="primary-button">Confirm Village Name</button>
+          </form>
           <div class="celebration-actions">
             <button type="button" class="primary-button hidden" id="levelCelebrationViewAlbum">View Album</button>
             <button type="button" id="levelCelebrationClose">Nice!</button>
@@ -618,6 +625,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=114"></script>
+    <script type="module" src="script.js?v=115"></script>
   </body>
 </html>

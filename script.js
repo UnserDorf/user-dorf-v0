@@ -19,6 +19,7 @@ const DEFAULT_GROUPS = [
   { id: "test-group", name: "Test Family", icon: "🧪", description: "Test- und Übungs-Dorf", password: "test" }
 ];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
+const VILLAGE_NAMING_CONTRIBUTION_GOAL = 10;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
@@ -407,6 +408,8 @@ const els = {
   levelCelebrationProfile: document.querySelector("#levelCelebrationProfile"),
   levelCelebrationLevel: document.querySelector("#levelCelebrationLevel"),
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
+  namingCeremonyForm: document.querySelector("#namingCeremonyForm"),
+  namingCeremonyInput: document.querySelector("#namingCeremonyInput"),
   levelCelebrationViewAlbum: document.querySelector("#levelCelebrationViewAlbum"),
   levelCelebrationClose: document.querySelector("#levelCelebrationClose"),
   memoryDetailModal: document.querySelector("#memoryDetailModal"),
@@ -737,13 +740,16 @@ function createDefaultGroups() {
 }
 
 function createGroupData(group, source = {}) {
+  const savedVillageName = normalizeVillageName(source.villageName);
+  const ceremonyReady = Boolean(source.namingCeremonyReady);
   return {
     id: group.id,
     name: group.name,
     icon: group.icon || source.icon || "🏡",
     description: group.description || source.description || "Learning village",
     password: group.password || source.password || "",
-    villageName: normalizeVillageName(source.villageName) || group.name,
+    villageName: savedVillageName === group.name && !ceremonyReady ? "" : savedVillageName,
+    namingCeremonyReady: ceremonyReady,
     villageAlbumSeenRewards: normalizeRewardIdList(source.villageAlbumSeenRewards),
     townCenterStagesSeen: normalizeRewardIdList(source.townCenterStagesSeen),
     familyLevelsReached: Array.isArray(source.familyLevelsReached) ? source.familyLevelsReached.map(String) : [],
@@ -762,9 +768,6 @@ function normalizeGroups(groups, store = profileStore) {
   const existingProfileIds = Object.keys(store?.profiles || {}).filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId));
   if (!Object.values(normalized).some((group) => group.memberIds.length) && existingProfileIds.length) {
     normalized[DEFAULT_GROUP_ID].memberIds = existingProfileIds.slice(0, 6);
-  }
-  if (!normalizeVillageName(normalized[DEFAULT_GROUP_ID].villageName)) {
-    normalized[DEFAULT_GROUP_ID].villageName = normalizeVillageName(store?.villageName);
   }
   normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards = normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards.length
     ? normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards
@@ -808,6 +811,7 @@ function mergeGroupData(localStore, remoteStore, baseStore) {
     };
     groups[groupId] = createGroupData(base, {
       villageName: normalizeVillageName(localGroup?.villageName) || normalizeVillageName(remoteGroup?.villageName),
+      namingCeremonyReady: Boolean(localGroup?.namingCeremonyReady || remoteGroup?.namingCeremonyReady),
       villageAlbumSeenRewards: [
         ...normalizeRewardIdList(localGroup?.villageAlbumSeenRewards),
         ...normalizeRewardIdList(remoteGroup?.villageAlbumSeenRewards)
@@ -868,7 +872,7 @@ function normalizeRewardIdList(value) {
 }
 
 function getVillageName() {
-  return normalizeVillageName(getCurrentGroup()?.villageName) || "Unser Dorf";
+  return normalizeVillageName(getCurrentGroup()?.villageName) || "Unnamed Village";
 }
 
 function hasVillageName() {
@@ -906,10 +910,10 @@ function renderVillageCards() {
     button.type = "button";
     button.dataset.groupId = group.id;
     button.addEventListener("click", () => selectVillage(group.id));
+    const villageName = normalizeVillageName(group.villageName);
     button.replaceChildren(
-      createTextElement("span", "village-card-icon", group.icon || "🏡"),
       createTextElement("strong", "", group.name),
-      createTextElement("span", "", group.description || "Learning village")
+      createTextElement("span", "", villageName ? `Village Name: ${villageName}` : group.description || "Learning village")
     );
     return button;
   });
@@ -1025,6 +1029,7 @@ function normalizeProfileData(data, profile) {
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
     streak: normalizeStreak(data?.streak),
+    villageContribution: normalizeVillageContribution(data?.villageContribution),
     achievementsUnlocked: normalizeAchievementList(data?.achievementsUnlocked || data?.achievements),
     austriaAlbumSeenRewards: normalizeRewardIdList(data?.austriaAlbumSeenRewards),
     decks: data?.decks || {},
@@ -1235,6 +1240,13 @@ function normalizeStreak(value) {
   };
 }
 
+function normalizeVillageContribution(value) {
+  return {
+    articleQuestions: normalizeCounter(value?.articleQuestions),
+    vocabularyCards: normalizeCounter(value?.vocabularyCards)
+  };
+}
+
 function normalizeCounter(value) {
   const count = Number(value);
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
@@ -1430,6 +1442,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       coins: Math.max(normalizeCoinCount(local.coins), normalizeCoinCount(remote.coins)),
       dailyChallenge: pickLatestDailyChallenge(local.dailyChallenge, remote.dailyChallenge),
       streak: pickBestStreak(local.streak, remote.streak),
+      villageContribution: pickBestVillageContribution(local.villageContribution, remote.villageContribution),
       progress: mergeProgressEntries(local.progress, remote.progress),
       vocabularyProgress: mergeProgressEntries(local.vocabularyProgress, remote.vocabularyProgress),
       articleProgress: mergeProgressEntries(local.articleProgress, remote.articleProgress),
@@ -1506,6 +1519,13 @@ function pickBestStreak(localStreak, remoteStreak) {
     best: Math.max(normalizeCounter(localStreak?.best), normalizeCounter(remoteStreak?.best)),
     articleQuestions: Math.max(normalizeCounter(localStreak?.articleQuestions), normalizeCounter(remoteStreak?.articleQuestions)),
     vocabularyCards: Math.max(normalizeCounter(localStreak?.vocabularyCards), normalizeCounter(remoteStreak?.vocabularyCards))
+  };
+}
+
+function pickBestVillageContribution(localContribution, remoteContribution) {
+  return {
+    articleQuestions: Math.max(normalizeCounter(localContribution?.articleQuestions), normalizeCounter(remoteContribution?.articleQuestions)),
+    vocabularyCards: Math.max(normalizeCounter(localContribution?.vocabularyCards), normalizeCounter(remoteContribution?.vocabularyCards))
   };
 }
 
@@ -1871,6 +1891,7 @@ function renderDashboard() {
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
   renderHouseholdMembers();
+  checkVillageNamingCeremony();
   saveProfileStore();
 }
 
@@ -1964,8 +1985,14 @@ function createRewardPreviewMetric(label, value) {
 function renderSettingsPanel() {
   renderVillageName();
   const profile = getCurrentProfile();
+  const villageHasName = hasVillageName();
   if (els.settingsVillageNameInput) {
-    els.settingsVillageNameInput.value = getVillageName();
+    els.settingsVillageNameInput.value = villageHasName ? getVillageName() : "";
+    els.settingsVillageNameInput.placeholder = villageHasName ? getVillageName() : "Unlocked after Village Naming Ceremony";
+    els.settingsVillageNameInput.disabled = !villageHasName;
+  }
+  if (els.saveVillageName) {
+    els.saveVillageName.disabled = !villageHasName;
   }
   if (els.settingsProfileName) {
     els.settingsProfileName.textContent = profile?.name || "No profile";
@@ -2114,13 +2141,13 @@ function renderRewardsPage(page = "austria-album") {
     return;
   }
   if (page === "town-center") {
-    els.rewardPageTitle.textContent = "🏡 Town Center";
+    els.rewardPageTitle.textContent = `🏡 ${getVillageName()} Town Center`;
     els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
     els.achievementsGrid.replaceChildren(createTownCenterPage(townCenter, sharedCoins));
     return;
   }
   if (page === "village-album") {
-    els.rewardPageTitle.textContent = "Village Memories";
+    els.rewardPageTitle.textContent = `${getVillageName()} Village Memories`;
     els.rewardPageSummary.textContent = `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`;
     els.achievementsGrid.replaceChildren(
       createRewardSection(
@@ -3162,6 +3189,7 @@ function bindEvents() {
   els.appShell.dataset.bound = "true";
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
+  els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
   els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
   els.cancelCreateProfile.addEventListener("click", cancelCreateProfile);
@@ -3357,6 +3385,7 @@ function bindEvents() {
   });
 
   els.saveVillageName.addEventListener("click", () => {
+    if (!hasVillageName()) return;
     saveVillageName(els.settingsVillageNameInput.value);
     renderVillageName();
     renderSettingsPanel();
@@ -3962,6 +3991,7 @@ function checkRewardUnlocks(profile) {
 }
 
 function showRewardUnlockCelebration(reward, source) {
+  hideNamingCeremonyForm();
   els.levelCelebrationTitle.textContent = "Congratulations!";
   els.levelCelebrationProfile.textContent = "You unlocked:";
   els.levelCelebrationLevel.textContent = reward.title;
@@ -3972,6 +4002,7 @@ function showRewardUnlockCelebration(reward, source) {
 }
 
 function showRewardCelebrationActions(page, label = "View Album") {
+  hideNamingCeremonyForm();
   els.levelCelebrationViewAlbum.dataset.rewardPage = page;
   els.levelCelebrationViewAlbum.textContent = label;
   els.levelCelebrationViewAlbum.classList.remove("hidden");
@@ -3979,10 +4010,67 @@ function showRewardCelebrationActions(page, label = "View Album") {
 }
 
 function hideRewardCelebrationActions() {
+  hideNamingCeremonyForm();
   els.levelCelebrationViewAlbum.dataset.rewardPage = "";
   els.levelCelebrationViewAlbum.textContent = "View Album";
   els.levelCelebrationViewAlbum.classList.add("hidden");
   els.levelCelebrationClose.textContent = "Nice!";
+}
+
+function hideNamingCeremonyForm() {
+  els.namingCeremonyForm?.classList.add("hidden");
+  if (els.namingCeremonyInput) els.namingCeremonyInput.value = "";
+}
+
+function checkVillageNamingCeremony() {
+  const group = getCurrentGroup();
+  if (!group || normalizeVillageName(group.villageName)) return false;
+  const members = getCurrentGroupProfiles();
+  if (!members.length) return false;
+  const everyMemberContributed = members.every(hasQualifiedForNamingCeremony);
+  if (!everyMemberContributed) return false;
+  group.namingCeremonyReady = true;
+  showVillageNamingCeremony();
+  return true;
+}
+
+function hasQualifiedForNamingCeremony(profile) {
+  const contribution = normalizeVillageContribution(profile?.villageContribution);
+  return contribution.articleQuestions >= VILLAGE_NAMING_CONTRIBUTION_GOAL
+    || contribution.vocabularyCards >= VILLAGE_NAMING_CONTRIBUTION_GOAL;
+}
+
+function showVillageNamingCeremony() {
+  const group = getCurrentGroup();
+  if (!group || normalizeVillageName(group.villageName)) return;
+  hideRewardCelebrationActions();
+  els.levelCelebrationTitle.textContent = "🎉 Village Naming Ceremony";
+  els.levelCelebrationProfile.textContent = "Everyone in your village has contributed.";
+  els.levelCelebrationLevel.textContent = "Your village is ready to receive its name.";
+  els.levelCelebrationBonus.textContent = "";
+  els.levelCelebrationBonus.classList.add("hidden");
+  els.namingCeremonyForm?.classList.remove("hidden");
+  if (els.namingCeremonyInput) {
+    els.namingCeremonyInput.value = "";
+    els.namingCeremonyInput.focus();
+  }
+  els.levelCelebrationClose.textContent = "Later";
+  els.levelCelebration.classList.remove("hidden");
+}
+
+function handleNamingCeremonySubmit(event) {
+  event.preventDefault();
+  const name = normalizeVillageName(els.namingCeremonyInput?.value);
+  if (!name) {
+    els.namingCeremonyInput?.focus();
+    return;
+  }
+  saveVillageName(name);
+  hideNamingCeremonyForm();
+  els.levelCelebration.classList.add("hidden");
+  renderVillageName();
+  renderVillageCards();
+  if (currentProfileId) renderDashboard();
 }
 
 function checkTownCenterStageUnlocks() {
@@ -4210,12 +4298,14 @@ function recordDailyActivity(type, details = {}) {
   if (!currentProfileId) return;
   const profile = getCurrentProfile();
   prepareProfileDailyState(profile);
+  profile.villageContribution = normalizeVillageContribution(profile.villageContribution);
 
   if (type === "article") {
     const dailyChallenge = getDailyChallengeForDate(profile.dailyChallenge.date);
     profile.dailyChallenge.articleQuestions += 1;
     if (details.isCorrect) profile.dailyChallenge.correctArticleAnswers += 1;
     profile.streak.articleQuestions += 1;
+    profile.villageContribution.articleQuestions += 1;
     const challengeProgress = getDailyChallengeProgress(profile.dailyChallenge, dailyChallenge);
     if (!profile.dailyChallenge.completed && challengeProgress.raw >= dailyChallenge.goal) {
       profile.dailyChallenge.completed = true;
@@ -4229,9 +4319,11 @@ function recordDailyActivity(type, details = {}) {
 
   if (type === "vocabulary") {
     profile.streak.vocabularyCards += 1;
+    profile.villageContribution.vocabularyCards += 1;
   }
 
   updateStreakQualification(profile);
+  checkVillageNamingCeremony();
   checkAchievements("daily-activity");
   saveProfileStore();
 }
