@@ -1331,6 +1331,11 @@ h1 {
   font-size: clamp(1.8rem, 5vw, 2.8rem);
 }
 
+.flashcard-completion-card .small-link-button,
+.challenge-results-card .small-link-button {
+  justify-self: start;
+}
+
 .section-heading.simple h3 {
   margin: 0;
   color: var(--ink);
@@ -3452,6 +3457,12 @@ select,
 }
 
 @media (max-width: 760px) {
+  .small-link-button,
+  .challenge-back-button {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+
   .level-selection-grid {
     grid-template-columns: 1fr;
   }

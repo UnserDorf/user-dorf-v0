@@ -375,6 +375,7 @@ const els = {
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
   levelSelectionBack: document.querySelector("#levelSelectionBack"),
+  levelSelectionContext: document.querySelector("#levelSelectionContext"),
   flashcardResumeScreen: document.querySelector("#flashcardResumeScreen"),
   flashcardResumeBack: document.querySelector("#flashcardResumeBack"),
   flashcardResumeDeck: document.querySelector("#flashcardResumeDeck"),
@@ -401,6 +402,7 @@ const els = {
   learningFlashcardNext: document.querySelector("#learningFlashcardNext"),
   learningFlashcardEmpty: document.querySelector("#learningFlashcardEmpty"),
   flashcardCompletionCard: document.querySelector("#flashcardCompletionCard"),
+  flashcardCompletionBack: document.querySelector("#flashcardCompletionBack"),
   flashcardCompletionCount: document.querySelector("#flashcardCompletionCount"),
   flashcardContinueStudying: document.querySelector("#flashcardContinueStudying"),
   flashcardReturnDashboard: document.querySelector("#flashcardReturnDashboard"),
@@ -527,6 +529,8 @@ const els = {
   challengeResultAccuracy: document.querySelector("#challengeResultAccuracy"),
   challengeResultCorrect: document.querySelector("#challengeResultCorrect"),
   challengeResultCoins: document.querySelector("#challengeResultCoins"),
+  challengeResultsType: document.querySelector("#challengeResultsType"),
+  challengeResultsBack: document.querySelector("#challengeResultsBack"),
   challengeResultsContinue: document.querySelector("#challengeResultsContinue"),
   answerPanel: document.querySelector("#answerPanel"),
   answerArticle: document.querySelector("#answerArticle"),
@@ -1866,7 +1870,10 @@ function showStudyView(options = {}) {
   currentView = "study";
   const isArticleQuiz = els.modeSelect.value === "article-quiz";
   const cleanArticlePractice = (els.modeSelect.value === "article" || isArticleQuiz) && !options.focusSearch && !options.openStats;
-  setChallengeBackButtons(cleanArticlePractice && !isArticleQuiz, false);
+  setChallengeBackButtons(
+    (cleanArticlePractice && !isArticleQuiz) || (isArticleQuiz && challengeSession.type === "articles"),
+    false
+  );
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -3006,6 +3013,7 @@ function resumePendingFlashcardSession() {
 function showLevelSelection(path) {
   if (path === "challenges") discardIncompleteChallengeSession();
   selectedLearningPath = path;
+  els.levelSelectionContext.textContent = path === "challenges" ? "Challenges" : "Flashcards";
   currentView = "level-selection";
   setChallengeBackButtons(false, false);
   els.dashboardScreen.classList.add("hidden");
@@ -3351,6 +3359,8 @@ function showChallengeResults() {
   challengeSession.complete = true;
   const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
   const accuracy = Math.round((correct / CHALLENGE_QUESTION_COUNT) * 100);
+  const challengeName = challengeSession.type === "articles" ? "Articles" : "Vocabulary";
+  els.challengeResultsType.textContent = `${challengeSession.level || selectedLearningLevel} ${challengeName}`;
   els.challengeResultAccuracy.textContent = `${accuracy}%`;
   els.challengeResultCorrect.textContent = `${correct} / ${CHALLENGE_QUESTION_COUNT}`;
   els.challengeResultCoins.textContent = `+${challengeSession.coinsEarned}`;
@@ -3944,6 +3954,7 @@ function bindEvents() {
   els.challengeReadyBack.addEventListener("click", showCoinChallenges);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
   els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
+  els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
@@ -3952,6 +3963,7 @@ function bindEvents() {
     renderLearningFlashcard();
   });
   els.flashcardReturnDashboard.addEventListener("click", showDashboard);
+  els.challengeResultsBack.addEventListener("click", showCoinChallenges);
   els.flashcardSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     startLearningFlashcards();
@@ -4331,7 +4343,9 @@ function renderCard() {
   const modeText = getModeText(mode);
   const isArticleQuiz = mode === "article-quiz";
 
-  els.cardMode.textContent = isArticleQuiz ? "Article Practice" : modeText;
+  els.cardMode.textContent = isArticleQuiz && challengeSession.type === "articles"
+    ? "Articles"
+    : isArticleQuiz ? "Article Practice" : modeText;
   const articleChallengeActive = isArticleQuiz && challengeSession.type === "articles";
   els.cardCounter.textContent = visibleCards.length
     ? articleChallengeActive
@@ -5305,7 +5319,7 @@ function renderVocabularyReviewQuiz() {
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
-  els.nounVerbTitle.textContent = "Vocabulary Review";
+  els.nounVerbTitle.textContent = challengeSession.type === "vocabulary" ? "Vocabulary" : "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the English meaning";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);

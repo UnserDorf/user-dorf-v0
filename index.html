@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=123">
+    <link rel="stylesheet" href="style.css?v=124">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -190,7 +190,7 @@
               </section>
               <section class="settings-section" aria-label="Settings navigation">
                 <h3>Navigation</h3>
-                <button type="button" id="settingsBackDashboard">Back to Dashboard</button>
+                <button type="button" id="settingsBackDashboard">Back</button>
               </section>
             </div>
           </div>
@@ -253,9 +253,9 @@
           </div>
         </section>
 
-        <section class="dashboard-section collections-preview-section" aria-label="Reward previews">
+        <section class="dashboard-section collections-preview-section" aria-label="Collection">
           <div class="section-heading simple">
-            <h3>Rewards</h3>
+            <h3>Collection</h3>
           </div>
           <div class="reward-preview-grid">
             <article class="reward-preview-card">
@@ -263,32 +263,32 @@
                 <h4>🏅 Achievements</h4>
                 <p id="achievementPreview">0 earned</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="achievements">Open Achievements</button>
+              <button class="primary-button" type="button" data-dashboard-action="achievements">Open</button>
             </article>
             <article class="reward-preview-card">
               <div>
                 <h4>🇦🇹 My Austria Album</h4>
                 <p id="austriaAlbumPreview">0 / 10 unlocked</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="austria-album">Open Album</button>
+              <button class="primary-button" type="button" data-dashboard-action="austria-album">Open</button>
             </article>
             <article class="reward-preview-card">
               <div>
                 <h4>🎉 Village Memories</h4>
                 <p id="villageAlbumPreview">0 / 5 unlocked</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="village-album">Open Memories</button>
+              <button class="primary-button" type="button" data-dashboard-action="village-album">Open</button>
             </article>
           </div>
         </section>
 
       </section>
 
-      <section class="achievement-collection-screen hidden" id="achievementCollectionScreen" aria-label="Rewards">
+      <section class="achievement-collection-screen hidden" id="achievementCollectionScreen" aria-label="Collection">
         <div class="dashboard-heading reward-page-heading">
           <div class="reward-title-stack">
-            <button type="button" class="small-link-button" data-dashboard-action="dashboard">← Back to Dashboard</button>
-            <p class="eyebrow">Rewards</p>
+            <button type="button" class="small-link-button" data-dashboard-action="dashboard">← Back</button>
+            <p class="eyebrow">Collection</p>
             <h2 id="rewardPageTitle">My Austria Album</h2>
             <p id="rewardPageSummary">Unlocked: 0 / 10</p>
           </div>
@@ -298,7 +298,8 @@
 
       <section class="level-selection-screen hidden" id="levelSelectionScreen" aria-label="Choose level">
         <div class="level-selection-heading">
-          <button class="small-link-button" id="levelSelectionBack" type="button">← Home</button>
+          <button class="small-link-button" id="levelSelectionBack" type="button">← Back</button>
+          <p class="eyebrow" id="levelSelectionContext">Flashcards</p>
           <h2>Choose Level</h2>
           <p>Select the German level you would like to use.</p>
         </div>
@@ -320,7 +321,7 @@
 
       <section class="flashcard-resume-screen hidden" id="flashcardResumeScreen" aria-label="Continue learning">
         <article class="flashcard-resume-card">
-          <button class="small-link-button" id="flashcardResumeBack" type="button">← Home</button>
+          <button class="small-link-button" id="flashcardResumeBack" type="button">← Back</button>
           <p class="eyebrow">Flashcards</p>
           <h2>Continue Learning</h2>
           <strong id="flashcardResumeDeck">A2 · Verbs</strong>
@@ -334,7 +335,7 @@
 
       <section class="flashcard-setup-screen hidden" id="flashcardSetupScreen" aria-label="Flashcard setup">
         <div class="flashcard-page-heading">
-          <button class="small-link-button" id="flashcardSetupBack" type="button">← Levels</button>
+          <button class="small-link-button" id="flashcardSetupBack" type="button">← Back</button>
           <h2>📇 Flashcards</h2>
           <p><span id="flashcardSetupLevel">A1</span> · Choose a category.</p>
         </div>
@@ -347,14 +348,15 @@
               <label><input type="radio" name="flashcardCategory" value="other"><span>Other Words</span></label>
             </div>
           </fieldset>
-          <button class="primary-button" type="submit">Start Flashcards</button>
+          <button class="primary-button" type="submit">Start</button>
         </form>
       </section>
 
       <section class="learning-flashcards-screen hidden" id="learningFlashcardsScreen" aria-live="polite">
         <article class="learning-flashcard" id="learningFlashcard">
           <div class="learning-flashcard-meta">
-            <button class="small-link-button" id="learningFlashcardsBack" type="button">← Flashcards</button>
+            <button class="small-link-button" id="learningFlashcardsBack" type="button">← Back</button>
+            <strong>Flashcards</strong>
             <span id="learningFlashcardCounter">Card 1 of 25</span>
           </div>
           <div class="learning-flashcard-content">
@@ -385,19 +387,20 @@
           </div>
         </article>
         <article class="flashcard-completion-card hidden" id="flashcardCompletionCard">
+          <button class="small-link-button" id="flashcardCompletionBack" type="button">← Back</button>
           <p class="eyebrow">Flashcards</p>
           <h2>Great work!</h2>
           <p>You studied <strong id="flashcardCompletionCount">25</strong> words today.</p>
           <div class="flashcard-completion-actions">
-            <button class="primary-button" id="flashcardContinueStudying" type="button">Continue Studying</button>
-            <button class="ghost-button" id="flashcardReturnDashboard" type="button">Return to Dashboard</button>
+            <button class="primary-button" id="flashcardContinueStudying" type="button">Continue</button>
+            <button class="ghost-button" id="flashcardReturnDashboard" type="button">Home</button>
           </div>
         </article>
       </section>
 
       <section class="coin-challenges-screen hidden" id="coinChallengesScreen" aria-label="Challenges">
         <div class="dashboard-heading challenge-page-heading">
-          <button class="small-link-button" id="challengeLevelBack" type="button">← Levels</button>
+          <button class="small-link-button" id="challengeLevelBack" type="button">← Back</button>
           <h2>Challenges</h2>
           <p><span id="challengeSelectedLevel">A1</span> · Choose what you would like to practice.</p>
         </div>
@@ -425,7 +428,7 @@
 
       <section class="challenge-ready-screen hidden" id="challengeReadyScreen" aria-label="Challenge ready">
         <article class="challenge-ready-card">
-          <button class="small-link-button" id="challengeReadyBack" type="button">← Challenges</button>
+          <button class="small-link-button" id="challengeReadyBack" type="button">← Back</button>
           <p class="eyebrow" id="challengeReadyLevel">A1 Challenge</p>
           <h2 id="challengeReadyTitle">Vocabulary</h2>
           <p id="challengeReadyDescription">Review German vocabulary.</p>
@@ -437,7 +440,8 @@
 
       <section class="challenge-results-screen hidden" id="challengeResultsScreen" aria-live="polite">
         <article class="challenge-results-card">
-          <p class="eyebrow">Challenge Complete</p>
+          <button class="small-link-button" id="challengeResultsBack" type="button">← Back</button>
+          <p class="eyebrow" id="challengeResultsType">A1 Vocabulary</p>
           <h2>🎉 Challenge Complete!</h2>
           <dl class="challenge-results-summary">
             <div>
@@ -597,7 +601,7 @@
 
       <section class="study-stage hidden" id="studyStage" aria-live="polite">
         <article class="flashcard" id="flashcard">
-          <button class="challenge-back-button hidden" id="studyChallengeBack" type="button">← Back to Challenges</button>
+          <button class="challenge-back-button hidden" id="studyChallengeBack" type="button">← Back</button>
           <div class="card-meta">
             <span id="cardCounter">0 / 0</span>
             <span id="cardMode">German -> English</span>
@@ -651,7 +655,7 @@
 
       <section class="noun-verb-stage hidden" id="nounVerbStage" aria-live="polite">
         <article class="noun-verb-card">
-          <button class="challenge-back-button hidden" id="nounVerbChallengeBack" type="button">← Back to Challenges</button>
+          <button class="challenge-back-button hidden" id="nounVerbChallengeBack" type="button">← Back</button>
           <div class="card-meta">
             <span id="nounVerbCounter">0 / 0</span>
             <span id="nounVerbTitle">Noun-Verb Pairs</span>
@@ -699,6 +703,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=123"></script>
+    <script type="module" src="script.js?v=124"></script>
   </body>
 </html>
