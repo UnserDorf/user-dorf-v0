@@ -717,7 +717,10 @@ async function loadLevelDatasets(level) {
 async function loadCsvRows(path) {
   try {
     const response = await fetch(path, { cache: "no-store" });
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.warn(`Could not load ${path}: ${response.status}.`);
+      return [];
+    }
     return parseCsv(await response.text());
   } catch (error) {
     console.warn(`Could not load ${path}.`, error);
@@ -3202,9 +3205,7 @@ function getFlashcardSessionProfile() {
 }
 
 function getFlashcardCardsForLevel(level) {
-  const levelCards = levelDatasets[level]?.flashcards || [];
-  if (levelCards.length) return levelCards;
-  return cards.filter((card) => getFlashcardLevel(card) === level);
+  return levelDatasets[level]?.flashcards || [];
 }
 
 function loadOrCreateFlashcardSession(forceNew = false) {
@@ -5417,15 +5418,11 @@ function getVocabularyReviewCards() {
 }
 
 function getVocabularyChallengeCards(level) {
-  const levelCards = levelDatasets[level]?.vocabulary || [];
-  if (levelCards.length) return levelCards;
-  return cards.filter((card) => getFlashcardLevel(card) === level);
+  return levelDatasets[level]?.vocabulary || [];
 }
 
 function getArticleChallengeCards(level) {
-  const levelCards = levelDatasets[level]?.articles || [];
-  if (levelCards.length) return levelCards;
-  return cards.filter((card) => getFlashcardLevel(card) === level && card.isNoun);
+  return levelDatasets[level]?.articles || [];
 }
 
 function getCurrentVocabularyReviewCard() {
