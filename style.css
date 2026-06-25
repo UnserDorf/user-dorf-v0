@@ -1166,7 +1166,7 @@ h1 {
 .learning-flashcard {
   min-height: min(620px, calc(100dvh - 150px));
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   gap: 20px;
 }
 
@@ -1201,17 +1201,27 @@ h1 {
   font-weight: 850;
 }
 
-.learning-flashcard-category,
-.learning-flashcard-example {
-  margin: 0;
+.learning-flashcard-detail {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.learning-flashcard-detail span {
   color: var(--muted);
-  font-weight: 780;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.learning-flashcard-detail strong {
+  color: var(--ink);
+  font-weight: 800;
   line-height: 1.45;
 }
 
-.learning-flashcard-example {
+#learningFlashcardExample {
   max-width: 42ch;
-  color: var(--ink);
   font-size: clamp(1rem, 2.2vw, 1.2rem);
 }
 
@@ -1240,6 +1250,40 @@ h1 {
 .learning-flashcard-ratings .dont-know {
   background: var(--red-soft);
   color: var(--red);
+}
+
+.learning-flashcard-navigation,
+.flashcard-completion-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.learning-flashcard-navigation button {
+  min-height: 50px;
+}
+
+.flashcard-completion-card {
+  min-height: min(480px, calc(100dvh - 150px));
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.94);
+  box-shadow: var(--shadow);
+  padding: clamp(24px, 5vw, 42px);
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.flashcard-completion-card h2,
+.flashcard-completion-card p {
+  margin: 0;
+}
+
+.flashcard-completion-card h2 {
+  color: var(--ink);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
 }
 
 .section-heading.simple h3 {
@@ -3587,6 +3631,11 @@ select,
   }
 
   .learning-flashcard-ratings {
+    grid-template-columns: 1fr;
+  }
+
+  .learning-flashcard-navigation,
+  .flashcard-completion-actions {
     grid-template-columns: 1fr;
   }
 

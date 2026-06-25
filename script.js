@@ -11,6 +11,7 @@ const UNLOCK_STORAGE_KEY = "goethe-b1-flashcards-unlocked-v1";
 const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const CHALLENGE_QUESTION_COUNT = 10;
+const FLASHCARD_SESSION_SIZE = 25;
 const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
 const PROFILE_STORE_VERSION = 2;
 const DEFAULT_GROUP_ID = "family-z";
@@ -379,6 +380,7 @@ const els = {
   flashcardSetupBack: document.querySelector("#flashcardSetupBack"),
   flashcardSetupLevel: document.querySelector("#flashcardSetupLevel"),
   learningFlashcardsScreen: document.querySelector("#learningFlashcardsScreen"),
+  learningFlashcard: document.querySelector("#learningFlashcard"),
   learningFlashcardsBack: document.querySelector("#learningFlashcardsBack"),
   learningFlashcardCounter: document.querySelector("#learningFlashcardCounter"),
   learningFlashcardSelection: document.querySelector("#learningFlashcardSelection"),
@@ -386,8 +388,16 @@ const els = {
   learningFlashcardEnglish: document.querySelector("#learningFlashcardEnglish"),
   learningFlashcardCategory: document.querySelector("#learningFlashcardCategory"),
   learningFlashcardExample: document.querySelector("#learningFlashcardExample"),
+  learningFlashcardExampleGroup: document.querySelector("#learningFlashcardExampleGroup"),
   learningFlashcardRatings: document.querySelector("#learningFlashcardRatings"),
+  learningFlashcardNavigation: document.querySelector("#learningFlashcardNavigation"),
+  learningFlashcardPrevious: document.querySelector("#learningFlashcardPrevious"),
+  learningFlashcardNext: document.querySelector("#learningFlashcardNext"),
   learningFlashcardEmpty: document.querySelector("#learningFlashcardEmpty"),
+  flashcardCompletionCard: document.querySelector("#flashcardCompletionCard"),
+  flashcardCompletionCount: document.querySelector("#flashcardCompletionCount"),
+  flashcardContinueStudying: document.querySelector("#flashcardContinueStudying"),
+  flashcardReturnDashboard: document.querySelector("#flashcardReturnDashboard"),
   challengeLevelBack: document.querySelector("#challengeLevelBack"),
   challengeSelectedLevel: document.querySelector("#challengeSelectedLevel"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
@@ -1074,6 +1084,7 @@ function normalizeProfileData(data, profile) {
     recentMeaningMatchItems: normalizeRecentItemList(data?.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER),
     vocabularyReviewStats: normalizeVocabularyReviewStats(data?.vocabularyReviewStats),
     challengeSessionsCompleted: normalizeCounter(data?.challengeSessionsCompleted),
+    flashcardSessions: normalizeFlashcardSessions(data?.flashcardSessions),
     positions: normalizePositions(data?.positions),
     settings: {
       mode: data?.settings?.mode || "de-en",
@@ -1092,6 +1103,25 @@ function normalizePositions(value = {}) {
     article: normalizePosition(value.article),
     nounVerb: normalizePosition(value.nounVerb)
   };
+}
+
+function normalizeFlashcardSessions(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).map(([key, session]) => [
+      key,
+      {
+        deckIds: Array.isArray(session?.deckIds) ? session.deckIds.map(String).filter(Boolean) : [],
+        index: normalizeCounter(session?.index),
+        studiedIds: Array.isArray(session?.studiedIds)
+          ? Array.from(new Set(session.studiedIds.map(String).filter(Boolean)))
+          : [],
+        studyDate: typeof session?.studyDate === "string" ? session.studyDate : "",
+        completed: Boolean(session?.completed),
+        updatedAt: typeof session?.updatedAt === "string" ? session.updatedAt : ""
+      }
+    ])
+  );
 }
 
 function normalizePosition(value) {
@@ -1488,6 +1518,10 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
         normalizeCounter(local.challengeSessionsCompleted),
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
+      flashcardSessions: {
+        ...local.flashcardSessions,
+        ...remote.flashcardSessions
+      },
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -1602,7 +1636,7 @@ function refreshVisibleProfileState() {
     renderVocabularyReviewQuiz();
   } else if (currentView === "learning-flashcards") {
     renderLearningFlashcard();
-  } else if (currentView === "level-selection" || currentView === "flashcard-setup") {
+  } else if (["level-selection", "flashcard-setup", "flashcard-complete"].includes(currentView)) {
     return;
   } else {
     updateStats();
@@ -2924,11 +2958,7 @@ function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
   flashcardStudyLevel = selectedLearningLevel;
   flashcardStudyCategory = categoryInput?.value || "nouns";
-  flashcardStudyCards = buildLearningFlashcardOrder(
-    cards.filter((card) => getFlashcardLevel(card) === flashcardStudyLevel
-      && getFlashcardCategory(card) === flashcardStudyCategory)
-  );
-  flashcardStudyIndex = 0;
+  loadOrCreateFlashcardSession();
   currentView = "learning-flashcards";
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.remove("hidden");
@@ -2952,25 +2982,108 @@ function getFlashcardCategory(card) {
 }
 
 function buildLearningFlashcardOrder(cardList) {
-  const weightedCards = cardList.flatMap((card) => {
-    const status = getMeaningStatus(card);
-    const weight = status === "unknown" ? 5 : status === "unsure" ? 3 : status === "unrated" ? 2 : 1;
-    return Array.from({ length: weight }, () => card);
-  });
-  return shuffleCards(weightedCards);
+  const candidates = cardList.map((card) => ({ card, weight: getFlashcardReviewWeight(card) }));
+  const selected = [];
+  while (candidates.length && selected.length < FLASHCARD_SESSION_SIZE) {
+    const totalWeight = candidates.reduce((total, item) => total + item.weight, 0);
+    let target = Math.random() * totalWeight;
+    let selectedIndex = 0;
+    for (let index = 0; index < candidates.length; index += 1) {
+      target -= candidates[index].weight;
+      if (target <= 0) {
+        selectedIndex = index;
+        break;
+      }
+    }
+    selected.push(candidates.splice(selectedIndex, 1)[0].card);
+  }
+  return selected;
+}
+
+function getFlashcardReviewWeight(card) {
+  const status = getMeaningStatus(card);
+  if (status === "unknown") return 6;
+  if (status === "unsure") return 4;
+  if (status === "unrated") return 2;
+  return 1;
+}
+
+function getFlashcardSessionKey() {
+  return `${flashcardStudyLevel}-${flashcardStudyCategory}`;
+}
+
+function getFlashcardSessionProfile() {
+  const profile = getCurrentProfile();
+  if (!profile) return null;
+  profile.flashcardSessions = normalizeFlashcardSessions(profile.flashcardSessions);
+  return profile;
+}
+
+function loadOrCreateFlashcardSession(forceNew = false) {
+  const profile = getFlashcardSessionProfile();
+  const availableCards = cards.filter((card) => getFlashcardLevel(card) === flashcardStudyLevel
+    && getFlashcardCategory(card) === flashcardStudyCategory);
+  const availableById = new Map(availableCards.map((card) => [card.id, card]));
+  const key = getFlashcardSessionKey();
+  const saved = profile?.flashcardSessions?.[key];
+  const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
+  const canResume = !forceNew && savedCards.length && !saved.completed;
+
+  if (canResume) {
+    flashcardStudyCards = savedCards;
+    flashcardStudyIndex = clamp(saved.index, 0, Math.max(savedCards.length - 1, 0));
+    return;
+  }
+
+  flashcardStudyCards = buildLearningFlashcardOrder(availableCards);
+  flashcardStudyIndex = 0;
+  if (!profile) return;
+  profile.flashcardSessions[key] = {
+    deckIds: flashcardStudyCards.map((card) => card.id),
+    index: 0,
+    studiedIds: [],
+    studyDate: getTodayKey(),
+    completed: false,
+    updatedAt: new Date().toISOString()
+  };
+  saveProfileStore();
+}
+
+function saveCurrentFlashcardSession({ studiedCard = null, completed = false } = {}) {
+  const profile = getFlashcardSessionProfile();
+  if (!profile) return;
+  const key = getFlashcardSessionKey();
+  const existing = profile.flashcardSessions[key] || {};
+  const today = getTodayKey();
+  const studiedIds = new Set(existing.studyDate === today ? existing.studiedIds || [] : []);
+  if (studiedCard?.id) studiedIds.add(studiedCard.id);
+  profile.flashcardSessions[key] = {
+    deckIds: flashcardStudyCards.map((card) => card.id),
+    index: flashcardStudyIndex,
+    studiedIds: Array.from(studiedIds),
+    studyDate: today,
+    completed,
+    updatedAt: new Date().toISOString()
+  };
+  saveProfileStore();
 }
 
 function renderLearningFlashcard() {
   const card = flashcardStudyCards[flashcardStudyIndex];
   const hasCard = Boolean(card);
+  els.learningFlashcard.classList.remove("hidden");
+  els.flashcardCompletionCard.classList.add("hidden");
   els.learningFlashcardEmpty.classList.toggle("hidden", hasCard);
   els.learningFlashcardSelection.classList.toggle("hidden", !hasCard);
   els.learningFlashcardGerman.classList.toggle("hidden", !hasCard);
   els.learningFlashcardEnglish.classList.toggle("hidden", !hasCard);
   els.learningFlashcardCategory.classList.toggle("hidden", !hasCard);
-  els.learningFlashcardExample.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardExampleGroup.classList.toggle("hidden", !hasCard);
   els.learningFlashcardRatings.classList.toggle("hidden", !hasCard);
-  els.learningFlashcardCounter.textContent = hasCard ? `Card ${flashcardStudyIndex + 1}` : "No cards";
+  els.learningFlashcardNavigation.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardCounter.textContent = hasCard
+    ? `Card ${flashcardStudyIndex + 1} of ${flashcardStudyCards.length}`
+    : "No cards";
   if (!card) return;
   const categoryLabel = flashcardStudyCategory === "nouns"
     ? "Nouns"
@@ -2978,9 +3091,11 @@ function renderLearningFlashcard() {
   els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} · ${categoryLabel}`;
   els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
   els.learningFlashcardEnglish.textContent = card.english;
-  els.learningFlashcardCategory.textContent = `Category: ${categoryLabel}`;
+  els.learningFlashcardCategory.textContent = categoryLabel;
   els.learningFlashcardExample.textContent = card.example || "";
-  els.learningFlashcardExample.classList.toggle("hidden", !card.example);
+  els.learningFlashcardExampleGroup.classList.toggle("hidden", !card.example);
+  els.learningFlashcardPrevious.disabled = flashcardStudyIndex === 0;
+  els.learningFlashcardNext.textContent = flashcardStudyIndex === flashcardStudyCards.length - 1 ? "Finish" : "Next";
 }
 
 function rateLearningFlashcard(rating) {
@@ -2992,14 +3107,35 @@ function rateLearningFlashcard(rating) {
     updatedAt: new Date().toISOString()
   };
   saveProgress();
-  const currentId = card.id;
-  flashcardStudyCards = buildLearningFlashcardOrder(
-    cards.filter((item) => getFlashcardLevel(item) === flashcardStudyLevel
-      && getFlashcardCategory(item) === flashcardStudyCategory)
-  );
-  const differentCardIndex = flashcardStudyCards.findIndex((item) => item.id !== currentId);
-  flashcardStudyIndex = differentCardIndex >= 0 ? differentCardIndex : 0;
+  moveLearningFlashcard(1, card);
+}
+
+function moveLearningFlashcard(direction, studiedCard = null) {
+  if (!flashcardStudyCards.length) return;
+  if (direction < 0) {
+    flashcardStudyIndex = Math.max(flashcardStudyIndex - 1, 0);
+    saveCurrentFlashcardSession();
+    renderLearningFlashcard();
+    return;
+  }
+  const card = studiedCard || flashcardStudyCards[flashcardStudyIndex];
+  if (flashcardStudyIndex >= flashcardStudyCards.length - 1) {
+    saveCurrentFlashcardSession({ studiedCard: card, completed: true });
+    showFlashcardCompletion();
+    return;
+  }
+  flashcardStudyIndex += 1;
+  saveCurrentFlashcardSession({ studiedCard: card });
   renderLearningFlashcard();
+}
+
+function showFlashcardCompletion() {
+  const profile = getFlashcardSessionProfile();
+  const session = profile?.flashcardSessions?.[getFlashcardSessionKey()];
+  els.flashcardCompletionCount.textContent = normalizeCounter(session?.studiedIds?.length);
+  currentView = "flashcard-complete";
+  els.learningFlashcard.classList.add("hidden");
+  els.flashcardCompletionCard.classList.remove("hidden");
 }
 
 function handleChallengeAction(action) {
@@ -3665,6 +3801,14 @@ function bindEvents() {
   els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
   els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
+  els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
+  els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
+  els.flashcardContinueStudying.addEventListener("click", () => {
+    loadOrCreateFlashcardSession(true);
+    currentView = "learning-flashcards";
+    renderLearningFlashcard();
+  });
+  els.flashcardReturnDashboard.addEventListener("click", showDashboard);
   els.flashcardSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     startLearningFlashcards();

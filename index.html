@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=120">
+    <link rel="stylesheet" href="style.css?v=121">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -338,26 +338,45 @@
       </section>
 
       <section class="learning-flashcards-screen hidden" id="learningFlashcardsScreen" aria-live="polite">
-        <article class="learning-flashcard">
+        <article class="learning-flashcard" id="learningFlashcard">
           <div class="learning-flashcard-meta">
             <button class="small-link-button" id="learningFlashcardsBack" type="button">← Flashcards</button>
-            <span id="learningFlashcardCounter">Card 1</span>
+            <span id="learningFlashcardCounter">Card 1 of 25</span>
           </div>
           <div class="learning-flashcard-content">
             <p class="eyebrow" id="learningFlashcardSelection">A1 · Nouns</p>
             <h2 id="learningFlashcardGerman">das Haus</h2>
             <p class="learning-flashcard-english" id="learningFlashcardEnglish">house</p>
-            <p class="learning-flashcard-category" id="learningFlashcardCategory">Category: Nouns</p>
-            <p class="learning-flashcard-example" id="learningFlashcardExample">Das Haus ist groß.</p>
+            <div class="learning-flashcard-detail">
+              <span>Category</span>
+              <strong id="learningFlashcardCategory">Nouns</strong>
+            </div>
+            <div class="learning-flashcard-detail" id="learningFlashcardExampleGroup">
+              <span>Example</span>
+              <strong id="learningFlashcardExample">Das Haus ist groß.</strong>
+            </div>
           </div>
           <div class="learning-flashcard-ratings" id="learningFlashcardRatings">
             <button class="know" type="button" data-flashcard-rating="known">✓ Known</button>
             <button class="unsure" type="button" data-flashcard-rating="unsure">? Unsure</button>
             <button class="dont-know" type="button" data-flashcard-rating="unknown">✗ Don’t Know</button>
           </div>
+          <div class="learning-flashcard-navigation" id="learningFlashcardNavigation">
+            <button class="ghost-button" id="learningFlashcardPrevious" type="button">Previous</button>
+            <button class="primary-button" id="learningFlashcardNext" type="button">Next</button>
+          </div>
           <div class="empty-state hidden" id="learningFlashcardEmpty">
             <h2>No flashcards available</h2>
             <p>Try another level or category.</p>
+          </div>
+        </article>
+        <article class="flashcard-completion-card hidden" id="flashcardCompletionCard">
+          <p class="eyebrow">Flashcards</p>
+          <h2>Great work!</h2>
+          <p>You studied <strong id="flashcardCompletionCount">25</strong> words today.</p>
+          <div class="flashcard-completion-actions">
+            <button class="primary-button" id="flashcardContinueStudying" type="button">Continue Studying</button>
+            <button class="ghost-button" id="flashcardReturnDashboard" type="button">Return to Dashboard</button>
           </div>
         </article>
       </section>
@@ -654,6 +673,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=120"></script>
+    <script type="module" src="script.js?v=121"></script>
   </body>
 </html>
