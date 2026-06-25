@@ -392,6 +392,7 @@ const els = {
   currentUserLabel: document.querySelector("#currentUserLabel"),
   dashboardChallengeStatus: document.querySelector("#dashboardChallengeStatus"),
   dashboardStreak: document.querySelector("#dashboardStreak"),
+  dashboardChallengesCompleted: document.querySelector("#dashboardChallengesCompleted"),
   achievementPreview: document.querySelector("#achievementPreview"),
   austriaAlbumPreview: document.querySelector("#austriaAlbumPreview"),
   townCenterDashboardImage: document.querySelector("#townCenterDashboardImage"),
@@ -1065,6 +1066,7 @@ function normalizeProfileData(data, profile) {
     prepositionProgress: normalizeNounVerbProgress(data?.prepositionProgress || {}),
     recentMeaningMatchItems: normalizeRecentItemList(data?.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER),
     vocabularyReviewStats: normalizeVocabularyReviewStats(data?.vocabularyReviewStats),
+    challengeSessionsCompleted: normalizeCounter(data?.challengeSessionsCompleted),
     positions: normalizePositions(data?.positions),
     settings: {
       mode: data?.settings?.mode || "de-en",
@@ -1475,6 +1477,10 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       prepositionProgress: mergeProgressEntries(local.prepositionProgress, remote.prepositionProgress),
       recentMeaningMatchItems: mergeRecentItemLists(local.recentMeaningMatchItems, remote.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER),
       vocabularyReviewStats: mergeVocabularyReviewStats(local.vocabularyReviewStats, remote.vocabularyReviewStats),
+      challengeSessionsCompleted: Math.max(
+        normalizeCounter(local.challengeSessionsCompleted),
+        normalizeCounter(remote.challengeSessionsCompleted)
+      ),
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -1953,6 +1959,9 @@ function renderProgressCards(profile) {
     els.dashboardChallengeStatus.textContent = profile.dailyChallenge.completed
       ? "Completed today"
       : `${progress.current} / ${challenge.goal}`;
+  }
+  if (els.dashboardChallengesCompleted) {
+    els.dashboardChallengesCompleted.textContent = normalizeCounter(profile.challengeSessionsCompleted);
   }
 }
 
@@ -3006,6 +3015,13 @@ function advanceChallengeSession(type, moveNext) {
 }
 
 function showChallengeResults() {
+  if (!challengeSession.complete) {
+    const profile = getCurrentProfile();
+    if (profile) {
+      profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + 1;
+      saveProfileStore();
+    }
+  }
   challengeSession.complete = true;
   const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
   const accuracy = Math.round((correct / CHALLENGE_QUESTION_COUNT) * 100);

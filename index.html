@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=118">
+    <link rel="stylesheet" href="style.css?v=119">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -205,67 +205,52 @@
           </div>
         </div>
 
-        <section class="dashboard-section dashboard-town-center-panel" aria-label="Town Center">
-          <article class="dashboard-town-center-card" data-dashboard-action="town-center" tabindex="0" role="button" aria-label="Open Town Center">
-            <div class="dashboard-town-center-image-wrap">
-              <img id="townCenterDashboardImage" src="assets/town-center-stage-1.png" alt="Town Center" loading="lazy">
-            </div>
-            <div class="dashboard-town-center-content">
+        <section class="dashboard-section dashboard-learning-panel" aria-label="Today's Learning">
+          <div class="section-heading simple">
+            <h3>Today's Learning</h3>
+          </div>
+          <div class="dashboard-learning-grid">
+            <article class="dashboard-learning-card">
               <div>
-                <h3>Town Center</h3>
-                <p>See how your village has grown together.</p>
+                <h3>📇 Flashcards</h3>
+                <p>Learn vocabulary before taking challenges.</p>
               </div>
-              <div class="dashboard-town-center-stats">
-                <span>
-                  <small>Current Stage:</small>
-                  <strong id="townCenterDashboardStage">🌱 Open Village Green</strong>
-                </span>
-                <span>
-                  <small>Town Center Progress:</small>
-                  <strong id="townCenterDashboardStageCount">Stage 1 / 5</strong>
-                </span>
-                <span>
-                  <small>Village Coins:</small>
-                  <strong id="dashboardFamilyCoins">0</strong>
-                </span>
+              <button class="primary-button" type="button" data-dashboard-action="flashcards">Start</button>
+            </article>
+            <article class="dashboard-learning-card">
+              <div>
+                <h3>🏆 Challenges</h3>
+                <p>Test your knowledge and earn coins.</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="town-center">View Progress</button>
-            </div>
-          </article>
+              <button class="primary-button" type="button" data-dashboard-action="challenges">Open</button>
+            </article>
+          </div>
         </section>
 
-        <section class="dashboard-section dashboard-progress-panel" aria-label="My progress">
+        <section class="dashboard-section dashboard-progress-panel" aria-label="Your Progress">
           <div class="section-heading simple">
-            <h3>My Progress</h3>
+            <h3>Your Progress</h3>
           </div>
           <div class="dashboard-progress-grid">
-            <article class="challenge-card simple-challenge" aria-label="Challenges">
-              <div>
-                <span class="progress-card-label">🎯 Challenges</span>
-                <strong id="dashboardChallengeStatus">Choose a goal</strong>
-                <p>Earn coins through learning.</p>
-              </div>
-              <button class="primary-button" type="button" data-dashboard-action="challenges">Open Challenges</button>
+            <article class="dashboard-metric" aria-label="Coins">
+              <span>🪙 Coins</span>
+              <strong id="levelCoins">0</strong>
             </article>
             <article class="dashboard-metric" aria-label="Streak">
               <span>🔥 Streak</span>
               <strong id="dashboardStreak">No streak yet</strong>
             </article>
-            <article class="dashboard-metric" aria-label="My coins">
-              <span>🪙 Coins</span>
-              <strong id="levelCoins">0</strong>
+            <article class="dashboard-metric" aria-label="Challenges completed">
+              <span>🏆 Challenges Completed</span>
+              <strong id="dashboardChallengesCompleted">0</strong>
+            </article>
+            <article class="dashboard-metric dashboard-village-progress" data-dashboard-action="town-center" tabindex="0" role="button" aria-label="Open Village Progress">
+              <span>🏡 Village Progress</span>
+              <strong id="townCenterDashboardStageCount">Stage 1 / 5</strong>
+              <small id="townCenterDashboardStage">Open Village Green</small>
+              <small><span id="dashboardFamilyCoins">0</span> village coins</small>
             </article>
           </div>
-        </section>
-
-        <section class="dashboard-section dashboard-flashcards-panel" aria-label="Flashcards">
-          <article class="flashcards-dashboard-card">
-            <div>
-              <h3>📇 Flashcards</h3>
-              <p>Learn vocabulary before taking challenges.</p>
-            </div>
-            <button class="primary-button" type="button" data-dashboard-action="flashcards">Start</button>
-          </article>
         </section>
 
         <section class="dashboard-section collections-preview-section" aria-label="Reward previews">
@@ -297,12 +282,6 @@
           </div>
         </section>
 
-        <section class="dashboard-section village-members-section" aria-label="Village members">
-          <div class="section-heading simple">
-            <h3>Our Village Members</h3>
-          </div>
-          <div class="village-members-grid" id="householdList"></div>
-        </section>
       </section>
 
       <section class="achievement-collection-screen hidden" id="achievementCollectionScreen" aria-label="Rewards">
@@ -660,6 +639,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=118"></script>
+    <script type="module" src="script.js?v=119"></script>
   </body>
 </html>
