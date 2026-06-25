@@ -375,6 +375,12 @@ const els = {
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
   levelSelectionBack: document.querySelector("#levelSelectionBack"),
+  flashcardResumeScreen: document.querySelector("#flashcardResumeScreen"),
+  flashcardResumeBack: document.querySelector("#flashcardResumeBack"),
+  flashcardResumeDeck: document.querySelector("#flashcardResumeDeck"),
+  flashcardResumePosition: document.querySelector("#flashcardResumePosition"),
+  flashcardResumeContinue: document.querySelector("#flashcardResumeContinue"),
+  flashcardChooseAnotherDeck: document.querySelector("#flashcardChooseAnotherDeck"),
   flashcardSetupScreen: document.querySelector("#flashcardSetupScreen"),
   flashcardSetupForm: document.querySelector("#flashcardSetupForm"),
   flashcardSetupBack: document.querySelector("#flashcardSetupBack"),
@@ -585,6 +591,7 @@ let flashcardStudyCategory = "nouns";
 let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
 let pendingChallengeAction = "";
+let pendingFlashcardResumeKey = "";
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
 let recentMeaningMatchItems = [];
@@ -1643,7 +1650,7 @@ function refreshVisibleProfileState() {
     renderVocabularyReviewQuiz();
   } else if (currentView === "learning-flashcards") {
     renderLearningFlashcard();
-  } else if (["level-selection", "flashcard-setup", "flashcard-complete", "challenge-ready"].includes(currentView)) {
+  } else if (["level-selection", "flashcard-resume", "flashcard-setup", "flashcard-complete", "challenge-ready"].includes(currentView)) {
     return;
   } else {
     updateStats();
@@ -1776,6 +1783,7 @@ function saveSettings() {
 }
 
 function showDashboard() {
+  discardIncompleteChallengeSession();
   currentView = "dashboard";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
@@ -1789,6 +1797,7 @@ function showDashboard() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -1800,6 +1809,7 @@ function showDashboard() {
 }
 
 function showCoinChallenges() {
+  discardIncompleteChallengeSession();
   currentView = "coin-challenges";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
@@ -1813,6 +1823,7 @@ function showCoinChallenges() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeSelectedLevel.textContent = selectedLearningLevel;
@@ -1826,6 +1837,7 @@ function showCoinChallenges() {
 }
 
 function showAchievementCollection(page = "austria-album") {
+  discardIncompleteChallengeSession();
   currentView = page;
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
@@ -1839,6 +1851,7 @@ function showAchievementCollection(page = "austria-album") {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -1860,6 +1873,7 @@ function showStudyView(options = {}) {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
@@ -1892,6 +1906,7 @@ function showNounVerbQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1921,6 +1936,7 @@ function showVocabularyReviewQuiz() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -1944,6 +1960,7 @@ function showMeaningMatchQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1969,6 +1986,7 @@ function showPrepositionQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -2876,7 +2894,7 @@ function handleDashboardAction(action) {
     return;
   }
   if (action === "flashcards") {
-    showLevelSelection("flashcards");
+    showFlashcardsEntry();
     return;
   }
   if (action === "challenges") {
@@ -2919,7 +2937,74 @@ function handleDashboardAction(action) {
   openStudyRoute(route);
 }
 
+function showFlashcardsEntry() {
+  const resumable = getMostRecentFlashcardSession();
+  if (!resumable) {
+    showLevelSelection("flashcards");
+    return;
+  }
+  pendingFlashcardResumeKey = resumable.key;
+  currentView = "flashcard-resume";
+  selectedLearningPath = "flashcards";
+  els.flashcardResumeDeck.textContent = `${resumable.level} · ${getFlashcardCategoryLabel(resumable.category)}`;
+  els.flashcardResumePosition.textContent = `Card ${resumable.index + 1} of ${resumable.total}`;
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+  els.flashcardResumeScreen.classList.remove("hidden");
+}
+
+function getMostRecentFlashcardSession() {
+  const profile = getFlashcardSessionProfile();
+  const sessions = Object.entries(profile?.flashcardSessions || {})
+    .map(([key, session]) => {
+      const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(key);
+      if (!match || session.completed || !session.deckIds.length) return null;
+      const validDeckIds = session.deckIds.filter((id) => cards.some((card) => card.id === id));
+      if (!validDeckIds.length) return null;
+      return {
+        key,
+        level: match[1],
+        category: match[2],
+        index: clamp(session.index, 0, validDeckIds.length - 1),
+        total: validDeckIds.length,
+        updatedAt: session.updatedAt || ""
+      };
+    })
+    .filter(Boolean)
+    .sort((first, second) => second.updatedAt.localeCompare(first.updatedAt));
+  return sessions[0] || null;
+}
+
+function resumePendingFlashcardSession() {
+  const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(pendingFlashcardResumeKey);
+  if (!match) {
+    showLevelSelection("flashcards");
+    return;
+  }
+  selectedLearningLevel = match[1];
+  flashcardStudyLevel = match[1];
+  flashcardStudyCategory = match[2];
+  loadOrCreateFlashcardSession();
+  currentView = "learning-flashcards";
+  els.flashcardResumeScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.remove("hidden");
+  renderLearningFlashcard();
+}
+
 function showLevelSelection(path) {
+  if (path === "challenges") discardIncompleteChallengeSession();
   selectedLearningPath = path;
   currentView = "level-selection";
   setChallengeBackButtons(false, false);
@@ -2928,6 +3013,7 @@ function showLevelSelection(path) {
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.remove("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -2959,6 +3045,7 @@ function showFlashcardSetup() {
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.remove("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -2996,6 +3083,12 @@ function getFlashcardCategory(card) {
   const word = String(card.word || "").trim();
   if (/^[a-zäöüß].*(en|ern|eln)$/.test(word)) return "verbs";
   return "other";
+}
+
+function getFlashcardCategoryLabel(category) {
+  if (category === "nouns") return "Nouns";
+  if (category === "verbs") return "Verbs";
+  return "Other Words";
 }
 
 function buildLearningFlashcardOrder(cardList) {
@@ -3102,9 +3195,7 @@ function renderLearningFlashcard() {
     ? `Card ${flashcardStudyIndex + 1} of ${flashcardStudyCards.length}`
     : "No cards";
   if (!card) return;
-  const categoryLabel = flashcardStudyCategory === "nouns"
-    ? "Nouns"
-    : flashcardStudyCategory === "verbs" ? "Verbs" : "Other Words";
+  const categoryLabel = getFlashcardCategoryLabel(flashcardStudyCategory);
   els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} · ${categoryLabel}`;
   els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
   els.learningFlashcardEnglish.textContent = card.english;
@@ -3176,6 +3267,7 @@ function showChallengeReady(action) {
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -3210,6 +3302,13 @@ function createEmptyChallengeSession() {
     coinsEarned: 0,
     complete: false
   };
+}
+
+function discardIncompleteChallengeSession() {
+  if (challengeSession.type && !challengeSession.complete) {
+    challengeSession = createEmptyChallengeSession();
+  }
+  pendingChallengeAction = "";
 }
 
 function startChallengeSession(type, level = selectedLearningLevel) {
@@ -3262,6 +3361,7 @@ function showChallengeResults() {
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -3831,6 +3931,9 @@ function bindEvents() {
     showDashboard();
   });
   els.levelSelectionBack.addEventListener("click", showDashboard);
+  els.flashcardResumeBack.addEventListener("click", showDashboard);
+  els.flashcardResumeContinue.addEventListener("click", resumePendingFlashcardSession);
+  els.flashcardChooseAnotherDeck.addEventListener("click", () => showLevelSelection("flashcards"));
   els.levelSelectionScreen.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-learning-level]");
     if (!button) return;

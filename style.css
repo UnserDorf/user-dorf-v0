@@ -1043,11 +1043,56 @@ h1 {
 }
 
 .level-selection-screen,
+.flashcard-resume-screen,
 .flashcard-setup-screen,
 .learning-flashcards-screen {
   width: min(760px, 100%);
   margin: 0 auto;
   padding: clamp(18px, 4vw, 36px) 0;
+}
+
+.flashcard-resume-card {
+  min-height: min(460px, calc(100dvh - 150px));
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.94);
+  box-shadow: var(--shadow);
+  padding: clamp(24px, 5vw, 42px);
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.flashcard-resume-card .small-link-button {
+  justify-self: start;
+}
+
+.flashcard-resume-card h2,
+.flashcard-resume-card p {
+  margin: 0;
+}
+
+.flashcard-resume-card h2 {
+  color: var(--ink);
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+}
+
+.flashcard-resume-card > strong {
+  color: var(--green);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+}
+
+.flashcard-resume-actions {
+  width: min(100%, 380px);
+  margin-top: 8px;
+  display: grid;
+  gap: 10px;
+  justify-self: center;
+}
+
+.flashcard-resume-actions button {
+  min-height: 52px;
 }
 
 .level-selection-heading,
