@@ -1,0 +1,683 @@
+id,German,Article,English,ExampleSentence,CEFR,WordType,Category,ArticleQuizEligible,Source,Notes,RecommendedRemoval
+a1_0001,ab,,from; starting,Ab morgen lernen wir Deutsch.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0002,aber,,but,Ich komme gern aber ich habe keine Zeit.,A1,conjunction,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0003,abfahren,,to depart,Der Zug fährt um acht Uhr ab.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0004,Abfahrt,die,departure,Die Abfahrt ist um acht Uhr.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0005,abfliegen,,to depart by plane,Der Flug fliegt um zehn ab.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0006,Abflug,der,departure,Der Abflug ist um elf Uhr.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0007,abgeben,,to hand in; give back,Bitte gib das Formular ab.,A1,verb,Health,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0008,abholen,,to pick up,Ich hole mein Kind von der Schule ab.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0009,Absender,der,sender,Der Absender steht oben auf dem Brief.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0010,Achtung,,attention; caution,Achtung das ist heiß.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0011,Adresse,die,address,Wie ist deine Adresse?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0012,all-/alles,,all; everything,Alles ist gut.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0013,allein,,alone,Ich bin heute allein zu Hause.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0014,also,,so; therefore,Also wir beginnen jetzt.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0015,alt,,old,Mein Auto ist alt.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0016,Alter,das,age,Wie ist Ihr Alter?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0017,an,,at; on; to,Wir treffen uns am Bahnhof.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0018,an sein,,to be on,Das Licht ist an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0019,anbieten,,to offer,Was kann ich Ihnen anbieten?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0020,ander-,,other; another,Ich nehme die andere Jacke.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0021,Anfang,der,beginning,Am Anfang ist es leicht.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0022,anfangen,,to begin,Der Kurs fängt um neun Uhr an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0023,Angebot,das,offer; special offer,Das Angebot ist günstig.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0024,anklicken,,to click on,Klicken Sie das Wort an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0025,ankommen,,to arrive,Wann kommt der Zug an?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0026,ankreuzen,,to tick; check,Bitte kreuzen Sie die richtige Antwort an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0027,Ankunft,die,arrival,Die Ankunft ist um zehn Uhr.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0028,anmachen,,to turn on,Mach bitte das Licht an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0029,Anmeldung,die,registration,Die Anmeldung ist heute möglich.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0030,Anrede,die,salutation,Schreiben Sie eine Anrede in den Brief.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0031,Anruf,der,call,Ich bekomme einen Anruf.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0032,Anrufbeantworter,der,answering machine,Sprechen Sie bitte auf den Anrufbeantworter.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0033,anrufen,,to call,Ich rufe dich heute Abend an.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0034,Ansage,die,announcement,Hören Sie bitte die Ansage.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0035,Anschluss,der,connection; phone connection,Wir haben Anschluss nach Wien.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0036,Antwort,die,answer,Die Antwort ist richtig.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0037,antworten,,to answer,Bitte antworten Sie schnell.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0038,Anzeige,die,advertisement; notice,Ich lese die Anzeige in der Zeitung.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0039,Apartment,das,apartment,Wir mieten ein Apartment.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0040,Apfel,der,apple,Ich esse einen Apfel.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0041,Appetit,der,appetite,Guten Appetit!,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0042,Arbeit,die,work; job,Meine Arbeit beginnt um acht Uhr.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0043,arbeiten,,to work,Ich arbeite in Wien.,A1,verb,Work,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0044,arbeitslos,,unemployed,Er ist seit Mai arbeitslos.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0045,Arbeitsplatz,der,workplace,Mein Arbeitsplatz ist ruhig.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0046,Arm,der,arm,Mein Arm tut weh.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0047,Arzt,der,doctor,Ich gehe zum Arzt.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0048,auch,,also; too,Ich komme auch.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0049,auf,,on; open; in,Das Buch liegt auf dem Tisch.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0050,auf sein,,to be open,Die Tür ist auf.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0051,Aufgabe,die,task; exercise,Die Aufgabe ist einfach.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0052,aufhören,,to stop,Der Unterricht hört um zwölf Uhr auf.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0053,aufstehen,,to get up,Ich stehe um sieben Uhr auf.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0054,Aufzug,der,elevator,Der Aufzug ist kaputt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0055,Auge,das,eye,Meine Augen sind braun.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0056,aus,,from; out of,Ich komme aus Japan.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0057,aus sein,,to be off; be over,Die Schule ist aus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0058,Ausflug,der,excursion; trip,Wir machen einen Ausflug.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0059,ausfüllen,,to fill out,Füllen Sie bitte das Formular aus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0060,Ausgang,der,exit,Wo ist der Ausgang?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0061,Auskunft,die,information,Können Sie mir eine Auskunft geben?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0062,Ausländer,der,foreigner,Er ist Ausländer.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0063,ausländisch,,foreign,Ich habe ausländisches Geld.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0064,Ausland,das,foreign countries; abroad,Wir fahren ins Ausland.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0065,ausmachen,,to turn off,Mach bitte den Computer aus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0066,Aussage,die,statement,Die Aussage ist richtig.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0067,aussehen,,to look; appear,Das sieht schön aus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0068,aussteigen,,to get off,Wo muss ich aussteigen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0069,Ausweis,der,ID card,Hier ist mein Ausweis.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0070,Auto,das,car,Ich fahre mit dem Auto.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0071,Autobahn,die,highway; motorway,Die Autobahn ist voll.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0072,Automat,der,machine; vending machine,Die Fahrkarte gibt es am Automaten.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0073,automatisch,,automatic; automatically,Das geht automatisch.,A1,other,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0074,Baby,das,baby,Das Baby schläft.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0075,Bad,das,bathroom; bath,Das Bad ist klein.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0076,baden,,to bathe; swim,Ich bade nicht gern.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0077,Bäckerei,die,bakery,Ich gehe zur Bäckerei.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0078,Bahn,die,train; railway,Ich fahre mit der Bahn.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0079,Bahnhof,der,train station,Der Bahnhof ist in der Nähe.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0080,Bahnsteig,der,platform,Der Zug fährt von Bahnsteig zwei.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0081,bald,,soon,Ich komme bald.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0082,Balkon,der,balcony,Die Wohnung hat einen Balkon.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0083,Banane,die,banana,Ich kaufe drei Bananen.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0084,Bank,die,bank; bench,Die Bank öffnet um neun Uhr.,A1,noun,Shopping,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0085,bar,,cash; in cash,Kann ich bar zahlen?,A1,other,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0086,Bauch,der,stomach; belly,Mein Bauch tut weh.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0087,Baum,der,tree,Der Baum ist groß.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0088,Beamte,der/die,official; civil servant,Die Beamtin hilft mir.,A1,noun,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0089,bedeuten,,to mean,Was bedeutet dieses Wort?,A1,verb,Housing,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0090,beginnen,,to begin,Der Film beginnt um acht Uhr.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0091,bei,,near; at; with,Ich wohne bei meinen Eltern.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0092,beide,,both,Beide Kinder lernen Deutsch.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0093,Bein,das,leg,Mein Bein tut weh.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0094,Beispiel,das,example,Das ist ein gutes Beispiel.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0095,bekannt,,known; famous,Der Mann ist bekannt.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0096,Bekannte,der/die,acquaintance,Ein Bekannter kommt heute.,A1,noun,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0097,bekommen,,to receive; get,Ich bekomme eine E-Mail.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0098,benutzen,,to use,Darf ich das Telefon benutzen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0099,Beruf,der,profession; job,Was sind Sie von Beruf?,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0100,besetzt,,occupied; busy,Der Platz ist besetzt.,A1,other,Travel,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0101,besichtigen,,to visit; tour,Wir besichtigen den Dom.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0102,besser,,better,Heute geht es mir besser.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0103,best-,,best,Am besten lernen wir zusammen.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0104,bestellen,,to order,Ich möchte einen Kaffee bestellen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0105,besuchen,,to visit,Ich besuche meine Freundin.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0106,Bett,das,bed,Das Kind liegt im Bett.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0107,bezahlen,,to pay,Wo kann ich bezahlen?,A1,verb,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0108,Bier,das,beer,Ein Bier bitte.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0109,Bild,das,picture,Das Bild ist schön.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0110,billig,,cheap,Die Jacke ist billig.,A1,adjective,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0111,Birne,die,pear,Ich kaufe ein Kilo Birnen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0112,bis,,until; to,Ich warte bis morgen.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0113,bisschen,,a little,Ich spreche ein bisschen Deutsch.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0114,bitte,,please; you are welcome,Einen Kaffee bitte.,A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0115,bitten,,to ask; request,Darf ich Sie um Hilfe bitten?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0116,bitter,,bitter,Der Kaffee ist bitter.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0117,bleiben,,to stay,Wir bleiben zu Hause.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0118,Bleistift,der,pencil,Hast du einen Bleistift?,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0119,Blick,der,view; look,Der Blick ist sehr schön.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0120,Blume,die,flower,Die Blumen sind schön.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0121,böse,,angry,Sie ist böse auf mich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0122,Bogen,der,sheet; form,Schreiben Sie auf den Antwortbogen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0123,brauchen,,to need,Ich brauche Wasser.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0124,breit,,wide,Wie breit ist der Tisch?,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0125,Brief,der,letter,Ich schreibe einen Brief.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0126,Briefmarke,die,stamp,Ich brauche eine Briefmarke.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0127,bringen,,to bring,Bitte bringen Sie Wasser.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0128,Brötchen,das,bread roll,Ich esse ein Brötchen.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0129,Brot,das,bread,Ich kaufe ein Brot.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0130,Bruder,der,brother,Mein Bruder wohnt in Graz.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0131,Buch,das,book,Ich lese ein Buch.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0132,Buchstabe,der,letter of alphabet,Dieser Buchstabe ist neu.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0133,buchstabieren,,to spell,Buchstabieren Sie bitte Ihren Namen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0134,Bus,der,bus,Der Bus kommt um acht Uhr.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0135,Butter,die,butter,Ich möchte Brot mit Butter.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0136,Café,das,café,Wir treffen uns im Café.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0137,CD,die,CD,Ich höre eine CD.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0138,Chef,der,boss,Mein Chef ist freundlich.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0139,circa,,approximately; about,Das kostet circa zehn Euro.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0140,circa/ca.,,about/approximately,Das kostet circa zehn Euro.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0141,Computer,der,computer,Der Computer ist neu.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0142,da,,there; here,Da ist der Bahnhof.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0143,Dame,die,lady,Sehr geehrte Damen und Herren.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0144,daneben,,next to it,Daneben ist die Post.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0145,Dank,der,thanks,Vielen Dank.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0146,danke,,thanks; thank you,Nein danke.,A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0147,danken,,to thank,Ich danke Ihnen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0148,dann,,then,Ich kaufe ein und dann komme ich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0149,Datum,das,date,Schreiben Sie bitte das Datum.,A1,noun,Time,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0150,dauern,,to last; take time,Wie lange dauert der Film?,A1,verb,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0151,dein-,,your,Ist das dein Buch?,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0152,denn,,because,Ich komme nicht denn ich bin krank.,A1,conjunction,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0153,der/die/das,,the,Der Tisch ist groß.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0154,dich,,you (accusative informal),Ich rufe dich an.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0155,dies-,,this,Ich nehme diesen Kuchen.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0156,dir,,you (dative informal),Gefällt dir das Buch?,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0157,Disco,die,disco; club,Wir gehen heute in die Disco.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0158,Doktor,der,doctor,Ich gehe zum Doktor.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0159,Doppelzimmer,das,double room,Wir möchten ein Doppelzimmer.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0160,Dorf,das,village,Meine Familie lebt in einem Dorf.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0161,dort,,there,Dort ist unser Haus.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0162,draußen,,outside,Die Kinder spielen draußen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0163,drucken,,to print,Bitte drucke das Formular.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0164,Drucker,der,printer,Der Drucker ist kaputt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0165,drücken,,to press,Drücken Sie bitte hier.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0166,dürfen,,may; to be allowed to,Hier dürfen Sie nicht rauchen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0167,durch,,through,Gehen Sie durch die Tür.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0168,Durchsage,die,announcement,Ich verstehe die Durchsage nicht.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0169,Durst,der,thirst,Ich habe Durst.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0170,Dusche,die,shower,Die Wohnung hat eine Dusche.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0171,duschen,,to shower,Ich dusche morgens.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0172,E-Mail,die,email,Ich schreibe eine E-Mail.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0173,Ecke,die,corner,Die Post ist an der Ecke.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0174,Ehefrau,die,wife,Das ist meine Ehefrau.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0175,Ehemann,der,husband,Das ist mein Ehemann.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0176,Ei,das,egg,Ich esse ein Ei zum Frühstück.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0177,eilig,,urgent; in a hurry,Ich habe es eilig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0178,ein-,,a; one,Ich nehme ein Wasser.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0179,einfach,,simple; single,Die Aufgabe ist einfach.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0180,Eingang,der,entrance,Der Eingang ist links.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0181,einkaufen,,to shop,Ich gehe heute einkaufen.,A1,verb,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0182,einladen,,to invite,Ich lade dich zum Kaffee ein.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0183,Einladung,die,invitation,Danke für die Einladung.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0184,einmal,,once,Ich mache das nur einmal.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0185,einsteigen,,to get on,Steigen Sie bitte ein.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0186,Eintritt,der,admission; entrance fee,Der Eintritt kostet fünf Euro.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0187,Einzelzimmer,das,single room,Haben Sie ein Einzelzimmer?,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0188,Eltern,die (pl.),parents,Meine Eltern leben in Spanien.,A1,verb,Family,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0189,Empfänger,der,recipient,Der Empfänger steht auf dem Brief.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0190,empfehlen,,to recommend,Was können Sie empfehlen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0191,Ende,das,end,Am Ende gehen wir nach Hause.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0192,enden,,to end,Der Kurs endet heute.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0193,entschuldigen,,to excuse; apologize,Entschuldigen Sie bitte.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0194,Entschuldigung,die,apology; excuse,Entschuldigung ich komme zu spät.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0195,er,,he,Er heißt Ali.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0196,Ergebnis,das,result,Das Ergebnis ist gut.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0197,erklären,,to explain,Können Sie das erklären?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0198,erlauben,,to allow,Rauchen ist hier nicht erlaubt.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0199,Erwachsene,der/die,adult,Der Erwachsene wartet draußen.,A1,noun,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0200,erzählen,,to tell,Erzähl mir etwas.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0201,es,,it,Es regnet heute.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0202,essen,,to eat,Wir essen zu Hause.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0203,euer,,your (plural/informal),Ist das euer Auto?,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0204,fahren,,to drive/go by vehicle,Ich fahre mit dem Bus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0205,Fahrer,der,driver,Der Fahrer wartet.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0206,Fahrkarte,die,ticket,Ich kaufe eine Fahrkarte.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0207,Fahrrad,das,bicycle,Mein Fahrrad ist rot.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0208,falsch,,wrong,Die Antwort ist falsch.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0209,Familie,die,family,Meine Familie lebt hier.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0210,Familienname,der,family name/surname,Mein Familienname ist Müller.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0211,Familienstand,der,marital status,Mein Familienstand ist ledig.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0212,Farbe,die,color,Welche Farbe magst du?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0213,Fax,das,fax,Ich schicke ein Fax.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0214,fehlen,,to be missing,Ein Stuhl fehlt.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0215,Fehler,der,mistake,Ich mache einen Fehler.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0216,Feierabend,der,end of workday,Um fünf habe ich Feierabend.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0217,feiern,,to celebrate,Wir feiern Geburtstag.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0218,Feiertag,der,holiday,Morgen ist ein Feiertag.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0219,fernsehen,,to watch TV,Wir sehen heute fern.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0220,fertig,,finished/ready,Das Essen ist fertig.,A1,other,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0221,Feuer,das,fire,Haben Sie Feuer?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0222,Fieber,das,fever,Das Kind hat Fieber.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0223,Film,der,film/movie,Der Film beginnt um acht.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0224,finden,,to find,Ich finde den Schlüssel.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0225,Firma,die,company,Sie arbeitet in einer Firma.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0226,Fisch,der,fish,Ich esse gern Fisch.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0227,Flasche,die,bottle,Ich kaufe eine Flasche Wasser.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0228,Fleisch,das,meat,Ich esse kein Fleisch.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0229,fliegen,,to fly,Wir fliegen nach Berlin.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0230,Flughafen,der,airport,Der Flughafen ist weit weg.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0231,Flugzeug,das,airplane,Das Flugzeug ist groß.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0232,Formular,das,form,Bitte füllen Sie das Formular aus.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0233,Foto,das,photo,Ich mache ein Foto.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0234,Frage,die,question,Ich habe eine Frage.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0235,fragen,,to ask,Ich frage den Lehrer.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0236,Frau,die,woman/Mrs./wife,Die Frau trinkt Kaffee.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0237,frei,,free/available,Ist dieser Platz frei?,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0238,Freizeit,die,free time,In meiner Freizeit lese ich.,A1,noun,Time,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0239,fremd,,foreign/strange,Ich bin fremd hier.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0240,Freund,der,friend,Mein Freund kommt morgen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0241,früher,,earlier/in the past,Früher wohnte ich in Japan.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0242,Frühstück,das,breakfast,Das Frühstück ist fertig.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0243,frühstücken,,to have breakfast,Wir frühstücken um acht.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0244,Führung,die,guided tour,Die Führung beginnt jetzt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0245,für,,for,Das Geschenk ist für dich.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0246,Fuß,der,foot,Mein Fuß tut weh.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0247,Fußball,der,football/soccer,Die Kinder spielen Fußball.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0248,Garten,der,garden,Der Garten ist schön.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0249,Gast,der,guest,Heute kommt ein Gast.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0250,geben,,to give/there is,Bitte gib mir das Buch.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0251,geboren,,born,Ich bin in Wien geboren.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0252,Geburtsjahr,das,year of birth,Mein Geburtsjahr ist 2014.,A1,noun,Time,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0253,Geburtsort,der,place of birth,Mein Geburtsort ist Tokio.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0254,Geburtstag,der,birthday,Heute ist mein Geburtstag.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0255,gefallen,,to please/like,Das gefällt mir.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0256,gegen,,against/around,Ich bin gegen den Plan.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0257,gehen,,to go,Ich gehe nach Hause.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0258,gehören,,to belong,Das Buch gehört mir.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0259,Geld,das,money,Ich brauche Geld.,A1,noun,Shopping,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0260,Gemüse,das,vegetables,Wir kaufen Gemüse.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0261,geöffnet,,open,Der Laden ist geöffnet.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0262,Gepäck,das,luggage,Mein Gepäck ist schwer.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0263,gerade,,just/straight,Ich komme gerade aus der Schule.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0264,geradeaus,,straight ahead,Gehen Sie geradeaus.,A1,other,Health,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0265,gern(e),,gladly/like to,Ich trinke gern Tee.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0266,Geschäft,das,shop/business,Das Geschäft ist offen.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0267,Geschenk,das,gift,Das Geschenk ist schön.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0268,geschlossen,,closed,Die Bank ist geschlossen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0269,Geschwister,die,siblings,Ich habe zwei Geschwister.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0270,Gespräch,das,conversation,Das Gespräch ist kurz.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0271,gestern,,yesterday,Gestern war ich müde.,A1,verb,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0272,gestorben,,died/dead,Sein Vater ist gestorben.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0273,Getränk,das,drink,Ich möchte ein Getränk.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0274,Gewicht,das,weight,Mein Gewicht ist normal.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0275,gewinnen,,to win,Unser Team gewinnt.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0276,Glas,das,glass,Ich nehme ein Glas Wasser.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0277,glauben,,to believe/think,"Ich glaube, er kommt.",A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0278,gleich,,same/right away,Ich komme gleich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0279,Gleis,das,track/platform,Der Zug fährt von Gleis zwei.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0280,Glück,das,luck,Viel Glück!,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0281,glücklich,,happy,Sie ist glücklich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0282,Glückwunsch,der,congratulations,Herzlichen Glückwunsch!,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0283,Grad,der,degree,Heute sind es zwanzig Grad.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0284,gratulieren,,to congratulate,Ich gratuliere dir.,A1,verb,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0285,grillen,,to grill/barbecue,Wir grillen im Garten.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0286,Größe,die,size,Welche Größe brauchen Sie?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0287,groß,,big/tall,Das Haus ist groß.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0288,Großeltern,die,grandparents,Meine Großeltern wohnen hier.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0289,Großmutter,die,grandmother,Meine Großmutter kocht gern.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0290,Großvater,der,grandfather,Mein Großvater ist alt.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0291,Gruppe,die,group,Unsere Gruppe lernt Deutsch.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0292,Gruß,der,greeting/regards,Viele Grüße!,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0293,gültig,,valid,Der Pass ist gültig.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0294,günstig,,cheap/good value,Das Angebot ist günstig.,A1,other,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0295,gut,,good,Das ist gut.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0296,Haar,das,hair,Sie hat langes Haar.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0297,haben,,to have,Ich habe Zeit.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0298,Hähnchen,das,chicken,Ich esse Hähnchen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0299,Halbpension,die,half board,Wir buchen Halbpension.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0300,Halle,die,hall,Wir treffen uns in der Halle.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0301,hallo,,hello,"Hallo, wie geht es dir?",A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0302,halten,,to stop/hold,Der Bus hält hier.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0303,Haltestelle,die,stop,Die Haltestelle ist dort.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0304,Hand,die,hand,Meine Hand ist kalt.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0305,Handy,das,mobile phone,Mein Handy ist neu.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0306,Haus,das,house,Das Haus ist klein.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0307,Hausaufgabe,die,homework,Ich mache die Hausaufgabe.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0308,Hausfrau,die,housewife,Die Hausfrau kauft ein.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0309,Hausmann,der,househusband,Der Hausmann kocht heute.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0310,Heimat,die,homeland/home,Österreich ist meine neue Heimat.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0311,heiraten,,to marry,Sie heiraten im Sommer.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0312,heißen,,to be called,Ich heiße Mineko.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0313,helfen,,to help,Kannst du mir helfen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0314,hell,,bright/light,Das Zimmer ist hell.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0315,Herd,der,stove,Der Herd ist neu.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0316,Herr,der,Mr./gentleman,"Guten Tag, Herr Müller.",A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0317,herzlich,,warm/heartfelt,Herzlich willkommen!,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0318,heute,,today,Heute lerne ich Deutsch.,A1,other,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0319,hier,,here,Ich wohne hier.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0320,Hilfe,die,help,Ich brauche Hilfe.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0321,hinten,,at the back,Die Toilette ist hinten.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0322,Hobby,das,hobby,Mein Hobby ist Lesen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0323,hoch,,high/tall,Der Berg ist hoch.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0324,Hochzeit,die,wedding,Die Hochzeit ist im Mai.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0325,hören,,to hear/listen,Ich höre Musik.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0326,holen,,to fetch/get,Ich hole Wasser.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0327,Hotel,das,hotel,Wir schlafen im Hotel.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0328,Hund,der,dog,Der Hund ist freundlich.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0329,Hunger,der,hunger,Ich habe Hunger.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0330,ich,,I,Ich lerne Deutsch.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0331,ihr/ihm/ihn,,her/to him/him,Ich gebe ihm das Buch.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0332,immer,,always,Ich komme immer pünktlich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0333,in,,in,Ich wohne in Wien.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0334,Information,die,information,Ich brauche eine Information.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0335,international,,international,Der Kurs ist international.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0336,Internet,das,internet,Ich suche im Internet.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0337,ja,,yes,"Ja, ich komme.",A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0338,Jacke,die,jacket,Die Jacke ist warm.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0339,jed-,,each/every,Jedes Kind bekommt ein Buch.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0340,jetzt,,now,Jetzt machen wir Pause.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0341,Job,der,job,Sie hat einen neuen Job.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0342,Jugendliche,der/die,young person/teenager,Der Jugendliche fährt Bus.,A1,noun,Family,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0343,jung,,young,Mein Bruder ist jung.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0344,Junge,der,boy,Der Junge spielt draußen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0345,Kaffee,der,coffee,Ich trinke Kaffee.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0346,kaputt,,broken,Mein Handy ist kaputt.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0347,Karte,die,card/ticket/menu/map,Ich kaufe eine Karte.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0348,Kartoffel,die,potato,Ich koche Kartoffeln.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0349,Kasse,die,checkout/cash desk,Ich zahle an der Kasse.,A1,noun,Shopping,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0350,kaufen,,to buy,Ich kaufe Brot.,A1,verb,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0351,kein,,no/not any,Ich habe kein Geld.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0352,kennen,,to know,Ich kenne sie nicht.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0353,kennenlernen,,to get to know/meet,Wir lernen neue Freunde kennen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0354,Kind,das,child,Das Kind spielt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0355,Kindergarten,der,kindergarten,Mein Kind geht in den Kindergarten.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0356,Kino,das,cinema,Wir gehen ins Kino.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0357,Kiosk,der,kiosk,Ich kaufe Zeitung am Kiosk.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0358,klar,,clear/sure,"Ja, klar!",A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0359,Klasse,die,class,Meine Klasse ist nett.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0360,Kleidung,die,clothing,Ich brauche neue Kleidung.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0361,klein,,small,Das Zimmer ist klein.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0362,kochen,,to cook,Ich koche Suppe.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0363,können,,can/to be able,Ich kann schwimmen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0364,Koffer,der,suitcase,Der Koffer ist schwer.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0365,Kollege,der,colleague,Mein Kollege kommt später.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0366,kommen,,to come,Ich komme morgen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0367,Konto,das,bank account,Das Geld ist auf dem Konto.,A1,noun,Shopping,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0368,Kopf,der,head,Mein Kopf tut weh.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0369,kosten,,to cost,Das kostet zehn Euro.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0370,krank,,sick,Ich bin krank.,A1,adjective,Health,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0371,Kreditkarte,die,credit card,Ich zahle mit Kreditkarte.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0372,kriegen,,to get,Ich kriege eine E-Mail.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0373,Kuchen,der,cake,Ich esse Kuchen.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0374,Küche,die,kitchen,Die Küche ist klein.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0375,Kühlschrank,der,fridge,Die Milch ist im Kühlschrank.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0376,Kugelschreiber,der,pen,Ich brauche einen Kugelschreiber.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0377,kulturell,,cultural,Wien ist kulturell interessant.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0378,Kunde,der,customer,Der Kunde wartet.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0379,Kurs,der,course,Der Kurs beginnt heute.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0380,kurz,,short,Der Text ist kurz.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0381,lachen,,to laugh,Die Kinder lachen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0382,Laden,der,shop,Der Laden ist offen.,A1,noun,Shopping,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0383,Land,das,country,Österreich ist ein schönes Land.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0384,lang,,long,Die Straße ist lang.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0385,lange,,long/how long,Wie lange dauert der Kurs?,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0386,langsam,,slowly/slow,Bitte sprechen Sie langsam.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0387,laufen,,to walk/run,Ich laufe zur Schule.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0388,laut,,loud,Das Radio ist laut.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0389,leben,,to live,Ich lebe in Wien.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0390,Lebensmittel,die,food/groceries,Ich kaufe Lebensmittel.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0391,ledig,,single/unmarried,Ich bin ledig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0392,legen,,to lay/put,Ich lege das Buch auf den Tisch.,A1,verb,Health,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0393,Lehrer,der,teacher,Der Lehrer erklärt die Aufgabe.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0394,leicht,,easy/light,Die Tasche ist leicht.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0395,leider,,unfortunately,Leider habe ich keine Zeit.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0396,leise,,quiet,Bitte sei leise.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0397,lernen,,to learn,Wir lernen Deutsch.,A1,verb,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0398,lesen,,to read,Ich lese ein Buch.,A1,verb,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0399,letzt-,,last,Der letzte Bus fährt um elf.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0400,Leute,die,people,Viele Leute warten.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0401,Licht,das,light,Mach bitte das Licht an.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0402,lieb-,,dear/nice,"Liebe Anna, danke für die Mail.",A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0403,lieben,,to love,Ich liebe meine Familie.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0404,lieber,,rather/prefer,Ich trinke lieber Tee.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0405,Lieblings-,,favorite,Mein Lieblingsessen ist Pizza.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0406,Lied,das,song,Das Lied ist schön.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0407,liegen,,to lie/be located,Das Buch liegt auf dem Tisch.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0408,links,,left,Gehen Sie links.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0409,Lkw,der,truck,Der Lkw ist groß.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0410,Lösung,die,solution/answer,Die Lösung ist richtig.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0411,Lokal,das,restaurant/pub,Das Lokal ist neu.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0412,lustig,,funny,Der Film ist lustig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0413,machen,,to do/make,Was machst du heute?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0414,Mädchen,das,girl,Das Mädchen liest.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0415,männlich,,male,Bitte kreuzen Sie männlich an.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0416,man,,one/people,Hier kann man essen.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0417,Mann,der,man/husband,Der Mann arbeitet.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0418,Maschine,die,machine,Die Maschine ist kaputt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0419,Meer,das,sea,Wir fahren ans Meer.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0420,mehr,,more,Ich möchte mehr Wasser.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0421,mein,,my,Das ist mein Buch.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0422,meist-,,most,Die meisten Kinder spielen gern.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0423,Mensch,der,person/human,Der Mensch braucht Wasser.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0424,Miete,die,rent,Die Miete ist hoch.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0425,mieten,,to rent,Wir mieten ein Auto.,A1,verb,Housing,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0426,Milch,die,milk,Ich trinke Milch.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0427,mit,,with,Ich komme mit dir.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0428,mitbringen,,to bring along,Ich bringe Kuchen mit.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0429,mitkommen,,to come along,Kommst du mit?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0430,mitmachen,,to join in,Machst du mit?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0431,mitnehmen,,to take along,Ich nehme Wasser mit.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0432,Mitte,die,middle,Der Tisch steht in der Mitte.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0433,Möbel,die,furniture,Die Möbel sind neu.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0434,möchten,,would like,Ich möchte Tee.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0435,mögen,,to like,Ich mag Kaffee.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0436,möglich,,possible,Das ist möglich.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0437,Moment,der,moment,Einen Moment bitte.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0438,morgen,,tomorrow,Morgen habe ich frei.,A1,verb,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0439,müde,,tired,Ich bin müde.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0440,müssen,,must/have to,Ich muss gehen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0441,Mund,der,mouth,Der Mund ist rot.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0442,Mutter,die,mother,Meine Mutter kocht.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0443,nach,,after/to,Ich fahre nach Wien.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0444,nächst-,,next,Nächste Woche beginnt der Kurs.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0445,Name,der,name,Mein Name ist Sami.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0446,nehmen,,to take,Ich nehme den Bus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0447,nein,,no,"Nein, danke.",A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0448,neu,,new,Das Auto ist neu.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0449,nicht,,not,Ich komme nicht.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0450,nichts,,nothing,Ich brauche nichts.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0451,nie,,never,Er kommt nie zu spät.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0452,noch,,still/yet/more,Ich habe noch Zeit.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0453,normal,,normal,Das ist normal.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0454,Nummer,die,number,Meine Nummer ist zwölf.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0455,nur,,only,Ich möchte nur Wasser.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0456,oben,,upstairs/above,Ich wohne oben.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0457,Obst,das,fruit,Ich esse gern Obst.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0458,oder,,or,Tee oder Kaffee?,A1,conjunction,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0459,öffnen,,to open,Ich öffne die Tür.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0460,Öl,das,oil,Wir brauchen Öl.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0461,oft,,often,Ich gehe oft spazieren.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0462,ohne,,without,"Kaffee ohne Milch, bitte.",A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0463,Oma,die,grandma,Meine Oma wohnt hier.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0464,Opa,der,grandpa,Mein Opa heißt Hans.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0465,Ordnung,die,order,Alles ist in Ordnung.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0466,Ort,der,place/town,Der Ort ist klein.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0467,Papier,das,paper,Ich brauche Papier.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0468,Papiere,die,papers/documents,Haben Sie Ihre Papiere?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0469,Partner,der,partner,Mein Partner kommt mit.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0470,Partnerin,die,female partner,Meine Partnerin lernt Deutsch.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0471,Party,die,party,Die Party beginnt um acht.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0472,Pass,der,passport,Mein Pass ist im Hotel.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0473,Pause,die,break,Wir machen Pause.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0474,Plan,der,plan/map,Ich habe einen Plan.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0475,Platz,der,place/seat/square,Der Platz ist frei.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0476,Polizei,die,police,Die Polizei kommt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0477,Pommes frites,die,fries,Die Kinder essen Pommes frites.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0478,Post,die,post office/mail,Ich gehe zur Post.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0479,Postleitzahl,die,postal code,Wie ist die Postleitzahl?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0480,Praktikum,das,internship,Ich mache ein Praktikum.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0481,Praxis,die,doctor's office/practice,Die Praxis ist geöffnet.,A1,noun,Health,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0482,Preis,der,price,Der Preis ist hoch.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0483,Problem,das,problem,Ich habe ein Problem.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0484,Prospekt,der,brochure,Ich lese den Prospekt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0485,Prüfung,die,exam,Die Prüfung ist am Montag.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0486,pünktlich,,punctual/on time,Der Bus ist pünktlich.,A1,adjective,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0487,Rad fahren,,to ride a bike,Das Kind kann Rad fahren.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0488,rauchen,,to smoke,Hier darf man nicht rauchen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0489,Raum,der,room,Der Kurs ist in Raum 12.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0490,Rechnung,die,bill,Die Rechnung bitte.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0491,rechts,,right,Gehen Sie rechts.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0492,Regen,der,rain,Der Regen ist stark.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0493,regnen,,to rain,Heute regnet es.,A1,verb,Nature,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0494,Reis,der,rice,Ich esse Reis.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0495,Reise,die,trip/journey,Die Reise ist lang.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0496,Reisebüro,das,travel agency,Das Reisebüro ist offen.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0497,Reiseführer,der,guidebook/tour guide,Ich kaufe einen Reiseführer.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0498,reisen,,to travel,Ich reise gern.,A1,verb,Travel,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0499,Reparatur,die,repair,Die Reparatur ist teuer.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0500,reparieren,,to repair,Ich repariere das Fahrrad.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0501,Restaurant,das,restaurant,Wir essen im Restaurant.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0502,Rezeption,die,reception,Fragen Sie an der Rezeption.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0503,richtig,,right/correct,Die Antwort ist richtig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0504,riechen,,to smell,Die Blumen riechen gut.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0505,ruhig,,quiet/calm,Das Zimmer ist ruhig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0506,S-Bahn,die,suburban train,Ich nehme die S-Bahn.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0507,Saft,der,juice,Ich trinke Apfelsaft.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0508,sagen,,to say/tell,Sag mir bitte die Nummer.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0509,Salat,der,salad,Der Salat ist frisch.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0510,Salz,das,salt,Ich brauche Salz.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0511,Satz,der,sentence,Der Satz ist einfach.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0512,Schalter,der,counter,Der Schalter ist offen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0513,scheinen,,to shine,Die Sonne scheint.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0514,schicken,,to send,Ich schicke eine E-Mail.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0515,Schild,das,sign,Das Schild ist groß.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0516,Schinken,der,ham,Ich esse Brot mit Schinken.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0517,schlafen,,to sleep,Das Baby schläft.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0518,schlecht,,bad,Mir ist schlecht.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0519,schließen,,to close,Bitte schließen Sie die Tür.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0520,Schlüssel,der,key,Ich suche den Schlüssel.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0521,Schluss,der,end,Jetzt ist Schluss.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0522,schmecken,,to taste,Der Kuchen schmeckt gut.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0523,schnell,,fast/quick,Der Zug ist schnell.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0524,schön,,beautiful/nice,Das Haus ist schön.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0525,schon,,already,Das Essen ist schon fertig.,A1,other,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0526,Schrank,der,cupboard/wardrobe,Die Jacke ist im Schrank.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0527,schreiben,,to write,Ich schreibe eine E-Mail.,A1,verb,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0528,Schüler,der,student/pupil,Der Schüler lernt Deutsch.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0529,Schuh,der,shoe,Der Schuh ist neu.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0530,Schule,die,school,Die Schule beginnt um acht.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0531,schwer,,heavy/difficult,Der Koffer ist schwer.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0532,Schwester,die,sister,Meine Schwester kommt heute.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0533,Schwimmbad,das,swimming pool,Wir gehen ins Schwimmbad.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0534,schwimmen,,to swim,Ich schwimme gern.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0535,See,der,lake,Der See ist schön.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0536,sehen,,to see,Ich sehe den Bus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0537,Sehenswürdigkeit,die,sight/attraction,Wien hat viele Sehenswürdigkeiten.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0538,sehr,,very,Das ist sehr gut.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0539,sein,,to be/his,Ich bin müde.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0540,seit,,since/for,Ich wohne seit drei Jahren hier.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0541,selbstständig,,self-employed/independent,Er ist selbstständig.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0542,sich,,oneself,Sie meldet sich an.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0543,sich anmelden,,to register,Ich möchte mich für den Kurs anmelden.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0544,sich anziehen,,to get dressed,Ich ziehe mich schnell an.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0545,sich ausziehen,,to take off clothes/shoes,Ziehen Sie die Schuhe aus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0546,sich duschen,,to shower,Ich dusche am Morgen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0547,sich freuen,,to be happy/look forward,Ich freue mich auf den Urlaub.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0548,sich kümmern,,to take care of,Ich kümmere mich um das Kind.,A1,verb,Travel,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0549,sich treffen,,to meet,Wir treffen uns im Café.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0550,sich vorstellen,,to introduce oneself,Bitte stellen Sie sich vor.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0551,sich waschen,,to wash oneself,Ich wasche mir die Hände.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0552,sie,,she/they,Sie kommt morgen.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0553,sitzen,,to sit,Ich sitze am Tisch.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0554,so,,so/like this,Mach das so.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0555,Sofa,das,sofa,Das Sofa ist bequem.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0556,sofort,,immediately,Ich komme sofort.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0557,Sohn,der,son,Mein Sohn liest.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0558,sollen,,should/supposed to,Soll ich helfen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0559,Sonne,die,sun,Die Sonne scheint.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0560,spät,,late,Es ist spät.,A1,other,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0561,später,,later,Ich komme später.,A1,other,Time,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0562,Speisekarte,die,menu,Die Speisekarte ist auf dem Tisch.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0563,spielen,,to play,Die Kinder spielen.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0564,Sport,der,sport,Ich mache Sport.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0565,Sprache,die,language,Deutsch ist eine Sprache.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0566,sprechen,,to speak,Ich spreche Deutsch.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0567,Stadt,die,city,Wien ist eine Stadt.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0568,stehen,,to stand/be written,Der Bus steht dort.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0569,Stelle,die,job/position/place,Ich habe eine neue Stelle.,A1,noun,Work,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0570,stellen,,to put/place,Ich stelle die Tasche hier.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0571,Stock,der,floor/storey,Wir wohnen im zweiten Stock.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0572,Straße,die,street,Die Straße ist lang.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0573,Straßenbahn,die,tram,Die Straßenbahn kommt gleich.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0574,Student,der,student,Der Student lernt viel.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0575,studieren,,to study,Ich studiere in Wien.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0576,Studium,das,studies,Das Studium beginnt im Oktober.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0577,Stunde,die,hour/lesson,Der Kurs dauert eine Stunde.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0578,suchen,,to search/look for,Ich suche mein Handy.,A1,verb,Nature,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0579,tanzen,,to dance,Wir tanzen gern.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0580,Tasche,die,bag,Die Tasche ist schwer.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0581,Taxi,das,taxi,Wir fahren mit dem Taxi.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0582,Tee,der,tea,Ich trinke Tee.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0583,Teil,der,part,Lies den ersten Teil.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0584,Telefon,das,telephone,Das Telefon klingelt.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0585,telefonieren,,to telephone,Ich telefoniere mit Oma.,A1,verb,Communication,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0586,Termin,der,appointment,Ich habe einen Termin.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0587,Test,der,test,Der Test ist einfach.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0588,teuer,,expensive,Das Auto ist teuer.,A1,adjective,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0589,Text,der,text,Der Text ist kurz.,A1,noun,School,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0590,Thema,das,topic,Das Thema ist Essen.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0591,Ticket,das,ticket,Ich kaufe ein Ticket.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0592,Tisch,der,table,Das Buch liegt auf dem Tisch.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0593,Tochter,die,daughter,Meine Tochter malt.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0594,Toilette,die,toilet,Wo ist die Toilette?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0595,Tomate,die,tomato,Die Tomate ist rot.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0596,tot,,dead,Der Hund ist tot.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0597,Treppe,die,stairs,Die Treppe ist links.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0598,trinken,,to drink,Ich trinke Wasser.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0599,tschüss,,bye,"Tschüss, bis morgen!",A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0600,tun,,to do,Was tust du heute?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0601,über,,over/about/across,Wir sprechen über Schule.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0602,übernachten,,to stay overnight,Ich übernachte bei Oma.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0603,überweisen,,to transfer money,Ich überweise das Geld.,A1,verb,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0604,Uhr,die,clock/o'clock,Es ist acht Uhr.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0605,um,,at/around,Der Kurs beginnt um neun.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0606,umziehen,,to move house/change clothes,Wir ziehen morgen um.,A1,verb,Housing,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0607,und,,and,Sami und Mai lernen.,A1,conjunction,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0608,unser-,,our,Das ist unser Haus.,A1,determiner,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0609,unten,,downstairs/below,Die Küche ist unten.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0610,unter,,under/below,Die Tasche ist unter dem Tisch.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0611,Unterricht,der,lesson/class,Der Unterricht beginnt.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0612,unterschreiben,,to sign,Bitte unterschreiben Sie hier.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0613,Unterschrift,die,signature,Hier fehlt die Unterschrift.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0614,Urlaub,der,vacation,Wir machen Urlaub.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0615,Vater,der,father,Mein Vater arbeitet.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0616,verboten,,forbidden,Rauchen ist verboten.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0617,verdienen,,to earn,Sie verdient gut.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0618,Verein,der,club/association,Er ist im Sportverein.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0619,verheiratet,,married,Ich bin verheiratet.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0620,Verkäufer,der,salesperson,Der Verkäufer hilft mir.,A1,noun,Family,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0621,verkaufen,,to sell,Ich verkaufe mein Auto.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0622,vermieten,,to rent out,Sie vermietet eine Wohnung.,A1,verb,Housing,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0623,Vermieter,der,landlord,Der Vermieter wohnt hier.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0624,verstehen,,to understand,Ich verstehe Deutsch.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0625,Verwandte,der/die,relative,Meine Verwandten kommen.,A1,noun,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0626,viel,,much/a lot,Ich habe viel Arbeit.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0627,vielleicht,,maybe/perhaps,Vielleicht komme ich morgen.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0628,von,,from/of,Ich komme von zu Hause.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0629,vor,,before/in front of,Das Auto steht vor dem Haus.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0630,Vorname,der,first name,Mein Vorname ist Mai.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0631,Vorsicht,die,caution,"Vorsicht, ein Auto!",A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0632,Vorwahl,die,area code,Wie ist die Vorwahl?,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0633,wandern,,to hike,Wir wandern am Sonntag.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0634,wann,,when,Wann kommst du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0635,warten,,to wait,Ich warte auf den Bus.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0636,warum,,why,Warum lachst du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0637,was,,what,Was ist das?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0638,was für ein,,what kind of,Was für ein Zimmer möchten Sie?,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0639,Wasser,das,water,Ich trinke Wasser.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0640,weh tun,,to hurt,Mein Bein tut weh.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0641,weiblich,,female,Bitte kreuzen Sie weiblich an.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0642,Wein,der,wine,Ich trinke keinen Wein.,A1,noun,Food,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0643,weit,,far,Der Bahnhof ist nicht weit.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0644,weiter,,further/continue,Der Bus fährt weiter.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0645,welch-,,which,Welches Buch möchtest du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0646,Welt,die,world,Die Welt ist groß.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0647,wenig,,little/few,Ich habe wenig Zeit.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0648,wer,,who,Wer ist das?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0649,werden,,to become,Mein Sohn will Arzt werden.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0650,Wetter,das,weather,Das Wetter ist schön.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0651,wichtig,,important,Das Formular ist wichtig.,A1,adjective,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0652,wie,,how/like/as,Wie heißt du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0653,wie viel,,how much/how many,Wie viel kostet das?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0654,Wiederhören,das,hearing again/goodbye on phone,Auf Wiederhören!,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0655,wiederholen,,to repeat,Können Sie das bitte wiederholen?,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0656,Wiedersehen,das,seeing again/goodbye,Auf Wiedersehen!,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0657,willkommen,,welcome,Herzlich willkommen!,A1,phrase,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0658,Wind,der,wind,Der Wind ist stark.,A1,noun,Nature,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0659,wir,,we,Wir lernen Deutsch.,A1,pronoun,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0660,wissen,,to know,Ich weiß die Antwort.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0661,wo,,where,Wo ist die Schule?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0662,woher,,from where,Woher kommst du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0663,wohin,,where to,Wohin gehst du?,A1,question word,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0664,wohnen,,to live/reside,Ich wohne in Wien.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0665,Wohnung,die,apartment,Die Wohnung ist hell.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0666,wollen,,to want,Ich will Wasser trinken.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0667,Wort,das,word,Ich kenne das Wort.,A1,noun,Communication,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0668,wunderbar,,wonderful,Das Essen ist wunderbar.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0669,zahlen,,to pay,Ich möchte zahlen.,A1,verb,Shopping,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0670,Zeit,die,time,Ich habe keine Zeit.,A1,noun,Time,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0671,Zeitung,die,newspaper,Ich lese Zeitung.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0672,Zigarette,die,cigarette,Die Zigarette ist teuer.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0673,Zimmer,das,room,Das Zimmer ist groß.,A1,noun,Housing,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0674,Zoll,der,customs,Wir gehen durch den Zoll.,A1,noun,General,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0675,zu,,to/too/closed,Ich gehe zu Fuß.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0676,zufrieden,,satisfied,Ich bin zufrieden.,A1,verb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0677,Zug,der,train,Der Zug kommt um acht.,A1,noun,Travel,yes,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0678,zum Beispiel,,for example,Ich mag Obst zum Beispiel Äpfel.,A1,other,School,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0679,zurück,,back,Ich komme morgen zurück.,A1,other,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0680,zurzeit,,currently,Zurzeit lerne ich Deutsch.,A1,other,Housing,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0681,zusammen,,together,Wir essen zusammen.,A1,adverb,General,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
+a1_0682,zwischen,,between,Der Tisch steht zwischen den Stühlen.,A1,preposition,Grammar,no,Goethe-Zertifikat A1 Start Deutsch 1 Wortliste PDF; original Unser Dorf example sentence,,False
