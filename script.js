@@ -1587,6 +1587,8 @@ function refreshVisibleProfileState() {
     renderPrepositionQuiz();
   } else if (currentView === "vocabulary-review") {
     renderVocabularyReviewQuiz();
+  } else if (currentView === "learning-flashcards") {
+    renderLearningFlashcard();
   } else {
     updateStats();
     renderCard();
@@ -1825,6 +1827,8 @@ function showNounVerbQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -1871,6 +1875,8 @@ function showMeaningMatchQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -1892,6 +1898,8 @@ function showPrepositionQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -3007,6 +3015,8 @@ function showChallengeResults() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
