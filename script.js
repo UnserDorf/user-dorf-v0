@@ -431,6 +431,7 @@ const els = {
   householdList: document.querySelector("#householdList"),
   rewardPageTitle: document.querySelector("#rewardPageTitle"),
   rewardPageSummary: document.querySelector("#rewardPageSummary"),
+  collectionNavigation: document.querySelector("#collectionNavigation"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
   challengeArticleProgressLabel: document.querySelector("#challengeArticleProgressLabel"),
@@ -2274,6 +2275,12 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
+  if (els.collectionNavigation) {
+    els.collectionNavigation.classList.toggle("hidden", page === "town-center");
+    els.collectionNavigation.querySelectorAll("button[data-dashboard-action]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.dashboardAction === page);
+    });
+  }
   if (page === "achievements") {
     const achievementStates = getAchievementStates().filter(({ achievement }) => !achievement.testOnly);
     const earnedCount = achievementStates.filter(({ unlocked }) => unlocked).length;
