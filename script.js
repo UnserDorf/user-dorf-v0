@@ -2961,7 +2961,7 @@ function handleDashboardAction(action) {
     return;
   }
   if (action === "challenges") {
-    showLevelSelection("challenges");
+    showChallengesEntry();
     return;
   }
 
@@ -2985,7 +2985,7 @@ function handleDashboardAction(action) {
   const routes = {
     continue: { mode: "de-en", filter: "all", resume: true },
     articles: { mode: "article", filter: "smartArticle", resume: true },
-    "earn-coins": "coin-challenges",
+    "earn-coins": "challenges",
     "unknown-meanings": { mode: "de-en", filter: "unknownMeaning" },
     "unknown-articles": { mode: "article", filter: "newArticles" },
     search: { mode: "de-en", filter: "all", focusSearch: true },
@@ -2993,11 +2993,15 @@ function handleDashboardAction(action) {
   };
   const route = routes[action];
   if (!route) return;
-  if (route === "coin-challenges") {
-    showCoinChallenges();
+  if (route === "challenges") {
+    showChallengesEntry();
     return;
   }
   openStudyRoute(route);
+}
+
+function showChallengesEntry() {
+  showLevelSelection("challenges");
 }
 
 function showFlashcardsEntry() {
