@@ -372,6 +372,19 @@ const els = {
   dashboardScreen: document.querySelector("#dashboardScreen"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
+  flashcardSetupScreen: document.querySelector("#flashcardSetupScreen"),
+  flashcardSetupForm: document.querySelector("#flashcardSetupForm"),
+  flashcardSetupBack: document.querySelector("#flashcardSetupBack"),
+  learningFlashcardsScreen: document.querySelector("#learningFlashcardsScreen"),
+  learningFlashcardsBack: document.querySelector("#learningFlashcardsBack"),
+  learningFlashcardCounter: document.querySelector("#learningFlashcardCounter"),
+  learningFlashcardSelection: document.querySelector("#learningFlashcardSelection"),
+  learningFlashcardGerman: document.querySelector("#learningFlashcardGerman"),
+  learningFlashcardEnglish: document.querySelector("#learningFlashcardEnglish"),
+  learningFlashcardCategory: document.querySelector("#learningFlashcardCategory"),
+  learningFlashcardExample: document.querySelector("#learningFlashcardExample"),
+  learningFlashcardRatings: document.querySelector("#learningFlashcardRatings"),
+  learningFlashcardEmpty: document.querySelector("#learningFlashcardEmpty"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
@@ -543,6 +556,10 @@ let vocabularyReviewQuizState = {
   currentChoices: []
 };
 let challengeSession = createEmptyChallengeSession();
+let flashcardStudyCards = [];
+let flashcardStudyIndex = 0;
+let flashcardStudyLevel = "A1";
+let flashcardStudyCategory = "nouns";
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
 let recentMeaningMatchItems = [];
@@ -1712,6 +1729,8 @@ function showDashboard() {
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -1732,6 +1751,8 @@ function showCoinChallenges() {
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.remove("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   renderVillageName();
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -1753,6 +1774,8 @@ function showAchievementCollection(page = "austria-album") {
   els.achievementCollectionScreen.classList.remove("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -1770,6 +1793,8 @@ function showStudyView(options = {}) {
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.appShell.classList.toggle("clean-article-practice", cleanArticlePractice);
   els.appShell.classList.toggle("clean-quiz-mode", cleanArticlePractice);
@@ -1823,6 +1848,8 @@ function showVocabularyReviewQuiz() {
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -2764,6 +2791,10 @@ function handleDashboardAction(action) {
     showDashboard();
     return;
   }
+  if (action === "flashcards") {
+    showFlashcardSetup();
+    return;
+  }
 
   if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
     showAchievementCollection(action);
@@ -2799,6 +2830,106 @@ function handleDashboardAction(action) {
     return;
   }
   openStudyRoute(route);
+}
+
+function showFlashcardSetup() {
+  currentView = "flashcard-setup";
+  setChallengeBackButtons(false, false);
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.remove("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+}
+
+function startLearningFlashcards() {
+  const levelInput = els.flashcardSetupForm.querySelector('input[name="flashcardLevel"]:checked');
+  const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
+  flashcardStudyLevel = levelInput?.value || "A1";
+  flashcardStudyCategory = categoryInput?.value || "nouns";
+  flashcardStudyCards = buildLearningFlashcardOrder(
+    cards.filter((card) => getFlashcardLevel(card) === flashcardStudyLevel
+      && getFlashcardCategory(card) === flashcardStudyCategory)
+  );
+  flashcardStudyIndex = 0;
+  currentView = "learning-flashcards";
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.remove("hidden");
+  renderLearningFlashcard();
+}
+
+function getFlashcardLevel(card) {
+  if (["A1", "A2", "B1"].includes(card.level)) return card.level;
+  const index = Math.max(cards.findIndex((item) => item.id === card.id), 0);
+  const sectionSize = Math.max(Math.ceil(cards.length / 3), 1);
+  if (index < sectionSize) return "A1";
+  if (index < sectionSize * 2) return "A2";
+  return "B1";
+}
+
+function getFlashcardCategory(card) {
+  if (card.isNoun) return "nouns";
+  const word = String(card.word || "").trim();
+  if (/^[a-zäöüß].*(en|ern|eln)$/.test(word)) return "verbs";
+  return "other";
+}
+
+function buildLearningFlashcardOrder(cardList) {
+  const weightedCards = cardList.flatMap((card) => {
+    const status = getMeaningStatus(card);
+    const weight = status === "unknown" ? 5 : status === "unsure" ? 3 : status === "unrated" ? 2 : 1;
+    return Array.from({ length: weight }, () => card);
+  });
+  return shuffleCards(weightedCards);
+}
+
+function renderLearningFlashcard() {
+  const card = flashcardStudyCards[flashcardStudyIndex];
+  const hasCard = Boolean(card);
+  els.learningFlashcardEmpty.classList.toggle("hidden", hasCard);
+  els.learningFlashcardSelection.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardGerman.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardEnglish.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardCategory.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardExample.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardRatings.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardCounter.textContent = hasCard ? `Card ${flashcardStudyIndex + 1}` : "No cards";
+  if (!card) return;
+  const categoryLabel = flashcardStudyCategory === "nouns"
+    ? "Nouns"
+    : flashcardStudyCategory === "verbs" ? "Verbs" : "Other Words";
+  els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} · ${categoryLabel}`;
+  els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
+  els.learningFlashcardEnglish.textContent = card.english;
+  els.learningFlashcardCategory.textContent = `Category: ${categoryLabel}`;
+  els.learningFlashcardExample.textContent = card.example || "";
+  els.learningFlashcardExample.classList.toggle("hidden", !card.example);
+}
+
+function rateLearningFlashcard(rating) {
+  const card = flashcardStudyCards[flashcardStudyIndex];
+  if (!card || !currentProfileId) return;
+  progress[card.id] = {
+    ...(progress[card.id] || {}),
+    meaningStatus: normalizeMeaningStatus(rating),
+    updatedAt: new Date().toISOString()
+  };
+  saveProgress();
+  const currentId = card.id;
+  flashcardStudyCards = buildLearningFlashcardOrder(
+    cards.filter((item) => getFlashcardLevel(item) === flashcardStudyLevel
+      && getFlashcardCategory(item) === flashcardStudyCategory)
+  );
+  const differentCardIndex = flashcardStudyCards.findIndex((item) => item.id !== currentId);
+  flashcardStudyIndex = differentCardIndex >= 0 ? differentCardIndex : 0;
+  renderLearningFlashcard();
 }
 
 function handleChallengeAction(action) {
@@ -3444,6 +3575,17 @@ function bindEvents() {
     challengeSession = createEmptyChallengeSession();
     showCoinChallenges();
   });
+  els.flashcardSetupBack.addEventListener("click", showDashboard);
+  els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
+  els.flashcardSetupForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    startLearningFlashcards();
+  });
+  els.learningFlashcardRatings.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-flashcard-rating]");
+    if (!button) return;
+    rateLearningFlashcard(button.dataset.flashcardRating);
+  });
 
   els.switchProfile.addEventListener("click", logoutToProfileScreen);
   els.logoutButton.addEventListener("click", lockSharedPasswordScreen);
@@ -3588,6 +3730,7 @@ function normalizeCards(rows) {
       article: row.article.toLowerCase(),
       english: row.english,
       example: row.example || "",
+      level: String(row.level || row.cefr || "").trim().toUpperCase(),
       isNoun: ["der", "die", "das"].includes(row.article.toLowerCase())
     }));
 }
