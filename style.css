@@ -1726,7 +1726,7 @@ h1 {
 }
 
 .level-celebration-card strong {
-  color: var(--violet);
+  color: var(--green);
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
 
@@ -1738,7 +1738,7 @@ h1 {
 
 .level-celebration-card button {
   min-height: 56px;
-  background: var(--violet);
+  background: var(--green);
   color: white;
   padding: 0 22px;
 }
@@ -2718,7 +2718,7 @@ h1 {
 }
 
 .achievement-progress-text {
-  color: var(--violet) !important;
+  color: var(--green) !important;
   font-weight: 900 !important;
 }
 
@@ -2735,7 +2735,7 @@ h1 {
   height: 100%;
   display: block;
   border-radius: inherit;
-  background: var(--violet);
+  background: var(--green);
 }
 
 .achievement-badge.unlocked .achievement-progress span {
@@ -2991,11 +2991,11 @@ select,
   transform: translateY(1px);
 }
 
-.clean-article-practice #cardCounter,
-.clean-quiz-mode #nounVerbCounter {
+.clean-article-practice #cardCounter {
   display: none;
 }
 
+.clean-quiz-mode #nounVerbCounter,
 .article-quiz-mode #cardCounter {
   display: inline;
 }

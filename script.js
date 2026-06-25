@@ -622,6 +622,7 @@ let meaningMatchProgress = {};
 let prepositionProgress = {};
 let profileStore = null;
 let checkingAchievements = false;
+let pendingCelebrations = [];
 let currentProfileId = "";
 let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
@@ -2089,8 +2090,9 @@ function renderDashboard() {
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
   renderHouseholdMembers();
-  checkVillageNamingCeremony();
+  if (!pendingCelebrations.length) checkVillageNamingCeremony();
   saveProfileStore();
+  showNextPendingCelebration();
 }
 
 function renderProgressCards(profile) {
@@ -2386,7 +2388,7 @@ function getUnlockedRewards(rewards, coins) {
 }
 
 function getAustriaAlbumUnlockedRewardIds(profileOrGroup, backfillFromCoins = false) {
-  const target = profileOrGroup?.memberIds ? profileOrGroup : getCurrentGroup();
+  const target = profileOrGroup;
   const unlockedCount = getAustriaAlbumUnlockedCount(target, backfillFromCoins);
   const sequentialIds = AUSTRIA_ALBUM_REWARDS
     .slice(0, unlockedCount)
@@ -4016,6 +4018,7 @@ function bindEvents() {
   els.challengeResultsContinue.addEventListener("click", () => {
     challengeSession = createEmptyChallengeSession();
     showDashboard();
+    showNextPendingCelebration();
   });
   els.levelSelectionBack.addEventListener("click", showDashboard);
   els.flashcardResumeBack.addEventListener("click", showDashboard);
@@ -4121,6 +4124,7 @@ function bindEvents() {
 
   els.levelCelebrationClose.addEventListener("click", () => {
     els.levelCelebration.classList.add("hidden");
+    if (!showNextPendingCelebration()) checkVillageNamingCeremony();
   });
 
   els.levelCelebrationViewAlbum?.addEventListener("click", () => {
@@ -4238,17 +4242,26 @@ function normalizeDatasetWord(value) {
 
 function normalizeArticleChallengeCards(rows, level) {
   const seen = new Set();
+  const fallbackCardsByArticle = new Map(cards.map((card) => [
+    `${card.article}:${normalizeDatasetWord(card.word)}`,
+    card
+  ]));
+  const fallbackCardsByWord = new Map(cards.map((card) => [normalizeDatasetWord(card.word), card]));
   return rows
     .filter((row) => row.german && ["der", "die", "das"].includes(normalizeArticleValue(row.article)))
     .map((row, index) => {
+      const article = normalizeArticleValue(row.article);
+      const wordKey = normalizeDatasetWord(row.german);
+      const fallbackCard = fallbackCardsByArticle.get(`${article}:${wordKey}`)
+        || fallbackCardsByWord.get(wordKey);
       const id = String(row.id || "").trim()
         || `${level.toLowerCase()}-articles-${slugify(row.german) || index}`;
       return {
         id,
         word: row.german.trim(),
-        article: normalizeArticleValue(row.article),
-        english: String(row.english || "").trim(),
-        example: String(row.examplesentence || "").trim(),
+        article,
+        english: String(row.english || fallbackCard?.english || "").trim(),
+        example: String(row.examplesentence || fallbackCard?.example || "").trim(),
         level,
         wordType: "noun",
         category: String(row.category || "").trim(),
@@ -4731,18 +4744,18 @@ function checkRewardUnlocks(profile) {
   if (!profile) return;
   const group = getCurrentGroup();
   if (!group) return;
-  group.austriaAlbumSeenRewards = normalizeRewardIdList(group.austriaAlbumSeenRewards);
+  profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
   group.villageAlbumSeenRewards = normalizeRewardIdList(group.villageAlbumSeenRewards);
   const sharedCoins = getGroupCoinTotal(group);
-  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(group, false);
-  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(group, true);
+  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, false);
+  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, true);
   const sequentialPersonalRewardIds = AUSTRIA_ALBUM_REWARDS
     .slice(0, earnedPersonalRewardCount)
     .map((reward) => reward.id);
   const newPersonalReward = earnedPersonalRewardCount > previousPersonalRewardCount
     ? AUSTRIA_ALBUM_REWARDS[previousPersonalRewardCount]
     : null;
-  group.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
+  profile.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
   if (newPersonalReward) {
     showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
     return;
@@ -4757,6 +4770,7 @@ function checkRewardUnlocks(profile) {
 }
 
 function showRewardUnlockCelebration(reward, source) {
+  if (deferCelebration(() => showRewardUnlockCelebration(reward, source))) return;
   hideNamingCeremonyForm();
   els.levelCelebrationTitle.textContent = "Congratulations!";
   els.levelCelebrationProfile.textContent = "You unlocked:";
@@ -4854,6 +4868,7 @@ function checkTownCenterStageUnlocks() {
 }
 
 function showTownCenterStageCelebration(stage) {
+  if (deferCelebration(() => showTownCenterStageCelebration(stage))) return;
   els.levelCelebrationTitle.textContent = "Village Upgrade!";
   els.levelCelebrationProfile.textContent = "The Town Center has unlocked:";
   els.levelCelebrationLevel.textContent = getTownCenterStageName(stage);
@@ -4880,6 +4895,7 @@ function awardLevelBonusIfNeeded(profile) {
 }
 
 function showLevelCelebration(profile, level) {
+  if (deferCelebration(() => showLevelCelebration(profile, level))) return;
   els.levelCelebrationTitle.textContent = "🎉 Congratulations!";
   els.levelCelebrationProfile.textContent = `${profile.name} reached:`;
   els.levelCelebrationLevel.textContent = `${level.icon} ${level.name}`;
@@ -4904,6 +4920,7 @@ function celebrateFamilyLevelIfNeeded() {
 }
 
 function showFamilyLevelCelebration(level) {
+  if (deferCelebration(() => showFamilyLevelCelebration(level))) return;
   els.levelCelebrationTitle.textContent = "Shared Village Milestone";
   els.levelCelebrationProfile.textContent = "Unser Dorf reached:";
   els.levelCelebrationLevel.textContent = level.name;
@@ -4914,6 +4931,7 @@ function showFamilyLevelCelebration(level) {
 }
 
 function showDailyChallengeComplete(challenge) {
+  if (deferCelebration(() => showDailyChallengeComplete(challenge))) return;
   els.levelCelebrationTitle.textContent = "🎉 Daily Challenge Complete!";
   els.levelCelebrationProfile.textContent = "Challenge:";
   els.levelCelebrationLevel.textContent = `${challenge.icon} ${challenge.name}`;
@@ -4951,8 +4969,10 @@ function isAchievementConditionMet(achievement, profile) {
 
 function hasAnyCorrectQuizAnswer(profile) {
   return Object.values(profile.articleProgress || {}).some((entry) => normalizeCounter(entry.articleCorrectCount) > 0)
+    || Object.values(profile.vocabularyProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
     || Object.values(profile.nounVerbProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile.meaningMatchProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0);
+    || Object.values(profile.meaningMatchProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
+    || Object.values(profile.prepositionProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0);
 }
 
 function getNounVerbCorrectAnswerCount(profile) {
@@ -5001,6 +5021,7 @@ function unlockAchievement(achievement, profile, reason = "") {
 }
 
 function showAchievementCelebration(achievement) {
+  if (deferCelebration(() => showAchievementCelebration(achievement))) return;
   els.levelCelebrationTitle.textContent = "🎉 Achievement Unlocked!";
   els.levelCelebrationProfile.textContent = achievement.scope === "family" ? "Shared achievement:" : "Achievement:";
   els.levelCelebrationLevel.textContent = `${achievement.icon} ${achievement.name}`;
@@ -5089,9 +5110,22 @@ function recordDailyActivity(type, details = {}) {
   }
 
   updateStreakQualification(profile);
-  checkVillageNamingCeremony();
   checkAchievements("daily-activity");
   saveProfileStore();
+}
+
+function deferCelebration(showCelebration) {
+  if (!challengeSession.type || challengeSession.complete) return false;
+  pendingCelebrations.push(showCelebration);
+  return true;
+}
+
+function showNextPendingCelebration() {
+  if (!els.levelCelebration.classList.contains("hidden")) return false;
+  const nextCelebration = pendingCelebrations.shift();
+  if (!nextCelebration) return false;
+  nextCelebration();
+  return true;
 }
 
 function updateStreakQualification(profile) {
@@ -5502,7 +5536,7 @@ function renderVocabularyReviewQuiz() {
   if (!card) {
     els.nounVerbPrompt.textContent = "No vocabulary words";
     els.nounVerbEmptyState.querySelector("h2").textContent = "No vocabulary words available";
-    els.nounVerbEmptyState.querySelector("p").textContent = "Make sure vocabulary.csv is uploaded.";
+    els.nounVerbEmptyState.querySelector("p").textContent = `The ${challengeSession.level || selectedLearningLevel} vocabulary dataset could not be loaded.`;
     els.nounVerbOptions.replaceChildren();
     return;
   }
