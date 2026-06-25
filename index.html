@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=121">
+    <link rel="stylesheet" href="style.css?v=122">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -409,18 +409,30 @@
         </div>
       </section>
 
+      <section class="challenge-ready-screen hidden" id="challengeReadyScreen" aria-label="Challenge ready">
+        <article class="challenge-ready-card">
+          <button class="small-link-button" id="challengeReadyBack" type="button">← Challenges</button>
+          <p class="eyebrow" id="challengeReadyLevel">A1 Challenge</p>
+          <h2 id="challengeReadyTitle">Vocabulary</h2>
+          <p id="challengeReadyDescription">Review German vocabulary.</p>
+          <strong>10 Questions</strong>
+          <p>Ready to begin?</p>
+          <button class="primary-button" id="challengeReadyStart" type="button">Start</button>
+        </article>
+      </section>
+
       <section class="challenge-results-screen hidden" id="challengeResultsScreen" aria-live="polite">
         <article class="challenge-results-card">
           <p class="eyebrow">Challenge Complete</p>
-          <h2>Challenge Complete!</h2>
+          <h2>🎉 Challenge Complete!</h2>
           <dl class="challenge-results-summary">
-            <div>
-              <dt>Accuracy</dt>
-              <dd id="challengeResultAccuracy">0%</dd>
-            </div>
             <div>
               <dt>Correct</dt>
               <dd id="challengeResultCorrect">0 / 10</dd>
+            </div>
+            <div>
+              <dt>Accuracy</dt>
+              <dd id="challengeResultAccuracy">0%</dd>
             </div>
             <div>
               <dt>Coins earned</dt>
@@ -673,6 +685,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=121"></script>
+    <script type="module" src="script.js?v=122"></script>
   </body>
 </html>

@@ -400,6 +400,12 @@ const els = {
   flashcardReturnDashboard: document.querySelector("#flashcardReturnDashboard"),
   challengeLevelBack: document.querySelector("#challengeLevelBack"),
   challengeSelectedLevel: document.querySelector("#challengeSelectedLevel"),
+  challengeReadyScreen: document.querySelector("#challengeReadyScreen"),
+  challengeReadyBack: document.querySelector("#challengeReadyBack"),
+  challengeReadyLevel: document.querySelector("#challengeReadyLevel"),
+  challengeReadyTitle: document.querySelector("#challengeReadyTitle"),
+  challengeReadyDescription: document.querySelector("#challengeReadyDescription"),
+  challengeReadyStart: document.querySelector("#challengeReadyStart"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
@@ -578,6 +584,7 @@ let flashcardStudyLevel = "A1";
 let flashcardStudyCategory = "nouns";
 let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
+let pendingChallengeAction = "";
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
 let recentMeaningMatchItems = [];
@@ -1636,7 +1643,7 @@ function refreshVisibleProfileState() {
     renderVocabularyReviewQuiz();
   } else if (currentView === "learning-flashcards") {
     renderLearningFlashcard();
-  } else if (["level-selection", "flashcard-setup", "flashcard-complete"].includes(currentView)) {
+  } else if (["level-selection", "flashcard-setup", "flashcard-complete", "challenge-ready"].includes(currentView)) {
     return;
   } else {
     updateStats();
@@ -1779,6 +1786,7 @@ function showDashboard() {
   els.dashboardScreen.classList.remove("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1802,6 +1810,7 @@ function showCoinChallenges() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.remove("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1827,6 +1836,7 @@ function showAchievementCollection(page = "austria-album") {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.remove("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1847,6 +1857,7 @@ function showStudyView(options = {}) {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1881,6 +1892,7 @@ function showNounVerbQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -1906,6 +1918,7 @@ function showVocabularyReviewQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -1931,6 +1944,7 @@ function showMeaningMatchQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -1955,6 +1969,7 @@ function showPrepositionQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -2911,6 +2926,7 @@ function showLevelSelection(path) {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.remove("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -2941,6 +2957,7 @@ function showFlashcardSetup() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.remove("hidden");
@@ -3139,21 +3156,41 @@ function showFlashcardCompletion() {
 }
 
 function handleChallengeAction(action) {
+  if (!["vocabulary-review", "articles"].includes(action)) return;
+  showChallengeReady(action);
+}
+
+function showChallengeReady(action) {
+  pendingChallengeAction = action;
+  currentView = "challenge-ready";
+  const isVocabulary = action === "vocabulary-review";
+  els.challengeReadyLevel.textContent = `${selectedLearningLevel} Challenge`;
+  els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary" : "Articles";
+  els.challengeReadyDescription.textContent = isVocabulary
+    ? "Review German vocabulary."
+    : "Practice der, die, das.";
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+  els.challengeReadyScreen.classList.remove("hidden");
+}
+
+function beginPendingChallenge() {
+  const action = pendingChallengeAction;
+  pendingChallengeAction = "";
   const routes = {
     articles: { mode: "article-quiz", filter: "smartArticle", resume: true }
   };
-  if (action === "noun-verb") {
-    showNounVerbQuiz();
-    return;
-  }
-  if (action === "meaning-match") {
-    showMeaningMatchQuiz();
-    return;
-  }
-  if (action === "prepositions") {
-    showPrepositionQuiz();
-    return;
-  }
   if (action === "vocabulary-review") {
     startChallengeSession("vocabulary", selectedLearningLevel);
     showVocabularyReviewQuiz();
@@ -3221,6 +3258,7 @@ function showChallengeResults() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -3800,6 +3838,8 @@ function bindEvents() {
   });
   els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
+  els.challengeReadyBack.addEventListener("click", showCoinChallenges);
+  els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
   els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
@@ -4318,19 +4358,18 @@ function renderArticleResult(card) {
   }
 
   const fullAnswer = `${card.article} ${card.word}`;
-  const meaning = card.english ? `<span class="quiz-result-meaning">${escapeHtml(card.english)}</span>` : "";
+  const wordMeaning = card.english
+    ? `<span class="quiz-result-answer">${escapeHtml(fullAnswer)} = ${escapeHtml(capitalizeFirst(card.english))}</span>`
+    : `<span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>`;
   const isCorrect = selectedQuizArticle === card.article;
   els.articleQuizResult.innerHTML = isCorrect
     ? `
-      <span class="quiz-result-label">Correct</span>
-      <span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>
-      ${meaning}
+      <span class="quiz-result-label">✅ Correct!</span>
+      ${wordMeaning}
     `
     : `
-      <span class="quiz-result-label">Not quite</span>
-      <span class="quiz-result-correction">Correct answer:</span>
-      <span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>
-      ${meaning}
+      <span class="quiz-result-label">❌ Not quite</span>
+      ${wordMeaning}
     `;
   els.articleQuizResult.classList.toggle("hidden", !articleQuizAnswered);
   els.articleQuizResult.classList.toggle("success", articleQuizAnswered && isCorrect);
@@ -5271,10 +5310,8 @@ function renderVocabularyReviewResult(card) {
   els.nounVerbResult.classList.remove("hidden", "success", "error");
   els.nounVerbResult.classList.add(isCorrect ? "success" : "error");
   els.nounVerbResult.innerHTML = `
-    <span class="quiz-result-label">${isCorrect ? "✅ Correct" : "❌ Wrong"}</span>
-    ${isCorrect ? "" : "<span class=\"quiz-result-correction\">Correct answer:</span>"}
-    <span class="quiz-result-answer">${escapeHtml(card.english)}</span>
-    <span class="quiz-result-meaning"><strong>German:</strong> ${escapeHtml(card.article ? `${card.article} ${card.word}` : card.word)}</span>
+    <span class="quiz-result-label">${isCorrect ? "✅ Correct!" : "❌ Not quite"}</span>
+    <span class="quiz-result-answer">${escapeHtml(card.word)} = ${escapeHtml(capitalizeFirst(card.english))}</span>
   `;
   els.nounVerbOptions.querySelectorAll("button").forEach((button) => {
     const answer = button.dataset.vocabularyChoice;

@@ -1517,12 +1517,14 @@ h1 {
   filter: brightness(0.97);
 }
 
+.challenge-ready-screen,
 .challenge-results-screen {
   width: min(560px, 100%);
   margin: 0 auto;
   padding: clamp(18px, 4vw, 36px) 0;
 }
 
+.challenge-ready-card,
 .challenge-results-card {
   border: 1px solid var(--card-border);
   border-radius: 8px;
@@ -1532,6 +1534,37 @@ h1 {
   display: grid;
   gap: 22px;
   text-align: center;
+}
+
+.challenge-ready-card {
+  min-height: min(440px, calc(100dvh - 150px));
+  align-content: center;
+}
+
+.challenge-ready-card .small-link-button {
+  justify-self: start;
+  align-self: start;
+}
+
+.challenge-ready-card h2,
+.challenge-ready-card p {
+  margin: 0;
+}
+
+.challenge-ready-card h2 {
+  color: var(--ink);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+}
+
+.challenge-ready-card > strong {
+  color: var(--green);
+  font-size: 1.15rem;
+}
+
+.challenge-ready-card .primary-button {
+  width: min(100%, 320px);
+  min-height: 54px;
+  justify-self: center;
 }
 
 .challenge-results-card h2,
