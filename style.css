@@ -1044,20 +1044,34 @@ h1 {
 }
 
 .challenge-selection-grid {
+  width: min(760px, 100%);
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: clamp(14px, 2.4vw, 22px);
+}
+
+.challenge-page-heading {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.challenge-page-heading h2,
+.challenge-page-heading p {
+  margin: 0;
 }
 
 .coin-challenge-card {
-  min-height: 260px;
+  min-height: 230px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.9);
   box-shadow: var(--shadow);
-  padding: clamp(14px, 2.4vw, 20px);
+  padding: clamp(18px, 3vw, 26px);
   display: grid;
-  gap: 12px;
+  gap: 18px;
   align-content: start;
 }
 
@@ -1073,6 +1087,17 @@ h1 {
   margin: 0;
   color: var(--muted);
   font-weight: 800;
+  line-height: 1.45;
+}
+
+.coin-challenge-card p strong {
+  color: var(--ink);
+}
+
+.coin-challenge-card .challenge-question-count {
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 900;
 }
 
 .challenge-mini-list {
