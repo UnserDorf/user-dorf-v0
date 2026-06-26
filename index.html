@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=129">
+    <link rel="stylesheet" href="style.css?v=130">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -380,29 +380,37 @@
             <p class="eyebrow" id="learningFlashcardSelection">A1 · Nouns</p>
             <h2 id="learningFlashcardGerman">das Haus</h2>
             <p class="learning-flashcard-english" id="learningFlashcardEnglish">house</p>
-            <div class="learning-flashcard-detail">
-              <span>Category</span>
-              <strong id="learningFlashcardCategory">Nouns</strong>
+            <div class="learning-flashcard-details">
+              <div class="learning-flashcard-detail">
+                <span>Category</span>
+                <strong id="learningFlashcardCategory">Nouns</strong>
+              </div>
+              <div class="learning-flashcard-detail" id="learningFlashcardExampleGroup">
+                <span>Example</span>
+                <strong id="learningFlashcardExample">Das Haus ist groß.</strong>
+              </div>
             </div>
-            <div class="learning-flashcard-detail" id="learningFlashcardExampleGroup">
-              <span>Example</span>
-              <strong id="learningFlashcardExample">Das Haus ist groß.</strong>
-            </div>
+          </div>
+          <div class="learning-flashcard-ratings" id="learningFlashcardRatings">
+            <button class="know" type="button" data-flashcard-rating="known">✓ Known</button>
+            <button class="unsure" type="button" data-flashcard-rating="unsure">? Unsure</button>
+            <button class="dont-know" type="button" data-flashcard-rating="unknown">✗ Don’t Know</button>
           </div>
           <section class="flashcard-study-stats" id="flashcardStudyStats" aria-label="Study progress">
             <h3>Study Progress</h3>
-            <div>
+            <div class="flashcard-study-bar" aria-hidden="true">
+              <span class="known" id="flashcardStatsKnownBar"></span>
+              <span class="unsure" id="flashcardStatsUnsureBar"></span>
+              <span class="unknown" id="flashcardStatsUnknownBar"></span>
+              <span class="unseen" id="flashcardStatsUnseenBar"></span>
+            </div>
+            <div class="flashcard-study-labels">
               <span>Known: <strong id="flashcardStatsKnown">0</strong></span>
               <span>Unsure: <strong id="flashcardStatsUnsure">0</strong></span>
               <span>Don’t Know: <strong id="flashcardStatsUnknown">0</strong></span>
               <span>Unseen: <strong id="flashcardStatsUnseen">0</strong></span>
             </div>
           </section>
-          <div class="learning-flashcard-ratings" id="learningFlashcardRatings">
-            <button class="know" type="button" data-flashcard-rating="known">✓ Known</button>
-            <button class="unsure" type="button" data-flashcard-rating="unsure">? Unsure</button>
-            <button class="dont-know" type="button" data-flashcard-rating="unknown">✗ Don’t Know</button>
-          </div>
           <div class="learning-flashcard-navigation" id="learningFlashcardNavigation">
             <button class="ghost-button" id="learningFlashcardPrevious" type="button">Previous</button>
             <button class="primary-button" id="learningFlashcardNext" type="button">Next</button>
@@ -755,6 +763,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=136"></script>
+    <script type="module" src="script.js?v=137"></script>
   </body>
 </html>

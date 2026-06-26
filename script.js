@@ -414,6 +414,10 @@ const els = {
   flashcardStatsUnsure: document.querySelector("#flashcardStatsUnsure"),
   flashcardStatsUnknown: document.querySelector("#flashcardStatsUnknown"),
   flashcardStatsUnseen: document.querySelector("#flashcardStatsUnseen"),
+  flashcardStatsKnownBar: document.querySelector("#flashcardStatsKnownBar"),
+  flashcardStatsUnsureBar: document.querySelector("#flashcardStatsUnsureBar"),
+  flashcardStatsUnknownBar: document.querySelector("#flashcardStatsUnknownBar"),
+  flashcardStatsUnseenBar: document.querySelector("#flashcardStatsUnseenBar"),
   learningFlashcardRatings: document.querySelector("#learningFlashcardRatings"),
   learningFlashcardNavigation: document.querySelector("#learningFlashcardNavigation"),
   learningFlashcardPrevious: document.querySelector("#learningFlashcardPrevious"),
@@ -3411,6 +3415,11 @@ function renderFlashcardStudyStats() {
   if (els.flashcardStatsUnsure) els.flashcardStatsUnsure.textContent = stats.unsure;
   if (els.flashcardStatsUnknown) els.flashcardStatsUnknown.textContent = stats.unknown;
   if (els.flashcardStatsUnseen) els.flashcardStatsUnseen.textContent = stats.unseen;
+  const total = Math.max(stats.known + stats.unsure + stats.unknown + stats.unseen, 1);
+  if (els.flashcardStatsKnownBar) els.flashcardStatsKnownBar.style.flexGrow = stats.known / total;
+  if (els.flashcardStatsUnsureBar) els.flashcardStatsUnsureBar.style.flexGrow = stats.unsure / total;
+  if (els.flashcardStatsUnknownBar) els.flashcardStatsUnknownBar.style.flexGrow = stats.unknown / total;
+  if (els.flashcardStatsUnseenBar) els.flashcardStatsUnseenBar.style.flexGrow = stats.unseen / total;
 }
 
 function updateFlashcardStudyRating(card, rating) {
