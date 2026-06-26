@@ -22,6 +22,18 @@ const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const CHALLENGE_QUESTION_COUNT = 10;
 const FLASHCARD_SESSION_SIZE = 25;
+const CHALLENGE_BANNER_ROTATION_QUESTIONS = 75;
+const CHALLENGE_BANNERS = [
+  "assets/town-center-stage-1.png",
+  "assets/town-center-stage-2.png",
+  "assets/town-center-stage-3.png",
+  "assets/town-center-stage-4.png",
+  "assets/town-center-stage-5.png",
+  "assets/saturday-market.png",
+  "assets/community-picnic.png",
+  "assets/village-carnival.png",
+  "assets/villages-homepage.png"
+];
 const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
 const PROFILE_STORE_VERSION = 2;
 const DEFAULT_GROUP_ID = "family-z";
@@ -494,8 +506,10 @@ const els = {
   statsGrid: document.querySelector("#statsGrid"),
   studyStage: document.querySelector("#studyStage"),
   studyChallengeBack: document.querySelector("#studyChallengeBack"),
+  studyChallengeBanner: document.querySelector("#studyChallengeBanner"),
   nounVerbStage: document.querySelector("#nounVerbStage"),
   nounVerbChallengeBack: document.querySelector("#nounVerbChallengeBack"),
+  nounVerbChallengeBanner: document.querySelector("#nounVerbChallengeBanner"),
   nounVerbCounter: document.querySelector("#nounVerbCounter"),
   nounVerbTitle: document.querySelector("#nounVerbTitle"),
   vocabularyReviewDebug: document.querySelector("#vocabularyReviewDebug"),
@@ -4722,7 +4736,29 @@ function renderCard() {
   els.answerArticle.textContent = card.article || "none";
   els.answerMeaning.textContent = mode === "en-de" ? `${card.article ? `${card.article} ` : ""}${card.word}` : card.english;
   els.answerExample.textContent = buildExampleText(card);
+  renderChallengeBanner(els.studyChallengeBanner);
   renderArticleResult(card);
+}
+
+function getChallengeBannerSrc() {
+  const profile = getCurrentProfile();
+  const completedQuestions = normalizeCounter(profile?.challengeSessionsCompleted) * CHALLENGE_QUESTION_COUNT;
+  const currentQuestions = challengeSession.type && !challengeSession.complete
+    ? normalizeCounter(challengeSession.answered)
+    : 0;
+  const rotationIndex = Math.floor((completedQuestions + currentQuestions) / CHALLENGE_BANNER_ROTATION_QUESTIONS);
+  return CHALLENGE_BANNERS[rotationIndex % CHALLENGE_BANNERS.length] || CHALLENGE_BANNERS[0];
+}
+
+function renderChallengeBanner(image) {
+  if (!image) return;
+  const imagePath = getChallengeBannerSrc();
+  image.classList.remove("is-missing");
+  image.onerror = () => {
+    image.classList.add("is-missing");
+    image.removeAttribute("src");
+  };
+  image.src = imagePath;
 }
 
 function revealAnswer() {
@@ -5686,6 +5722,7 @@ function renderVocabularyReviewQuiz() {
   els.nounVerbOptions.classList.toggle("hidden", !hasCard);
   els.nounVerbResult.classList.add("hidden");
   els.nounVerbNext.classList.toggle("hidden", !vocabularyReviewQuizState.hasAnswered);
+  renderChallengeBanner(els.nounVerbChallengeBanner);
   const vocabularyChallengeActive = challengeSession.type === "vocabulary";
   els.nounVerbCounter.textContent = hasCard
     ? vocabularyChallengeActive
