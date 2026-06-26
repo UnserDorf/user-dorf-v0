@@ -685,9 +685,9 @@ async function unlockApp() {
     if (!response.ok) throw new Error("Vocabulary file was not found.");
     const csv = await response.text();
     cards = normalizeCards(parseCsv(csv));
-    els.deckStatus.textContent = `${cards.length} cards loaded from ${CSV_URL}`;
+    els.deckStatus.textContent = "";
   } catch (error) {
-    els.deckStatus.textContent = "Could not load vocabulary.csv. Use a local web server or upload a CSV.";
+    els.deckStatus.textContent = "";
     cards = [];
   }
   try {
@@ -4331,7 +4331,7 @@ function bindEvents() {
       if (!file) return;
       const csv = await file.text();
       cards = normalizeCards(parseCsv(csv));
-      els.deckStatus.textContent = `${cards.length} cards loaded from ${file.name}`;
+      els.deckStatus.textContent = "";
       currentIndex = 0;
       updateFilterOptions();
       applyModeAndFilter();
