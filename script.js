@@ -447,6 +447,10 @@ const els = {
   challengeCorrectOnce: document.querySelector("#challengeCorrectOnce"),
   challengeMasteredCount: document.querySelector("#challengeMasteredCount"),
   challengeRemainingMastery: document.querySelector("#challengeRemainingMastery"),
+  articleMasteryDeck: document.querySelector("#articleMasteryDeck"),
+  articleCorrectOnce: document.querySelector("#articleCorrectOnce"),
+  articleMasteredCount: document.querySelector("#articleMasteredCount"),
+  articleRemainingMastery: document.querySelector("#articleRemainingMastery"),
   challengeReadyScreen: document.querySelector("#challengeReadyScreen"),
   challengeReadyBack: document.querySelector("#challengeReadyBack"),
   challengeReadyLevel: document.querySelector("#challengeReadyLevel"),
@@ -2332,6 +2336,7 @@ function getVillageMemberStatus(profile) {
 
 function renderCoinChallenges() {
   renderChallengeMasteryProgress();
+  renderArticleMasteryProgress();
 }
 
 function getChallengeVocabularyDeck(level = selectedLearningLevel, category = selectedChallengeCategory) {
@@ -2367,6 +2372,35 @@ function renderChallengeMasteryProgress() {
   if (els.challengeCorrectOnce) els.challengeCorrectOnce.textContent = `${summary.correctOnce} / ${summary.total}`;
   if (els.challengeMasteredCount) els.challengeMasteredCount.textContent = `${summary.mastered} / ${summary.total}`;
   if (els.challengeRemainingMastery) els.challengeRemainingMastery.textContent = `${summary.remaining} / ${summary.total}`;
+}
+
+function getArticleMasteryProgress(level = selectedLearningLevel) {
+  const deckCards = getArticleChallengeCards(level);
+  const total = deckCards.length;
+  const progressMap = getCurrentProfile()?.articleProgress || articleProgress || {};
+  const counts = deckCards.reduce(
+    (summary, card) => {
+      const correctCount = normalizeCounter(progressMap[card.id]?.articleCorrectCount);
+      if (correctCount >= 1) summary.correctOnce += 1;
+      if (correctCount >= 3) summary.mastered += 1;
+      return summary;
+    },
+    { correctOnce: 0, mastered: 0 }
+  );
+  return {
+    total,
+    correctOnce: counts.correctOnce,
+    mastered: counts.mastered,
+    remaining: Math.max(total - counts.mastered, 0)
+  };
+}
+
+function renderArticleMasteryProgress() {
+  const summary = getArticleMasteryProgress();
+  if (els.articleMasteryDeck) els.articleMasteryDeck.textContent = `${selectedLearningLevel} • Articles`;
+  if (els.articleCorrectOnce) els.articleCorrectOnce.textContent = `${summary.correctOnce} / ${summary.total}`;
+  if (els.articleMasteredCount) els.articleMasteredCount.textContent = `${summary.mastered} / ${summary.total}`;
+  if (els.articleRemainingMastery) els.articleRemainingMastery.textContent = `${summary.remaining} / ${summary.total}`;
 }
 
 function renderChallengeProgress(barEl, labelEl, summary) {
