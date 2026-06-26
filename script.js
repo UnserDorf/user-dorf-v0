@@ -3277,7 +3277,7 @@ function getFlashcardCategoryLabel(category) {
 
 function renderLearningDeckSelector() {
   if (!els.learningDeckSelectorPanel) return;
-  els.learningDeckSelectorPanel.innerHTML = LEARNING_LEVELS.map((level) => {
+  const deckGroups = LEARNING_LEVELS.map((level) => {
     const deckButtons = ["nouns", "verbs", "other"].map((category) => {
       const isActive = level === flashcardStudyLevel && category === flashcardStudyCategory;
       return `
@@ -3293,6 +3293,10 @@ function renderLearningDeckSelector() {
       </div>
     `;
   }).join("");
+  els.learningDeckSelectorPanel.innerHTML = `
+    <h3>Choose Study Deck</h3>
+    ${deckGroups}
+  `;
 }
 
 function closeLearningDeckSelector() {

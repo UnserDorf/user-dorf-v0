@@ -1353,15 +1353,16 @@ h1 {
 }
 
 .learning-deck-selector-button {
-  border: 1px solid rgba(82, 118, 82, 0.2);
+  border: 1px solid rgba(82, 118, 82, 0.42);
   border-radius: 999px;
   background: rgba(236, 244, 229, 0.86);
   color: var(--green);
   cursor: pointer;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 900;
-  padding: 8px 14px;
+  padding: 10px 16px;
+  box-shadow: 0 8px 18px rgba(73, 58, 35, 0.08);
 }
 
 .learning-deck-selector-button:hover,
@@ -1375,7 +1376,7 @@ h1 {
   position: absolute;
   top: 62px;
   z-index: 5;
-  width: min(360px, calc(100% - 28px));
+  width: min(400px, calc(100% - 28px));
   border: 1px solid rgba(190, 177, 153, 0.5);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.98);
@@ -1384,6 +1385,13 @@ h1 {
   display: grid;
   gap: 12px;
   text-align: left;
+}
+
+.learning-deck-selector-panel h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 950;
 }
 
 .learning-deck-selector-group {
@@ -1800,10 +1808,10 @@ h1 {
 .challenge-mastery-panel {
   border: 1px solid var(--card-border);
   border-radius: 8px;
-  background: rgba(255, 253, 248, 0.7);
-  padding: 12px;
+  background: rgba(255, 253, 248, 0.54);
+  padding: 10px 12px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .challenge-mastery-panel h4,
@@ -1814,13 +1822,17 @@ h1 {
 
 .challenge-mastery-panel h4 {
   color: var(--ink);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 900;
+}
+
+.challenge-mastery-panel .eyebrow {
+  font-size: 0.72rem;
 }
 
 .challenge-mastery-panel dl {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .challenge-mastery-panel div {
@@ -1832,13 +1844,13 @@ h1 {
 
 .challenge-mastery-panel dt {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
 .challenge-mastery-panel dd {
   color: var(--green);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 900;
   white-space: nowrap;
 }
