@@ -177,8 +177,35 @@ body {
 .village-selection {
   width: min(620px, 100%);
   display: grid;
-  gap: clamp(18px, 4vh, 32px);
+  gap: clamp(16px, 3vh, 26px);
   justify-items: center;
+}
+
+.village-selection-heading {
+  width: min(520px, 100%);
+  border: 1px solid rgba(255, 253, 248, 0.82);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.84);
+  box-shadow: 0 16px 34px rgba(51, 39, 26, 0.18);
+  padding: clamp(18px, 4vw, 26px);
+  text-align: center;
+  backdrop-filter: blur(6px);
+}
+
+.village-selection-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  line-height: 1.08;
+  font-weight: 950;
+}
+
+.village-selection-heading p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.94rem, 2vw, 1.04rem);
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .villages-title-image {
@@ -748,6 +775,7 @@ h1 {
 }
 
 .dashboard-screen,
+.landing-screen,
 .demo-screen,
 .achievement-collection-screen,
 .coin-challenges-screen {
@@ -762,20 +790,24 @@ h1 {
   padding: clamp(8px, 1.4vw, 14px) 0 18px;
 }
 
+.landing-screen,
 .demo-screen {
   align-content: center;
   justify-items: center;
 }
 
+.app-shell.landing-mode .topbar,
 .app-shell.onboarding-mode .topbar {
   display: none;
 }
 
+.app-shell.landing-mode .landing-screen,
 .app-shell.onboarding-mode .demo-screen {
   grid-row: 1 / -1;
   align-content: center;
 }
 
+.landing-card,
 .demo-card {
   width: min(680px, 100%);
   border: 1px solid var(--card-border);
@@ -788,6 +820,7 @@ h1 {
   text-align: center;
 }
 
+.landing-illustration,
 .onboarding-illustration {
   width: min(100%, 560px);
   aspect-ratio: 16 / 9;
@@ -802,23 +835,28 @@ h1 {
   font-weight: 850;
 }
 
+.landing-copy,
 .onboarding-copy {
   display: grid;
   gap: 12px;
 }
 
+.landing-card h2,
+.landing-card p,
 .demo-card h2,
 .demo-card p,
 .onboarding-mini-section h3 {
   margin: 0;
 }
 
+.landing-card h2,
 .demo-card h2 {
   color: var(--ink);
   font-size: clamp(1.9rem, 4vw, 2.7rem);
   line-height: 1.05;
 }
 
+.landing-card p,
 .demo-card p:not(.eyebrow) {
   color: var(--muted);
   font-weight: 760;
@@ -843,12 +881,14 @@ h1 {
   font-weight: 900 !important;
 }
 
+.landing-actions,
 .onboarding-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
+.landing-actions button,
 .onboarding-actions button {
   min-height: 48px;
 }
@@ -5367,10 +5407,12 @@ select,
     padding: 22px;
   }
 
+  .landing-card,
   .demo-card {
     padding: 20px;
   }
 
+  .landing-actions,
   .onboarding-actions {
     grid-template-columns: 1fr;
   }
@@ -5466,6 +5508,7 @@ button:active {
 .village-password-card,
 .create-profile-card,
 .profile-login-card,
+.landing-card,
 .demo-card,
 .dashboard-screen > .dashboard-heading,
 .dashboard-learning-card,
@@ -5497,6 +5540,7 @@ button:active {
 .village-password-card,
 .create-profile-card,
 .profile-login-card,
+.landing-card,
 .demo-card,
 .dashboard-screen > .dashboard-heading,
 .dashboard-learning-card,
@@ -5538,6 +5582,7 @@ button:active {
 .flashcard-page-heading h2,
 .challenge-page-heading h2,
 .reward-title-stack h2,
+.landing-card h2,
 .demo-card h2,
 .challenge-ready-card h2,
 .challenge-results-card h2 {
@@ -5578,6 +5623,7 @@ button:active {
 .challenge-mastery-panel dt,
 .town-center-stage-card p,
 .memory-detail-card p:not(.eyebrow),
+.landing-card p,
 .demo-card p:not(.eyebrow),
 .flashcard-page-heading p,
 .level-selection-heading p,
@@ -5635,6 +5681,7 @@ button:active {
 .reward-image-frame,
 .memory-detail-image,
 .town-center-hero img,
+.landing-illustration,
 .onboarding-illustration,
 .dashboard-village-image-wrap,
 .dashboard-village-image-wrap img,
@@ -5647,6 +5694,7 @@ button:active {
 .memory-detail-image,
 .town-center-hero img,
 .dashboard-village-image-wrap,
+.landing-illustration,
 .onboarding-illustration {
   border-color: var(--border-soft);
   box-shadow: 0 10px 24px rgba(73, 58, 35, 0.08);

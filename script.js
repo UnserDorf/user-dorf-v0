@@ -451,6 +451,9 @@ const els = {
   familyWealthProgressFill: document.querySelector("#familyWealthProgressFill"),
   familyWealthProgressText: document.querySelector("#familyWealthProgressText"),
   appShell: document.querySelector("#appShell"),
+  landingScreen: document.querySelector("#landingScreen"),
+  landingGetStarted: document.querySelector("#landingGetStarted"),
+  landingExistingAccount: document.querySelector("#landingExistingAccount"),
   demoScreen: document.querySelector("#demoScreen"),
   demoIllustration: document.querySelector("#demoIllustration"),
   demoTitle: document.querySelector("#demoTitle"),
@@ -789,7 +792,7 @@ async function unlockApp() {
   if (isDeviceOnboardingComplete()) {
     showProfileScreen();
   } else {
-    showDemoScreen();
+    showLandingScreen();
   }
 }
 
@@ -1854,7 +1857,9 @@ function showProfileScreen() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.remove("landing-mode");
   els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
   els.profileScreen.classList.remove("hidden");
   showVillageSelection();
@@ -1970,14 +1975,49 @@ function showDashboard() {
   discardIncompleteChallengeSession();
   currentView = "dashboard";
   els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.remove("landing-mode");
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderDashboard();
+  els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
   els.dashboardScreen.classList.remove("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+}
+
+function showLandingScreen() {
+  discardIncompleteChallengeSession();
+  currentView = "landing";
+  currentProfileId = "";
+  pendingProfileId = "";
+  els.profileScreen.classList.add("hidden");
+  els.appShell.classList.remove("locked");
+  els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.add("landing-mode");
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  setChallengeBackButtons(false, false);
+  els.landingScreen?.classList.remove("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -2002,12 +2042,14 @@ function showDemoScreen() {
   pendingProfileId = "";
   els.profileScreen.classList.add("hidden");
   els.appShell.classList.remove("locked");
+  els.appShell.classList.remove("landing-mode");
   els.appShell.classList.add("onboarding-mode");
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
+  els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.remove("hidden");
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -2062,6 +2104,11 @@ function moveDemoPage(direction) {
 }
 
 function completeDemoScreen() {
+  completeDeviceOnboarding();
+  showProfileScreen();
+}
+
+function skipLandingToVillageSelection() {
   completeDeviceOnboarding();
   showProfileScreen();
 }
@@ -4346,6 +4393,8 @@ function bindEvents() {
     closeSettingsMenu();
     showDashboard();
   });
+  els.landingGetStarted?.addEventListener("click", showDemoScreen);
+  els.landingExistingAccount?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoNext?.addEventListener("click", handleDemoNext);
 
