@@ -42,6 +42,42 @@ const DEFAULT_GROUPS = [
   { id: "b2-class", name: "B2 Class", icon: "📚", description: "Unser Deutschlern-Dorf", password: "b2class" },
   { id: "test-group", name: "Test Family", icon: "🧪", description: "Test- und Übungs-Dorf", password: "test" }
 ];
+const ONBOARDING_PAGES = [
+  {
+    illustration: "Illustration 1",
+    title: "Welcome to Unser Dorf",
+    body: [
+      "Every word you learn helps your village grow.",
+      "Build your vocabulary, earn rewards, and discover Austria along the way."
+    ],
+    progress: "● ○ ○",
+    backLabel: "Skip",
+    nextLabel: "Next"
+  },
+  {
+    illustration: "Illustration 2",
+    title: "How It Works",
+    sections: [
+      ["📇 Learn", "Study new vocabulary with Flashcards."],
+      ["🏆 Practice", "Complete Challenges to review what you've learned."],
+      ["🏡 Grow", "Earn coins, unlock Austria Album rewards, and help your village grow."]
+    ],
+    progress: "○ ● ○",
+    backLabel: "Back",
+    nextLabel: "Next"
+  },
+  {
+    illustration: "Illustration 3",
+    title: "You're Ready!",
+    body: [
+      "We recommend starting with Flashcards before trying Challenges.",
+      "Your progress is saved automatically, so you can continue anytime."
+    ],
+    progress: "○ ○ ●",
+    backLabel: "Back",
+    nextLabel: "Go to Dashboard"
+  }
+];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const VILLAGE_NAMING_CONTRIBUTION_GOAL = 10;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
@@ -394,6 +430,11 @@ const els = {
   familyWealthProgressText: document.querySelector("#familyWealthProgressText"),
   appShell: document.querySelector("#appShell"),
   demoScreen: document.querySelector("#demoScreen"),
+  demoIllustration: document.querySelector("#demoIllustration"),
+  demoTitle: document.querySelector("#demoTitle"),
+  demoBody: document.querySelector("#demoBody"),
+  demoProgress: document.querySelector("#demoProgress"),
+  demoBack: document.querySelector("#demoBack"),
   demoNext: document.querySelector("#demoNext"),
   dashboardScreen: document.querySelector("#dashboardScreen"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
@@ -668,6 +709,7 @@ let randomSessionKey = "";
 let randomSessionIds = [];
 let currentView = "dashboard";
 let syncEnabled = false;
+let demoPageIndex = 0;
 let applyingRemoteStore = false;
 let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
@@ -1927,6 +1969,7 @@ function showDashboard() {
 function showDemoScreen() {
   discardIncompleteChallengeSession();
   currentView = "demo";
+  demoPageIndex = 0;
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
@@ -1948,6 +1991,41 @@ function showDemoScreen() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  renderOnboardingPage();
+}
+
+function renderOnboardingPage() {
+  const page = ONBOARDING_PAGES[demoPageIndex] || ONBOARDING_PAGES[0];
+  if (els.demoIllustration) els.demoIllustration.textContent = page.illustration;
+  if (els.demoTitle) els.demoTitle.textContent = page.title;
+  if (els.demoBody) {
+    const bodyNodes = page.sections
+      ? page.sections.map(([heading, text]) => {
+        const section = document.createElement("section");
+        section.className = "onboarding-mini-section";
+        const title = document.createElement("h3");
+        title.textContent = heading;
+        const copy = document.createElement("p");
+        copy.textContent = text;
+        section.append(title, copy);
+        return section;
+      })
+      : page.body.map((text) => createTextElement("p", "", text));
+    els.demoBody.replaceChildren(...bodyNodes);
+  }
+  if (els.demoProgress) els.demoProgress.textContent = page.progress;
+  if (els.demoBack) els.demoBack.textContent = page.backLabel;
+  if (els.demoNext) els.demoNext.textContent = page.nextLabel;
+}
+
+function moveDemoPage(direction) {
+  const nextIndex = demoPageIndex + direction;
+  if (nextIndex < 0) {
+    completeDemoScreen();
+    return;
+  }
+  demoPageIndex = clamp(nextIndex, 0, ONBOARDING_PAGES.length - 1);
+  renderOnboardingPage();
 }
 
 function completeDemoScreen() {
@@ -1956,6 +2034,22 @@ function completeDemoScreen() {
   profile.demoCompleted = true;
   saveProfileStore();
   showDashboard();
+}
+
+function handleDemoNext() {
+  if (demoPageIndex >= ONBOARDING_PAGES.length - 1) {
+    completeDemoScreen();
+    return;
+  }
+  moveDemoPage(1);
+}
+
+function handleDemoBack() {
+  if (demoPageIndex === 0) {
+    completeDemoScreen();
+    return;
+  }
+  moveDemoPage(-1);
 }
 
 function showCoinChallenges() {
@@ -4216,7 +4310,8 @@ function bindEvents() {
     closeSettingsMenu();
     showDashboard();
   });
-  els.demoNext?.addEventListener("click", completeDemoScreen);
+  els.demoBack?.addEventListener("click", handleDemoBack);
+  els.demoNext?.addEventListener("click", handleDemoNext);
 
   els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
   els.articleQuizNext.addEventListener("click", () => {

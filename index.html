@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=142">
+    <link rel="stylesheet" href="style.css?v=143">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -196,10 +196,20 @@
 
       <section class="demo-screen hidden" id="demoScreen" aria-label="Demo introduction">
         <article class="demo-card">
-          <p class="eyebrow">Unser Dorf</p>
-          <h2>Demo</h2>
-          <p>Welcome to Unser Dorf.</p>
-          <button class="primary-button" id="demoNext" type="button">Next</button>
+          <div class="onboarding-illustration" id="demoIllustration">Illustration 1</div>
+          <div class="onboarding-copy">
+            <p class="eyebrow">Unser Dorf</p>
+            <h2 id="demoTitle">Welcome to Unser Dorf</h2>
+            <div id="demoBody">
+              <p>Every word you learn helps your village grow.</p>
+              <p>Build your vocabulary, earn rewards, and discover Austria along the way.</p>
+            </div>
+          </div>
+          <p class="onboarding-progress" id="demoProgress" aria-label="Onboarding progress">● ○ ○</p>
+          <div class="onboarding-actions">
+            <button class="ghost-button" id="demoBack" type="button">Skip</button>
+            <button class="primary-button" id="demoNext" type="button">Next</button>
+          </div>
         </article>
       </section>
 
@@ -782,6 +792,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=147"></script>
+    <script type="module" src="script.js?v=148"></script>
   </body>
 </html>

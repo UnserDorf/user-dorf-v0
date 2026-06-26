@@ -768,36 +768,80 @@ h1 {
 }
 
 .demo-card {
-  width: min(440px, 100%);
+  width: min(680px, 100%);
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.92);
   box-shadow: var(--shadow);
-  padding: clamp(22px, 4vw, 34px);
+  padding: clamp(22px, 4vw, 38px);
   display: grid;
-  gap: 14px;
+  gap: clamp(16px, 2.8vw, 24px);
   text-align: center;
 }
 
+.onboarding-illustration {
+  width: min(100%, 560px);
+  aspect-ratio: 16 / 9;
+  justify-self: center;
+  border: 1px solid rgba(190, 177, 153, 0.42);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.9), rgba(236, 244, 229, 0.72));
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.onboarding-copy {
+  display: grid;
+  gap: 12px;
+}
+
 .demo-card h2,
-.demo-card p {
+.demo-card p,
+.onboarding-mini-section h3 {
   margin: 0;
 }
 
 .demo-card h2 {
   color: var(--ink);
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
   line-height: 1.05;
 }
 
-.demo-card > p:not(.eyebrow) {
+.demo-card p:not(.eyebrow) {
   color: var(--muted);
   font-weight: 760;
+  line-height: 1.5;
 }
 
-.demo-card .primary-button {
-  justify-self: center;
-  min-width: 132px;
+.onboarding-mini-section {
+  display: grid;
+  gap: 4px;
+}
+
+.onboarding-mini-section h3 {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.onboarding-progress {
+  color: var(--green) !important;
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+  font-weight: 900 !important;
+}
+
+.onboarding-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.onboarding-actions button {
+  min-height: 48px;
 }
 
 .dashboard-heading {
@@ -5302,6 +5346,14 @@ select,
   .profile-login-card {
     width: min(370px, 100%);
     padding: 22px;
+  }
+
+  .demo-card {
+    padding: 20px;
+  }
+
+  .onboarding-actions {
+    grid-template-columns: 1fr;
   }
 
   .create-profile-buttons {
