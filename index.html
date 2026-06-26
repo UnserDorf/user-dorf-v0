@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=147">
+    <link rel="stylesheet" href="style.css?v=148">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -35,7 +35,10 @@
           </div>
         </div>
         <section class="village-selection" id="villageSelection" aria-label="Choose your village">
-          <img class="villages-title-image" src="assets/villages-title.png" alt="Unser Dorf">
+          <div class="village-selection-heading">
+            <h2>Choose Your Village</h2>
+            <p>Select the village you would like to join.</p>
+          </div>
           <div class="village-card-grid" id="villageCardGrid"></div>
         </section>
         <form class="village-password-card hidden" id="villagePasswordForm" aria-label="Village password">
@@ -193,6 +196,20 @@
           <button class="ghost-button" id="logoutButton" type="button">Log Out</button>
         </div>
       </header>
+
+      <section class="landing-screen hidden" id="landingScreen" aria-label="Welcome to Unser Dorf">
+        <article class="landing-card">
+          <div class="landing-illustration">Landing Illustration</div>
+          <div class="landing-copy">
+            <h2>Welcome to Unser Dorf</h2>
+            <p>Learn German while helping your village grow.</p>
+          </div>
+          <div class="landing-actions">
+            <button class="primary-button" id="landingGetStarted" type="button">🟢 Get Started</button>
+            <button class="ghost-button" id="landingExistingAccount" type="button">⚪ I already have an account</button>
+          </div>
+        </article>
+      </section>
 
       <section class="demo-screen hidden" id="demoScreen" aria-label="Onboarding introduction">
         <article class="demo-card">
@@ -792,6 +809,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=151"></script>
+    <script type="module" src="script.js?v=152"></script>
   </body>
 </html>
