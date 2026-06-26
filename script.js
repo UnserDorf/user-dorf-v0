@@ -3154,18 +3154,20 @@ function showChallengesEntry() {
 
 function showFlashcardsEntry() {
   const resumable = getMostRecentFlashcardSession();
-  if (!resumable) {
-    showLevelSelection("flashcards");
-    return;
+  if (resumable) {
+    selectedLearningLevel = resumable.level;
+    flashcardStudyLevel = resumable.level;
+    flashcardStudyCategory = resumable.category;
   }
-  openFlashcardDeck(resumable.level, resumable.category);
+  showLevelSelection("flashcards");
 }
 
-function getMostRecentFlashcardSession() {
+function getMostRecentFlashcardSession(level = "") {
   const profile = getFlashcardSessionProfile();
   const sessions = Object.entries(profile?.flashcardSessions || {})
     .map(([key, session]) => {
       const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(key);
+      if (level && match?.[1] !== level) return null;
       if (!match || !session.deckIds.length) return null;
       const levelCards = getFlashcardCardsForLevel(match[1]);
       const validDeckIds = session.deckIds.filter((id) => levelCards.some((card) => card.id === id));
@@ -3182,6 +3184,20 @@ function getMostRecentFlashcardSession() {
     .filter(Boolean)
     .sort((first, second) => second.updatedAt.localeCompare(first.updatedAt));
   return sessions[0] || null;
+}
+
+function getPreferredFlashcardCategoryForLevel(level) {
+  return getMostRecentFlashcardSession(level)?.category
+    || (flashcardStudyLevel === level ? flashcardStudyCategory : "")
+    || "nouns";
+}
+
+function renderLevelSelectionState() {
+  els.levelSelectionScreen.querySelectorAll("button[data-learning-level]").forEach((button) => {
+    const isSelected = button.dataset.learningLevel === selectedLearningLevel;
+    button.classList.toggle("selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
 }
 
 function resumePendingFlashcardSession() {
@@ -3244,6 +3260,7 @@ function showLevelSelection(path) {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  renderLevelSelectionState();
 }
 
 function chooseLearningLevel(level) {
@@ -3261,6 +3278,7 @@ function chooseLearningLevel(level) {
 function showFlashcardSetup() {
   currentView = "flashcard-setup";
   setChallengeBackButtons(false, false);
+  flashcardStudyCategory = getPreferredFlashcardCategoryForLevel(selectedLearningLevel);
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -3277,6 +3295,9 @@ function showFlashcardSetup() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   els.flashcardSetupLevel.textContent = `${selectedLearningLevel} Flashcards`;
+  els.flashcardSetupForm.querySelectorAll('input[name="flashcardCategory"]').forEach((input) => {
+    input.checked = input.value === flashcardStudyCategory;
+  });
 }
 
 function startLearningFlashcards() {
@@ -4283,8 +4304,8 @@ function bindEvents() {
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
   els.challengeReadyBack.addEventListener("click", showCoinChallenges);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
-  els.learningFlashcardsBack.addEventListener("click", showDashboard);
-  els.flashcardCompletionBack.addEventListener("click", showDashboard);
+  els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
+  els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
