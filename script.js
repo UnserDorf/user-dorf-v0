@@ -381,6 +381,8 @@ const els = {
   familyWealthProgressFill: document.querySelector("#familyWealthProgressFill"),
   familyWealthProgressText: document.querySelector("#familyWealthProgressText"),
   appShell: document.querySelector("#appShell"),
+  demoScreen: document.querySelector("#demoScreen"),
+  demoNext: document.querySelector("#demoNext"),
   dashboardScreen: document.querySelector("#dashboardScreen"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
@@ -1147,6 +1149,7 @@ function normalizeProfileData(data, profile) {
     villageContribution: normalizeVillageContribution(data?.villageContribution),
     achievementsUnlocked: normalizeAchievementList(data?.achievementsUnlocked || data?.achievements),
     austriaAlbumSeenRewards: normalizeRewardIdList(data?.austriaAlbumSeenRewards),
+    demoCompleted: data?.demoCompleted === undefined ? true : Boolean(data.demoCompleted),
     decks: data?.decks || {},
     progress: normalizeMeaningProgress(data?.progress || {}),
     vocabularyProgress: normalizeVocabularyProgress(data?.vocabularyProgress || {}),
@@ -1814,7 +1817,11 @@ function completeProfileLogin(profileId) {
   updateFilterOptions();
   currentIndex = 0;
   applyModeAndFilter();
-  showDashboard();
+  if (profile.demoCompleted) {
+    showDashboard();
+  } else {
+    showDemoScreen();
+  }
 }
 
 function getCurrentProfile() {
@@ -1842,6 +1849,11 @@ function saveSettings() {
 }
 
 function showDashboard() {
+  const profile = getCurrentProfile();
+  if (profile && !profile.demoCompleted) {
+    showDemoScreen();
+    return;
+  }
   discardIncompleteChallengeSession();
   currentView = "dashboard";
   els.appShell.classList.remove("clean-article-practice");
@@ -1850,6 +1862,7 @@ function showDashboard() {
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderDashboard();
+  els.demoScreen?.classList.add("hidden");
   els.dashboardScreen.classList.remove("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -1865,6 +1878,40 @@ function showDashboard() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+}
+
+function showDemoScreen() {
+  discardIncompleteChallengeSession();
+  currentView = "demo";
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  setChallengeBackButtons(false, false);
+  els.demoScreen?.classList.remove("hidden");
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+}
+
+function completeDemoScreen() {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  profile.demoCompleted = true;
+  saveProfileStore();
+  showDashboard();
 }
 
 function showCoinChallenges() {
@@ -3670,7 +3717,7 @@ function renderAvatarPicker() {
 function createCustomProfile(name, password, emoji = selectedAvatar) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
-    { id, name, password, emoji, avatar: "" },
+    { id, name, password, emoji, avatar: "", demoCompleted: false },
     { id, name, password, emoji, avatar: "" }
   );
   const group = getCurrentGroup();
@@ -3939,6 +3986,7 @@ function bindEvents() {
     closeSettingsMenu();
     showDashboard();
   });
+  els.demoNext?.addEventListener("click", completeDemoScreen);
 
   els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
   els.articleQuizNext.addEventListener("click", () => {
