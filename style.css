@@ -1272,15 +1272,31 @@ h1 {
 }
 
 .flashcard-choice-grid span {
-  min-height: 54px;
+  min-height: 92px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.82);
   display: grid;
   place-items: center;
+  gap: 5px;
   color: var(--ink);
   font-weight: 850;
   cursor: pointer;
+  padding: 12px;
+  text-align: center;
+}
+
+.flashcard-choice-grid strong {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.flashcard-choice-grid small {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 780;
+  line-height: 1.25;
 }
 
 .flashcard-choice-grid input:checked + span {

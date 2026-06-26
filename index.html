@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=131">
+    <link rel="stylesheet" href="style.css?v=132">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -354,15 +354,25 @@
         <div class="flashcard-page-heading">
           <button class="small-link-button" id="flashcardSetupBack" type="button">← Back</button>
           <h2>📇 Flashcards</h2>
-          <p><span id="flashcardSetupLevel">A1</span> · Choose a category.</p>
+          <p><span id="flashcardSetupLevel">A1 Flashcards</span></p>
+          <p>Choose the type of words you want to study.</p>
         </div>
         <form class="flashcard-setup-card" id="flashcardSetupForm">
           <fieldset>
-            <legend>Category</legend>
+            <legend>What would you like to study?</legend>
             <div class="flashcard-choice-grid flashcard-category-grid">
-              <label><input type="radio" name="flashcardCategory" value="nouns" checked><span>Nouns</span></label>
-              <label><input type="radio" name="flashcardCategory" value="verbs"><span>Verbs</span></label>
-              <label><input type="radio" name="flashcardCategory" value="other"><span>Other Words</span></label>
+              <label>
+                <input type="radio" name="flashcardCategory" value="nouns" checked>
+                <span><strong>Nouns</strong><small>People, places, and things</small></span>
+              </label>
+              <label>
+                <input type="radio" name="flashcardCategory" value="verbs">
+                <span><strong>Verbs</strong><small>Action words</small></span>
+              </label>
+              <label>
+                <input type="radio" name="flashcardCategory" value="other">
+                <span><strong>Other Words</strong><small>Useful everyday words</small></span>
+              </label>
             </div>
           </fieldset>
           <button class="primary-button" type="submit">Start</button>
@@ -769,6 +779,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=139"></script>
+    <script type="module" src="script.js?v=140"></script>
   </body>
 </html>

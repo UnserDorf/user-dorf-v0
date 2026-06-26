@@ -3237,7 +3237,7 @@ function showFlashcardSetup() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
-  els.flashcardSetupLevel.textContent = selectedLearningLevel;
+  els.flashcardSetupLevel.textContent = `${selectedLearningLevel} Flashcards`;
 }
 
 function startLearningFlashcards() {
