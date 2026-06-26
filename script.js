@@ -178,6 +178,7 @@ const DAILY_CHALLENGES = [
   }
 ];
 const STREAK_ACTIVITY_GOAL = 10;
+const VILLAGE_NAMING_MIN_SHARED_COINS = 700;
 const LEVEL_UP_BONUS = 25;
 const FAMILY_MILESTONES = [
   { coins: 500, reward: "" },
@@ -198,14 +199,14 @@ const FAMILY_WEALTH_LEVELS = [
   { min: 15000, next: null, icon: "", name: "Shared Village" }
 ];
 const AUSTRIA_ALBUM_REWARDS = [
-  { id: "vienna-tram-ride", coins: 200, title: "Vienna Tram Adventure", category: "Vienna", image: "assets/vienna-tram-ride.png", icon: "🚋", description: "Explore Vienna aboard its iconic red-and-white trams." },
+  { id: "vienna-tram-ride", coins: 25, title: "Vienna Tram Adventure", category: "Vienna", image: "assets/vienna-tram-ride.png", icon: "🚋", description: "Explore Vienna aboard its iconic red-and-white trams." },
   { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
-  { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
-  { id: "salzburg", coins: 125, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
-  { id: "prater", coins: 25, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "tiergarten-schoenbrunn", coins: 175, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
-  { id: "hallstatt", coins: 100, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
-  { id: "semmering", coins: 75, title: "Semmering Adventure", category: "Lower Austria", image: "assets/semmering.png", icon: "🚂", description: "Ride Austria's famous mountain railway through forests, tunnels, and spectacular Alpine scenery." },
+  { id: "vienna-woods", coins: 75, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
+  { id: "salzburg", coins: 100, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
+  { id: "prater", coins: 125, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "tiergarten-schoenbrunn", coins: 150, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
+  { id: "hallstatt", coins: 175, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
+  { id: "semmering", coins: 200, title: "Semmering Adventure", category: "Lower Austria", image: "assets/semmering.png", icon: "🚂", description: "Ride Austria's famous mountain railway through forests, tunnels, and spectacular Alpine scenery." },
   { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Danube Region", image: "assets/danube-river.png", icon: "🌊", description: "Enjoy a relaxing summer day beside the Danube." },
   { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austrian Alps", image: "assets/austrian-alps.png", icon: "🏔", description: "Discover breathtaking mountain landscapes and alpine trails." }
 ];
@@ -2389,21 +2390,14 @@ function getUnlockedRewards(rewards, coins) {
 
 function getAustriaAlbumUnlockedRewardIds(profileOrGroup, backfillFromCoins = false) {
   const target = profileOrGroup;
-  const unlockedCount = getAustriaAlbumUnlockedCount(target, backfillFromCoins);
-  const sequentialIds = AUSTRIA_ALBUM_REWARDS
-    .slice(0, unlockedCount)
-    .map((reward) => reward.id);
-  if (backfillFromCoins && target) target.austriaAlbumSeenRewards = sequentialIds;
-  return sequentialIds;
+  const unlockedIds = getUnlockedCurrentRewardIds(AUSTRIA_ALBUM_REWARDS, target?.austriaAlbumSeenRewards);
+  if (backfillFromCoins && target) target.austriaAlbumSeenRewards = unlockedIds;
+  return unlockedIds;
 }
 
 function getAustriaAlbumUnlockedCount(profileOrGroup, includeCoinProgress = false) {
   if (!profileOrGroup) return 0;
-  const savedCount = Math.min(normalizeRewardIdList(profileOrGroup.austriaAlbumSeenRewards).length, AUSTRIA_ALBUM_REWARDS.length);
-  if (!includeCoinProgress) return savedCount;
-  const coins = profileOrGroup.memberIds ? getGroupCoinTotal(profileOrGroup) : normalizeCoinCount(profileOrGroup.coins);
-  const coinProgressCount = AUSTRIA_ALBUM_REWARDS.filter((reward) => coins >= reward.coins).length;
-  return Math.min(Math.max(savedCount, coinProgressCount), AUSTRIA_ALBUM_REWARDS.length);
+  return getAustriaAlbumUnlockedRewardIds(profileOrGroup, includeCoinProgress).length;
 }
 
 function getTownCenterProgress(sharedCoins) {
@@ -4747,16 +4741,12 @@ function checkRewardUnlocks(profile) {
   profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
   group.villageAlbumSeenRewards = normalizeRewardIdList(group.villageAlbumSeenRewards);
   const sharedCoins = getGroupCoinTotal(group);
-  const previousPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, false);
-  const earnedPersonalRewardCount = getAustriaAlbumUnlockedCount(profile, true);
-  const sequentialPersonalRewardIds = AUSTRIA_ALBUM_REWARDS
-    .slice(0, earnedPersonalRewardCount)
-    .map((reward) => reward.id);
-  const newPersonalReward = earnedPersonalRewardCount > previousPersonalRewardCount
-    ? AUSTRIA_ALBUM_REWARDS[previousPersonalRewardCount]
-    : null;
-  profile.austriaAlbumSeenRewards = sequentialPersonalRewardIds;
+  const personalCoins = normalizeCoinCount(profile.coins);
+  const newPersonalReward = AUSTRIA_ALBUM_REWARDS.find((reward) => {
+    return personalCoins >= reward.coins && !profile.austriaAlbumSeenRewards.includes(reward.id);
+  });
   if (newPersonalReward) {
+    profile.austriaAlbumSeenRewards.push(newPersonalReward.id);
     showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
     return;
   }
@@ -4807,6 +4797,7 @@ function checkVillageNamingCeremony() {
   if (!group || normalizeVillageName(group.villageName)) return false;
   const members = getCurrentGroupProfiles();
   if (!members.length) return false;
+  if (getGroupCoinTotal(group) < VILLAGE_NAMING_MIN_SHARED_COINS) return false;
   const everyMemberContributed = members.every(hasQualifiedForNamingCeremony);
   if (!everyMemberContributed) return false;
   group.namingCeremonyReady = true;
