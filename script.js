@@ -4263,8 +4263,8 @@ function bindEvents() {
     if (!button) return;
     rateLearningFlashcard(button.dataset.flashcardRating);
   });
-  els.learningFlashcardSelection.addEventListener("click", toggleLearningDeckSelector);
-  els.learningDeckSelectorPanel.addEventListener("click", (event) => {
+  els.learningFlashcardSelection?.addEventListener("click", toggleLearningDeckSelector);
+  els.learningDeckSelectorPanel?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-flashcard-deck-level][data-flashcard-deck-category]");
     if (!button) return;
     openFlashcardDeck(button.dataset.flashcardDeckLevel, button.dataset.flashcardDeckCategory);

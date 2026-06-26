@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=132">
+    <link rel="stylesheet" href="style.css?v=133">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -336,20 +336,6 @@
         </div>
       </section>
 
-      <section class="flashcard-resume-screen hidden" id="flashcardResumeScreen" aria-label="Continue learning">
-        <article class="flashcard-resume-card">
-          <button class="small-link-button" id="flashcardResumeBack" type="button">← Back</button>
-          <p class="eyebrow">Flashcards</p>
-          <h2>Continue Learning</h2>
-          <strong id="flashcardResumeDeck">A2 · Verbs</strong>
-          <p id="flashcardResumePosition">Card 1 of 25</p>
-          <div class="flashcard-resume-actions">
-            <button class="primary-button" id="flashcardResumeContinue" type="button">Continue</button>
-            <button class="ghost-button" id="flashcardChooseAnotherDeck" type="button">Choose Another Deck</button>
-          </div>
-        </article>
-      </section>
-
       <section class="flashcard-setup-screen hidden" id="flashcardSetupScreen" aria-label="Flashcard setup">
         <div class="flashcard-page-heading">
           <button class="small-link-button" id="flashcardSetupBack" type="button">← Back</button>
@@ -387,7 +373,8 @@
             <span id="learningFlashcardCounter">Card 1 of 25</span>
           </div>
           <div class="learning-flashcard-content">
-            <p class="eyebrow" id="learningFlashcardSelection">A1 · Nouns</p>
+            <button class="eyebrow learning-deck-selector-button" id="learningFlashcardSelection" type="button" aria-expanded="false">A1 • Nouns ▼</button>
+            <div class="learning-deck-selector-panel hidden" id="learningDeckSelectorPanel" aria-label="Choose study deck"></div>
             <h2 id="learningFlashcardGerman">das Haus</h2>
             <p class="learning-flashcard-english" id="learningFlashcardEnglish">house</p>
             <div class="learning-flashcard-details">
@@ -779,6 +766,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=140"></script>
+    <script type="module" src="script.js?v=142"></script>
   </body>
 </html>
