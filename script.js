@@ -200,15 +200,15 @@ const FAMILY_WEALTH_LEVELS = [
 ];
 const AUSTRIA_ALBUM_REWARDS = [
   { id: "vienna-tram-ride", coins: 25, title: "Vienna Tram Adventure", category: "Vienna", image: "assets/vienna-tram-ride.png", icon: "🚋", description: "Explore Vienna aboard its iconic red-and-white trams." },
-  { id: "schoenbrunn-palace", coins: 50, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
-  { id: "vienna-woods", coins: 75, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
-  { id: "salzburg", coins: 100, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
-  { id: "prater", coins: 125, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
-  { id: "tiergarten-schoenbrunn", coins: 150, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
-  { id: "hallstatt", coins: 175, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
-  { id: "semmering", coins: 200, title: "Semmering Adventure", category: "Lower Austria", image: "assets/semmering.png", icon: "🚂", description: "Ride Austria's famous mountain railway through forests, tunnels, and spectacular Alpine scenery." },
-  { id: "danube-river", coins: 225, title: "Danube Picnic Day", category: "Danube Region", image: "assets/danube-river.png", icon: "🌊", description: "Enjoy a relaxing summer day beside the Danube." },
-  { id: "austrian-alps", coins: 250, title: "Alpine Mountain Day", category: "Austrian Alps", image: "assets/austrian-alps.png", icon: "🏔", description: "Discover breathtaking mountain landscapes and alpine trails." }
+  { id: "schoenbrunn-palace", coins: 75, title: "Afternoon at Schönbrunn", category: "Vienna", image: "assets/schoenbrunn-palace.png", icon: "🏰", description: "Walk through the gardens at Schönbrunn." },
+  { id: "vienna-woods", coins: 150, title: "Walk in the Vienna Woods", category: "Vienna", image: "assets/vienna-woods.png", icon: "🌳", description: "Enjoy peaceful forest trails, vineyards, and scenic views." },
+  { id: "salzburg", coins: 250, title: "Salzburg Adventure", category: "Salzburg", image: "assets/salzburg.png", icon: "⛰", description: "Explore Austria's beautiful city of music and history." },
+  { id: "prater", coins: 375, title: "Ride the Giant Ferris Wheel", category: "Vienna", image: "assets/prater.png", icon: "🎡", description: "Take in Vienna from the classic Prater wheel." },
+  { id: "tiergarten-schoenbrunn", coins: 525, title: "Day at Tiergarten Schönbrunn", category: "Vienna", image: "assets/tiergarten-schoenbrunn.png", icon: "🦁", description: "Discover animals and nature at the world's oldest zoo." },
+  { id: "hallstatt", coins: 700, title: "Discover Hallstatt", category: "Upper Austria", image: "assets/hallstatt.png", icon: "🏞", description: "Visit one of Austria's most picturesque lakeside villages." },
+  { id: "semmering", coins: 900, title: "Semmering Adventure", category: "Lower Austria", image: "assets/semmering.png", icon: "🚂", description: "Ride Austria's famous mountain railway through forests, tunnels, and spectacular Alpine scenery." },
+  { id: "danube-river", coins: 1150, title: "Danube Picnic Day", category: "Danube Region", image: "assets/danube-river.png", icon: "🌊", description: "Enjoy a relaxing summer day beside the Danube." },
+  { id: "austrian-alps", coins: 1400, title: "Alpine Mountain Day", category: "Austrian Alps", image: "assets/austrian-alps.png", icon: "🏔", description: "Discover breathtaking mountain landscapes and alpine trails." }
 ];
 const TOWN_CENTER_STAGES = [
   { id: "empty-square", coins: 0, stage: 1, icon: "🌱", title: "Open Village Green", description: "The village has a shared green space ready to grow." },
