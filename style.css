@@ -772,6 +772,28 @@ h1 {
   padding: clamp(10px, 1.6vw, 14px);
 }
 
+.dashboard-village-image-wrap {
+  flex: 0 0 clamp(96px, 18vw, 144px);
+  width: clamp(96px, 18vw, 144px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  box-shadow: 0 10px 24px rgba(73, 58, 35, 0.1);
+}
+
+.dashboard-village-image-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.dashboard-village-image-wrap img.is-missing {
+  display: none;
+}
+
 .dashboard-heading h2 {
   margin-top: 2px;
   font-size: clamp(1.5rem, 2.8vw, 2rem);
@@ -3561,6 +3583,11 @@ select,
 
   .dashboard-heading {
     padding: 14px;
+  }
+
+  .dashboard-village-image-wrap {
+    flex-basis: clamp(86px, 26vw, 118px);
+    width: clamp(86px, 26vw, 118px);
   }
 
   .dashboard-heading h2 {
