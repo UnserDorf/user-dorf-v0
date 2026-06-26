@@ -1816,6 +1816,7 @@ function showProfileLogin(profileId) {
   if (!profile) return;
   pendingProfileId = profileId;
   hideProfileOnboardingPanels();
+  els.profileLoginForm.querySelector(".eyebrow").textContent = "Welcome back";
   els.profileLoginTitle.textContent = `${profile.emoji || "⭐"} ${profile.name}`;
   els.profileLoginPassword.value = "";
   els.profileLoginError.classList.add("hidden");
