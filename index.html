@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=128">
+    <link rel="stylesheet" href="style.css?v=129">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -438,6 +438,32 @@
               <p>Review German vocabulary.</p>
             </div>
             <p class="challenge-question-count">10 Questions</p>
+            <fieldset class="challenge-category-selector" aria-label="Vocabulary category">
+              <legend>Category</legend>
+              <div>
+                <label><input type="radio" name="challengeCategory" value="nouns" checked><span>Nouns</span></label>
+                <label><input type="radio" name="challengeCategory" value="verbs"><span>Verbs</span></label>
+                <label><input type="radio" name="challengeCategory" value="other"><span>Other Words</span></label>
+              </div>
+            </fieldset>
+            <section class="challenge-mastery-panel" id="challengeMasteryPanel" aria-label="Mastery progress">
+              <p class="eyebrow" id="challengeMasteryDeck">A1 • Nouns</p>
+              <h4>Mastery Progress</h4>
+              <dl>
+                <div>
+                  <dt>✓ Correct at least once</dt>
+                  <dd id="challengeCorrectOnce">0 / 0</dd>
+                </div>
+                <div>
+                  <dt>★★★ Mastered (3 correct)</dt>
+                  <dd id="challengeMasteredCount">0 / 0</dd>
+                </div>
+                <div>
+                  <dt>Remaining to master</dt>
+                  <dd id="challengeRemainingMastery">0 / 0</dd>
+                </div>
+              </dl>
+            </section>
             <button type="button" data-challenge-action="vocabulary-review">Start</button>
           </article>
 
@@ -729,6 +755,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=135"></script>
+    <script type="module" src="script.js?v=136"></script>
   </body>
 </html>

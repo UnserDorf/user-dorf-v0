@@ -426,6 +426,10 @@ const els = {
   flashcardReturnDashboard: document.querySelector("#flashcardReturnDashboard"),
   challengeLevelBack: document.querySelector("#challengeLevelBack"),
   challengeSelectedLevel: document.querySelector("#challengeSelectedLevel"),
+  challengeMasteryDeck: document.querySelector("#challengeMasteryDeck"),
+  challengeCorrectOnce: document.querySelector("#challengeCorrectOnce"),
+  challengeMasteredCount: document.querySelector("#challengeMasteredCount"),
+  challengeRemainingMastery: document.querySelector("#challengeRemainingMastery"),
   challengeReadyScreen: document.querySelector("#challengeReadyScreen"),
   challengeReadyBack: document.querySelector("#challengeReadyBack"),
   challengeReadyLevel: document.querySelector("#challengeReadyLevel"),
@@ -614,6 +618,7 @@ let flashcardStudyLevel = "A1";
 let flashcardStudyCategory = "nouns";
 let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
+let selectedChallengeCategory = "nouns";
 let pendingChallengeAction = "";
 let pendingFlashcardResumeKey = "";
 let recentNounVerbQuestionIds = [];
@@ -1937,7 +1942,6 @@ function showCoinChallenges() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-  renderCoinChallenges();
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.remove("hidden");
@@ -1948,6 +1952,10 @@ function showCoinChallenges() {
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeSelectedLevel.textContent = selectedLearningLevel;
+  document.querySelectorAll('input[name="challengeCategory"]').forEach((input) => {
+    input.checked = input.value === selectedChallengeCategory;
+  });
+  renderCoinChallenges();
   renderVillageName();
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -2304,16 +2312,42 @@ function getVillageMemberStatus(profile) {
 }
 
 function renderCoinChallenges() {
-  const articleSummary = getArticleSummary();
-  const nounVerbSummary = getNounVerbSummary();
-  const meaningMatchSummary = getMeaningMatchSummary();
-  const prepositionSummary = getPrepositionSummary();
-  const wordSummary = getWordLearningSummary();
-  renderChallengeProgress(els.challengeArticleProgressBar, els.challengeArticleProgressLabel, articleSummary);
-  renderChallengeProgress(els.challengeVocabularyProgressBar, els.challengeVocabularyProgressLabel, wordSummary);
-  renderChallengeProgress(els.challengeMeaningMatchProgressBar, els.challengeMeaningMatchProgressLabel, meaningMatchSummary);
-  renderChallengeProgress(els.challengeNounVerbProgressBar, els.challengeNounVerbProgressLabel, nounVerbSummary);
-  renderChallengeProgress(els.challengePrepositionProgressBar, els.challengePrepositionProgressLabel, prepositionSummary);
+  renderChallengeMasteryProgress();
+}
+
+function getChallengeVocabularyDeck(level = selectedLearningLevel, category = selectedChallengeCategory) {
+  return getVocabularyChallengeCards(level)
+    .filter((card) => getFlashcardCategory(card) === category);
+}
+
+function getChallengeMasteryProgress(level = selectedLearningLevel, category = selectedChallengeCategory) {
+  const deckCards = getChallengeVocabularyDeck(level, category);
+  const total = deckCards.length;
+  const progressMap = getCurrentProfile()?.vocabularyProgress || vocabularyProgress || {};
+  const counts = deckCards.reduce(
+    (summary, card) => {
+      const correctCount = normalizeCounter(progressMap[card.id]?.correctCount);
+      if (correctCount >= 1) summary.correctOnce += 1;
+      if (correctCount >= 3) summary.mastered += 1;
+      return summary;
+    },
+    { correctOnce: 0, mastered: 0 }
+  );
+  return {
+    total,
+    correctOnce: counts.correctOnce,
+    mastered: counts.mastered,
+    remaining: Math.max(total - counts.mastered, 0)
+  };
+}
+
+function renderChallengeMasteryProgress() {
+  const categoryLabel = getFlashcardCategoryLabel(selectedChallengeCategory);
+  const summary = getChallengeMasteryProgress();
+  if (els.challengeMasteryDeck) els.challengeMasteryDeck.textContent = `${selectedLearningLevel} • ${categoryLabel}`;
+  if (els.challengeCorrectOnce) els.challengeCorrectOnce.textContent = `${summary.correctOnce} / ${summary.total}`;
+  if (els.challengeMasteredCount) els.challengeMasteredCount.textContent = `${summary.mastered} / ${summary.total}`;
+  if (els.challengeRemainingMastery) els.challengeRemainingMastery.textContent = `${summary.remaining} / ${summary.total}`;
 }
 
 function renderChallengeProgress(barEl, labelEl, summary) {
@@ -3444,7 +3478,9 @@ function showChallengeReady(action) {
   pendingChallengeAction = action;
   currentView = "challenge-ready";
   const isVocabulary = action === "vocabulary-review";
-  els.challengeReadyLevel.textContent = `${selectedLearningLevel} Challenge`;
+  els.challengeReadyLevel.textContent = isVocabulary
+    ? `${selectedLearningLevel} • ${getFlashcardCategoryLabel(selectedChallengeCategory)} Challenge`
+    : `${selectedLearningLevel} Challenge`;
   els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary" : "Articles";
   els.challengeReadyDescription.textContent = isVocabulary
     ? "Review German vocabulary."
@@ -3487,6 +3523,7 @@ function createEmptyChallengeSession() {
   return {
     type: "",
     level: "",
+    category: "",
     questionIds: [],
     answered: 0,
     correct: 0,
@@ -3505,11 +3542,12 @@ function discardIncompleteChallengeSession() {
 function startChallengeSession(type, level = selectedLearningLevel) {
   const questionCards = type === "articles"
     ? getArticleChallengeCards(level)
-    : getVocabularyChallengeCards(level);
+    : getChallengeVocabularyDeck(level, selectedChallengeCategory);
   challengeSession = {
     ...createEmptyChallengeSession(),
     type,
     level,
+    category: type === "vocabulary" ? selectedChallengeCategory : "",
     questionIds: shuffleCards(questionCards).slice(0, CHALLENGE_QUESTION_COUNT).map((card) => card.id)
   };
 }
@@ -3969,6 +4007,12 @@ function bindEvents() {
     const button = event.target.closest("button[data-challenge-action]");
     if (!button) return;
     handleChallengeAction(button.dataset.challengeAction);
+  });
+  els.coinChallengesScreen.addEventListener("change", (event) => {
+    const input = event.target.closest('input[name="challengeCategory"]');
+    if (!input) return;
+    selectedChallengeCategory = input.value || "nouns";
+    renderChallengeMasteryProgress();
   });
 
   els.modeSelect.addEventListener("change", () => {
@@ -5553,7 +5597,7 @@ function resetVocabularyReviewQuizState() {
 function getVocabularyReviewCards() {
   if (challengeSession.type !== "vocabulary") return cards;
   const questionIds = new Set(challengeSession.questionIds || []);
-  return getVocabularyChallengeCards(challengeSession.level)
+  return getChallengeVocabularyDeck(challengeSession.level, challengeSession.category || selectedChallengeCategory)
     .filter((card) => !questionIds.size || questionIds.has(card.id));
 }
 
@@ -5668,7 +5712,9 @@ function renderVocabularyReviewQuiz() {
 }
 
 function buildVocabularyReviewChoices(card) {
-  const answerSource = getVocabularyChallengeCards(challengeSession.level || selectedLearningLevel);
+  const answerSource = challengeSession.type === "vocabulary"
+    ? getChallengeVocabularyDeck(challengeSession.level || selectedLearningLevel, challengeSession.category || selectedChallengeCategory)
+    : getVocabularyChallengeCards(challengeSession.level || selectedLearningLevel);
   const wrongChoices = shuffleCards(
     Array.from(new Set(answerSource
       .map((item) => item.english)
