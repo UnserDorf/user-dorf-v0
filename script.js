@@ -409,6 +409,11 @@ const els = {
   learningFlashcardCategory: document.querySelector("#learningFlashcardCategory"),
   learningFlashcardExample: document.querySelector("#learningFlashcardExample"),
   learningFlashcardExampleGroup: document.querySelector("#learningFlashcardExampleGroup"),
+  flashcardStudyStats: document.querySelector("#flashcardStudyStats"),
+  flashcardStatsKnown: document.querySelector("#flashcardStatsKnown"),
+  flashcardStatsUnsure: document.querySelector("#flashcardStatsUnsure"),
+  flashcardStatsUnknown: document.querySelector("#flashcardStatsUnknown"),
+  flashcardStatsUnseen: document.querySelector("#flashcardStatsUnseen"),
   learningFlashcardRatings: document.querySelector("#learningFlashcardRatings"),
   learningFlashcardNavigation: document.querySelector("#learningFlashcardNavigation"),
   learningFlashcardPrevious: document.querySelector("#learningFlashcardPrevious"),
@@ -1192,11 +1197,21 @@ function normalizeFlashcardSessions(value) {
         studiedIds: Array.isArray(session?.studiedIds)
           ? Array.from(new Set(session.studiedIds.map(String).filter(Boolean)))
           : [],
+        ratings: normalizeFlashcardRatings(session?.ratings),
         studyDate: typeof session?.studyDate === "string" ? session.studyDate : "",
         completed: Boolean(session?.completed),
         updatedAt: typeof session?.updatedAt === "string" ? session.updatedAt : ""
       }
     ])
+  );
+}
+
+function normalizeFlashcardRatings(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value)
+      .map(([cardId, rating]) => [String(cardId), normalizeMeaningStatus(rating)])
+      .filter(([cardId, rating]) => cardId && ["known", "unsure", "unknown"].includes(rating))
   );
 }
 
@@ -3251,10 +3266,14 @@ function getFlashcardCardsForLevel(level) {
   return levelDatasets[level]?.flashcards || [];
 }
 
+function getFlashcardCardsForDeck(level = flashcardStudyLevel, category = flashcardStudyCategory) {
+  return getFlashcardCardsForLevel(level)
+    .filter((card) => getFlashcardCategory(card) === category);
+}
+
 function loadOrCreateFlashcardSession(forceNew = false) {
   const profile = getFlashcardSessionProfile();
-  const availableCards = getFlashcardCardsForLevel(flashcardStudyLevel)
-    .filter((card) => getFlashcardCategory(card) === flashcardStudyCategory);
+  const availableCards = getFlashcardCardsForDeck();
   const availableById = new Map(availableCards.map((card) => [card.id, card]));
   const key = getFlashcardSessionKey();
   const saved = profile?.flashcardSessions?.[key];
@@ -3274,6 +3293,7 @@ function loadOrCreateFlashcardSession(forceNew = false) {
     deckIds: flashcardStudyCards.map((card) => card.id),
     index: 0,
     studiedIds: [],
+    ratings: normalizeFlashcardRatings(saved?.ratings),
     studyDate: getTodayKey(),
     completed: false,
     updatedAt: new Date().toISOString()
@@ -3293,6 +3313,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     deckIds: flashcardStudyCards.map((card) => card.id),
     index: flashcardStudyIndex,
     studiedIds: Array.from(studiedIds),
+    ratings: normalizeFlashcardRatings(existing.ratings),
     studyDate: today,
     completed,
     updatedAt: new Date().toISOString()
@@ -3311,6 +3332,7 @@ function renderLearningFlashcard() {
   els.learningFlashcardEnglish.classList.toggle("hidden", !hasCard);
   els.learningFlashcardCategory.classList.toggle("hidden", !hasCard);
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !hasCard);
+  els.flashcardStudyStats?.classList.toggle("hidden", !hasCard);
   els.learningFlashcardRatings.classList.toggle("hidden", !hasCard);
   els.learningFlashcardNavigation.classList.toggle("hidden", !hasCard);
   els.learningFlashcardCounter.textContent = hasCard
@@ -3324,13 +3346,58 @@ function renderLearningFlashcard() {
   els.learningFlashcardCategory.textContent = card.category || categoryLabel;
   els.learningFlashcardExample.textContent = card.example || "";
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !card.example);
+  renderFlashcardStudyStats();
   els.learningFlashcardPrevious.disabled = flashcardStudyIndex === 0;
   els.learningFlashcardNext.textContent = flashcardStudyIndex === flashcardStudyCards.length - 1 ? "Finish" : "Next";
+}
+
+function getCurrentFlashcardSession() {
+  const profile = getFlashcardSessionProfile();
+  return profile?.flashcardSessions?.[getFlashcardSessionKey()] || null;
+}
+
+function getFlashcardStudyStats() {
+  const session = getCurrentFlashcardSession();
+  const ratings = normalizeFlashcardRatings(session?.ratings);
+  const deckCards = getFlashcardCardsForDeck();
+  const stats = { known: 0, unsure: 0, unknown: 0, unseen: 0 };
+  deckCards.forEach((card) => {
+    const rating = ratings[card.id];
+    if (rating === "known") stats.known += 1;
+    else if (rating === "unsure") stats.unsure += 1;
+    else if (rating === "unknown") stats.unknown += 1;
+    else stats.unseen += 1;
+  });
+  return stats;
+}
+
+function renderFlashcardStudyStats() {
+  const stats = getFlashcardStudyStats();
+  if (els.flashcardStatsKnown) els.flashcardStatsKnown.textContent = stats.known;
+  if (els.flashcardStatsUnsure) els.flashcardStatsUnsure.textContent = stats.unsure;
+  if (els.flashcardStatsUnknown) els.flashcardStatsUnknown.textContent = stats.unknown;
+  if (els.flashcardStatsUnseen) els.flashcardStatsUnseen.textContent = stats.unseen;
+}
+
+function updateFlashcardStudyRating(card, rating) {
+  const profile = getFlashcardSessionProfile();
+  if (!profile || !card?.id) return;
+  const key = getFlashcardSessionKey();
+  const session = profile.flashcardSessions[key] || {};
+  profile.flashcardSessions[key] = {
+    ...session,
+    ratings: {
+      ...normalizeFlashcardRatings(session.ratings),
+      [card.id]: normalizeMeaningStatus(rating)
+    },
+    updatedAt: new Date().toISOString()
+  };
 }
 
 function rateLearningFlashcard(rating) {
   const card = flashcardStudyCards[flashcardStudyIndex];
   if (!card || !currentProfileId) return;
+  updateFlashcardStudyRating(card, rating);
   progress[card.id] = {
     ...(progress[card.id] || {}),
     meaningStatus: normalizeMeaningStatus(rating),

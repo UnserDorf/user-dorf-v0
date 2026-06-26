@@ -1351,6 +1351,39 @@ h1 {
   font-size: clamp(1rem, 2.2vw, 1.2rem);
 }
 
+.flashcard-study-stats {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.72);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.flashcard-study-stats h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.flashcard-study-stats div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.flashcard-study-stats span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.flashcard-study-stats strong {
+  color: var(--green);
+  font-weight: 900;
+}
+
 .learning-flashcard-ratings {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
