@@ -4554,15 +4554,6 @@ select,
     display: none;
   }
 
-  .brand-profile {
-    margin-top: 1px;
-    font-size: 0.68rem;
-    max-width: 106px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .ghost-button {
     padding: 0 9px;
   }
@@ -4577,15 +4568,6 @@ select,
     min-height: 38px;
     font-size: 0.76rem;
     line-height: 1;
-  }
-
-  #switchProfile {
-    font-size: 0;
-  }
-
-  #switchProfile::after {
-    content: "Profile";
-    font-size: 0.76rem;
   }
 
   .icon-button {
@@ -5348,6 +5330,34 @@ select,
 }
 
 @media (max-width: 520px) {
+  .app-shell,
+  .topbar,
+  .dashboard-screen,
+  .coin-challenges-screen,
+  .achievement-collection-screen,
+  .level-selection-screen,
+  .flashcard-setup-screen,
+  .learning-flashcards-screen {
+    width: 100%;
+    max-width: calc(100vw - 20px);
+  }
+
+  .brand-profile {
+    display: none;
+  }
+
+  .town-center-hero {
+    gap: 12px;
+  }
+
+  .town-center-hero-media:has(img.is-missing)::before,
+  .town-center-hero img {
+    min-height: 0;
+    height: auto;
+    max-height: 240px;
+    aspect-ratio: 16 / 9;
+  }
+
   .lock-card,
   .village-name-card,
   .village-password-card,
