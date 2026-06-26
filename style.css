@@ -767,6 +767,15 @@ h1 {
   justify-items: center;
 }
 
+.app-shell.onboarding-mode .topbar {
+  display: none;
+}
+
+.app-shell.onboarding-mode .demo-screen {
+  grid-row: 1 / -1;
+  align-content: center;
+}
+
 .demo-card {
   width: min(680px, 100%);
   border: 1px solid var(--card-border);

@@ -35,6 +35,7 @@ const CHALLENGE_BANNERS = [
   "assets/villages-homepage.png"
 ];
 const PROFILE_STORAGE_KEY = "goethe-b1-profile-store-v1";
+const DEVICE_ONBOARDING_KEY = "unser-dorf-device-onboarding-complete-v1";
 const PROFILE_STORE_VERSION = 2;
 const DEFAULT_GROUP_ID = "family-z";
 const DEFAULT_GROUPS = [
@@ -47,35 +48,56 @@ const ONBOARDING_PAGES = [
     illustration: "Illustration 1",
     title: "Welcome to Unser Dorf",
     body: [
-      "Every word you learn helps your village grow.",
-      "Build your vocabulary, earn rewards, and discover Austria along the way."
+      "Learn German while helping your village grow.",
+      "Every word you learn contributes to something bigger."
     ],
-    progress: "● ○ ○",
+    progress: "● ○ ○ ○ ○",
     backLabel: "Skip",
     nextLabel: "Next"
   },
   {
     illustration: "Illustration 2",
-    title: "How It Works",
-    sections: [
-      ["📇 Learn", "Study new vocabulary with Flashcards."],
-      ["🏆 Practice", "Complete Challenges to review what you've learned."],
-      ["🏡 Grow", "Earn coins, unlock Austria Album rewards, and help your village grow."]
+    title: "📇 Learn",
+    body: [
+      "Study new vocabulary with Flashcards.",
+      "Choose your level and learn at your own pace."
     ],
-    progress: "○ ● ○",
+    progress: "○ ● ○ ○ ○",
     backLabel: "Back",
     nextLabel: "Next"
   },
   {
     illustration: "Illustration 3",
+    title: "🏆 Practice",
+    body: [
+      "Complete Challenges to review what you've learned.",
+      "Correct answers strengthen your vocabulary and earn coins."
+    ],
+    progress: "○ ○ ● ○ ○",
+    backLabel: "Back",
+    nextLabel: "Next"
+  },
+  {
+    illustration: "Illustration 4",
+    title: "🏡 Grow",
+    body: [
+      "Earn coins, unlock Austria Album rewards, and help your village grow.",
+      "Every learner contributes to a shared village."
+    ],
+    progress: "○ ○ ○ ● ○",
+    backLabel: "Back",
+    nextLabel: "Next"
+  },
+  {
+    illustration: "Illustration 5",
     title: "You're Ready!",
     body: [
-      "We recommend starting with Flashcards before trying Challenges.",
-      "Your progress is saved automatically, so you can continue anytime."
+      "Choose your village, begin learning, and watch it grow.",
+      "Your journey starts with your first word."
     ],
-    progress: "○ ○ ●",
+    progress: "○ ○ ○ ○ ●",
     backLabel: "Back",
-    nextLabel: "Go to Dashboard"
+    nextLabel: "Enter Your Village"
   }
 ];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
@@ -764,7 +786,19 @@ async function unlockApp() {
     prepositionItems = [];
   }
   await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level)));
-  showProfileScreen();
+  if (isDeviceOnboardingComplete()) {
+    showProfileScreen();
+  } else {
+    showDemoScreen();
+  }
+}
+
+function isDeviceOnboardingComplete() {
+  return localStorage.getItem(DEVICE_ONBOARDING_KEY) === "true";
+}
+
+function completeDeviceOnboarding() {
+  localStorage.setItem(DEVICE_ONBOARDING_KEY, "true");
 }
 
 function createEmptyLevelDatasets() {
@@ -1819,7 +1853,9 @@ function showProfileScreen() {
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("onboarding-mode");
   els.appShell.classList.add("locked");
+  els.demoScreen?.classList.add("hidden");
   els.profileScreen.classList.remove("hidden");
   showVillageSelection();
 }
@@ -1903,11 +1939,7 @@ function completeProfileLogin(profileId) {
   updateFilterOptions();
   currentIndex = 0;
   applyModeAndFilter();
-  if (profile.demoCompleted) {
-    showDashboard();
-  } else {
-    showDemoScreen();
-  }
+  showDashboard();
 }
 
 function getCurrentProfile() {
@@ -1935,13 +1967,9 @@ function saveSettings() {
 }
 
 function showDashboard() {
-  const profile = getCurrentProfile();
-  if (profile && !profile.demoCompleted) {
-    showDemoScreen();
-    return;
-  }
   discardIncompleteChallengeSession();
   currentView = "dashboard";
+  els.appShell.classList.remove("onboarding-mode");
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
@@ -1970,6 +1998,11 @@ function showDemoScreen() {
   discardIncompleteChallengeSession();
   currentView = "demo";
   demoPageIndex = 0;
+  currentProfileId = "";
+  pendingProfileId = "";
+  els.profileScreen.classList.add("hidden");
+  els.appShell.classList.remove("locked");
+  els.appShell.classList.add("onboarding-mode");
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
@@ -2029,11 +2062,8 @@ function moveDemoPage(direction) {
 }
 
 function completeDemoScreen() {
-  const profile = getCurrentProfile();
-  if (!profile) return;
-  profile.demoCompleted = true;
-  saveProfileStore();
-  showDashboard();
+  completeDeviceOnboarding();
+  showProfileScreen();
 }
 
 function handleDemoNext() {
