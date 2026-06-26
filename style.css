@@ -5379,3 +5379,319 @@ select,
     grid-template-columns: 1fr;
   }
 }
+
+/* UI/UX consistency pass: unify surfaces, controls, and page rhythm. */
+:root {
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --surface: rgba(255, 253, 248, 0.9);
+  --surface-warm: rgba(255, 250, 241, 0.92);
+  --border-soft: rgba(190, 177, 153, 0.34);
+  --shadow-soft: 0 12px 30px rgba(73, 58, 35, 0.08);
+  --shadow-lift: 0 18px 44px rgba(73, 58, 35, 0.11);
+}
+
+.primary-button,
+.ghost-button,
+.small-link-button,
+.settings-panel button,
+.coin-challenge-card button,
+.learning-flashcard-ratings button,
+.learning-flashcard-navigation button,
+.flashcard-completion-actions button,
+.article-quiz-options button,
+.article-quiz-next,
+.challenge-ready-card .primary-button,
+.challenge-results-card .primary-button,
+.celebration-actions button {
+  border-radius: var(--radius-md);
+  letter-spacing: 0;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+.primary-button,
+.coin-challenge-card button,
+.challenge-ready-card .primary-button,
+.challenge-results-card .primary-button,
+.article-quiz-next {
+  background: var(--green);
+  color: white;
+  box-shadow: 0 8px 18px rgba(71, 115, 91, 0.16);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.ghost-button,
+.small-link-button,
+.settings-panel button,
+.learning-flashcard-navigation .ghost-button,
+.flashcard-completion-actions .ghost-button {
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 253, 248, 0.68);
+  color: var(--green);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.primary-button:hover,
+.coin-challenge-card button:hover,
+.challenge-ready-card .primary-button:hover,
+.challenge-results-card .primary-button:hover,
+.article-quiz-next:hover {
+  background: #3f684f;
+  filter: none;
+}
+
+.ghost-button:hover,
+.small-link-button:hover,
+.settings-panel button:hover {
+  border-color: rgba(71, 115, 91, 0.3);
+  background: var(--green-soft);
+  color: var(--green);
+  filter: none;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.small-link-button {
+  min-height: 38px;
+  padding-inline: 12px;
+}
+
+.lock-card,
+.village-name-card,
+.village-password-card,
+.create-profile-card,
+.profile-login-card,
+.demo-card,
+.dashboard-screen > .dashboard-heading,
+.dashboard-learning-card,
+.dashboard-metric,
+.reward-preview-card,
+.level-selection-card,
+.flashcard-setup-card,
+.learning-flashcard,
+.learning-flashcard-content,
+.flashcard-completion-card,
+.coin-challenge-card,
+.challenge-ready-card,
+.challenge-results-card,
+.reward-section,
+.reward-card,
+.town-center-card,
+.town-center-hero-details,
+.town-center-progress-block,
+.town-center-stage-card,
+.memory-detail-card,
+.settings-panel,
+.settings-section {
+  border-color: var(--border-soft);
+  border-radius: var(--radius-lg);
+}
+
+.lock-card,
+.village-name-card,
+.village-password-card,
+.create-profile-card,
+.profile-login-card,
+.demo-card,
+.dashboard-screen > .dashboard-heading,
+.dashboard-learning-card,
+.dashboard-metric,
+.reward-preview-card,
+.level-selection-card,
+.flashcard-setup-card,
+.learning-flashcard,
+.flashcard-completion-card,
+.coin-challenge-card,
+.challenge-ready-card,
+.challenge-results-card,
+.reward-section,
+.memory-detail-card,
+.settings-panel {
+  background: var(--surface-warm);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-screen > .dashboard-heading,
+.learning-flashcard-content,
+.town-center-hero-details,
+.memory-detail-card {
+  box-shadow: var(--shadow-lift);
+}
+
+.dashboard-section,
+.coin-challenges-screen,
+.achievement-collection-screen,
+.level-selection-screen,
+.flashcard-setup-screen,
+.learning-flashcards-screen,
+.challenge-ready-screen,
+.challenge-results-screen {
+  gap: clamp(16px, 2.4vw, 24px);
+}
+
+.level-selection-heading h2,
+.flashcard-page-heading h2,
+.challenge-page-heading h2,
+.reward-title-stack h2,
+.demo-card h2,
+.challenge-ready-card h2,
+.challenge-results-card h2 {
+  color: var(--ink);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.section-heading.simple h3,
+.reward-section h3,
+.coin-challenge-card h3,
+.reward-preview-card h4,
+.flashcard-study-stats h3,
+.town-center-stage-list h3 {
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.eyebrow,
+.challenge-category-selector legend,
+.flashcard-study-stats h3,
+.learning-flashcard-detail span,
+.town-center-hero-details small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.dashboard-learning-card p,
+.dashboard-metric small,
+.reward-preview-card p,
+.reward-section-heading p,
+.reward-summary,
+.challenge-mastery-panel dt,
+.town-center-stage-card p,
+.memory-detail-card p:not(.eyebrow),
+.demo-card p:not(.eyebrow),
+.flashcard-page-heading p,
+.level-selection-heading p,
+.challenge-page-heading p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.collection-navigation {
+  gap: 10px;
+}
+
+.collection-navigation button {
+  min-height: 44px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 253, 248, 0.68);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.collection-navigation button.active {
+  border-color: rgba(71, 115, 91, 0.34);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.reward-card-grid {
+  gap: 12px;
+}
+
+.reward-section-empty-note {
+  margin: -2px 0 2px;
+  color: var(--green);
+  font-size: 0.94rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.reward-card {
+  padding: 14px;
+}
+
+.reward-card.unlocked {
+  border-color: rgba(71, 115, 91, 0.36);
+  box-shadow: var(--shadow-soft);
+}
+
+.reward-card.locked {
+  opacity: 0.68;
+}
+
+.reward-image-placeholder,
+.reward-image-frame,
+.memory-detail-image,
+.town-center-hero img,
+.onboarding-illustration,
+.dashboard-village-image-wrap,
+.dashboard-village-image-wrap img,
+.dashboard-town-center-image-wrap,
+.dashboard-town-center-image-wrap img {
+  border-radius: var(--radius-lg);
+}
+
+.reward-image-frame,
+.memory-detail-image,
+.town-center-hero img,
+.dashboard-village-image-wrap,
+.onboarding-illustration {
+  border-color: var(--border-soft);
+  box-shadow: 0 10px 24px rgba(73, 58, 35, 0.08);
+}
+
+.challenge-mastery-panel,
+.flashcard-study-stats,
+.learning-flashcard-detail,
+.town-center-progress-block,
+.settings-section {
+  border-color: var(--border-soft);
+  background: rgba(255, 253, 248, 0.62);
+  border-radius: var(--radius-md);
+}
+
+.challenge-results-summary div {
+  border-color: var(--border-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 253, 248, 0.68);
+}
+
+.level-celebration-card {
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+}
+
+@media (max-width: 520px) {
+  .primary-button,
+  .ghost-button,
+  .small-link-button,
+  .settings-panel button,
+  .coin-challenge-card button,
+  .learning-flashcard-ratings button,
+  .learning-flashcard-navigation button,
+  .article-quiz-options button {
+    min-height: 46px;
+  }
+
+  .dashboard-section,
+  .coin-challenges-screen,
+  .achievement-collection-screen,
+  .level-selection-screen,
+  .flashcard-setup-screen,
+  .learning-flashcards-screen {
+    gap: 16px;
+  }
+}

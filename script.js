@@ -2619,7 +2619,8 @@ function renderRewardsPage(page = "austria-album") {
       createRewardSection(
         "Achievements",
         `${earnedCount} earned`,
-        achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress))
+        achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress)),
+        earnedCount === 0 ? "Your learning milestones will appear here as you study." : ""
       )
     );
     return;
@@ -2637,7 +2638,8 @@ function renderRewardsPage(page = "austria-album") {
       createRewardSection(
         "Village Memories",
         `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
-        VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins))
+        VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins)),
+        unlockedVillage.length === 0 ? "Shared village memories will appear here as your village grows." : ""
       )
     );
     return;
@@ -2648,7 +2650,8 @@ function renderRewardsPage(page = "austria-album") {
     createRewardSection(
       "My Austria Album",
       `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
-      AUSTRIA_ALBUM_REWARDS.map((reward) => createAustriaAlbumCard(reward, unlockedCurrentAustriaIds.includes(reward.id)))
+      AUSTRIA_ALBUM_REWARDS.map((reward) => createAustriaAlbumCard(reward, unlockedCurrentAustriaIds.includes(reward.id))),
+      unlockedCurrentAustriaIds.length === 0 ? "Austria adventures will appear here as you earn them." : ""
     )
   );
 }
@@ -2711,7 +2714,7 @@ function setTownCenterImage(image, stage) {
   image.src = imagePath;
 }
 
-function createRewardSection(title, summary, cards) {
+function createRewardSection(title, summary, cards, emptyNote = "") {
   const section = document.createElement("section");
   section.className = "reward-section";
   const heading = document.createElement("div");
@@ -2723,7 +2726,10 @@ function createRewardSection(title, summary, cards) {
   const grid = document.createElement("div");
   grid.className = "reward-card-grid";
   grid.replaceChildren(...cards);
-  section.replaceChildren(heading, grid);
+  const children = [heading];
+  if (emptyNote) children.push(createTextElement("p", "reward-section-empty-note", emptyNote));
+  children.push(grid);
+  section.replaceChildren(...children);
   return section;
 }
 
