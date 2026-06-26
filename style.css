@@ -1700,11 +1700,12 @@ h1 {
 }
 
 .challenge-selection-grid {
-  width: min(760px, 100%);
+  width: min(860px, 100%);
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(14px, 2.4vw, 22px);
+  align-items: stretch;
+  gap: clamp(16px, 2.4vw, 24px);
 }
 
 .challenge-page-heading {
@@ -1724,15 +1725,16 @@ h1 {
 }
 
 .coin-challenge-card {
-  min-height: 230px;
+  min-height: 410px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.9);
   box-shadow: var(--shadow);
   padding: clamp(18px, 3vw, 26px);
   display: grid;
-  gap: 18px;
-  align-content: start;
+  grid-template-rows: auto auto minmax(74px, auto) auto minmax(0, 1fr);
+  gap: 14px;
+  align-content: stretch;
 }
 
 .coin-challenge-card h3 {
@@ -1818,6 +1820,7 @@ h1 {
   padding: 10px 12px;
   display: grid;
   gap: 6px;
+  align-self: end;
 }
 
 .challenge-mastery-panel h4,
@@ -1935,7 +1938,6 @@ h1 {
 .coin-challenge-card button {
   min-height: 58px;
   border-radius: 8px;
-  margin-top: auto;
   background: var(--green);
   color: white;
   font-size: clamp(0.95rem, 2vw, 1.08rem);
@@ -3999,6 +4001,7 @@ select,
 
   .coin-challenge-card {
     min-height: auto;
+    grid-template-rows: none;
     padding: 14px;
   }
 

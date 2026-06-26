@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=140">
+    <link rel="stylesheet" href="style.css?v=141">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -449,9 +449,10 @@
                 <label><input type="radio" name="challengeCategory" value="other"><span>Other Words</span></label>
               </div>
             </fieldset>
+            <button type="button" data-challenge-action="vocabulary-review">Start</button>
             <section class="challenge-mastery-panel" id="challengeMasteryPanel" aria-label="Mastery progress">
               <p class="eyebrow" id="challengeMasteryDeck">A1 • Nouns</p>
-              <h4>Mastery Progress</h4>
+              <h4>Progress</h4>
               <dl>
                 <div>
                   <dt>Correct once</dt>
@@ -467,7 +468,6 @@
                 </div>
               </dl>
             </section>
-            <button type="button" data-challenge-action="vocabulary-review">Start</button>
           </article>
 
           <article class="coin-challenge-card">
@@ -476,9 +476,10 @@
               <p>Practice <strong>der, die, das</strong>.</p>
             </div>
             <p class="challenge-question-count">10 Questions</p>
+            <button type="button" data-challenge-action="articles">Start</button>
             <section class="challenge-mastery-panel" id="articleMasteryPanel" aria-label="Article progress">
               <p class="eyebrow" id="articleMasteryDeck">A1 • Articles</p>
-              <h4>Article Progress</h4>
+              <h4>Progress</h4>
               <dl>
                 <div>
                   <dt>Correct once</dt>
@@ -494,7 +495,6 @@
                 </div>
               </dl>
             </section>
-            <button type="button" data-challenge-action="articles">Start</button>
           </article>
         </div>
       </section>
