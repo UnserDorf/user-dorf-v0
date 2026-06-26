@@ -416,6 +416,7 @@ const els = {
   learningFlashcardsBack: document.querySelector("#learningFlashcardsBack"),
   learningFlashcardCounter: document.querySelector("#learningFlashcardCounter"),
   learningFlashcardSelection: document.querySelector("#learningFlashcardSelection"),
+  learningDeckSelectorPanel: document.querySelector("#learningDeckSelectorPanel"),
   learningFlashcardGerman: document.querySelector("#learningFlashcardGerman"),
   learningFlashcardEnglish: document.querySelector("#learningFlashcardEnglish"),
   learningFlashcardCategory: document.querySelector("#learningFlashcardCategory"),
@@ -1907,7 +1908,7 @@ function showDashboard() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -1933,7 +1934,7 @@ function showDemoScreen() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -1966,7 +1967,7 @@ function showCoinChallenges() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeSelectedLevel.textContent = selectedLearningLevel;
@@ -1998,7 +1999,7 @@ function showAchievementCollection(page = "austria-album") {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -2023,7 +2024,7 @@ function showStudyView(options = {}) {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
@@ -2056,7 +2057,7 @@ function showNounVerbQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -2086,7 +2087,7 @@ function showVocabularyReviewQuiz() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -2110,7 +2111,7 @@ function showMeaningMatchQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -2136,7 +2137,7 @@ function showPrepositionQuiz() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
@@ -3123,26 +3124,7 @@ function showFlashcardsEntry() {
     showLevelSelection("flashcards");
     return;
   }
-  pendingFlashcardResumeKey = resumable.key;
-  currentView = "flashcard-resume";
-  selectedLearningPath = "flashcards";
-  els.flashcardResumeDeck.textContent = `${resumable.level} · ${getFlashcardCategoryLabel(resumable.category)}`;
-  els.flashcardResumePosition.textContent = `Card ${resumable.index + 1} of ${resumable.total}`;
-  els.dashboardScreen.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
-  els.coinChallengesScreen.classList.add("hidden");
-  els.challengeReadyScreen.classList.add("hidden");
-  els.challengeResultsScreen.classList.add("hidden");
-  els.levelSelectionScreen.classList.add("hidden");
-  els.flashcardSetupScreen.classList.add("hidden");
-  els.learningFlashcardsScreen.classList.add("hidden");
-  els.controlPanel.classList.add("hidden");
-  els.searchPanel.classList.add("hidden");
-  els.statsGrid.classList.add("hidden");
-  els.studyStage.classList.add("hidden");
-  els.nounVerbStage.classList.add("hidden");
-  els.actionBar.classList.add("hidden");
-  els.flashcardResumeScreen.classList.remove("hidden");
+  openFlashcardDeck(resumable.level, resumable.category);
 }
 
 function getMostRecentFlashcardSession() {
@@ -3150,7 +3132,7 @@ function getMostRecentFlashcardSession() {
   const sessions = Object.entries(profile?.flashcardSessions || {})
     .map(([key, session]) => {
       const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(key);
-      if (!match || session.completed || !session.deckIds.length) return null;
+      if (!match || !session.deckIds.length) return null;
       const levelCards = getFlashcardCardsForLevel(match[1]);
       const validDeckIds = session.deckIds.filter((id) => levelCards.some((card) => card.id === id));
       if (!validDeckIds.length) return null;
@@ -3174,13 +3156,36 @@ function resumePendingFlashcardSession() {
     showLevelSelection("flashcards");
     return;
   }
-  selectedLearningLevel = match[1];
-  flashcardStudyLevel = match[1];
-  flashcardStudyCategory = match[2];
-  loadOrCreateFlashcardSession();
+  openFlashcardDeck(match[1], match[2]);
+}
+
+function openFlashcardDeck(level, category, { forceNew = false } = {}) {
+  if (!LEARNING_LEVELS.includes(level) || !["nouns", "verbs", "other"].includes(category)) return;
+  if (currentView === "learning-flashcards" && flashcardStudyCards.length) {
+    saveCurrentFlashcardSession();
+  }
+  selectedLearningPath = "flashcards";
+  selectedLearningLevel = level;
+  flashcardStudyLevel = level;
+  flashcardStudyCategory = category;
+  loadOrCreateFlashcardSession(forceNew);
   currentView = "learning-flashcards";
-  els.flashcardResumeScreen.classList.add("hidden");
+  closeLearningDeckSelector();
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.remove("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
   renderLearningFlashcard();
 }
 
@@ -3195,7 +3200,7 @@ function showLevelSelection(path) {
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.levelSelectionScreen.classList.remove("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -3227,7 +3232,7 @@ function showFlashcardSetup() {
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.remove("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
@@ -3242,13 +3247,7 @@ function showFlashcardSetup() {
 
 function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
-  flashcardStudyLevel = selectedLearningLevel;
-  flashcardStudyCategory = categoryInput?.value || "nouns";
-  loadOrCreateFlashcardSession();
-  currentView = "learning-flashcards";
-  els.flashcardSetupScreen.classList.add("hidden");
-  els.learningFlashcardsScreen.classList.remove("hidden");
-  renderLearningFlashcard();
+  openFlashcardDeck(selectedLearningLevel, categoryInput?.value || "nouns");
 }
 
 function getFlashcardLevel(card) {
@@ -3274,6 +3273,39 @@ function getFlashcardCategoryLabel(category) {
   if (category === "nouns") return "Nouns";
   if (category === "verbs") return "Verbs";
   return "Other Words";
+}
+
+function renderLearningDeckSelector() {
+  if (!els.learningDeckSelectorPanel) return;
+  els.learningDeckSelectorPanel.innerHTML = LEARNING_LEVELS.map((level) => {
+    const deckButtons = ["nouns", "verbs", "other"].map((category) => {
+      const isActive = level === flashcardStudyLevel && category === flashcardStudyCategory;
+      return `
+        <button class="${isActive ? "active" : ""}" type="button" data-flashcard-deck-level="${level}" data-flashcard-deck-category="${category}">
+          ${getFlashcardCategoryLabel(category)}
+        </button>
+      `;
+    }).join("");
+    return `
+      <div class="learning-deck-selector-group">
+        <strong>${level}</strong>
+        <div>${deckButtons}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function closeLearningDeckSelector() {
+  els.learningDeckSelectorPanel?.classList.add("hidden");
+  els.learningFlashcardSelection?.setAttribute("aria-expanded", "false");
+}
+
+function toggleLearningDeckSelector() {
+  if (!els.learningDeckSelectorPanel) return;
+  renderLearningDeckSelector();
+  const isOpen = !els.learningDeckSelectorPanel.classList.contains("hidden");
+  els.learningDeckSelectorPanel.classList.toggle("hidden", isOpen);
+  els.learningFlashcardSelection.setAttribute("aria-expanded", String(!isOpen));
 }
 
 function buildLearningFlashcardOrder(cardList) {
@@ -3390,14 +3422,18 @@ function renderLearningFlashcard() {
   els.learningFlashcardCounter.textContent = hasCard
     ? `Card ${flashcardStudyIndex + 1} of ${flashcardStudyCards.length}`
     : "No cards";
-  if (!card) return;
+  if (!card) {
+    closeLearningDeckSelector();
+    return;
+  }
   const categoryLabel = getFlashcardCategoryLabel(flashcardStudyCategory);
-  els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} · ${categoryLabel}`;
+  els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} • ${categoryLabel} ▼`;
   els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
   els.learningFlashcardEnglish.textContent = card.english;
   els.learningFlashcardCategory.textContent = card.category || categoryLabel;
   els.learningFlashcardExample.textContent = card.example || "";
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !card.example);
+  renderLearningDeckSelector();
   renderFlashcardStudyStats();
   els.learningFlashcardPrevious.disabled = flashcardStudyIndex === 0;
   els.learningFlashcardNext.textContent = flashcardStudyIndex === flashcardStudyCards.length - 1 ? "Finish" : "Next";
@@ -3515,7 +3551,7 @@ function showChallengeReady(action) {
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -3619,7 +3655,7 @@ function showChallengeResults() {
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
-  els.flashcardResumeScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
   els.statsGrid.classList.add("hidden");
@@ -4197,9 +4233,9 @@ function bindEvents() {
     showNextPendingCelebration();
   });
   els.levelSelectionBack.addEventListener("click", showDashboard);
-  els.flashcardResumeBack.addEventListener("click", showDashboard);
-  els.flashcardResumeContinue.addEventListener("click", resumePendingFlashcardSession);
-  els.flashcardChooseAnotherDeck.addEventListener("click", () => showLevelSelection("flashcards"));
+  els.flashcardResumeBack?.addEventListener("click", showDashboard);
+  els.flashcardResumeContinue?.addEventListener("click", resumePendingFlashcardSession);
+  els.flashcardChooseAnotherDeck?.addEventListener("click", () => showLevelSelection("flashcards"));
   els.levelSelectionScreen.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-learning-level]");
     if (!button) return;
@@ -4209,14 +4245,12 @@ function bindEvents() {
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
   els.challengeReadyBack.addEventListener("click", showCoinChallenges);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
-  els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
-  els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
+  els.learningFlashcardsBack.addEventListener("click", showDashboard);
+  els.flashcardCompletionBack.addEventListener("click", showDashboard);
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
-    loadOrCreateFlashcardSession(true);
-    currentView = "learning-flashcards";
-    renderLearningFlashcard();
+    openFlashcardDeck(flashcardStudyLevel, flashcardStudyCategory, { forceNew: true });
   });
   els.flashcardReturnDashboard.addEventListener("click", showDashboard);
   els.challengeResultsBack.addEventListener("click", showCoinChallenges);
@@ -4228,6 +4262,12 @@ function bindEvents() {
     const button = event.target.closest("button[data-flashcard-rating]");
     if (!button) return;
     rateLearningFlashcard(button.dataset.flashcardRating);
+  });
+  els.learningFlashcardSelection.addEventListener("click", toggleLearningDeckSelector);
+  els.learningDeckSelectorPanel.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-flashcard-deck-level][data-flashcard-deck-category]");
+    if (!button) return;
+    openFlashcardDeck(button.dataset.flashcardDeckLevel, button.dataset.flashcardDeckCategory);
   });
 
   els.switchProfile.addEventListener("click", logoutToProfileScreen);

@@ -1333,6 +1333,7 @@ h1 {
 }
 
 .learning-flashcard-content {
+  position: relative;
   align-self: stretch;
   border: 1px solid var(--card-border);
   border-radius: 8px;
@@ -1349,6 +1350,72 @@ h1 {
 .learning-flashcard-content .eyebrow {
   color: var(--green);
   letter-spacing: 0;
+}
+
+.learning-deck-selector-button {
+  border: 1px solid rgba(82, 118, 82, 0.2);
+  border-radius: 999px;
+  background: rgba(236, 244, 229, 0.86);
+  color: var(--green);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 900;
+  padding: 8px 14px;
+}
+
+.learning-deck-selector-button:hover,
+.learning-deck-selector-button:focus-visible {
+  border-color: rgba(82, 118, 82, 0.42);
+  box-shadow: 0 0 0 3px rgba(82, 118, 82, 0.13);
+  outline: none;
+}
+
+.learning-deck-selector-panel {
+  position: absolute;
+  top: 62px;
+  z-index: 5;
+  width: min(360px, calc(100% - 28px));
+  border: 1px solid rgba(190, 177, 153, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 18px 42px rgba(73, 58, 35, 0.18);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.learning-deck-selector-group {
+  display: grid;
+  gap: 8px;
+}
+
+.learning-deck-selector-group > strong {
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.learning-deck-selector-group > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-deck-selector-group button {
+  min-height: 42px;
+  border: 1px solid rgba(190, 177, 153, 0.5);
+  border-radius: 8px;
+  background: rgba(250, 244, 232, 0.86);
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.learning-deck-selector-group button.active {
+  border-color: rgba(82, 118, 82, 0.46);
+  background: var(--green-soft);
+  color: var(--green);
 }
 
 .learning-flashcard-content h2 {
@@ -4085,6 +4152,15 @@ select,
   .learning-flashcard-content {
     padding: 20px 14px;
     min-height: 320px;
+  }
+
+  .learning-deck-selector-panel {
+    position: static;
+    width: 100%;
+  }
+
+  .learning-deck-selector-group > div {
+    grid-template-columns: 1fr;
   }
 
   .learning-flashcard-details,
