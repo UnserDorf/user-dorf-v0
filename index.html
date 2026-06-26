@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=133">
+    <link rel="stylesheet" href="style.css?v=135">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -150,21 +150,19 @@
           <span class="brand-mark" aria-hidden="true">UD</span>
           <div>
             <h1>Unser Dorf</h1>
-            <p class="brand-family">by Common Ground</p>
-            <p class="brand-profile"><span id="currentProfileLabel">No profile</span></p>
-            <span class="sr-only" id="deckStatus">Loading vocabulary...</span>
+            <span class="sr-only" id="currentProfileLabel">No profile</span>
+            <span class="sr-only" id="deckStatus"></span>
           </div>
         </div>
-        <div class="context-switchers" aria-label="Current village and user">
+        <div class="context-switchers hidden" aria-label="Current village and user">
           <span class="context-pill" id="currentGroupLabel">Current Village</span>
           <span class="context-pill" id="currentUserLabel">Current User</span>
         </div>
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
           <button class="ghost-button" id="switchProfile" type="button">Switch Profile</button>
-          <button class="ghost-button" id="logoutButton" type="button">Log Out</button>
           <div class="settings-menu">
-            <button class="icon-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings">⚙️</button>
+            <button class="ghost-button settings-toggle-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel">Settings</button>
             <div class="settings-panel hidden" id="settingsPanel">
               <section class="settings-section" aria-label="Village settings">
                 <h3>Village Settings</h3>
@@ -194,6 +192,7 @@
               </section>
             </div>
           </div>
+          <button class="ghost-button" id="logoutButton" type="button">Log Out</button>
         </div>
       </header>
 
@@ -214,6 +213,7 @@
           <div>
             <h2 id="dashboardVillageName">🏡 Unser Dorf</h2>
             <p id="dashboardWelcome">Welcome back</p>
+            <p class="dashboard-welcome-subtitle" id="dashboardWelcomeSubtitle">Every word helps your village grow.</p>
           </div>
         </div>
 
@@ -225,16 +225,16 @@
             <article class="dashboard-learning-card">
               <div>
                 <h3>📇 Flashcards</h3>
-                <p>Learn vocabulary before taking challenges.</p>
+                <p>Learn new words at your own pace.</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="flashcards">Start</button>
+              <button class="primary-button" type="button" data-dashboard-action="flashcards">Start Studying</button>
             </article>
             <article class="dashboard-learning-card">
               <div>
                 <h3>🏆 Challenges</h3>
-                <p>Test your knowledge and earn coins.</p>
+                <p>Review what you've learned.</p>
               </div>
-              <button class="primary-button" type="button" data-dashboard-action="challenges">Open</button>
+              <button class="primary-button" type="button" data-dashboard-action="challenges">Start Challenge</button>
             </article>
           </div>
         </section>
@@ -373,7 +373,7 @@
             <span id="learningFlashcardCounter">Card 1 of 25</span>
           </div>
           <div class="learning-flashcard-content">
-            <button class="eyebrow learning-deck-selector-button" id="learningFlashcardSelection" type="button" aria-expanded="false">A1 • Nouns ▼</button>
+            <button class="eyebrow learning-deck-selector-button" id="learningFlashcardSelection" type="button" aria-expanded="false" aria-label="Choose study deck">A1 • Nouns ▼</button>
             <div class="learning-deck-selector-panel hidden" id="learningDeckSelectorPanel" aria-label="Choose study deck"></div>
             <h2 id="learningFlashcardGerman">das Haus</h2>
             <p class="learning-flashcard-english" id="learningFlashcardEnglish">house</p>
@@ -444,7 +444,7 @@
             </div>
             <p class="challenge-question-count">10 Questions</p>
             <fieldset class="challenge-category-selector" aria-label="Vocabulary category">
-              <legend>Category</legend>
+              <legend>Choose word type</legend>
               <div>
                 <label><input type="radio" name="challengeCategory" value="nouns" checked><span>Nouns</span></label>
                 <label><input type="radio" name="challengeCategory" value="verbs"><span>Verbs</span></label>
@@ -456,15 +456,15 @@
               <h4>Mastery Progress</h4>
               <dl>
                 <div>
-                  <dt>✓ Correct at least once</dt>
+                  <dt>Correct once</dt>
                   <dd id="challengeCorrectOnce">0 / 0</dd>
                 </div>
                 <div>
-                  <dt>★★★ Mastered (3 correct)</dt>
+                  <dt>Mastered</dt>
                   <dd id="challengeMasteredCount">0 / 0</dd>
                 </div>
                 <div>
-                  <dt>Remaining to master</dt>
+                  <dt>Remaining</dt>
                   <dd id="challengeRemainingMastery">0 / 0</dd>
                 </div>
               </dl>
@@ -766,6 +766,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=142"></script>
+    <script type="module" src="script.js?v=144"></script>
   </body>
 </html>
