@@ -6506,3 +6506,90 @@ button:active {
     gap: 4px;
   }
 }
+
+/* Dashboard mobile layout refinement: keep both learning actions near the first screen. */
+@media (max-width: 520px) {
+  .dashboard-screen {
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    max-height: 108px;
+    aspect-ratio: 16 / 7;
+    border-radius: 10px;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    font-size: clamp(1.08rem, 5.6vw, 1.34rem);
+    line-height: 1.12;
+  }
+
+  .dashboard-screen > .dashboard-heading p {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+    margin-top: 6px;
+    font-size: 0.84rem !important;
+    line-height: 1.25;
+  }
+
+  .dashboard-section {
+    gap: 7px;
+  }
+
+  .dashboard-section .section-heading.simple h3 {
+    font-size: 0.98rem;
+    line-height: 1.1;
+  }
+
+  .dashboard-learning-grid {
+    gap: 8px;
+  }
+
+  .dashboard-learning-card {
+    min-height: 0;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .dashboard-learning-card::after {
+    height: 18px;
+    bottom: 8px;
+  }
+
+  .dashboard-learning-card h3 {
+    font-size: 1.02rem;
+    line-height: 1.15;
+  }
+
+  .dashboard-learning-card p {
+    margin-top: 4px;
+    font-size: 0.86rem;
+    line-height: 1.28;
+  }
+
+  .dashboard-learning-card .primary-button {
+    min-height: 42px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    max-height: 92px;
+  }
+
+  .dashboard-learning-card {
+    padding: 10px 11px;
+  }
+}
