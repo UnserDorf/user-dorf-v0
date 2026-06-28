@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=148">
+    <link rel="stylesheet" href="style.css?v=149">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -199,14 +199,44 @@
 
       <section class="landing-screen hidden" id="landingScreen" aria-label="Welcome to Unser Dorf">
         <article class="landing-card">
-          <div class="landing-illustration">Landing Illustration</div>
+          <header class="landing-header">
+            <img class="landing-logo" src="assets/unser-dorf-logo.png" alt="Unser Dorf">
+            <nav class="landing-nav" aria-label="Landing navigation">
+              <button class="landing-link-button" id="landingExistingAccount" type="button">I already have an account</button>
+              <button class="primary-button landing-nav-primary" id="landingGetStarted" type="button">Get Started</button>
+            </nav>
+          </header>
+          <img class="landing-hero" src="assets/landing-hero.png" alt="A welcoming village landscape">
           <div class="landing-copy">
+            <img class="landing-logo-large" src="assets/unser-dorf-logo.png" alt="Unser Dorf">
             <h2>Welcome to Unser Dorf</h2>
             <p>Learn German while helping your village grow.</p>
           </div>
           <div class="landing-actions">
-            <button class="primary-button" id="landingGetStarted" type="button">🟢 Get Started</button>
-            <button class="ghost-button" id="landingExistingAccount" type="button">⚪ I already have an account</button>
+            <button class="primary-button" id="landingGetStartedMain" type="button">Get Started</button>
+            <button class="ghost-button" id="landingExistingAccountMain" type="button">I already have an account</button>
+          </div>
+          <div class="landing-benefits" aria-label="Unser Dorf benefits">
+            <div>
+              <span aria-hidden="true">📇</span>
+              <strong>Learn</strong>
+              <small>New words</small>
+            </div>
+            <div>
+              <span aria-hidden="true">🏆</span>
+              <strong>Practice</strong>
+              <small>And earn</small>
+            </div>
+            <div>
+              <span aria-hidden="true">🏡</span>
+              <strong>Grow</strong>
+              <small>Your village</small>
+            </div>
+            <div>
+              <span aria-hidden="true">🤝</span>
+              <strong>Belong</strong>
+              <small>Together</small>
+            </div>
           </div>
         </article>
       </section>
@@ -809,6 +839,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=152"></script>
+    <script type="module" src="script.js?v=153"></script>
   </body>
 </html>

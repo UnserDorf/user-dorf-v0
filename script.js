@@ -453,7 +453,9 @@ const els = {
   appShell: document.querySelector("#appShell"),
   landingScreen: document.querySelector("#landingScreen"),
   landingGetStarted: document.querySelector("#landingGetStarted"),
+  landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
   landingExistingAccount: document.querySelector("#landingExistingAccount"),
+  landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
   demoIllustration: document.querySelector("#demoIllustration"),
   demoTitle: document.querySelector("#demoTitle"),
@@ -4394,7 +4396,9 @@ function bindEvents() {
     showDashboard();
   });
   els.landingGetStarted?.addEventListener("click", showDemoScreen);
+  els.landingGetStartedMain?.addEventListener("click", showDemoScreen);
   els.landingExistingAccount?.addEventListener("click", skipLandingToVillageSelection);
+  els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoNext?.addEventListener("click", handleDemoNext);
 
