@@ -7244,8 +7244,8 @@ button:active {
 /* Dashboard desktop/tablet balance: larger brand and village visual anchor. */
 @media (min-width: 761px) {
   .topbar {
-    min-height: 64px;
-    padding-block: 11px;
+    min-height: 74px;
+    padding-block: 12px;
   }
 
   .topbar .brand {
@@ -7253,19 +7253,19 @@ button:active {
   }
 
   .topbar-logo {
-    width: min(210px, 22vw);
-    max-height: 54px;
+    width: min(260px, 24vw);
+    max-height: 64px;
   }
 
   .dashboard-screen > .dashboard-heading {
-    grid-template-columns: minmax(360px, 48%) minmax(0, 1fr);
-    gap: clamp(28px, 4vw, 52px);
-    padding: clamp(26px, 4vw, 44px);
+    grid-template-columns: minmax(430px, 56%) minmax(0, 1fr);
+    gap: clamp(30px, 4.4vw, 60px);
+    padding: clamp(28px, 4.2vw, 48px);
   }
 
   .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
-    min-height: clamp(300px, 32vw, 440px);
-    aspect-ratio: 16 / 10;
+    min-height: clamp(390px, 38vw, 560px);
+    aspect-ratio: 16 / 10.5;
     border-radius: 12px;
   }
 
@@ -7291,17 +7291,124 @@ button:active {
 
 @media (min-width: 761px) and (max-width: 980px) {
   .topbar-logo {
-    width: min(180px, 24vw);
-    max-height: 48px;
+    width: min(210px, 25vw);
+    max-height: 56px;
   }
 
   .dashboard-screen > .dashboard-heading {
-    grid-template-columns: minmax(310px, 46%) minmax(0, 1fr);
-    gap: 26px;
-    padding: 24px;
+    grid-template-columns: minmax(380px, 54%) minmax(0, 1fr);
+    gap: 28px;
+    padding: 26px;
   }
 
   .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
-    min-height: clamp(260px, 34vw, 340px);
+    min-height: clamp(330px, 40vw, 430px);
+  }
+}
+
+/* Challenge question polish: centered hierarchy with a warmer village backdrop. */
+.clean-quiz-mode .flashcard,
+.clean-quiz-mode .noun-verb-card {
+  justify-items: center;
+  text-align: center;
+}
+
+.clean-quiz-mode .challenge-back-button {
+  justify-self: start;
+  align-self: start;
+}
+
+.clean-quiz-mode .challenge-village-banner {
+  opacity: 1;
+  background: rgba(255, 250, 241, 0.86);
+}
+
+.clean-quiz-mode .challenge-village-banner::after {
+  background: rgba(255, 250, 241, 0.26);
+}
+
+.clean-quiz-mode .challenge-village-banner img {
+  opacity: 0.32;
+}
+
+.clean-quiz-mode .card-meta {
+  width: 100%;
+  justify-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.clean-quiz-mode #cardCounter,
+.clean-quiz-mode #nounVerbCounter,
+.article-quiz-mode #cardCounter {
+  color: #746e64;
+  font-size: 0.84rem;
+  font-weight: 780;
+}
+
+.clean-quiz-mode #cardMode,
+.article-quiz-mode #cardMode,
+.clean-quiz-mode .noun-verb-card .card-meta span:last-child {
+  color: var(--green);
+  font-size: clamp(1rem, 1.7vw, 1.18rem);
+  font-weight: 850;
+}
+
+.clean-quiz-mode .question-area {
+  width: min(620px, 100%);
+  justify-items: center;
+  text-align: center;
+  gap: clamp(14px, 2.2vw, 22px);
+}
+
+.clean-article-practice #promptLabel,
+.clean-quiz-mode .noun-verb-card .eyebrow {
+  color: #4c4841;
+  font-size: clamp(0.96rem, 1.7vw, 1.1rem);
+  font-weight: 760;
+}
+
+.clean-article-practice #questionText,
+.clean-quiz-mode #nounVerbPrompt {
+  color: #15140f;
+  font-size: clamp(3.2rem, 7vw, 5.7rem);
+  font-weight: 900;
+}
+
+.article-quiz-card .article-quiz,
+.clean-quiz-mode .noun-verb-options {
+  width: 100%;
+  justify-content: center;
+  justify-items: center;
+}
+
+.article-quiz-card .article-quiz-options {
+  width: min(520px, 100%);
+  margin-inline: auto;
+  justify-content: center;
+}
+
+.article-quiz-card .article-quiz-options button,
+.clean-quiz-mode .noun-verb-options button {
+  min-width: min(150px, 30vw);
+}
+
+@media (max-width: 760px) {
+  .clean-quiz-mode .challenge-village-banner img {
+    opacity: 0.24;
+  }
+
+  .clean-quiz-mode .challenge-village-banner::after {
+    background: rgba(255, 250, 241, 0.36);
+  }
+
+  .clean-article-practice #questionText,
+  .clean-quiz-mode #nounVerbPrompt {
+    font-size: clamp(2.55rem, 12vw, 4.2rem);
+  }
+
+  .article-quiz-card .article-quiz-options button,
+  .clean-quiz-mode .noun-verb-options button {
+    min-width: 0;
   }
 }
