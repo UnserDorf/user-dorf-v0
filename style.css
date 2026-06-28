@@ -8072,3 +8072,153 @@ button:active {
     max-height: 150px;
   }
 }
+
+/* Village card layout fix: stable icon, text, and arrow columns. */
+.profile-screen.village-landing-mode .village-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 24px;
+  column-gap: 14px;
+  align-items: center;
+  justify-items: stretch;
+  text-align: left;
+  padding: 16px 20px;
+}
+
+.profile-screen.village-landing-mode .village-card::before,
+.profile-screen.village-landing-mode .village-card::after {
+  position: static;
+  transform: none;
+  top: auto;
+  left: auto;
+  right: auto;
+  display: inline-grid;
+  place-items: center;
+}
+
+.profile-screen.village-landing-mode .village-card::before {
+  grid-column: 1;
+  width: 34px;
+  height: 34px;
+  font-size: 1.45rem;
+}
+
+.profile-screen.village-landing-mode .village-card strong,
+.profile-screen.village-landing-mode .village-card span:last-child {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.profile-screen.village-landing-mode .village-card strong {
+  align-self: end;
+}
+
+.profile-screen.village-landing-mode .village-card span:last-child {
+  align-self: start;
+}
+
+.profile-screen.village-landing-mode .village-card::after {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  align-self: center;
+}
+
+@media (max-width: 520px) {
+  .profile-screen.village-landing-mode .village-card {
+    grid-template-columns: 28px minmax(0, 1fr) 18px;
+    column-gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .profile-screen.village-landing-mode .village-card::before {
+    width: 28px;
+    height: 28px;
+    font-size: 1.18rem;
+  }
+
+  .profile-screen.village-landing-mode .village-card::after {
+    font-size: 1.35rem;
+  }
+}
+
+/* Header alignment fix: one centered baseline for every nav item. */
+.topbar,
+.top-actions,
+.settings-menu {
+  align-items: center;
+}
+
+.top-actions {
+  display: flex;
+}
+
+.top-actions .ghost-button,
+.top-actions .settings-toggle-button,
+#homeButton,
+#switchProfile,
+#logoutButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  min-height: 38px;
+  margin: 0;
+  padding: 0 12px;
+  border-radius: 8px;
+  line-height: 1;
+  vertical-align: middle;
+  transform: none;
+}
+
+.settings-menu {
+  display: inline-flex;
+  position: relative;
+  height: 38px;
+}
+
+.settings-toggle-button {
+  align-self: center;
+}
+
+@media (min-width: 701px) and (max-width: 900px) {
+  .top-actions .ghost-button,
+  .top-actions .settings-toggle-button,
+  #homeButton,
+  #switchProfile,
+  #logoutButton {
+    height: 34px;
+    min-height: 34px;
+    padding-inline: 9px;
+  }
+
+  .settings-menu {
+    height: 34px;
+  }
+
+  .settings-toggle-button {
+    width: 36px;
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .top-actions .ghost-button,
+  .top-actions .settings-toggle-button,
+  #homeButton,
+  #switchProfile,
+  #logoutButton {
+    height: 32px;
+    min-height: 32px;
+    padding-inline: 8px;
+  }
+
+  .settings-menu {
+    height: 32px;
+  }
+
+  .settings-toggle-button {
+    width: 34px;
+    padding-inline: 0;
+  }
+}
