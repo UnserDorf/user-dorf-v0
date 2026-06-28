@@ -808,14 +808,14 @@ h1 {
 }
 
 .landing-card {
-  width: min(940px, 100%);
+  width: min(900px, 100%);
   border: 1px solid var(--card-border);
   border-radius: 22px;
   background: rgba(255, 250, 241, 0.9);
   box-shadow: 0 24px 70px rgba(73, 58, 35, 0.12);
-  padding: clamp(16px, 3vw, 28px);
+  padding: clamp(12px, 2vw, 20px);
   display: grid;
-  gap: clamp(18px, 3vw, 28px);
+  gap: clamp(22px, 4vw, 44px);
 }
 
 .demo-card {
@@ -830,44 +830,10 @@ h1 {
   text-align: center;
 }
 
-.landing-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.landing-logo {
-  width: min(190px, 42vw);
-  height: auto;
-  display: block;
-}
-
-.landing-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.landing-link-button {
-  min-height: 42px;
-  border: 0;
-  background: transparent;
-  color: var(--green);
-  padding: 0 10px;
-  font-size: 0.92rem;
-  font-weight: 900;
-}
-
-.landing-nav-primary {
-  min-height: 42px;
-  padding-inline: 18px;
-}
-
 .landing-hero {
   width: 100%;
-  aspect-ratio: 16 / 8.2;
-  max-height: min(46vh, 420px);
+  aspect-ratio: 3 / 2;
+  max-height: min(54vh, 520px);
   display: block;
   object-fit: cover;
   object-position: center;
@@ -876,7 +842,7 @@ h1 {
 }
 
 .landing-logo-large {
-  width: min(260px, 62vw);
+  width: min(190px, 54vw);
   height: auto;
   justify-self: center;
   display: block;
@@ -909,7 +875,7 @@ h1 {
 .landing-copy,
 .onboarding-copy {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   text-align: center;
   justify-items: center;
 }
@@ -925,15 +891,19 @@ h1 {
 .landing-card h2,
 .demo-card h2 {
   color: var(--ink);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2.25rem, 4.6vw, 3.45rem);
   line-height: 1.05;
 }
 
 .landing-card p,
 .demo-card p:not(.eyebrow) {
   color: var(--muted);
-  font-weight: 760;
+  font-weight: 620;
   line-height: 1.5;
+}
+
+.landing-card p {
+  font-size: clamp(1.03rem, 2vw, 1.22rem);
 }
 
 .onboarding-mini-section {
@@ -967,8 +937,11 @@ h1 {
 }
 
 .landing-actions {
-  width: min(520px, 100%);
+  width: min(360px, 100%);
   justify-self: center;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: -10px;
 }
 
 .landing-benefits {
@@ -5865,44 +5838,19 @@ button:active {
   }
 
   .landing-card {
-    padding: 14px;
-    gap: 16px;
+    padding: 12px;
+    gap: 22px;
     border-radius: 18px;
   }
 
-  .landing-header {
-    align-items: center;
-    gap: 10px;
-  }
-
-  .landing-logo {
-    width: min(148px, 42vw);
-  }
-
-  .landing-nav {
-    gap: 6px;
-  }
-
-  .landing-link-button {
-    min-height: 38px;
-    padding: 0 4px;
-    font-size: 0.78rem;
-  }
-
-  .landing-nav-primary {
-    min-height: 38px;
-    padding-inline: 10px;
-    font-size: 0.82rem;
-  }
-
   .landing-hero {
-    aspect-ratio: 16 / 10;
-    max-height: 240px;
+    aspect-ratio: 3 / 2;
+    max-height: 280px;
     border-radius: 14px;
   }
 
   .landing-logo-large {
-    width: min(210px, 64vw);
+    width: min(160px, 52vw);
   }
 
   .landing-actions {
