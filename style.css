@@ -6748,3 +6748,245 @@ button:active {
     gap: 7px;
   }
 }
+
+/* Dashboard mobile-first refinement: official logo, stronger village image, compact progress. */
+.topbar .brand {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.topbar-logo {
+  display: block;
+  width: min(150px, 34vw);
+  max-height: 44px;
+  object-fit: contain;
+}
+
+.dashboard-progress-grid > .dashboard-village-progress {
+  order: -1;
+}
+
+.dashboard-progress-panel .dashboard-metric,
+.dashboard-progress-grid > article {
+  min-height: 112px;
+  padding: clamp(12px, 2vw, 16px);
+  gap: 7px;
+}
+
+.dashboard-progress-panel .dashboard-metric strong {
+  font-size: clamp(1.08rem, 2vw, 1.45rem);
+}
+
+.dashboard-village-progress strong {
+  color: var(--green);
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .topbar-logo {
+    width: min(128px, 32vw);
+    max-height: 38px;
+  }
+
+  .top-actions {
+    width: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 0.78rem;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    aspect-ratio: 16 / 8;
+    max-height: 178px;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    color: var(--green);
+    font-size: clamp(1.22rem, 4.2vw, 1.7rem);
+    font-weight: 850;
+    line-height: 1.12;
+  }
+
+  .dashboard-screen > .dashboard-heading p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: clamp(0.86rem, 2.4vw, 1rem);
+    line-height: 1.25;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+    margin-top: 9px;
+    color: var(--green) !important;
+  }
+
+  .dashboard-progress-grid {
+    gap: 9px;
+  }
+
+  .dashboard-progress-panel .dashboard-metric,
+  .dashboard-progress-grid > article {
+    min-height: 92px;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .topbar-logo {
+    width: min(112px, 30vw);
+    max-height: 32px;
+  }
+
+  .top-actions {
+    gap: 2px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    min-height: 30px;
+    padding: 0 5px;
+    border-radius: 7px;
+    font-size: 0.68rem;
+  }
+
+  .dashboard-screen {
+    gap: 8px;
+    padding-top: 3px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 9px;
+    border-radius: 12px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    width: 100%;
+    max-height: 126px;
+    aspect-ratio: 16 / 8;
+    border-radius: 10px;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    font-size: clamp(1rem, 4.8vw, 1.22rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboard-screen > .dashboard-heading p {
+    margin-top: 6px;
+    font-size: 0.76rem;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+    margin-top: 7px;
+    font-size: 0.8rem !important;
+  }
+
+  .dashboard-section {
+    gap: 6px;
+  }
+
+  .dashboard-section .section-heading.simple h3 {
+    font-size: 0.96rem;
+  }
+
+  .dashboard-learning-grid {
+    gap: 7px;
+  }
+
+  .dashboard-learning-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .dashboard-learning-card h3 {
+    font-size: 0.98rem;
+  }
+
+  .dashboard-learning-card p {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+
+  .dashboard-learning-card .primary-button {
+    min-height: 38px;
+    font-size: 0.84rem;
+  }
+
+  .dashboard-progress-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .dashboard-progress-grid > .dashboard-village-progress {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-progress-panel .dashboard-metric,
+  .dashboard-progress-grid > article {
+    min-height: 72px;
+    padding: 9px;
+    gap: 4px;
+  }
+
+  .dashboard-progress-grid > .dashboard-village-progress {
+    min-height: 78px;
+  }
+
+  .dashboard-metric span,
+  .dashboard-metric small {
+    font-size: 0.72rem;
+  }
+
+  .dashboard-progress-panel .dashboard-metric strong {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .topbar-logo {
+    width: min(104px, 29vw);
+    max-height: 30px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    padding: 0 4px;
+    font-size: 0.64rem;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    max-height: 118px;
+  }
+
+  .dashboard-learning-card {
+    padding: 9px;
+  }
+}

@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=156">
+    <link rel="stylesheet" href="style.css?v=157">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -148,12 +148,9 @@
     <main class="app-shell locked" id="appShell">
       <header class="topbar" aria-label="Study controls">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">UD</span>
-          <div>
-            <h1>Unser Dorf</h1>
-            <span class="sr-only" id="currentProfileLabel">No profile</span>
-            <span class="sr-only" id="deckStatus"></span>
-          </div>
+          <img class="topbar-logo" src="assets/unser-dorf-logo.png" alt="Unser Dorf">
+          <span class="sr-only" id="currentProfileLabel">No profile</span>
+          <span class="sr-only" id="deckStatus"></span>
         </div>
         <div class="context-switchers hidden" aria-label="Current village and user">
           <span class="context-pill" id="currentGroupLabel">Current Village</span>
@@ -294,6 +291,12 @@
             <h3>Your Progress</h3>
           </div>
           <div class="dashboard-progress-grid">
+            <article class="dashboard-metric dashboard-village-progress" data-dashboard-action="town-center" tabindex="0" role="button" aria-label="Open Village Progress">
+              <span>🏡 Village Progress</span>
+              <strong id="townCenterDashboardStageCount">Stage 1 / 5</strong>
+              <small id="townCenterDashboardStage">Open Village Green</small>
+              <small><span id="dashboardFamilyCoins">0</span> village coins</small>
+            </article>
             <article class="dashboard-metric" aria-label="Coins">
               <span>🪙 Coins</span>
               <strong id="levelCoins">0</strong>
@@ -305,12 +308,6 @@
             <article class="dashboard-metric" aria-label="Challenges completed">
               <span>🏆 Challenges Completed</span>
               <strong id="dashboardChallengesCompleted">0</strong>
-            </article>
-            <article class="dashboard-metric dashboard-village-progress" data-dashboard-action="town-center" tabindex="0" role="button" aria-label="Open Village Progress">
-              <span>🏡 Village Progress</span>
-              <strong id="townCenterDashboardStageCount">Stage 1 / 5</strong>
-              <small id="townCenterDashboardStage">Open Village Green</small>
-              <small><span id="dashboardFamilyCoins">0</span> village coins</small>
             </article>
           </div>
         </section>
