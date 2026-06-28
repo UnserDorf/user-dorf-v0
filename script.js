@@ -117,6 +117,26 @@ const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", 
 const LEADERBOARD_PROFILE_IDS = [];
 const ACHIEVEMENTS = [
   {
+    id: "first-flashcard-reviewed",
+    icon: "📇",
+    name: "First Flashcard Reviewed",
+    description: "Review your first flashcard.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 1
+  },
+  {
+    id: "first-quiz-completed",
+    icon: "🏆",
+    name: "First Quiz Completed",
+    description: "Complete your first challenge.",
+    reward: 0,
+    scope: "profile",
+    metric: "challengesCompleted",
+    target: 1
+  },
+  {
     id: "first-correct-answer",
     icon: "✅",
     name: "First Correct Answer",
@@ -127,7 +147,147 @@ const ACHIEVEMENTS = [
     target: 1
   },
   {
-    id: "one-hundred-correct-answers",
+    id: "first-10-coins",
+    icon: "🪙",
+    name: "First 10 Coins Earned",
+    description: "Earn your first 10 coins.",
+    reward: 0,
+    scope: "profile",
+    metric: "coins",
+    target: 10
+  },
+  {
+    id: "first-austria-adventure",
+    icon: "🇦🇹",
+    name: "First Austria Album Reward",
+    description: "Unlock your first Austria Album reward.",
+    reward: 0,
+    scope: "profile",
+    metric: "austriaAlbumRewards",
+    target: 1
+  },
+  {
+    id: "flashcards-reviewed-10",
+    icon: "📇",
+    name: "10 Words Reviewed",
+    description: "Review 10 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 10
+  },
+  {
+    id: "flashcards-reviewed-50",
+    icon: "📇",
+    name: "50 Words Reviewed",
+    description: "Review 50 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 50
+  },
+  {
+    id: "flashcards-reviewed-100",
+    icon: "📇",
+    name: "100 Words Reviewed",
+    description: "Review 100 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 100
+  },
+  {
+    id: "flashcards-reviewed-250",
+    icon: "📇",
+    name: "250 Words Reviewed",
+    description: "Review 250 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 250
+  },
+  {
+    id: "flashcards-reviewed-500",
+    icon: "📇",
+    name: "500 Words Reviewed",
+    description: "Review 500 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 500
+  },
+  {
+    id: "flashcards-reviewed-1000",
+    icon: "📇",
+    name: "1000 Words Reviewed",
+    description: "Review 1000 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 1000
+  },
+  {
+    id: "flashcards-reviewed-1500",
+    icon: "📇",
+    name: "1500 Words Reviewed",
+    description: "Review 1500 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 1500
+  },
+  {
+    id: "flashcards-reviewed-2000",
+    icon: "📇",
+    name: "2000 Words Reviewed",
+    description: "Review 2000 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 2000
+  },
+  {
+    id: "flashcards-reviewed-2500",
+    icon: "📇",
+    name: "2500 Words Reviewed",
+    description: "Review 2500 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 2500
+  },
+  {
+    id: "flashcards-reviewed-3000",
+    icon: "📇",
+    name: "3000 Words Reviewed",
+    description: "Review 3000 flashcards.",
+    reward: 0,
+    scope: "profile",
+    metric: "flashcardsReviewed",
+    target: 3000
+  },
+  {
+    id: "quiz-correct-10",
+    icon: "✅",
+    name: "10 Correct Answers",
+    description: "Reach 10 correct quiz answers.",
+    reward: 0,
+    scope: "profile",
+    metric: "totalCorrectAnswers",
+    target: 10
+  },
+  {
+    id: "quiz-correct-50",
+    icon: "✅",
+    name: "50 Correct Answers",
+    description: "Reach 50 correct quiz answers.",
+    reward: 0,
+    scope: "profile",
+    metric: "totalCorrectAnswers",
+    target: 50
+  },
+  {
+    id: "quiz-correct-100",
     icon: "✅",
     name: "100 Correct Answers",
     description: "Reach 100 correct answers.",
@@ -137,64 +297,64 @@ const ACHIEVEMENTS = [
     target: 100
   },
   {
-    id: "first-100-coins",
-    icon: "🪙",
-    name: "First 100 Coins",
-    description: "Earn your first 100 coins.",
+    id: "quiz-correct-250",
+    icon: "✅",
+    name: "250 Correct Answers",
+    description: "Reach 250 correct quiz answers.",
     reward: 0,
     scope: "profile",
-    metric: "coins",
-    target: 100
+    metric: "totalCorrectAnswers",
+    target: 250
   },
   {
-    id: "first-village-upgrade",
-    icon: "🏡",
-    name: "First Village Upgrade",
-    description: "Help unlock the village's first upgrade.",
-    reward: 0,
-    scope: "family",
-    metric: "familyCoins",
-    target: 200
-  },
-  {
-    id: "three-day-streak",
-    icon: "🔥",
-    name: "3-Day Streak",
-    description: "Study for 3 days in a row.",
+    id: "quiz-correct-500",
+    icon: "✅",
+    name: "500 Correct Answers",
+    description: "Reach 500 correct quiz answers.",
     reward: 0,
     scope: "profile",
-    metric: "streak",
-    target: 3
+    metric: "totalCorrectAnswers",
+    target: 500
   },
   {
-    id: "seven-day-streak",
-    icon: "🔥",
-    name: "7-Day Streak",
-    description: "Study for 7 days in a row.",
+    id: "quiz-correct-1000",
+    icon: "✅",
+    name: "1000 Correct Answers",
+    description: "Reach 1000 correct quiz answers.",
     reward: 0,
     scope: "profile",
-    metric: "streak",
-    target: 7
+    metric: "totalCorrectAnswers",
+    target: 1000
   },
   {
-    id: "first-austria-adventure",
-    icon: "🇦🇹",
-    name: "First Austria Adventure",
-    description: "Unlock your first Austria Album reward.",
+    id: "quiz-correct-2000",
+    icon: "✅",
+    name: "2000 Correct Answers",
+    description: "Reach 2000 correct quiz answers.",
     reward: 0,
     scope: "profile",
-    metric: "austriaAlbumRewards",
-    target: 1
+    metric: "totalCorrectAnswers",
+    target: 2000
   },
   {
-    id: "first-village-memory",
-    icon: "🎉",
-    name: "First Village Memory",
-    description: "Unlock your first Village Memory.",
+    id: "quiz-correct-3000",
+    icon: "✅",
+    name: "3000 Correct Answers",
+    description: "Reach 3000 correct quiz answers.",
     reward: 0,
-    scope: "family",
-    metric: "villageMemories",
-    target: 1
+    scope: "profile",
+    metric: "totalCorrectAnswers",
+    target: 3000
+  },
+  {
+    id: "quiz-correct-5000",
+    icon: "✅",
+    name: "5000 Correct Answers",
+    description: "Reach 5000 correct quiz answers.",
+    reward: 0,
+    scope: "profile",
+    metric: "totalCorrectAnswers",
+    target: 5000
   }
 ];
 const DAILY_CHALLENGES = [
@@ -3145,6 +3305,8 @@ function getAchievementProgress(achievement, profile = getCurrentProfile()) {
 }
 
 function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) {
+  if (achievement.metric === "flashcardsReviewed") return getFlashcardsReviewedCount(profile);
+  if (achievement.metric === "challengesCompleted") return normalizeCounter(profile?.challengeSessionsCompleted);
   if (achievement.metric === "correctAnswers") return hasAnyCorrectQuizAnswer(profile) ? 1 : 0;
   if (achievement.metric === "totalCorrectAnswers") return getTotalCorrectAnswerCount(profile);
   if (achievement.metric === "coins") return normalizeCoinCount(profile?.coins);
@@ -3155,6 +3317,14 @@ function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) 
   if (achievement.metric === "austriaAlbumRewards") return getAustriaAlbumUnlockedCount(profile, true);
   if (achievement.metric === "villageMemories") return getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getGroupCoinTotal()).length;
   return 0;
+}
+
+function getFlashcardsReviewedCount(profile = getCurrentProfile()) {
+  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions);
+  return Object.values(sessions).reduce((total, session) => {
+    const ratings = normalizeFlashcardRatings(session.ratings);
+    return total + Object.keys(ratings).length;
+  }, 0);
 }
 
 function renderAchievementDebugPanel() {
@@ -3751,6 +3921,7 @@ function rateLearningFlashcard(rating) {
   const card = flashcardStudyCards[flashcardStudyIndex];
   if (!card || !currentProfileId) return;
   updateFlashcardStudyRating(card, rating);
+  checkAchievements("flashcards");
   progress[card.id] = {
     ...(progress[card.id] || {}),
     meaningStatus: normalizeMeaningStatus(rating),
@@ -3893,14 +4064,16 @@ function advanceChallengeSession(type, moveNext) {
 }
 
 function showChallengeResults() {
-  if (!challengeSession.complete) {
+  const wasComplete = challengeSession.complete;
+  challengeSession.complete = true;
+  if (!wasComplete) {
     const profile = getCurrentProfile();
     if (profile) {
       profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + 1;
+      checkAchievements("challenge-complete");
       saveProfileStore();
     }
   }
-  challengeSession.complete = true;
   const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
   const accuracy = Math.round((correct / CHALLENGE_QUESTION_COUNT) * 100);
   const challengeName = challengeSession.type === "articles" ? "Articles" : "Vocabulary";
