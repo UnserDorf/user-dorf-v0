@@ -107,6 +107,7 @@ const ONBOARDING_PAGES = [
 ];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const VILLAGE_NAMING_CONTRIBUTION_GOAL = 10;
+const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
@@ -733,6 +734,9 @@ let prepositionProgress = {};
 let profileStore = null;
 let checkingAchievements = false;
 let pendingCelebrations = [];
+let achievementNotificationQueue = [];
+let achievementNotificationTimer = 0;
+let achievementNotificationShowing = false;
 let currentProfileId = "";
 let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
@@ -4598,10 +4602,7 @@ function bindEvents() {
     });
   }
 
-  els.levelCelebrationClose.addEventListener("click", () => {
-    els.levelCelebration.classList.add("hidden");
-    if (!showNextPendingCelebration()) checkVillageNamingCeremony();
-  });
+  els.levelCelebrationClose.addEventListener("click", closeLevelCelebration);
 
   els.levelCelebrationViewAlbum?.addEventListener("click", () => {
     const page = els.levelCelebrationViewAlbum.dataset.rewardPage || "austria-album";
@@ -5517,6 +5518,29 @@ function unlockAchievement(achievement, profile, reason = "") {
 
 function showAchievementCelebration(achievement) {
   if (deferCelebration(() => showAchievementCelebration(achievement))) return;
+  queueAchievementNotification(achievement);
+}
+
+function queueAchievementNotification(achievement) {
+  if (!achievement) return;
+  achievementNotificationQueue.push(achievement);
+  showNextAchievementNotification();
+}
+
+function showNextAchievementNotification() {
+  if (achievementNotificationShowing) return true;
+  if (!els.levelCelebration.classList.contains("hidden")) return false;
+  const achievement = achievementNotificationQueue.shift();
+  if (!achievement) return false;
+  achievementNotificationShowing = true;
+  renderAchievementNotification(achievement);
+  els.levelCelebration.classList.remove("hidden");
+  window.clearTimeout(achievementNotificationTimer);
+  achievementNotificationTimer = window.setTimeout(closeLevelCelebration, ACHIEVEMENT_NOTIFICATION_DURATION_MS);
+  return true;
+}
+
+function renderAchievementNotification(achievement) {
   els.levelCelebrationTitle.textContent = "🎉 Achievement Unlocked!";
   els.levelCelebrationProfile.textContent = achievement.scope === "family" ? "Shared achievement:" : "Achievement:";
   els.levelCelebrationLevel.textContent = `${achievement.icon} ${achievement.name}`;
@@ -5528,7 +5552,23 @@ function showAchievementCelebration(achievement) {
     els.levelCelebrationBonus.classList.remove("hidden");
   }
   hideRewardCelebrationActions();
-  els.levelCelebration.classList.remove("hidden");
+}
+
+function closeLevelCelebration() {
+  const wasAchievementNotification = achievementNotificationShowing;
+  window.clearTimeout(achievementNotificationTimer);
+  achievementNotificationTimer = 0;
+  achievementNotificationShowing = false;
+  els.levelCelebration.classList.add("hidden");
+  if (wasAchievementNotification) {
+    window.setTimeout(() => {
+      if (showNextAchievementNotification()) return;
+      if (!showNextPendingCelebration()) checkVillageNamingCeremony();
+    }, 220);
+    return;
+  }
+  if (showNextAchievementNotification()) return;
+  if (!showNextPendingCelebration()) checkVillageNamingCeremony();
 }
 
 async function testPersonalAchievement() {
@@ -5610,6 +5650,11 @@ function recordDailyActivity(type, details = {}) {
 }
 
 function deferCelebration(showCelebration) {
+  const celebrationIsVisible = els.levelCelebration && !els.levelCelebration.classList.contains("hidden");
+  if (celebrationIsVisible || achievementNotificationShowing || achievementNotificationQueue.length) {
+    pendingCelebrations.push(showCelebration);
+    return true;
+  }
   if (!challengeSession.type || challengeSession.complete) return false;
   pendingCelebrations.push(showCelebration);
   return true;
