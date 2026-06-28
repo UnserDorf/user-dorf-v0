@@ -6247,3 +6247,262 @@ button:active {
     font-size: clamp(2.4rem, 12vw, 3.7rem);
   }
 }
+
+/* V0 visual polish: landing, village selection, dashboard, and mobile flashcards. */
+.landing-card {
+  width: min(880px, 100%);
+  padding: clamp(10px, 1.6vw, 16px);
+  gap: clamp(18px, 3vw, 34px);
+}
+
+.landing-hero {
+  aspect-ratio: 16 / 9;
+  max-height: min(48vh, 440px);
+}
+
+.landing-logo-large {
+  width: min(142px, 44vw);
+}
+
+.landing-copy {
+  gap: clamp(10px, 1.8vw, 18px);
+}
+
+.landing-card h2 {
+  color: var(--green);
+  font-size: clamp(1.78rem, 3.5vw, 2.72rem);
+  font-weight: 760;
+  line-height: 1.16;
+}
+
+.landing-card p {
+  max-width: min(70%, 520px);
+  color: #746e64;
+  font-size: clamp(0.94rem, 1.55vw, 1.08rem);
+  font-weight: 560;
+}
+
+.landing-actions {
+  gap: 12px;
+  margin-top: -6px;
+}
+
+.landing-benefits {
+  align-items: stretch;
+}
+
+.landing-benefits div {
+  min-height: 86px;
+  align-content: center;
+  background: rgba(255, 250, 241, 0.7);
+}
+
+.landing-benefits strong,
+.landing-benefits small {
+  line-height: 1.18;
+}
+
+.profile-screen.village-landing-mode .profile-panel {
+  width: min(700px, 100%);
+  align-content: center;
+  padding-top: clamp(24px, 7vh, 72px);
+}
+
+.profile-screen.village-landing-mode .village-selection {
+  gap: clamp(22px, 4vh, 38px);
+}
+
+.village-selection-heading {
+  width: min(520px, 100%);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  backdrop-filter: none;
+  text-shadow: 0 2px 12px rgba(255, 253, 248, 0.9);
+}
+
+.village-selection-heading h2 {
+  color: var(--green);
+  font-size: clamp(1.62rem, 3.4vw, 2.08rem);
+  font-weight: 760;
+  line-height: 1.16;
+}
+
+.village-selection-heading p {
+  margin-top: 12px;
+  color: #746e64;
+  font-size: clamp(0.88rem, 1.7vw, 0.98rem);
+  font-weight: 560;
+}
+
+.village-card-grid {
+  gap: 14px;
+}
+
+.village-card {
+  min-height: 78px;
+  background: rgba(255, 250, 241, 0.84);
+  padding: 14px 20px;
+}
+
+.village-card strong {
+  font-size: clamp(1.08rem, 2vw, 1.32rem);
+}
+
+.village-card span:last-child {
+  color: #746e64;
+  font-size: 0.86rem;
+  font-weight: 640;
+}
+
+.topbar {
+  flex-wrap: nowrap;
+}
+
+.brand,
+.top-actions {
+  flex-shrink: 0;
+}
+
+.top-actions .ghost-button,
+.settings-toggle-button {
+  white-space: nowrap;
+}
+
+.dashboard-screen > .dashboard-heading {
+  gap: clamp(22px, 3vw, 34px);
+  padding: clamp(18px, 2.8vw, 28px);
+}
+
+.dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+  flex-basis: clamp(150px, 24vw, 260px);
+  width: clamp(150px, 24vw, 260px);
+  max-height: 220px;
+}
+
+.dashboard-screen > .dashboard-heading h2 {
+  color: var(--green);
+  font-size: clamp(1.38rem, 2.7vw, 2.08rem);
+  font-weight: 760;
+  line-height: 1.16;
+  white-space: nowrap;
+}
+
+.dashboard-screen > .dashboard-heading p {
+  color: #746e64;
+  font-size: clamp(0.88rem, 1.5vw, 1rem);
+  font-weight: 560;
+}
+
+.dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+  margin-top: 12px;
+  color: var(--green) !important;
+  font-size: clamp(0.92rem, 1.5vw, 1.02rem) !important;
+  font-weight: 760 !important;
+}
+
+.dashboard-section .section-heading.simple h3 {
+  font-size: clamp(1.02rem, 1.8vw, 1.2rem);
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand h1 {
+    font-size: 1rem;
+  }
+
+  .top-actions {
+    width: auto;
+    display: flex;
+    gap: 3px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    min-height: 34px;
+    padding-inline: 7px;
+    font-size: 0.76rem;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing-card {
+    gap: 18px;
+  }
+
+  .landing-hero {
+    aspect-ratio: 16 / 10;
+    max-height: 230px;
+  }
+
+  .landing-logo-large {
+    width: min(126px, 44vw);
+  }
+
+  .landing-card h2 {
+    font-size: clamp(1.62rem, 8vw, 2.08rem);
+    line-height: 1.2;
+  }
+
+  .landing-card p {
+    max-width: 86%;
+    font-size: 0.92rem;
+  }
+
+  .landing-benefits div {
+    min-height: 72px;
+  }
+
+  .profile-screen.village-landing-mode .village-selection {
+    gap: 18px;
+  }
+
+  .village-card {
+    min-height: 62px;
+    padding: 10px 14px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    padding: 16px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    max-height: 175px;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    font-size: clamp(1.25rem, 7vw, 1.58rem);
+  }
+
+  .learning-flashcard {
+    gap: 7px;
+  }
+
+  .learning-flashcard-content {
+    padding: 12px 10px;
+    gap: 7px;
+  }
+
+  .learning-flashcard-detail {
+    padding: 7px 9px;
+  }
+
+  .flashcard-study-stats {
+    gap: 4px;
+  }
+}
