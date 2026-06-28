@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=171">
+    <link rel="stylesheet" href="style.css?v=172">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -596,6 +596,20 @@
         </article>
       </section>
 
+      <section class="reward-debug-screen hidden" id="rewardDebugScreen" aria-label="Reward debug page">
+        <article class="reward-debug-panel">
+          <div class="reward-debug-header">
+            <div>
+              <p class="eyebrow">Developer Testing</p>
+              <h2>Reward Debug Page</h2>
+              <p>Current reward and achievement configuration. Simulations are dry runs only.</p>
+            </div>
+            <button class="ghost-button" id="rewardDebugClose" type="button">Close</button>
+          </div>
+          <div class="reward-debug-content" id="rewardDebugContent"></div>
+        </article>
+      </section>
+
       <div class="level-celebration hidden" id="levelCelebration" role="status" aria-live="polite">
         <div class="level-celebration-card">
           <p class="eyebrow">Level up</p>
@@ -844,6 +858,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=161"></script>
+    <script type="module" src="script.js?v=162"></script>
   </body>
 </html>
