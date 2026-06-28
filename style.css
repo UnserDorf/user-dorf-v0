@@ -5794,6 +5794,128 @@ button:active {
   border-radius: var(--radius-md);
 }
 
+/* Mobile flashcard study optimization. */
+.learning-flashcard-details {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.learning-flashcard-detail {
+  padding: 10px 12px;
+}
+
+@media (max-width: 520px) {
+  .learning-flashcards-screen {
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
+
+  .learning-flashcard {
+    min-height: auto;
+    padding: 10px;
+    gap: 8px;
+    grid-template-rows: auto auto auto auto auto;
+  }
+
+  .learning-flashcard-meta {
+    gap: 6px;
+  }
+
+  .learning-flashcard-meta .small-link-button {
+    min-height: 34px;
+    padding-inline: 10px;
+    font-size: 0.8rem;
+  }
+
+  .learning-flashcard-meta strong,
+  .learning-flashcard-meta span {
+    font-size: 0.74rem;
+  }
+
+  .learning-flashcard-content {
+    min-height: 0;
+    padding: 14px 12px;
+    gap: 8px;
+  }
+
+  .learning-deck-selector-button {
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  .learning-flashcard-content h2 {
+    font-size: clamp(2.05rem, 10vw, 3rem);
+    line-height: 1.02;
+  }
+
+  .learning-flashcard-english {
+    font-size: clamp(1.02rem, 4.5vw, 1.28rem);
+  }
+
+  .learning-flashcard-details {
+    width: 100%;
+    margin-top: 0;
+    gap: 0;
+  }
+
+  .learning-flashcard-detail {
+    padding: 8px 10px;
+    gap: 3px;
+  }
+
+  .learning-flashcard-detail span {
+    font-size: 0.66rem;
+  }
+
+  #learningFlashcardExample {
+    max-width: none;
+    font-size: 0.82rem;
+    line-height: 1.28;
+  }
+
+  .learning-flashcard-ratings {
+    gap: 8px;
+  }
+
+  .learning-flashcard-ratings button {
+    min-height: 52px;
+    font-size: 0.9rem;
+  }
+
+  .flashcard-study-stats {
+    gap: 5px;
+  }
+
+  .flashcard-study-stats h3 {
+    font-size: 0.7rem;
+  }
+
+  .flashcard-study-bar {
+    min-height: 7px;
+  }
+
+  .flashcard-study-labels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 8px;
+  }
+
+  .flashcard-study-stats span {
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .learning-flashcard-navigation {
+    gap: 8px;
+  }
+
+  .learning-flashcard-navigation button {
+    min-height: 38px;
+    font-size: 0.84rem;
+  }
+}
+
 .challenge-results-summary div {
   border-color: var(--border-soft);
   border-radius: var(--radius-md);
@@ -5864,6 +5986,11 @@ button:active {
 
   .landing-benefits div {
     padding: 10px 8px;
+  }
+
+  .learning-flashcard-navigation button {
+    min-height: 38px;
+    font-size: 0.84rem;
   }
 }
 

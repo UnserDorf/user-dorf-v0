@@ -3669,7 +3669,7 @@ function renderLearningFlashcard() {
   els.learningFlashcardSelection.classList.toggle("hidden", !hasCard);
   els.learningFlashcardGerman.classList.toggle("hidden", !hasCard);
   els.learningFlashcardEnglish.classList.toggle("hidden", !hasCard);
-  els.learningFlashcardCategory.classList.toggle("hidden", !hasCard);
+  els.learningFlashcardCategory?.classList.toggle("hidden", !hasCard);
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !hasCard);
   els.flashcardStudyStats?.classList.toggle("hidden", !hasCard);
   els.learningFlashcardRatings.classList.toggle("hidden", !hasCard);
@@ -3685,7 +3685,7 @@ function renderLearningFlashcard() {
   els.learningFlashcardSelection.textContent = `${flashcardStudyLevel} • ${categoryLabel} ▼`;
   els.learningFlashcardGerman.textContent = card.article ? `${card.article} ${card.word}` : card.word;
   els.learningFlashcardEnglish.textContent = card.english;
-  els.learningFlashcardCategory.textContent = card.category || categoryLabel;
+  if (els.learningFlashcardCategory) els.learningFlashcardCategory.textContent = card.category || categoryLabel;
   els.learningFlashcardExample.textContent = card.example || "";
   els.learningFlashcardExampleGroup.classList.toggle("hidden", !card.example);
   renderLearningDeckSelector();
