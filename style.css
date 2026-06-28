@@ -7219,10 +7219,24 @@ button:active {
   }
 
   .coin-challenge-card {
-    grid-template-rows: auto auto minmax(38px, auto) auto;
+    display: grid;
+    grid-template-rows: auto minmax(72px, auto) minmax(38px, auto) auto;
+    align-content: start;
   }
 
   .coin-challenge-card > button {
     grid-row: 4;
+    width: 220px;
+    min-height: 44px;
+    align-self: start;
+  }
+
+  .coin-challenge-card > :first-child {
+    min-height: 78px;
+  }
+
+  .coin-challenge-card .challenge-choice-summary {
+    align-content: start;
+    min-height: 72px;
   }
 }
