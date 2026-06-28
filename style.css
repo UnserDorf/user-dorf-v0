@@ -5918,3 +5918,257 @@ button:active {
     padding: 10px 8px;
   }
 }
+
+/* Quiz UX simplification pass. */
+.challenge-page-heading {
+  padding-block: 14px;
+  gap: 4px;
+}
+
+.challenge-page-heading h2 {
+  font-size: clamp(1.7rem, 3.2vw, 2.25rem);
+}
+
+.challenge-page-heading p {
+  font-size: 0.94rem;
+  font-weight: 760;
+}
+
+.challenge-selection-grid {
+  width: min(820px, 100%);
+  gap: clamp(14px, 2vw, 20px);
+}
+
+.coin-challenge-card {
+  min-height: 0;
+  grid-template-rows: auto auto auto auto;
+  gap: 12px;
+  padding: clamp(18px, 2.4vw, 24px);
+  align-content: start;
+}
+
+.coin-challenge-card h3 {
+  margin-bottom: 5px;
+  font-size: clamp(1.08rem, 1.8vw, 1.28rem);
+}
+
+.coin-challenge-card p {
+  font-size: 0.94rem;
+  line-height: 1.38;
+}
+
+.coin-challenge-card .challenge-question-count {
+  display: none;
+}
+
+.challenge-choice-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.challenge-choice-summary span {
+  min-height: 34px;
+  border: 1px solid rgba(190, 177, 153, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.58);
+  color: var(--muted);
+  padding: 7px 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 840;
+}
+
+.challenge-choice-summary strong {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.challenge-category-selector {
+  margin-top: -4px;
+}
+
+.challenge-category-selector legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.challenge-category-selector span {
+  min-height: 34px;
+  border-color: rgba(190, 177, 153, 0.28);
+  background: rgba(255, 253, 248, 0.52);
+  padding: 7px 9px;
+  font-size: 0.78rem;
+}
+
+.coin-challenge-card > button {
+  min-height: 44px;
+  width: min(100%, 220px);
+  justify-self: start;
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+
+.challenge-mastery-panel {
+  margin-top: 2px;
+  border-color: rgba(190, 177, 153, 0.22);
+  background: rgba(255, 253, 248, 0.42);
+  box-shadow: none;
+  padding: 9px 10px;
+  gap: 5px;
+  align-self: stretch;
+}
+
+.challenge-mastery-panel .eyebrow {
+  display: none;
+}
+
+.challenge-mastery-panel h4 {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.challenge-mastery-panel dl {
+  gap: 3px;
+}
+
+.challenge-mastery-panel dt,
+.challenge-mastery-panel dd {
+  font-size: 0.76rem;
+}
+
+.clean-quiz-mode .flashcard,
+.clean-quiz-mode .noun-verb-card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(190, 177, 153, 0.28);
+  background: rgba(255, 250, 241, 0.94);
+  padding: clamp(22px, 3.4vw, 38px);
+  gap: clamp(14px, 2.2vw, 24px);
+}
+
+.clean-quiz-mode .flashcard > :not(.challenge-village-banner),
+.clean-quiz-mode .noun-verb-card > :not(.challenge-village-banner) {
+  position: relative;
+  z-index: 1;
+}
+
+.clean-quiz-mode .challenge-village-banner {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: inherit;
+  background: rgba(255, 250, 241, 0.92);
+  opacity: 0.1;
+  display: block;
+  pointer-events: none;
+}
+
+.clean-quiz-mode .challenge-village-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 250, 241, 0.62);
+}
+
+.clean-quiz-mode .challenge-village-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.clean-quiz-mode .card-meta {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+
+.clean-quiz-mode #nounVerbCounter,
+.article-quiz-mode #cardCounter {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.article-quiz-mode #cardMode,
+.clean-quiz-mode .noun-verb-card .card-meta span:last-child {
+  color: #286f73;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.clean-quiz-mode .question-area {
+  gap: clamp(12px, 2vw, 18px);
+  text-align: center;
+}
+
+.clean-article-practice #promptLabel,
+.clean-quiz-mode .noun-verb-card .eyebrow {
+  color: var(--muted);
+  font-size: clamp(0.96rem, 1.8vw, 1.12rem);
+  font-weight: 800;
+  text-transform: none;
+}
+
+.clean-article-practice #questionText,
+.clean-quiz-mode #nounVerbPrompt {
+  color: var(--ink);
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.clean-quiz-mode .noun-verb-options,
+.article-quiz-card .article-quiz {
+  margin-top: 4px;
+}
+
+.clean-quiz-mode .noun-verb-options button,
+.article-quiz-card .article-quiz-options button {
+  min-height: 62px;
+}
+
+.article-quiz-card {
+  min-height: min(570px, calc(100dvh - 110px));
+  max-width: 660px;
+  grid-template-rows: auto auto auto auto auto;
+}
+
+.article-quiz-card .question-area {
+  gap: clamp(12px, 2vw, 18px);
+}
+
+.article-quiz-card .question-translation {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .challenge-page-heading {
+    padding-block: 12px;
+  }
+
+  .coin-challenge-card > button {
+    width: 100%;
+  }
+
+  .clean-quiz-mode .flashcard,
+  .clean-quiz-mode .noun-verb-card {
+    padding: 18px 14px;
+    gap: 14px;
+  }
+
+  .clean-article-practice #questionText,
+  .clean-quiz-mode #nounVerbPrompt {
+    font-size: clamp(2.4rem, 12vw, 3.7rem);
+  }
+}

@@ -516,6 +516,8 @@ const els = {
   flashcardReturnDashboard: document.querySelector("#flashcardReturnDashboard"),
   challengeLevelBack: document.querySelector("#challengeLevelBack"),
   challengeSelectedLevel: document.querySelector("#challengeSelectedLevel"),
+  challengeSelectedCategory: document.querySelector("#challengeSelectedCategory"),
+  articleSelectedLevel: document.querySelector("#articleSelectedLevel"),
   challengeMasteryDeck: document.querySelector("#challengeMasteryDeck"),
   challengeCorrectOnce: document.querySelector("#challengeCorrectOnce"),
   challengeMasteredCount: document.querySelector("#challengeMasteredCount"),
@@ -2159,7 +2161,9 @@ function showCoinChallenges() {
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
-  els.challengeSelectedLevel.textContent = selectedLearningLevel;
+  if (els.challengeSelectedLevel) els.challengeSelectedLevel.textContent = selectedLearningLevel;
+  if (els.articleSelectedLevel) els.articleSelectedLevel.textContent = selectedLearningLevel;
+  if (els.challengeSelectedCategory) els.challengeSelectedCategory.textContent = getFlashcardCategoryLabel(selectedChallengeCategory);
   document.querySelectorAll('input[name="challengeCategory"]').forEach((input) => {
     input.checked = input.value === selectedChallengeCategory;
   });
@@ -2553,6 +2557,8 @@ function getChallengeMasteryProgress(level = selectedLearningLevel, category = s
 function renderChallengeMasteryProgress() {
   const categoryLabel = getFlashcardCategoryLabel(selectedChallengeCategory);
   const summary = getChallengeMasteryProgress();
+  if (els.challengeSelectedCategory) els.challengeSelectedCategory.textContent = categoryLabel;
+  if (els.challengeSelectedLevel) els.challengeSelectedLevel.textContent = selectedLearningLevel;
   if (els.challengeMasteryDeck) els.challengeMasteryDeck.textContent = `${selectedLearningLevel} • ${categoryLabel}`;
   if (els.challengeCorrectOnce) els.challengeCorrectOnce.textContent = `${summary.correctOnce} / ${summary.total}`;
   if (els.challengeMasteredCount) els.challengeMasteredCount.textContent = `${summary.mastered} / ${summary.total}`;
@@ -2582,6 +2588,7 @@ function getArticleMasteryProgress(level = selectedLearningLevel) {
 
 function renderArticleMasteryProgress() {
   const summary = getArticleMasteryProgress();
+  if (els.articleSelectedLevel) els.articleSelectedLevel.textContent = selectedLearningLevel;
   if (els.articleMasteryDeck) els.articleMasteryDeck.textContent = `${selectedLearningLevel} • Articles`;
   if (els.articleCorrectOnce) els.articleCorrectOnce.textContent = `${summary.correctOnce} / ${summary.total}`;
   if (els.articleMasteredCount) els.articleMasteredCount.textContent = `${summary.mastered} / ${summary.total}`;
@@ -4979,7 +4986,7 @@ function renderCard() {
   const isArticleQuiz = mode === "article-quiz";
 
   els.cardMode.textContent = isArticleQuiz && challengeSession.type === "articles"
-    ? "Articles"
+    ? "Article Practice"
     : isArticleQuiz ? "Article Practice" : modeText;
   const articleChallengeActive = isArticleQuiz && challengeSession.type === "articles";
   els.cardCounter.textContent = visibleCards.length
@@ -5015,8 +5022,8 @@ function renderCard() {
     els.promptLabel.textContent = "English";
     els.questionText.textContent = card.english;
   } else if (isArticleQuiz) {
-    els.promptLabel.textContent = "Article Practice";
-    els.questionText.textContent = challengeSession.type === "articles" ? `___ ${card.word}` : card.word;
+    els.promptLabel.textContent = "Choose the correct article.";
+    els.questionText.textContent = card.word;
   } else if (mode === "article") {
     els.promptLabel.textContent = "Choose the article";
     els.questionText.textContent = card.word;
@@ -5024,7 +5031,7 @@ function renderCard() {
     els.promptLabel.textContent = "German";
     els.questionText.textContent = card.word;
   }
-  const translation = isArticleQuiz ? (card.english || "").trim() : "";
+  const translation = "";
   els.questionTranslation.textContent = translation;
   els.questionTranslation.classList.toggle("hidden", !translation);
 
@@ -6006,7 +6013,7 @@ function renderVocabularyReviewQuiz() {
   }
   els.nounVerbTitle.textContent = challengeSession.type === "vocabulary" ? "Vocabulary" : "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
-  els.nounVerbInstruction.textContent = "Choose the English meaning";
+  els.nounVerbInstruction.textContent = "Choose the English meaning.";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
   els.ratingButtons.classList.add("hidden");

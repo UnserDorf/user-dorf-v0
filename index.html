@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=150">
+    <link rel="stylesheet" href="style.css?v=151">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -490,18 +490,21 @@
         <div class="dashboard-heading challenge-page-heading">
           <button class="small-link-button" id="challengeLevelBack" type="button">← Back</button>
           <h2>Challenges</h2>
-          <p><span id="challengeSelectedLevel">A1</span> · Choose what you would like to practice.</p>
+          <p>Choose what you would like to practice.</p>
         </div>
 
         <div class="challenge-selection-grid">
           <article class="coin-challenge-card">
             <div>
-              <h3>📖 Vocabulary</h3>
+              <h3>Vocabulary Challenge</h3>
               <p>Review German vocabulary.</p>
             </div>
-            <p class="challenge-question-count">10 Questions</p>
+            <div class="challenge-choice-summary" aria-label="Vocabulary challenge settings">
+              <span>Level: <strong id="challengeSelectedLevel">A1</strong> ▼</span>
+              <span>Category: <strong id="challengeSelectedCategory">Nouns</strong> ▼</span>
+            </div>
             <fieldset class="challenge-category-selector" aria-label="Vocabulary category">
-              <legend>Choose word type</legend>
+              <legend>Category</legend>
               <div>
                 <label><input type="radio" name="challengeCategory" value="nouns" checked><span>Nouns</span></label>
                 <label><input type="radio" name="challengeCategory" value="verbs"><span>Verbs</span></label>
@@ -531,10 +534,12 @@
 
           <article class="coin-challenge-card">
             <div>
-              <h3>🏷️ Articles</h3>
+              <h3>Article Challenge</h3>
               <p>Practice <strong>der, die, das</strong>.</p>
             </div>
-            <p class="challenge-question-count">10 Questions</p>
+            <div class="challenge-choice-summary" aria-label="Article challenge settings">
+              <span>Level: <strong id="articleSelectedLevel">A1</strong> ▼</span>
+            </div>
             <button type="button" data-challenge-action="articles">Start</button>
             <section class="challenge-mastery-panel" id="articleMasteryPanel" aria-label="Article progress">
               <p class="eyebrow" id="articleMasteryDeck">A1 • Articles</p>
@@ -841,6 +846,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=154"></script>
+    <script type="module" src="script.js?v=155"></script>
   </body>
 </html>
