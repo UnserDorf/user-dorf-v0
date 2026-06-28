@@ -7827,3 +7827,174 @@ button:active {
     font-size: 0.78rem;
   }
 }
+
+/* Header breakpoint fix: full, compact, and phone states without wrapping. */
+.topbar {
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.topbar-logo {
+  display: block;
+  height: auto;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.top-actions {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+@media (min-width: 901px) {
+  .topbar {
+    min-height: 76px;
+    padding-inline: clamp(24px, 3.2vw, 32px);
+  }
+
+  .topbar-logo {
+    width: clamp(120px, 11vw, 150px);
+    max-height: 58px;
+  }
+
+  .settings-label-desktop {
+    display: inline;
+  }
+
+  .settings-label-mobile {
+    display: none;
+  }
+
+  #logoutButton {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 900px) {
+  .topbar {
+    min-height: 70px;
+    padding: 9px 18px;
+    gap: 14px;
+  }
+
+  .topbar .brand {
+    flex: 0 0 auto;
+  }
+
+  .topbar-logo {
+    width: clamp(108px, 17vw, 130px);
+    max-height: 52px;
+  }
+
+  .top-actions {
+    margin-left: auto;
+    justify-content: flex-end;
+    gap: 7px;
+    width: auto;
+  }
+
+  .label-full,
+  .settings-label-desktop,
+  #logoutButton {
+    display: none;
+  }
+
+  .label-short,
+  .settings-label-mobile {
+    display: inline;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 0.78rem;
+  }
+
+  .settings-toggle-button {
+    width: 36px;
+    padding: 0;
+    font-size: 1.05rem;
+  }
+
+  .mobile-menu-logout {
+    display: block;
+  }
+}
+
+@media (max-width: 700px) {
+  .topbar {
+    min-height: 64px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .topbar .brand {
+    flex: 0 0 auto;
+  }
+
+  .topbar-logo {
+    width: clamp(92px, 28vw, 112px);
+    max-height: 42px;
+  }
+
+  .top-actions {
+    width: auto;
+    margin-left: auto;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+
+  .label-full,
+  .settings-label-desktop,
+  #logoutButton {
+    display: none;
+  }
+
+  .label-short,
+  .settings-label-mobile {
+    display: inline;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+  }
+
+  .settings-toggle-button {
+    width: 34px;
+    padding: 0;
+    font-size: 1rem;
+  }
+
+  .mobile-menu-logout {
+    display: block;
+  }
+}
+
+@media (max-width: 520px) {
+  #switchProfile {
+    display: none;
+  }
+
+  .topbar-logo {
+    width: clamp(88px, 30vw, 104px);
+    max-height: 38px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    min-height: 32px;
+  }
+}
