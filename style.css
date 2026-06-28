@@ -7211,3 +7211,18 @@ button:active {
     max-height: 166px;
   }
 }
+
+/* Challenge card alignment: keep Start buttons level on side-by-side layouts. */
+@media (min-width: 701px) {
+  .challenge-selection-grid {
+    align-items: stretch;
+  }
+
+  .coin-challenge-card {
+    grid-template-rows: auto auto minmax(38px, auto) auto;
+  }
+
+  .coin-challenge-card > button {
+    grid-row: 4;
+  }
+}
