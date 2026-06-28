@@ -7240,3 +7240,68 @@ button:active {
     min-height: 72px;
   }
 }
+
+/* Dashboard desktop/tablet balance: larger brand and village visual anchor. */
+@media (min-width: 761px) {
+  .topbar {
+    min-height: 64px;
+    padding-block: 11px;
+  }
+
+  .topbar .brand {
+    flex: 0 0 auto;
+  }
+
+  .topbar-logo {
+    width: min(210px, 22vw);
+    max-height: 54px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    grid-template-columns: minmax(360px, 48%) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 52px);
+    padding: clamp(26px, 4vw, 44px);
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    min-height: clamp(300px, 32vw, 440px);
+    aspect-ratio: 16 / 10;
+    border-radius: 12px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap img {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    color: var(--green);
+    font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+    font-weight: 850;
+  }
+
+  .dashboard-screen > .dashboard-heading p {
+    margin-top: 14px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+    margin-top: 14px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 980px) {
+  .topbar-logo {
+    width: min(180px, 24vw);
+    max-height: 48px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    grid-template-columns: minmax(310px, 46%) minmax(0, 1fr);
+    gap: 26px;
+    padding: 24px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    min-height: clamp(260px, 34vw, 340px);
+  }
+}
