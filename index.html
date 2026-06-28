@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=157">
+    <link rel="stylesheet" href="style.css?v=158">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -158,9 +158,12 @@
         </div>
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
-          <button class="ghost-button" id="switchProfile" type="button"><span class="label-full">Switch Profile</span><span class="label-short">Profiles</span></button>
+          <button class="ghost-button" id="switchProfile" type="button"><span class="label-full">Switch Profile</span><span class="label-short">Profile</span></button>
           <div class="settings-menu">
-            <button class="ghost-button settings-toggle-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel">Settings</button>
+            <button class="ghost-button settings-toggle-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings menu">
+              <span class="settings-label-desktop">Settings</span>
+              <span class="settings-label-mobile" aria-hidden="true">☰</span>
+            </button>
             <div class="settings-panel hidden" id="settingsPanel">
               <section class="settings-section" aria-label="Village settings">
                 <h3>Village Settings</h3>
@@ -187,6 +190,7 @@
               <section class="settings-section" aria-label="Settings navigation">
                 <h3>Navigation</h3>
                 <button type="button" id="settingsBackDashboard">Back</button>
+                <button class="mobile-menu-logout" type="button" id="mobileLogoutButton">Log Out</button>
               </section>
             </div>
           </div>
@@ -838,6 +842,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=158"></script>
+    <script type="module" src="script.js?v=159"></script>
   </body>
 </html>

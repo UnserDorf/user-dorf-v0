@@ -610,6 +610,7 @@ const els = {
   homeButton: document.querySelector("#homeButton"),
   switchProfile: document.querySelector("#switchProfile"),
   logoutButton: document.querySelector("#logoutButton"),
+  mobileLogoutButton: document.querySelector("#mobileLogoutButton"),
   settingsToggle: document.querySelector("#settingsToggle"),
   settingsPanel: document.querySelector("#settingsPanel"),
   settingsVillageName: document.querySelector("#settingsVillageName"),
@@ -4530,6 +4531,7 @@ function bindEvents() {
 
   els.switchProfile.addEventListener("click", logoutToProfileScreen);
   els.logoutButton.addEventListener("click", lockSharedPasswordScreen);
+  els.mobileLogoutButton?.addEventListener("click", lockSharedPasswordScreen);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
