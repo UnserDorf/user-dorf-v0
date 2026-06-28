@@ -45,7 +45,8 @@ const DEFAULT_GROUPS = [
 ];
 const ONBOARDING_PAGES = [
   {
-    illustration: "Illustration 1",
+    illustration: "assets/welcome-hero.png",
+    illustrationAlt: "A welcoming view of Unser Dorf",
     title: "Welcome to Unser Dorf",
     body: [
       "Learn German while helping your village grow.",
@@ -56,7 +57,8 @@ const ONBOARDING_PAGES = [
     nextLabel: "Next"
   },
   {
-    illustration: "Illustration 2",
+    illustration: "assets/learn-hero.png",
+    illustrationAlt: "Flashcards for learning German words",
     title: "📇 Learn",
     body: [
       "Study new vocabulary with Flashcards.",
@@ -67,7 +69,8 @@ const ONBOARDING_PAGES = [
     nextLabel: "Next"
   },
   {
-    illustration: "Illustration 3",
+    illustration: "assets/practice-hero.png",
+    illustrationAlt: "Article practice in Unser Dorf",
     title: "🏆 Practice",
     body: [
       "Complete Challenges to review what you've learned.",
@@ -78,7 +81,8 @@ const ONBOARDING_PAGES = [
     nextLabel: "Next"
   },
   {
-    illustration: "Illustration 4",
+    illustration: "assets/grow-hero.png",
+    illustrationAlt: "A growing village scene",
     title: "🏡 Grow",
     body: [
       "Earn coins, unlock Austria Album rewards, and help your village grow.",
@@ -89,7 +93,8 @@ const ONBOARDING_PAGES = [
     nextLabel: "Next"
   },
   {
-    illustration: "Illustration 5",
+    illustration: "assets/get-started-hero.png",
+    illustrationAlt: "A path into the village",
     title: "You're Ready!",
     body: [
       "Choose your village, begin learning, and watch it grow.",
@@ -2073,7 +2078,13 @@ function showDemoScreen() {
 
 function renderOnboardingPage() {
   const page = ONBOARDING_PAGES[demoPageIndex] || ONBOARDING_PAGES[0];
-  if (els.demoIllustration) els.demoIllustration.textContent = page.illustration;
+  if (els.demoIllustration) {
+    const image = document.createElement("img");
+    image.src = page.illustration;
+    image.alt = page.illustrationAlt || "";
+    image.loading = "eager";
+    els.demoIllustration.replaceChildren(image);
+  }
   if (els.demoTitle) els.demoTitle.textContent = page.title;
   if (els.demoBody) {
     const bodyNodes = page.sections
