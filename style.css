@@ -6593,3 +6593,158 @@ button:active {
     padding: 10px 11px;
   }
 }
+
+/* Mobile launcher optimization: one screen, one decision. */
+.challenge-progress-details {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  border: 1px solid rgba(190, 177, 153, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 250, 241, 0.66);
+  padding: 8px 10px;
+}
+
+.challenge-progress-details summary {
+  color: var(--green);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 850;
+  list-style-position: inside;
+}
+
+.challenge-progress-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 10px;
+}
+
+@media (max-width: 520px) {
+  .dashboard-screen {
+    gap: 8px;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    max-height: 84px;
+    aspect-ratio: 16 / 6;
+  }
+
+  .dashboard-screen > .dashboard-heading h2 {
+    font-size: clamp(1rem, 5vw, 1.22rem);
+  }
+
+  .dashboard-screen > .dashboard-heading p {
+    margin-top: 4px;
+    font-size: 0.78rem;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
+    margin-top: 5px;
+    font-size: 0.8rem !important;
+  }
+
+  .dashboard-learning-grid {
+    gap: 7px;
+  }
+
+  .dashboard-learning-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .dashboard-learning-card h3 {
+    font-size: 0.98rem;
+  }
+
+  .dashboard-learning-card p {
+    font-size: 0.82rem;
+  }
+
+  .dashboard-learning-card .primary-button {
+    min-height: 40px;
+  }
+
+  .coin-challenges-screen {
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  .challenge-page-heading {
+    gap: 2px;
+    padding: 10px 12px;
+  }
+
+  .challenge-page-heading .small-link-button {
+    min-height: 34px;
+    padding-inline: 10px;
+    font-size: 0.82rem;
+  }
+
+  .challenge-page-heading h2 {
+    font-size: clamp(1.45rem, 7vw, 1.8rem);
+  }
+
+  .challenge-page-heading p {
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .challenge-selection-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .coin-challenge-card {
+    padding: 11px;
+    gap: 8px;
+  }
+
+  .coin-challenge-card h3 {
+    font-size: 1rem;
+    margin-bottom: 3px;
+  }
+
+  .coin-challenge-card p {
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .challenge-choice-summary {
+    gap: 6px;
+  }
+
+  .challenge-choice-summary span,
+  .challenge-category-selector span {
+    min-height: 30px;
+    padding: 5px 8px;
+    font-size: 0.74rem;
+  }
+
+  .challenge-category-selector div {
+    gap: 5px;
+  }
+
+  .coin-challenge-card > button {
+    min-height: 38px;
+    width: 100%;
+    font-size: 0.86rem;
+  }
+
+  .challenge-progress-details {
+    padding: 7px 9px;
+  }
+
+  .challenge-progress-details summary {
+    font-size: 0.8rem;
+  }
+
+  .challenge-progress-panels {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+}

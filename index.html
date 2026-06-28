@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=155">
+    <link rel="stylesheet" href="style.css?v=156">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -501,9 +501,26 @@
               </div>
             </fieldset>
             <button type="button" data-challenge-action="vocabulary-review">Start</button>
+          </article>
+
+          <article class="coin-challenge-card">
+            <div>
+              <h3>Article Challenge</h3>
+              <p>Practice <strong>der, die, das</strong>.</p>
+            </div>
+            <div class="challenge-choice-summary" aria-label="Article challenge settings">
+              <span>Level: <strong id="articleSelectedLevel">A1</strong> ▼</span>
+            </div>
+            <button type="button" data-challenge-action="articles">Start</button>
+          </article>
+        </div>
+
+        <details class="challenge-progress-details">
+          <summary>Show Progress</summary>
+          <div class="challenge-progress-panels">
             <section class="challenge-mastery-panel" id="challengeMasteryPanel" aria-label="Mastery progress">
               <p class="eyebrow" id="challengeMasteryDeck">A1 • Nouns</p>
-              <h4>Progress</h4>
+              <h4>Vocabulary Progress</h4>
               <dl>
                 <div>
                   <dt>Correct once</dt>
@@ -519,20 +536,9 @@
                 </div>
               </dl>
             </section>
-          </article>
-
-          <article class="coin-challenge-card">
-            <div>
-              <h3>Article Challenge</h3>
-              <p>Practice <strong>der, die, das</strong>.</p>
-            </div>
-            <div class="challenge-choice-summary" aria-label="Article challenge settings">
-              <span>Level: <strong id="articleSelectedLevel">A1</strong> ▼</span>
-            </div>
-            <button type="button" data-challenge-action="articles">Start</button>
             <section class="challenge-mastery-panel" id="articleMasteryPanel" aria-label="Article progress">
               <p class="eyebrow" id="articleMasteryDeck">A1 • Articles</p>
-              <h4>Progress</h4>
+              <h4>Article Progress</h4>
               <dl>
                 <div>
                   <dt>Correct once</dt>
@@ -548,8 +554,8 @@
                 </div>
               </dl>
             </section>
-          </article>
-        </div>
+          </div>
+        </details>
       </section>
 
       <section class="challenge-ready-screen hidden" id="challengeReadyScreen" aria-label="Challenge ready">
