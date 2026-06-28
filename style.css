@@ -7338,6 +7338,29 @@ button:active {
   gap: 8px;
 }
 
+.clean-quiz-mode .card-meta::after {
+  content: "";
+  width: min(320px, 70%);
+  height: 1px;
+  margin-top: 10px;
+  background:
+    linear-gradient(90deg, transparent, rgba(71, 115, 91, 0.32), transparent);
+}
+
+.article-quiz-mode .card-meta::after {
+  content: "🌿";
+  width: min(360px, 74%);
+  height: auto;
+  color: rgba(71, 115, 91, 0.72);
+  font-size: 0.78rem;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 253, 248, 0.9);
+  background:
+    linear-gradient(90deg, transparent, rgba(71, 115, 91, 0.3)) left 50% / calc(50% - 22px) 1px no-repeat,
+    linear-gradient(90deg, rgba(71, 115, 91, 0.3), transparent) right 50% / calc(50% - 22px) 1px no-repeat;
+}
+
 .clean-quiz-mode #cardCounter,
 .clean-quiz-mode #nounVerbCounter,
 .article-quiz-mode #cardCounter {
@@ -7410,5 +7433,15 @@ button:active {
   .article-quiz-card .article-quiz-options button,
   .clean-quiz-mode .noun-verb-options button {
     min-width: 0;
+  }
+
+  .article-quiz-mode .card-meta::after,
+  .clean-quiz-mode .card-meta::after {
+    content: "";
+    width: min(260px, 72%);
+    height: 1px;
+    margin-top: 8px;
+    background:
+      linear-gradient(90deg, transparent, rgba(71, 115, 91, 0.28), transparent);
   }
 }
