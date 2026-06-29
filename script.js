@@ -230,7 +230,6 @@ const ACHIEVEMENTS = [
 ];
 const STREAK_ACTIVITY_GOAL = 10;
 const VILLAGE_NAMING_MIN_SHARED_COINS = 700;
-const LEVEL_UP_BONUS = 25;
 const FAMILY_MILESTONES = [
   { coins: 500, reward: "" },
   { coins: 1000, reward: "" },
@@ -280,15 +279,7 @@ const VILLAGE_ALBUM_REWARDS = [
   { id: "lantern-festival", coins: 1800, title: "Lantern Festival", image: "assets/lantern-festival.png", icon: "🕯️", description: "Lanterns glow as the village celebrates what everyone has built together." }
 ];
 const COIN_LEVELS = [
-  { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
-  { min: 50, next: 150, icon: "👛", name: "Wallet" },
-  { min: 150, next: 300, icon: "🐷", name: "Piggy Bank" },
-  { min: 300, next: 500, icon: "💰", name: "Treasure Chest" },
-  { min: 500, next: 800, icon: "🏧", name: "ATM" },
-  { min: 800, next: 1200, icon: "🏦", name: "Bank" },
-  { min: 1200, next: 1600, icon: "🏛️", name: "Bill Gates" },
-  { min: 1600, next: 2500, icon: "💎", name: "Jeff Bezos" },
-  { min: 2500, next: null, icon: "👑", name: "Elon Musk" }
+  { min: 0, next: null, icon: "🪙", name: "Coins" }
 ];
 
 const STANDARD_FILTERS = [
@@ -2396,7 +2387,6 @@ function renderDashboard() {
   if (!currentProfileId) return;
   const profile = getCurrentProfile();
   prepareProfileDailyState(profile);
-  checkAchievements("dashboard");
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
   els.dashboardWelcome.textContent = `Welcome back, ${profile.name}`;
@@ -3198,12 +3188,6 @@ function getNextGoalAchievements(achievementStates) {
   return lockedGoals.sort(compareAchievementProgress).slice(0, 2);
 }
 
-function getClosestAchievementByMetric(achievementStates, metrics) {
-  return achievementStates
-    .filter(({ achievement }) => metrics.includes(achievement.metric))
-    .sort(compareAchievementProgress)[0] || null;
-}
-
 function compareAchievementProgress(first, second) {
   const firstRemaining = first.progress.target - first.progress.current;
   const secondRemaining = second.progress.target - second.progress.current;
@@ -3249,16 +3233,6 @@ function getAchievementProgress(achievement, profile = getCurrentProfile()) {
 
 function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) {
   if (achievement.metric === "flashcardsReviewed") return getFlashcardsReviewedCount(profile);
-  if (achievement.metric === "challengesCompleted") return normalizeCounter(profile?.challengeSessionsCompleted);
-  if (achievement.metric === "correctAnswers") return hasAnyCorrectQuizAnswer(profile) ? 1 : 0;
-  if (achievement.metric === "totalCorrectAnswers") return getTotalCorrectAnswerCount(profile);
-  if (achievement.metric === "coins") return normalizeCoinCount(profile?.coins);
-  if (achievement.metric === "streak") return normalizeCounter(profile?.streak?.current);
-  if (achievement.metric === "articlesMastered") return getArticleSummary().mastered;
-  if (achievement.metric === "nounVerbCorrect") return getNounVerbCorrectAnswerCount(profile);
-  if (achievement.metric === "familyCoins") return getGroupCoinTotal();
-  if (achievement.metric === "austriaAlbumRewards") return getAustriaAlbumUnlockedCount(profile, true);
-  if (achievement.metric === "villageMemories") return getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getGroupCoinTotal()).length;
   return 0;
 }
 
@@ -3295,31 +3269,12 @@ function renderRewardDebugPage() {
   els.rewardDebugContent.replaceChildren(
     createRewardDebugCurrentProgressSection(),
     createRewardDebugFlashcardAchievementsSection(),
-    createQuizRewardDebugSection("Vocabulary Quiz Rewards", "vocabulary"),
     createRewardDebugAustriaAlbumSection(),
     createRewardDebugVillageMemoriesSection(),
     createRewardDebugVillageGrowthSection(),
     createRewardDebugQueueSection(),
     createRewardDebugSimulationSection()
   );
-}
-
-function createQuizRewardDebugSection(title, quizType) {
-  const profile = getCurrentProfile();
-  const unlockedAustriaIds = new Set(getAustriaAlbumUnlockedRewardIds(profile, true));
-  return createRewardDebugSection(title, [
-    createTextElement("h4", "", "Austria Album unlocks"),
-    createRewardDebugTable(
-      ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
-      AUSTRIA_ALBUM_REWARDS.map((reward, index) => [
-        `${reward.coins} personal coins`,
-        `Austria Album #${index + 1}`,
-        reward.title,
-        reward.image || "None",
-        createRewardDebugStatusCell(unlockedAustriaIds.has(reward.id), "Unlocked", "Locked")
-      ])
-    )
-  ]);
 }
 
 function createRewardDebugCurrentProgressSection() {
@@ -3422,7 +3377,7 @@ function createRewardDebugQueueSection() {
       [
         ["Current queue size", `${achievementNotificationQueue.length}`],
         ["Current popup duration", `${ACHIEVEMENT_NOTIFICATION_DURATION_MS} ms`],
-        ["Delay between queued achievements", `${ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS} ms`],
+        ["Delay between queued milestones", `${ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS} ms`],
         ["Current reward waiting to display", getRewardDebugWaitingLabel()]
       ]
     )
@@ -3607,7 +3562,6 @@ function addRewardDebugVocabularyCorrect(amount) {
   profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + Math.ceil(amount / CHALLENGE_QUESTION_COUNT);
   Array.from({ length: amount }).forEach(() => awardCoins(1));
   recordDailyActivity("vocabulary");
-  checkAchievements("reward-debug-vocabulary");
 }
 
 function addRewardDebugArticleCorrect(amount) {
@@ -3629,7 +3583,6 @@ function addRewardDebugArticleCorrect(amount) {
   profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + Math.ceil(amount / CHALLENGE_QUESTION_COUNT);
   Array.from({ length: amount }).forEach(() => awardCoins(1));
   recordDailyActivity("article", { isCorrect: true });
-  checkAchievements("reward-debug-article");
 }
 
 function unlockRewardDebugAustriaAlbum(index) {
@@ -4474,7 +4427,6 @@ function showChallengeResults() {
     const profile = getCurrentProfile();
     if (profile) {
       profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + 1;
-      checkAchievements("challenge-complete");
       saveProfileStore();
     }
   }
@@ -5842,7 +5794,6 @@ function awardCoins(amount) {
   profile.coins = normalizeCoinCount(profile.coins) + normalizeCounter(amount);
   awardLevelBonusIfNeeded(profile);
   celebrateFamilyLevelIfNeeded();
-  checkAchievements("coins");
   checkRewardUnlocks(profile);
   checkTownCenterStageUnlocks();
   saveProfileStore();
@@ -5988,43 +5939,10 @@ function awardLevelBonusIfNeeded(profile) {
   profile.levelBonusesAwarded = normalizeLevelBonuses(profile.levelBonusesAwarded, 0);
 }
 
-function showLevelCelebration(profile, level) {
-  if (deferCelebration(() => showLevelCelebration(profile, level))) return;
-  els.levelCelebrationTitle.textContent = "🎉 Congratulations!";
-  els.levelCelebrationProfile.textContent = `${profile.name} reached:`;
-  els.levelCelebrationLevel.textContent = `${level.icon} ${level.name}`;
-  els.levelCelebrationBonus.textContent = `+${LEVEL_UP_BONUS} bonus coins`;
-  els.levelCelebrationBonus.classList.remove("hidden");
-  hideRewardCelebrationActions();
-  els.levelCelebration.classList.remove("hidden");
-}
-
 function celebrateFamilyLevelIfNeeded() {
   const group = getCurrentGroup();
   if (!group) return;
   group.familyLevelsReached = normalizeFamilyLevelsReached(group.familyLevelsReached, Object.fromEntries(getCurrentGroupProfiles().map((profile) => [profile.id, profile])));
-}
-
-function showFamilyLevelCelebration(level) {
-  if (deferCelebration(() => showFamilyLevelCelebration(level))) return;
-  els.levelCelebrationTitle.textContent = "Shared Village Milestone";
-  els.levelCelebrationProfile.textContent = "Unser Dorf reached:";
-  els.levelCelebrationLevel.textContent = level.name;
-  els.levelCelebrationBonus.textContent = "";
-  els.levelCelebrationBonus.classList.add("hidden");
-  hideRewardCelebrationActions();
-  els.levelCelebration.classList.remove("hidden");
-}
-
-function showDailyChallengeComplete(challenge) {
-  if (deferCelebration(() => showDailyChallengeComplete(challenge))) return;
-  els.levelCelebrationTitle.textContent = "🎉 Daily Challenge Complete!";
-  els.levelCelebrationProfile.textContent = "Challenge:";
-  els.levelCelebrationLevel.textContent = `${challenge.icon} ${challenge.name}`;
-  els.levelCelebrationBonus.textContent = `Reward: 🪙 +${challenge.reward} Coins`;
-  els.levelCelebrationBonus.classList.remove("hidden");
-  hideRewardCelebrationActions();
-  els.levelCelebration.classList.remove("hidden");
 }
 
 function checkAchievements(reason = "") {
@@ -6052,35 +5970,6 @@ function checkAchievements(reason = "") {
 function isAchievementConditionMet(achievement, profile) {
   if (achievement.testOnly) return false;
   return getAchievementProgress(achievement, profile).isComplete;
-}
-
-function hasAnyCorrectQuizAnswer(profile) {
-  return Object.values(profile?.articleProgress || {}).some((entry) => normalizeCounter(entry.articleCorrectCount) > 0)
-    || Object.values(profile?.vocabularyProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile?.nounVerbProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile?.meaningMatchProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile?.prepositionProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0);
-}
-
-function getNounVerbCorrectAnswerCount(profile) {
-  return Object.values(profile?.nounVerbProgress || {}).reduce((total, entry) => {
-    return total + normalizeCounter(entry.correctCount);
-  }, 0);
-}
-
-function getTotalCorrectAnswerCount(profile) {
-  if (!profile) return 0;
-  return [
-    profile.articleProgress,
-    profile.vocabularyProgress,
-    profile.nounVerbProgress,
-    profile.meaningMatchProgress,
-    profile.prepositionProgress
-  ].reduce((total, progress) => {
-    return total + Object.values(progress || {}).reduce((progressTotal, entry) => {
-      return progressTotal + normalizeCounter(entry.articleCorrectCount ?? entry.correctCount);
-    }, 0);
-  }, 0);
 }
 
 function unlockAchievement(achievement, profile, reason = "") {
@@ -6161,51 +6050,6 @@ function closeLevelCelebration() {
   if (!showNextPendingCelebration()) checkVillageNamingCeremony();
 }
 
-async function testPersonalAchievement() {
-  if (!currentProfileId) return;
-  const achievement = getAchievementById("test-personal-achievement");
-  const profile = getCurrentProfile();
-  if (!achievement || !profile) return;
-  profile.achievementsUnlocked = normalizeAchievementList(profile.achievementsUnlocked);
-  if (!profile.achievementsUnlocked.includes(achievement.id)) {
-    profile.achievementsUnlocked.push(achievement.id);
-    profile.coins = normalizeCoinCount(profile.coins) + achievement.reward;
-    showAchievementCelebration(achievement);
-  } else {
-    showAchievementCelebration(achievement);
-  }
-  awardLevelBonusIfNeeded(profile);
-  celebrateFamilyLevelIfNeeded();
-  saveProfileStore();
-  await saveProfileStoreToCloudNow();
-  renderAchievements();
-  if (currentView === "achievements") renderAchievementCollection();
-  renderCoinLeaderboard();
-  renderAchievementDebugPanel();
-}
-
-async function testFamilyAchievement() {
-  const achievement = getAchievementById("test-family-achievement");
-  if (!achievement || !profileStore) return;
-  profileStore.familyAchievementsUnlocked = normalizeAchievementList(profileStore.familyAchievementsUnlocked);
-  if (!profileStore.familyAchievementsUnlocked.includes(achievement.id)) {
-    profileStore.familyAchievementsUnlocked.push(achievement.id);
-  }
-  Object.values(profileStore.profiles || {}).forEach((profile) => {
-    profile.achievementsUnlocked = normalizeAchievementList(profile.achievementsUnlocked);
-    if (!profile.achievementsUnlocked.includes(achievement.id)) {
-      profile.achievementsUnlocked.push(achievement.id);
-    }
-  });
-  promoteFamilyAchievements(profileStore);
-  showAchievementCelebration(achievement);
-  saveProfileStore();
-  await saveProfileStoreToCloudNow();
-  renderAchievements();
-  if (currentView === "achievements") renderAchievementCollection();
-  renderAchievementDebugPanel();
-}
-
 function recordDailyActivity(type, details = {}) {
   if (!currentProfileId) return;
   const profile = getCurrentProfile();
@@ -6213,19 +6057,8 @@ function recordDailyActivity(type, details = {}) {
   profile.villageContribution = normalizeVillageContribution(profile.villageContribution);
 
   if (type === "article") {
-    const dailyChallenge = getDailyChallengeForDate(profile.dailyChallenge.date);
-    profile.dailyChallenge.articleQuestions += 1;
-    if (details.isCorrect) profile.dailyChallenge.correctArticleAnswers += 1;
     profile.streak.articleQuestions += 1;
     profile.villageContribution.articleQuestions += 1;
-    const challengeProgress = getDailyChallengeProgress(profile.dailyChallenge, dailyChallenge);
-    if (!profile.dailyChallenge.completed && challengeProgress.raw >= dailyChallenge.goal) {
-      profile.dailyChallenge.completed = true;
-      if (profile.dailyChallenge.rewardAwardedFor !== dailyChallenge.id) {
-        profile.dailyChallenge.rewardAwardedFor = dailyChallenge.id;
-        awardCoins(dailyChallenge.reward);
-      }
-    }
   }
 
   if (type === "vocabulary") {
@@ -6234,7 +6067,6 @@ function recordDailyActivity(type, details = {}) {
   }
 
   updateStreakQualification(profile);
-  checkAchievements("daily-activity");
   saveProfileStore();
 }
 
@@ -8195,59 +8027,12 @@ function getTodayKey() {
   return `${year}-${month}-${day}`;
 }
 
-function getDailyChallengeForDate(date = getTodayKey()) {
-  const index = getStableDailyChallengeIndex(date);
-  return DAILY_CHALLENGES[index] || DAILY_CHALLENGES[0];
-}
-
-function getStableDailyChallengeIndex(date) {
-  const key = String(date || getTodayKey());
-  if (DAILY_CHALLENGES.length < 2) return getRawDailyChallengeIndex(key);
-  const baseIndex = getRawDailyChallengeIndex(key);
-  const previousIndex = getAdjustedPreviousDailyChallengeIndex(key);
-  if (baseIndex !== previousIndex) return baseIndex;
-  return (baseIndex + 1) % DAILY_CHALLENGES.length;
-}
-
-function getAdjustedPreviousDailyChallengeIndex(dateKey) {
-  const previousDate = shiftDateKey(dateKey, -1);
-  const previousBaseIndex = getRawDailyChallengeIndex(previousDate);
-  const previousPreviousIndex = getRawDailyChallengeIndex(shiftDateKey(previousDate, -1));
-  return previousBaseIndex === previousPreviousIndex
-    ? (previousBaseIndex + 1) % DAILY_CHALLENGES.length
-    : previousBaseIndex;
-}
-
-function getRawDailyChallengeIndex(dateKey) {
-  return getStableHash(dateKey) % DAILY_CHALLENGES.length;
-}
-
 function getStableHash(key) {
   let hash = 0;
   for (let index = 0; index < key.length; index += 1) {
     hash = (hash * 31 + key.charCodeAt(index)) >>> 0;
   }
   return hash;
-}
-
-function shiftDateKey(dateKey, days) {
-  const date = parseDateKey(dateKey);
-  if (!date) return String(dateKey || "");
-  date.setDate(date.getDate() + days);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getDailyChallengeProgress(progress, challenge = getDailyChallengeForDate(progress?.date)) {
-  const current = challenge.metric === "correctArticleAnswers"
-    ? normalizeCounter(progress?.correctArticleAnswers)
-    : normalizeCounter(progress?.articleQuestions);
-  return {
-    current: Math.min(current, challenge.goal),
-    raw: current
-  };
 }
 
 function getDayDistance(fromDate, toDate) {
