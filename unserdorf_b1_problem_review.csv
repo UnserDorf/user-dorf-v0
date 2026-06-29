@@ -44,7 +44,7 @@ b1_0135,ansprechen,,,,B1,verb,yes,no,yes,separable_verb,19,"ansprechen, spricht 
 b1_0137,anstellen,,,,B1,verb,yes,no,yes,separable_verb,19,"anstellen, stellt an,",
 b1_0140,sich anstrengen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,19,"sich anstrengen, strengt",reflexive
 b1_0143,anwenden,,,,B1,verb,yes,no,yes,separable_verb,19,"anwenden, wendet an,",
-b1_0147,Wohnungen sind zu teuer.,die,,,B1,noun,yes,yes,yes,multi_word_expression,19,die Wohnungen sind zu teuer.,
+b1_0147,Wohnungen,die,,apartments,B1,noun,yes,yes,yes,multi_word_expression,19,die Wohnungen sind zu teuer.,"display cleaned: Removed example sentence tail: ""sind zu teuer."""
 b1_0148,bekommen Sie eine Anzeige.,,,,B1,phrase,yes,no,yes,multi_word_expression,19,bekommen Sie eine Anzeige.,
 b1_0149,Schmecken dir die Aprikosen?,,,,B1,phrase,yes,no,yes,multi_word_expression,19,Schmecken dir die Aprikosen?,
 b1_0151,auffallen,,,,B1,verb,yes,no,yes,separable_verb,20,"auffallen, fällt auf,",
@@ -108,7 +108,7 @@ b1_0448,Brötli,das,- (CH),,B1,noun,yes,yes,yes,regional_variant,28,"das Brötli
 b1_0449,Brötchen; A: Semmel,,,,B1,phrase,yes,no,yes,multi_word_expression,28,Brötchen; A: Semmel,
 b1_0453,Bub,der,"-en (A, CH)",,B1,noun,yes,yes,yes,regional_variant,28,"der Bub, -en (A, CH) →D:",regional_variant_or_reference
 b1_0473,nicht im Supermarkt.,,,,B1,phrase,yes,no,yes,multi_word_expression,28,nicht im Supermarkt.,
-b1_0474,Fahrt mit.,die,,,B1,noun,yes,yes,yes,multi_word_expression,28,die Fahrt mit.,
+b1_0474,Fahrt,die,,trip; ride,B1,noun,yes,yes,yes,multi_word_expression,28,die Fahrt mit.,"display cleaned: Removed verb fragment: ""mit."""
 b1_0479,Couvert,das,-s (CH),,B1,noun,yes,yes,yes,regional_variant,29,"das Couvert, -s (CH) →",regional_variant_or_reference
 b1_0480,Briefumschlag; A: Kuvert,,,,B1,phrase,yes,no,yes,multi_word_expression,29,Briefumschlag; A: Kuvert,
 b1_0490,Büchse,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,29,"die Büchse, -n (D, CH) →",regional_variant_or_reference
@@ -152,7 +152,7 @@ b1_0712,Erdgeschoss,das,,,B1,noun,yes,yes,yes,multiple_forms,36,das Erdgeschoss/
 b1_0715,sich ereignen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,36,"sich ereignen,",reflexive
 b1_0732,sich entschließen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,36,"sich entschließen,",reflexive
 b1_0741,entweder ... oder,,,,B1,phrase,yes,no,yes,multi_word_expression,36,entweder ... oder,
-b1_0745,Steuern erhöhen.,die,,,B1,noun,yes,yes,yes,multi_word_expression,36,die Steuern erhöhen.,
+b1_0745,Steuern,die,,taxes,B1,noun,yes,yes,yes,multi_word_expression,36,die Steuern erhöhen.,"display cleaned: Removed verb fragment: ""erhöhen."""
 b1_0763,sich erholen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erholen,",reflexive
 b1_0767,sich erkälten,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erkälten, erkältet sich,",reflexive
 b1_0773,sich erkundigen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erkundigen,",reflexive
@@ -184,7 +184,7 @@ b1_0944,sich freuen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,42,"s
 b1_0959,Früchte,,,,B1,other,yes,no,yes,regional_variant,42,"Früchte (CH) →D, A: Obst",regional_variant_or_reference
 b1_0962,seit zehn Jahren.,,,,B1,phrase,yes,no,yes,multi_word_expression,42,seit zehn Jahren.,
 b1_0963,Mannschaft 2 : 0.,,,,B1,phrase,yes,no,yes,multi_word_expression,42,Mannschaft 2 : 0.,
-b1_0964,Automat funktioniert?,der,,,B1,noun,yes,yes,yes,multi_word_expression,42,der Automat funktioniert?,
+b1_0964,Automat,der,,machine; vending machine,B1,noun,yes,yes,yes,multi_word_expression,42,der Automat funktioniert?,"display cleaned: Removed question fragment: ""funktioniert?"""
 b1_0975,geboren werden,,,,B1,verb,yes,no,yes,multi_word_expression,43,"geboren werden, wird",
 b1_1005,Gehsteig,der,A),,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,44,"der Gehsteig (D, A) →CH:",regional_variant_or_reference
 b1_1009,Bancomat/Bankomat,,,,B1,other,yes,no,yes,multiple_forms,44,Bancomat/Bankomat,
@@ -214,7 +214,7 @@ b1_1230,hier/hier-,,,,B1,other,yes,no,yes,multiple_forms,50,hier/hier-,
 b1_1234,hinter/hinter-,,,,B1,other,yes,no,yes,multiple_forms,50,hinter/hinter-,
 b1_1237,hinweisen,,,,B1,verb,yes,no,yes,separable_verb,50,"hinweisen, weist hin,",
 b1_1270,Imbiss,der,-e (D),,B1,noun,yes,yes,yes,regional_variant,51,"der Imbiss, -e (D) →A:",regional_variant_or_reference
-b1_1272,neuen Prüfungstermine.,die,,,B1,noun,yes,yes,yes,multi_word_expression,51,die neuen Prüfungstermine.,
+b1_1272,Prüfungstermine,die,,exam dates,B1,noun,yes,yes,yes,multi_word_expression,51,die neuen Prüfungstermine.,display cleaned: Removed adjective/trailing period.
 b1_1273,über die Bedingungen informieren.,,,,B1,phrase,yes,no,yes,multi_word_expression,51,über die Bedingungen informieren.,
 b1_1278,sich irren,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,52,"sich irren, irrt sich,",reflexive
 b1_1281,Jause,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,52,"die Jause, -n (A) →D: Im-",regional_variant_or_reference
@@ -249,7 +249,7 @@ b1_1558,Leute,die,,,B1,noun,yes,yes,yes,multi_word_expression,60,die Leute (Pl.)
 b1_1564,Lieblings-,,,,B1,word_part,review,no,no,,60,Lieblings-,word_part_or_prefix
 b1_1573,leid tun,,,,B1,phrase,yes,no,yes,multi_word_expression,60,"leid tun, tut leid, tat leid,",
 b1_1586,so nichts sehen.,,,,B1,phrase,yes,no,yes,multi_word_expression,60,so nichts sehen.,
-b1_1587,Licht an?,das,,,B1,noun,yes,yes,yes,multi_word_expression,60,das Licht an?,
+b1_1587,Licht,das,,light,B1,noun,yes,yes,yes,multi_word_expression,60,das Licht an?,"display cleaned: Removed question fragment: ""an?"""
 b1_1601,Lift,der,-e,,B1,noun,yes,yes,yes,regional_variant,61,"der Lift, -e →D, A: Aufzug",regional_variant_or_reference
 b1_1605,link-,,,,B1,word_part,review,no,no,,61,link-,word_part_or_prefix
 b1_1614,sich lohnen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,61,"sich lohnen, lohnt sich,",reflexive
@@ -260,7 +260,7 @@ b1_1629,Medien,die,,,B1,noun,yes,yes,yes,multi_word_expression,62,die Medien (Pl
 b1_1634,mehr (siehe auch viel),,,,B1,phrase,yes,no,yes,multi_word_expression,62,mehr (siehe auch viel),
 b1_1645,manch-,,,,B1,word_part,review,no,no,,62,manch-,word_part_or_prefix
 b1_1655,Marille,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,62,"die Marille, -n (A) →D, CH:",regional_variant_or_reference
-b1_1660,letzten Prüfung.,der,,,B1,noun,yes,yes,yes,multi_word_expression,62,der letzten Prüfung.,
+b1_1660,Prüfung,die,,exam,B1,noun,yes,yes,yes,multi_word_expression,62,der letzten Prüfung.,display cleaned: Removed adjective/trailing period and corrected article from inflected source phrase.
 b1_1666,Metzger,der,-,,B1,noun,yes,yes,yes,regional_variant,63,"der Metzger, - →A: Fleis-",regional_variant_or_reference
 b1_1682,miss-,,,,B1,word_part,review,no,no,,63,miss-,word_part_or_prefix
 b1_1685,meist-,,,,B1,word_part,review,no,no,,63,"meist-, die meisten",word_part_or_prefix
