@@ -10156,3 +10156,84 @@ button:active {
     margin-top: 1px;
   }
 }
+
+/* Compact one-line dashboard collection text. */
+.collections-preview-section .reward-preview-card > div {
+  display: grid;
+  gap: 4px;
+}
+
+.reward-preview-heading-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.reward-preview-heading-row h4 {
+  margin: 0;
+}
+
+.collections-preview-section .reward-preview-heading-row .reward-preview-count {
+  color: var(--green);
+  font-size: 0.9rem;
+  font-weight: 820;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.collections-preview-section .reward-preview-card p {
+  gap: 0;
+}
+
+.collections-preview-section .reward-preview-latest {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  min-width: 0;
+  color: #706a60;
+  font-size: 0.84rem;
+  font-weight: 640;
+  line-height: 1.22;
+}
+
+.collections-preview-section .reward-preview-latest > span,
+.collections-preview-section .reward-preview-latest strong {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.collections-preview-section .reward-preview-latest > span {
+  color: #706a60;
+  font-weight: 760;
+}
+
+.collections-preview-section .reward-preview-latest strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .collections-preview-section .reward-preview-card > div {
+    gap: 3px;
+  }
+
+  .reward-preview-heading-row {
+    gap: 8px;
+  }
+
+  .collections-preview-section .reward-preview-heading-row .reward-preview-count {
+    font-size: 0.82rem;
+  }
+
+  .collections-preview-section .reward-preview-latest {
+    font-size: 0.76rem;
+  }
+}

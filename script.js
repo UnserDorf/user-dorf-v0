@@ -2581,8 +2581,9 @@ function renderAchievementPreview(achievementStates = getAchievementStates()) {
   if (!els.achievementPreview) return;
   const earnedAchievements = achievementStates.filter(({ achievement, unlocked }) => unlocked && !achievement.testOnly);
   const latestAchievement = getRecentlyEarnedAchievements(achievementStates)[0]?.achievement || null;
-  els.achievementPreview.replaceChildren(
-    createTextElement("span", "reward-preview-count", `${earnedAchievements.length} earned`),
+  renderRewardPreviewText(
+    els.achievementPreview,
+    `${earnedAchievements.length} earned`,
     createRewardPreviewLatest(latestAchievement ? `${latestAchievement.icon} ${latestAchievement.name}` : "None Yet")
   );
 }
@@ -2594,19 +2595,38 @@ function renderRewardPreviews(profile = getCurrentProfile(), sharedCoins = getGr
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.austriaAlbumPreview) {
     const latestAustriaReward = getLatestRewardById(AUSTRIA_ALBUM_REWARDS, unlockedCurrentAustriaIds);
-    els.austriaAlbumPreview.replaceChildren(
-      createTextElement("span", "reward-preview-count", `${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`),
+    renderRewardPreviewText(
+      els.austriaAlbumPreview,
+      `${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`,
       createRewardPreviewLatest(latestAustriaReward ? getRewardDisplayName(latestAustriaReward) : "None Yet")
     );
   }
   renderDashboardTownCenter(townCenter, sharedCoins);
   if (els.villageAlbumPreview) {
     const latestVillageReward = unlockedVillage[unlockedVillage.length - 1] || null;
-    els.villageAlbumPreview.replaceChildren(
-      createTextElement("span", "reward-preview-count", `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
+    renderRewardPreviewText(
+      els.villageAlbumPreview,
+      `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`,
       createRewardPreviewLatest(latestVillageReward ? getRewardDisplayName(latestVillageReward) : "None Yet")
     );
   }
+}
+
+function renderRewardPreviewText(container, countText, latestElement) {
+  const card = container.closest(".reward-preview-card");
+  const title = card?.querySelector("h4");
+  if (title) {
+    let headingRow = card.querySelector(".reward-preview-heading-row");
+    if (!headingRow) {
+      headingRow = document.createElement("div");
+      headingRow.className = "reward-preview-heading-row";
+      title.replaceWith(headingRow);
+      headingRow.append(title);
+    }
+    headingRow.querySelector(".reward-preview-count")?.remove();
+    headingRow.append(createTextElement("span", "reward-preview-count", countText));
+  }
+  container.replaceChildren(latestElement);
 }
 
 function renderDashboardTownCenter(townCenter, sharedCoins) {
