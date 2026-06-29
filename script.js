@@ -3493,10 +3493,7 @@ function renderRewardDebugPage() {
 
 function createQuizRewardDebugSection(title, quizType) {
   const profile = getCurrentProfile();
-  const sharedCoins = getGroupCoinTotal();
   const unlockedAustriaIds = new Set(getAustriaAlbumUnlockedRewardIds(profile, true));
-  const unlockedMemoryIds = new Set(getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins).map((reward) => reward.id));
-  const label = quizType === "article" ? "article correct" : "vocabulary correct";
   return createRewardDebugSection(title, [
     createTextElement("h4", "", "Quiz achievements"),
     createRewardDebugTable(
@@ -3511,22 +3508,11 @@ function createQuizRewardDebugSection(title, quizType) {
     createRewardDebugTable(
       ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
       AUSTRIA_ALBUM_REWARDS.map((reward, index) => [
-        `${reward.coins} ${label}`,
+        `${reward.coins} personal coins`,
         `Austria Album #${index + 1}`,
         reward.title,
         reward.image || "None",
         createRewardDebugStatusCell(unlockedAustriaIds.has(reward.id), "Unlocked", "Locked")
-      ])
-    ),
-    createTextElement("h4", "", "Village Memories unlocks"),
-    createRewardDebugTable(
-      ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
-      VILLAGE_ALBUM_REWARDS.map((reward, index) => [
-        `${reward.coins} ${label}`,
-        `Village Memories #${index + 1}`,
-        reward.title,
-        reward.image || "None",
-        createRewardDebugStatusCell(unlockedMemoryIds.has(reward.id), "Unlocked", "Locked")
       ])
     )
   ]);
@@ -3610,6 +3596,7 @@ function createRewardDebugAustriaAlbumSection() {
 function createRewardDebugVillageMemoriesSection() {
   const unlockedIds = new Set(getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getGroupCoinTotal()).map((reward) => reward.id));
   return createRewardDebugSection("Village Memories", [
+    createTextElement("p", "reward-debug-note", "Village Memories unlock from shared village coins calculated by getGroupCoinTotal(group)."),
     createRewardDebugTable(
       ["Memory", "Unlock requirement", "Image filename", "Status"],
       VILLAGE_ALBUM_REWARDS.map((reward, index) => [
