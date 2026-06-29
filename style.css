@@ -10120,3 +10120,39 @@ button:active {
     font-size: 0.88rem;
   }
 }
+
+/* Final compact spacing for dashboard collection cards on phones. */
+@media (max-width: 700px) {
+  .collections-preview-section {
+    gap: 8px;
+  }
+
+  .collections-preview-section .reward-preview-grid {
+    gap: 6px;
+  }
+
+  .collections-preview-section .reward-preview-card {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .collection-preview-image {
+    height: clamp(84px, 24vw, 102px);
+    max-height: 102px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .collections-preview-section .reward-preview-card h4 {
+    margin-bottom: 2px;
+  }
+
+  .collections-preview-section .reward-preview-card p {
+    gap: 2px;
+  }
+
+  .collections-preview-section .reward-preview-card .primary-button {
+    margin-top: 1px;
+  }
+}
