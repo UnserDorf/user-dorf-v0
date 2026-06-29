@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=179">
+    <link rel="stylesheet" href="style.css?v=180">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -371,12 +371,15 @@
         <div class="dashboard-heading reward-page-heading">
           <div class="reward-title-stack">
             <button type="button" class="small-link-button" data-dashboard-action="dashboard">← Back</button>
-            <p class="eyebrow">Collection</p>
             <h2 id="rewardPageTitle">My Austria Album</h2>
-            <p id="rewardPageSummary">Unlocked: 0 / 10</p>
           </div>
         </div>
-        <nav class="collection-navigation" id="collectionNavigation" aria-label="Collection sections">
+        <div class="collection-page-intro" id="collectionPageIntro">
+          <img class="collection-page-hero" id="collectionPageHero" src="assets/my-austria-album.png" alt="My Austria Album collection">
+          <p class="collection-page-summary" id="rewardPageSummary">0 / 10 unlocked</p>
+          <p class="collection-page-description" id="collectionPageDescription">Austria adventures will appear here as you earn them.</p>
+        </div>
+        <nav class="collection-navigation hidden" id="collectionNavigation" aria-label="Collection sections">
           <button type="button" data-dashboard-action="achievements">Achievements</button>
           <button type="button" data-dashboard-action="austria-album">Austria Album</button>
           <button type="button" data-dashboard-action="village-album">Village Memories</button>
@@ -875,6 +878,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=166"></script>
+    <script type="module" src="script.js?v=167"></script>
   </body>
 </html>

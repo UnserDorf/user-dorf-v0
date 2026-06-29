@@ -708,6 +708,9 @@ const els = {
   householdList: document.querySelector("#householdList"),
   rewardPageTitle: document.querySelector("#rewardPageTitle"),
   rewardPageSummary: document.querySelector("#rewardPageSummary"),
+  collectionPageIntro: document.querySelector("#collectionPageIntro"),
+  collectionPageHero: document.querySelector("#collectionPageHero"),
+  collectionPageDescription: document.querySelector("#collectionPageDescription"),
   collectionNavigation: document.querySelector("#collectionNavigation"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
@@ -2882,7 +2885,7 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
   if (els.collectionNavigation) {
-    els.collectionNavigation.classList.toggle("hidden", page === "town-center");
+    els.collectionNavigation.classList.add("hidden");
     els.collectionNavigation.querySelectorAll("button[data-dashboard-action]").forEach((button) => {
       button.classList.toggle("active", button.dataset.dashboardAction === page);
     });
@@ -2892,10 +2895,16 @@ function renderRewardsPage(page = "austria-album") {
     const earnedCount = achievementStates.filter(({ unlocked }) => unlocked).length;
     els.rewardPageTitle.textContent = "Achievements";
     els.rewardPageSummary.textContent = `${earnedCount} earned`;
+    setCollectionPageIntro({
+      image: "assets/achievements.png",
+      alt: "Achievements collection",
+      summary: `${earnedCount} earned`,
+      description: "Your learning milestones will appear here as you study."
+    });
     els.achievementsGrid.replaceChildren(
       createRewardSection(
-        "Achievements",
-        `${earnedCount} earned`,
+        "",
+        "",
         achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress)),
         earnedCount === 0 ? "Your learning milestones will appear here as you study." : ""
       )
@@ -2905,16 +2914,23 @@ function renderRewardsPage(page = "austria-album") {
   if (page === "town-center") {
     els.rewardPageTitle.textContent = `🏡 ${getVillageName()} Town Center`;
     els.rewardPageSummary.textContent = `Current Stage: ${townCenter.current.title}`;
+    els.collectionPageIntro?.classList.add("hidden");
     els.achievementsGrid.replaceChildren(createTownCenterPage(townCenter, sharedCoins));
     return;
   }
   if (page === "village-album") {
-    els.rewardPageTitle.textContent = `${getVillageName()} Village Memories`;
-    els.rewardPageSummary.textContent = `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`;
+    els.rewardPageTitle.textContent = "Village Memories";
+    els.rewardPageSummary.textContent = `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`;
+    setCollectionPageIntro({
+      image: "assets/village-memories.png",
+      alt: "Village Memories collection",
+      summary: `${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`,
+      description: "Shared village memories will appear here as your village grows."
+    });
     els.achievementsGrid.replaceChildren(
       createRewardSection(
-        "Village Memories",
-        `Unlocked: ${unlockedVillage.length} / ${VILLAGE_ALBUM_REWARDS.length}`,
+        "",
+        "",
         VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins)),
         unlockedVillage.length === 0 ? "Shared village memories will appear here as your village grows." : ""
       )
@@ -2922,15 +2938,31 @@ function renderRewardsPage(page = "austria-album") {
     return;
   }
   els.rewardPageTitle.textContent = "My Austria Album";
-  els.rewardPageSummary.textContent = `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`;
+  els.rewardPageSummary.textContent = `${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`;
+  setCollectionPageIntro({
+    image: "assets/my-austria-album.png",
+    alt: "My Austria Album collection",
+    summary: `${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length} unlocked`,
+    description: "Austria adventures will appear here as you earn them."
+  });
   els.achievementsGrid.replaceChildren(
     createRewardSection(
-      "My Austria Album",
-      `Unlocked: ${unlockedCurrentAustriaIds.length} / ${AUSTRIA_ALBUM_REWARDS.length}`,
+      "",
+      "",
       AUSTRIA_ALBUM_REWARDS.map((reward) => createAustriaAlbumCard(reward, unlockedCurrentAustriaIds.includes(reward.id))),
       unlockedCurrentAustriaIds.length === 0 ? "Austria adventures will appear here as you earn them." : ""
     )
   );
+}
+
+function setCollectionPageIntro({ image, alt, summary, description }) {
+  els.collectionPageIntro?.classList.remove("hidden");
+  if (els.collectionPageHero) {
+    els.collectionPageHero.src = image;
+    els.collectionPageHero.alt = alt;
+  }
+  if (els.rewardPageSummary) els.rewardPageSummary.textContent = summary;
+  if (els.collectionPageDescription) els.collectionPageDescription.textContent = description;
 }
 
 function getUnlockedCurrentRewardIds(rewards, unlockedIds) {
@@ -3003,7 +3035,7 @@ function createRewardSection(title, summary, cards, emptyNote = "") {
   const grid = document.createElement("div");
   grid.className = "reward-card-grid";
   grid.replaceChildren(...cards);
-  const children = [heading];
+  const children = title || summary ? [heading] : [];
   if (emptyNote) children.push(createTextElement("p", "reward-section-empty-note", emptyNote));
   children.push(grid);
   section.replaceChildren(...children);
