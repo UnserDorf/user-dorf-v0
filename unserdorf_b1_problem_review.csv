@@ -1,0 +1,419 @@
+id,German,Article,Plural,English,CEFR,WordType,VocabularyQuizEligible,ArticleQuizEligible,ProblemFlag,ProblemType,SourcePage,RawEntry,Notes
+b1_0001,abschreiben,,,,B1,verb,yes,no,yes,separable_verb,16,"abschreiben, schreibt ab,",
+b1_0002,Abitur,das,CH:,,B1,noun,yes,yes,yes,regional_variant,16,"das Abitur (D)→A, CH:",regional_variant_or_reference
+b1_0004,ablehnen,,,,B1,verb,yes,no,yes,separable_verb,16,"ablehnen, lehnt ab,",
+b1_0005,abmachen,,,,B1,verb,yes,no,yes,separable_verb,16,"abmachen, macht ab,",
+b1_0006,abnehmen,,,,B1,verb,yes,no,yes,separable_verb,16,"abnehmen, nimmt ab,",
+b1_0009,absagen,,,,B1,verb,yes,no,yes,separable_verb,16,"absagen, sagt ab, sagte",
+b1_0016,abstimmen,,,,B1,verb,yes,no,yes,separable_verb,16,"abstimmen, stimmt ab,",
+b1_0019,Abwartin,die,-nen (CH),,B1,noun,yes,yes,yes,regional_variant,16,"die Abwartin, -nen (CH) →",regional_variant_or_reference
+b1_0021,abwaschen,,,,B1,verb,yes,no,yes,separable_verb,16,"abwaschen, wäscht ab,",
+b1_0025,abbiegen,,,,B1,verb,yes,no,yes,separable_verb,16,"abbiegen, biegt ab,",
+b1_0029,abfahren,,,,B1,verb,yes,no,yes,separable_verb,16,"abfahren, fährt ab,",
+b1_0033,Abgase (Pl.),,,,B1,phrase,yes,no,yes,multi_word_expression,16,Abgase (Pl.),
+b1_0034,abgeben,,,,B1,verb,yes,no,yes,separable_verb,16,"abgeben, gibt ab, gab ab,",
+b1_0035,abhängen,,,,B1,verb,yes,no,yes,separable_verb,16,"abhängen, hängt ab, hing",
+b1_0037,abheben,,,,B1,verb,yes,no,yes,separable_verb,16,"abheben, hebt ab, hob ab,",
+b1_0038,abholen,,,,B1,verb,yes,no,yes,separable_verb,16,"abholen, holt ab, holte ab,",
+b1_0039,Lasst uns über diesen Punkt abstimmen.,,,,B1,phrase,yes,no,yes,multi_word_expression,16,Lasst uns über diesen Punkt abstimmen.,
+b1_0043,als ob,,,,B1,phrase,yes,no,yes,multi_word_expression,17,als ob,
+b1_0047,Altenheim,das,-e,,B1,noun,yes,yes,yes,regional_variant,17,"das Altenheim, -e →",regional_variant_or_reference
+b1_0049,Altersheim,das,-e,,B1,noun,yes,yes,yes,regional_variant,17,"das Altersheim, -e →",regional_variant_or_reference
+b1_0055,sich amüsieren,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,17,"sich amüsieren, amüsiert",reflexive
+b1_0058,anbieten,,,,B1,verb,yes,no,yes,separable_verb,17,"anbieten, bietet an,",
+b1_0070,all-,,,,B1,word_part,review,no,no,,17,all-,word_part_or_prefix
+b1_0072,aller-,,,,B1,word_part,review,no,no,,17,aller-,word_part_or_prefix
+b1_0078,anhaben,,,,B1,verb,yes,no,yes,separable_verb,18,"anhaben, hat an, hatte an,",
+b1_0079,anklicken,,,,B1,verb,yes,no,yes,separable_verb,18,"anklicken, klickt an,",
+b1_0080,ankommen,,,,B1,verb,yes,no,yes,separable_verb,18,"ankommen, kommt an,",
+b1_0082,ankündigen,,,,B1,verb,yes,no,yes,separable_verb,18,"ankündigen, kündigt an,",
+b1_0085,anmelden,,,,B1,verb,yes,no,yes,separable_verb,18,"anmelden, meldet an,",
+b1_0087,annehmen,,,,B1,verb,yes,no,yes,separable_verb,18,"annehmen, nimmt an,",
+b1_0090,anrufen,,,,B1,verb,yes,no,yes,separable_verb,18,"anrufen, ruft an, rief an,",
+b1_0096,ander-,,,,B1,word_part,review,no,no,,18,ander-,word_part_or_prefix
+b1_0101,anerkennen,,,,B1,verb,yes,no,yes,separable_verb,18,"anerkennen, erkennt an,",
+b1_0102,anfangen,,,,B1,verb,yes,no,yes,separable_verb,18,"anfangen, fängt an,",
+b1_0105,angeben,,,,B1,verb,yes,no,yes,separable_verb,18,"angeben, gibt an, gab an,",
+b1_0112,anzeigen,,,,B1,verb,yes,no,yes,separable_verb,19,"anzeigen, zeigt an,",
+b1_0120,Aprikose,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,19,"die Aprikose, -n (D, CH) →",regional_variant_or_reference
+b1_0130,anschaffen,,,,B1,verb,yes,no,yes,separable_verb,19,"anschaffen, schafft an,",
+b1_0131,anschließen,,,,B1,verb,yes,no,yes,separable_verb,19,"anschließen, schließt an,",
+b1_0133,anschnallen,,,,B1,verb,yes,no,yes,separable_verb,19,"anschnallen, schnallt an,",
+b1_0134,ansehen,,,,B1,verb,yes,no,yes,separable_verb,19,"ansehen, sieht an, sah an,",
+b1_0135,ansprechen,,,,B1,verb,yes,no,yes,separable_verb,19,"ansprechen, spricht an,",
+b1_0137,anstellen,,,,B1,verb,yes,no,yes,separable_verb,19,"anstellen, stellt an,",
+b1_0140,sich anstrengen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,19,"sich anstrengen, strengt",reflexive
+b1_0143,anwenden,,,,B1,verb,yes,no,yes,separable_verb,19,"anwenden, wendet an,",
+b1_0147,Wohnungen sind zu teuer.,die,,,B1,noun,yes,yes,yes,multi_word_expression,19,die Wohnungen sind zu teuer.,
+b1_0148,bekommen Sie eine Anzeige.,,,,B1,phrase,yes,no,yes,multi_word_expression,19,bekommen Sie eine Anzeige.,
+b1_0149,Schmecken dir die Aprikosen?,,,,B1,phrase,yes,no,yes,multi_word_expression,19,Schmecken dir die Aprikosen?,
+b1_0151,auffallen,,,,B1,verb,yes,no,yes,separable_verb,20,"auffallen, fällt auf,",
+b1_0152,auffordern,,,,B1,verb,yes,no,yes,separable_verb,20,"auffordern, fordert auf,",
+b1_0154,aufführen,,,,B1,verb,yes,no,yes,separable_verb,20,"aufführen, führt auf,",
+b1_0156,aufgeben,,,,B1,verb,yes,no,yes,separable_verb,20,"aufgeben, gibt auf, gab",
+b1_0157,aufhalten,,,,B1,verb,yes,no,yes,separable_verb,20,"aufhalten, hält auf, hielt",
+b1_0158,aufheben,,,,B1,verb,yes,no,yes,separable_verb,20,"aufheben, hebt auf,",
+b1_0159,aufhören,,,,B1,verb,yes,no,yes,separable_verb,20,"aufhören, hört auf,",
+b1_0160,aufladen,,,,B1,verb,yes,no,yes,separable_verb,20,"aufladen, lädt auf, lud auf,",
+b1_0161,auflösen,,,,B1,verb,yes,no,yes,separable_verb,20,"auflösen, löst auf,",
+b1_0163,aufnehmen,,,,B1,verb,yes,no,yes,separable_verb,20,"aufnehmen, nimmt auf,",
+b1_0182,ausdrucken,,,,B1,verb,yes,no,yes,separable_verb,21,"ausdrucken, druckt aus,",
+b1_0186,ausfallen,,,,B1,verb,yes,no,yes,separable_verb,21,"ausfallen, fällt aus,",
+b1_0188,ausfüllen,,,,B1,verb,yes,no,yes,separable_verb,21,"ausfüllen, füllt aus,",
+b1_0191,ausgeben,,,,B1,verb,yes,no,yes,separable_verb,21,"ausgeben, gibt aus,",
+b1_0192,ausgehen,,,,B1,verb,yes,no,yes,separable_verb,21,"ausgehen, geht aus,",
+b1_0197,aufpassen,,,,B1,verb,yes,no,yes,separable_verb,21,"aufpassen, passt auf,",
+b1_0198,aufräumen,,,,B1,verb,yes,no,yes,separable_verb,21,"aufräumen, räumt auf,",
+b1_0199,aufregen,,,,B1,verb,yes,no,yes,separable_verb,21,"aufregen, regt auf,",
+b1_0200,aufstehen,,,,B1,verb,yes,no,yes,separable_verb,21,"aufstehen, steht auf,",
+b1_0202,auftreten,,,,B1,verb,yes,no,yes,separable_verb,21,"auftreten, tritt auf,",
+b1_0204,aufwachen,,,,B1,verb,yes,no,yes,separable_verb,21,"aufwachen, wacht auf,",
+b1_0206,Aufzug,der,"¨-e (D, A)",,B1,noun,yes,yes,yes,regional_variant,21,"der Aufzug, ¨-e (D, A) →",regional_variant_or_reference
+b1_0211,Füllen Sie bitte dieses Formular aus!,,,,B1,phrase,yes,no,yes,multi_word_expression,21,Füllen Sie bitte dieses Formular aus!,
+b1_0213,aussprechen,,,,B1,verb,yes,no,yes,separable_verb,22,"aussprechen, spricht aus,",
+b1_0215,ausstellen,,,,B1,verb,yes,no,yes,separable_verb,22,"ausstellen, stellt aus,",
+b1_0217,auswählen,,,,B1,verb,yes,no,yes,separable_verb,22,"auswählen, wählt aus,",
+b1_0220,ausziehen,,,,B1,verb,yes,no,yes,separable_verb,22,"ausziehen, zieht aus,",
+b1_0230,ausmachen,,,,B1,verb,yes,no,yes,separable_verb,22,"ausmachen, macht aus,",
+b1_0232,ausreichen,,,,B1,verb,yes,no,yes,separable_verb,22,"ausreichen, reicht aus, re-",
+b1_0234,ausrichten,,,,B1,verb,yes,no,yes,separable_verb,22,"ausrichten, richtet aus,",
+b1_0235,ausschließen,,,,B1,verb,yes,no,yes,separable_verb,22,"ausschließen, schließt aus,",
+b1_0237,aussehen,,,,B1,verb,yes,no,yes,separable_verb,22,"aussehen, sieht aus,",
+b1_0261,sich bedanken,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,23,"sich bedanken, bedankt,",reflexive
+b1_0275,Bahnsteig,der,"-e (D, A)",,B1,noun,yes,yes,yes,regional_variant,23,"der Bahnsteig, -e (D, A) →",regional_variant_or_reference
+b1_0282,Bankomat,der,,,B1,noun,yes,yes,yes,multiple_forms,23,"der Bancomat/Bankomat,",
+b1_0283,-en (A,,,,B1,phrase,yes,no,yes,multi_word_expression; regional_variant,23,"-en (A, CH) →D:",regional_variant_or_reference
+b1_0287,Zahlen Sie bar?,,,,B1,phrase,yes,no,yes,multi_word_expression,23,Zahlen Sie bar?,
+b1_0288,Ich habe kein Bargeld mehr.,,,,B1,phrase,yes,no,yes,multi_word_expression,23,Ich habe kein Bargeld mehr.,
+b1_0289,John trägt jetzt einen Bart.,,,,B1,phrase,yes,no,yes,multi_word_expression,23,John trägt jetzt einen Bart.,
+b1_0303,bekannt geben,,,,B1,verb,yes,no,yes,multi_word_expression,24,"bekannt geben, gibt",
+b1_0309,sich beeilen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,24,"sich beeilen, beeilt sich,",reflexive
+b1_0311,sich befinden,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,24,"sich befinden, befindet",reflexive
+b1_0336,Bescheid sagen,,,,B1,phrase,yes,no,yes,multi_word_expression,25,Bescheid sagen,
+b1_0337,Bescheid geben,,,,B1,phrase,yes,no,yes,multi_word_expression,25,Bescheid geben,
+b1_0342,sich beschweren,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,25,"sich beschweren,",reflexive
+b1_0347,sich bemühen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,25,"sich bemühen, bemüht,",reflexive
+b1_0360,sich beteiligen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,26,"sich beteiligen, beteiligt",reflexive
+b1_0378,sich bewerben,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,26,"sich bewerben, bewirbt",reflexive
+b1_0382,besonder-,,,,B1,word_part,review,no,no,,26,besonder-,word_part_or_prefix
+b1_0423,Billett,das,-e/-s,,B1,noun,yes,yes,yes,regional_variant,27,"das Billett, -e/-s →D, A:",regional_variant_or_reference
+b1_0427,Bio-,,,,B1,word_part,review,no,no,,27,Bio-,word_part_or_prefix
+b1_0432,ein bisschen,,,,B1,phrase,yes,no,yes,multi_word_expression,27,ein bisschen,
+b1_0439,Briefumschlag,der,¨-e,,B1,noun,yes,yes,yes,regional_variant,28,"der Briefumschlag, ¨-e →",regional_variant_or_reference
+b1_0440,Brieftasche,die,-n,,B1,noun,yes,yes,yes,regional_variant,28,"die Brieftasche, -n →D,",regional_variant_or_reference
+b1_0441,monee; A: Geldbörse,,,,B1,phrase,yes,no,yes,multi_word_expression,28,monee; A: Geldbörse,
+b1_0446,Brötchen,das,- (D),,B1,noun,yes,yes,yes,regional_variant,28,"das Brötchen, - (D) →A:",regional_variant_or_reference
+b1_0447,Semmel; CH: Brötli,,,,B1,phrase,yes,no,yes,multi_word_expression,28,Semmel; CH: Brötli,
+b1_0448,Brötli,das,- (CH),,B1,noun,yes,yes,yes,regional_variant,28,"das Brötli, - (CH) →D:",regional_variant_or_reference
+b1_0449,Brötchen; A: Semmel,,,,B1,phrase,yes,no,yes,multi_word_expression,28,Brötchen; A: Semmel,
+b1_0453,Bub,der,"-en (A, CH)",,B1,noun,yes,yes,yes,regional_variant,28,"der Bub, -en (A, CH) →D:",regional_variant_or_reference
+b1_0473,nicht im Supermarkt.,,,,B1,phrase,yes,no,yes,multi_word_expression,28,nicht im Supermarkt.,
+b1_0474,Fahrt mit.,die,,,B1,noun,yes,yes,yes,multi_word_expression,28,die Fahrt mit.,
+b1_0479,Couvert,das,-s (CH),,B1,noun,yes,yes,yes,regional_variant,29,"das Couvert, -s (CH) →",regional_variant_or_reference
+b1_0480,Briefumschlag; A: Kuvert,,,,B1,phrase,yes,no,yes,multi_word_expression,29,Briefumschlag; A: Kuvert,
+b1_0490,Büchse,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,29,"die Büchse, -n (D, CH) →",regional_variant_or_reference
+b1_0507,chic/schick,,,,B1,adjective/adverb/other,yes,no,yes,multiple_forms,29,chic/schick,
+b1_0521,Dessert,das,-s,,B1,noun,yes,yes,yes,regional_variant,30,"das Dessert, -s →D, A:",regional_variant_or_reference
+b1_0539,Daten,die,,,B1,noun,yes,yes,yes,multi_word_expression,30,die Daten (Plural),
+b1_0550,Doppel-,,,,B1,word_part,review,no,no,,31,Doppel-,word_part_or_prefix
+b1_0554,Dose,die,-n,,B1,noun,yes,yes,yes,regional_variant,31,"die Dose, -n →D, CH:",regional_variant_or_reference
+b1_0568,dies-,,,,B1,word_part,review,no,no,,31,dies-,word_part_or_prefix
+b1_0609,einbrechen,,,,B1,verb,yes,no,yes,separable_verb,33,"einbrechen, bricht ein,",
+b1_0618,einfallen,,,,B1,verb,yes,no,yes,separable_verb,33,"einfallen, fällt ein, fiel ein,",
+b1_0623,EC-Karte,die,,,B1,noun,yes,yes,yes,multiple_forms; regional_variant,33,die ec-Karte/EC-Karte →,regional_variant_or_reference
+b1_0624,Ecke,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,33,"die Ecke, -n (D, CH) →A:",regional_variant_or_reference
+b1_0626,Eck,das,-en (A),,B1,noun,yes,yes,yes,regional_variant,33,"das Eck, -en (A) →D, CH:",regional_variant_or_reference
+b1_0639,sich eignen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,33,"sich eignen, eignet sich,",reflexive
+b1_0641,einpacken,,,,B1,verb,yes,no,yes,separable_verb,34,"einpacken, packt ein,",
+b1_0642,einrichten,,,,B1,verb,yes,no,yes,separable_verb,34,"einrichten, richtet ein,",
+b1_0645,einschalten,,,,B1,verb,yes,no,yes,separable_verb,34,"einschalten, schaltet ein,",
+b1_0648,einsetzen,,,,B1,verb,yes,no,yes,separable_verb,34,"einsetzen, setzt ein,",
+b1_0649,einsteigen,,,,B1,verb,yes,no,yes,separable_verb,34,"einsteigen, steigt ein, stieg",
+b1_0650,einstellen,,,,B1,verb,yes,no,yes,separable_verb,34,"einstellen, stellt ein,",
+b1_0651,eintragen,,,,B1,verb,yes,no,yes,separable_verb,34,"eintragen, trägt ein,",
+b1_0652,eintreten,,,,B1,verb,yes,no,yes,separable_verb,34,"eintreten, tritt ein, trat",
+b1_0658,einfügen,,,,B1,verb,yes,no,yes,separable_verb,34,"einfügen, fügt ein,",
+b1_0659,einführen,,,,B1,verb,yes,no,yes,separable_verb,34,"einführen, führt ein,",
+b1_0663,einig-,,,,B1,word_part,review,no,no,,34,einig-,word_part_or_prefix
+b1_0664,sich einigen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,34,"sich einigen, einigt sich,",reflexive
+b1_0665,einkaufen,,,,B1,verb,yes,no,yes,separable_verb,34,"einkaufen, kauft ein,",
+b1_0668,einladen,,,,B1,verb,yes,no,yes,separable_verb,34,"einladen, lädt ein, lud ein,",
+b1_0671,einnehmen,,,,B1,verb,yes,no,yes,separable_verb,34,"einnehmen, nimmt ein,",
+b1_0688,einzahlen,,,,B1,verb,yes,no,yes,separable_verb,35,"einzahlen, zahlt ein,",
+b1_0691,Einzel-,,,,B1,word_part,review,no,no,,35,Einzel-,word_part_or_prefix
+b1_0694,einziehen,,,,B1,verb,yes,no,yes,separable_verb,35,"einziehen, zieht ein,",
+b1_0695,zog ein,,,,B1,phrase,yes,no,yes,multi_word_expression,35,"zog ein, ist eingezogen",
+b1_0697,Eis,das,A),,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,35,"das Eis (D, A) →CH:",regional_variant_or_reference
+b1_0698,Glace/Glacé,,,,B1,other,yes,no,yes,multiple_forms,35,Glace/Glacé,
+b1_0702,Elektro-,,,,B1,word_part,review,no,no,,35,Elektro-,word_part_or_prefix
+b1_0704,Eltern,die,,,B1,noun,yes,yes,yes,multi_word_expression,35,die Eltern (Pl.),
+b1_0710,Erdapfel,der,¨- (A),,B1,noun,yes,yes,yes,regional_variant,36,"der Erdapfel, ¨- (A) →",regional_variant_or_reference
+b1_0712,Erdgeschoss,das,,,B1,noun,yes,yes,yes,multiple_forms,36,das Erdgeschoss/,
+b1_0715,sich ereignen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,36,"sich ereignen,",reflexive
+b1_0732,sich entschließen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,36,"sich entschließen,",reflexive
+b1_0741,entweder ... oder,,,,B1,phrase,yes,no,yes,multi_word_expression,36,entweder ... oder,
+b1_0745,Steuern erhöhen.,die,,,B1,noun,yes,yes,yes,multi_word_expression,36,die Steuern erhöhen.,
+b1_0763,sich erholen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erholen,",reflexive
+b1_0767,sich erkälten,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erkälten, erkältet sich,",reflexive
+b1_0773,sich erkundigen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,37,"sich erkundigen,",reflexive
+b1_0789,Fachleute,die,,,B1,noun,yes,yes,yes,multi_word_expression,38,die Fachleute (Pl.),
+b1_0793,erst-,,,,B1,word_part,review,no,no,,38,erst-,word_part_or_prefix
+b1_0806,Etage,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,38,"die Etage, -n (D, CH) →",regional_variant_or_reference
+b1_0812,Faschierte,das,,,B1,noun,yes,yes,yes,regional_variant,39,"das Faschierte (A) →D,",regional_variant_or_reference
+b1_0813,Fasching,der,"- (D, A)",,B1,noun,yes,yes,yes,regional_variant,39,"der Fasching, - (D, A) →D:",regional_variant_or_reference
+b1_0814,Karneval; CH: Fasnacht,,,,B1,phrase,yes,no,yes,multi_word_expression,39,Karneval; CH: Fasnacht,
+b1_0815,Fasnacht,die,A:,,B1,noun,yes,yes,yes,regional_variant,39,"die Fasnacht (CH) →D, A:",regional_variant_or_reference
+b1_0816,Fasching; D: Karneval,,,,B1,phrase,yes,no,yes,multi_word_expression,39,Fasching; D: Karneval,
+b1_0821,Fauteuil,der,"-s (A, CH)",,B1,noun,yes,yes,yes,regional_variant,39,"der Fauteuil, -s (A, CH) →",regional_variant_or_reference
+b1_0834,Fahrrad,das,¨-er,,B1,noun,yes,yes,yes,regional_variant,39,"das Fahrrad, ¨-er →D, A:",regional_variant_or_reference
+b1_0835,Rad; CH: Velo,,,,B1,phrase,yes,no,yes,multi_word_expression,39,Rad; CH: Velo,
+b1_0845,Familienstand,der,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,39,"der Familienstand (D, A) →",regional_variant_or_reference
+b1_0848,Fantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,39,"die Fantasie/Phantasie, -n",
+b1_0870,Ferien,die,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,40,"die Ferien (Pl.) (CH) →D,",regional_variant_or_reference
+b1_0871,Ferien-,,,,B1,word_part,review,no,no,,40,Ferien-,word_part_or_prefix
+b1_0880,festhalten,,,,B1,verb,yes,no,yes,separable_verb,40,"festhalten, hält fest,",
+b1_0881,festlegen,,,,B1,verb,yes,no,yes,separable_verb,40,"festlegen, legt fest,",
+b1_0882,festnehmen nimmt fest,,,,B1,phrase,yes,no,yes,multi_word_expression,40,"festnehmen nimmt fest,",
+b1_0883,festsetzen,,,,B1,verb,yes,no,yes,separable_verb,40,"festsetzen, setzt fest, set-",
+b1_0884,feststehen,,,,B1,verb,yes,no,yes,separable_verb,40,"feststehen, steht fest,",
+b1_0885,feststellen,,,,B1,verb,yes,no,yes,separable_verb,40,"feststellen, stellt fest,",
+b1_0904,im Freien,,,,B1,phrase,yes,no,yes,multi_word_expression,41,im Freien,
+b1_0918,Flur,der,-e,,B1,noun,yes,yes,yes,regional_variant,41,"der Flur, -e →Gang; D, CH:",regional_variant_or_reference
+b1_0930,früher/früher-,,,,B1,other,yes,no,yes,multiple_forms,42,früher/früher-,
+b1_0944,sich freuen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,42,"sich freuen, freut sich,",reflexive
+b1_0959,Früchte,,,,B1,other,yes,no,yes,regional_variant,42,"Früchte (CH) →D, A: Obst",regional_variant_or_reference
+b1_0962,seit zehn Jahren.,,,,B1,phrase,yes,no,yes,multi_word_expression,42,seit zehn Jahren.,
+b1_0963,Mannschaft 2 : 0.,,,,B1,phrase,yes,no,yes,multi_word_expression,42,Mannschaft 2 : 0.,
+b1_0964,Automat funktioniert?,der,,,B1,noun,yes,yes,yes,multi_word_expression,42,der Automat funktioniert?,
+b1_0975,geboren werden,,,,B1,verb,yes,no,yes,multi_word_expression,43,"geboren werden, wird",
+b1_1005,Gehsteig,der,A),,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,44,"der Gehsteig (D, A) →CH:",regional_variant_or_reference
+b1_1009,Bancomat/Bankomat,,,,B1,other,yes,no,yes,multiple_forms,44,Bancomat/Bankomat,
+b1_1010,Geldbörse,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,44,"die Geldbörse, -n (A) →",regional_variant_or_reference
+b1_1011,Brieftasche; D,,,,B1,phrase,yes,no,yes,multi_word_expression,44,"Brieftasche; D, CH: Porte-",
+b1_1012,monnaie/Portmonee,,,,B1,adjective/adverb/other,yes,no,yes,multiple_forms,44,monnaie/Portmonee,
+b1_1020,sich etwas gefallen lassen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,44,"sich etwas gefallen lassen,",reflexive
+b1_1030,nicht höflich.,,,,B1,phrase,yes,no,yes,multi_word_expression,44,nicht höflich.,
+b1_1034,gern/gerne,,,,B1,other,yes,no,yes,multiple_forms,45,gern/gerne,
+b1_1035,gesamt-/Gesamt-,,,,B1,other,yes,no,yes,multiple_forms,45,gesamt-/Gesamt-,
+b1_1047,Geschwister,die,,,B1,noun,yes,yes,yes,multi_word_expression,45,die Geschwister (Pl.),
+b1_1073,Glace,das,-n,,B1,noun,yes,yes,yes,multiple_forms,46,"das Glace/Glacé, -n",
+b1_1129,Groß-,,,,B1,word_part,review,no,no,,47,Groß-,word_part_or_prefix
+b1_1149,Haupt-,,,,B1,word_part,review,no,no,,48,Haupt-,word_part_or_prefix
+b1_1151,Hackfleisch,das,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,48,"das Hackfleisch (D, CH) →",regional_variant_or_reference
+b1_1154,Hähnchen,das,,,B1,noun,yes,yes,yes,multiple_forms,48,"das Hähnchen/Hühnchen,",
+b1_1155,-,,,,B1,word_part,review,no,yes,regional_variant,48,- (D) →A: Hend(e)l;,regional_variant_or_reference; word_part_or_prefix
+b1_1175,Hendl,das,- (A),,B1,noun,yes,yes,yes,regional_variant,49,"das Hend(e)l, - (A) →D:",regional_variant_or_reference
+b1_1176,Hähnchen/Hühnchen; CH:,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,49,Hähnchen/Hühnchen; CH:,
+b1_1177,her/her-,,,,B1,other,yes,no,yes,multiple_forms,49,her/her-,
+b1_1178,heraus-,,,,B1,word_part,review,no,no,,49,"heraus-, raus-",word_part_or_prefix
+b1_1181,herein-,,,,B1,word_part,review,no,no,,49,"herein-, rein-",word_part_or_prefix
+b1_1184,herstellen,,,,B1,verb,yes,no,yes,separable_verb,49,"herstellen, stellt her,",
+b1_1186,herunter-,,,,B1,word_part,review,no,no,,49,"herunter-, runter-",word_part_or_prefix
+b1_1214,hochladen,,,,B1,verb,yes,no,yes,separable_verb,50,"hochladen, lädt hoch,",
+b1_1230,hier/hier-,,,,B1,other,yes,no,yes,multiple_forms,50,hier/hier-,
+b1_1234,hinter/hinter-,,,,B1,other,yes,no,yes,multiple_forms,50,hinter/hinter-,
+b1_1237,hinweisen,,,,B1,verb,yes,no,yes,separable_verb,50,"hinweisen, weist hin,",
+b1_1270,Imbiss,der,-e (D),,B1,noun,yes,yes,yes,regional_variant,51,"der Imbiss, -e (D) →A:",regional_variant_or_reference
+b1_1272,neuen Prüfungstermine.,die,,,B1,noun,yes,yes,yes,multi_word_expression,51,die neuen Prüfungstermine.,
+b1_1273,über die Bedingungen informieren.,,,,B1,phrase,yes,no,yes,multi_word_expression,51,über die Bedingungen informieren.,
+b1_1278,sich irren,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,52,"sich irren, irrt sich,",reflexive
+b1_1281,Jause,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,52,"die Jause, -n (A) →D: Im-",regional_variant_or_reference
+b1_1282,biss; CH: Znüni/Zvieri,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,52,biss; CH: Znüni/Zvieri,
+b1_1284,je … desto …,,,,B1,phrase,yes,no,yes,multi_word_expression,52,je … desto …,
+b1_1285,Jeans,die,,,B1,noun,yes,yes,yes,multi_word_expression,52,die Jeans (Pl.),
+b1_1322,jedes Mal,,,,B1,phrase,yes,no,yes,multi_word_expression,53,jedes Mal,
+b1_1335,Junge,der,-n (D),,B1,noun,yes,yes,yes,regional_variant,53,"der Junge, -n (D) →A, CH:",regional_variant_or_reference
+b1_1337,Kalender notiert.,,,,B1,phrase,yes,no,yes,multi_word_expression,53,Kalender notiert.,
+b1_1338,Ich muss erst in meinem Terminkalen-,,,,B1,phrase,yes,no,yes,multi_word_expression,53,Ich muss erst in meinem Terminkalen-,
+b1_1349,Kenntnisse,die,,,B1,noun,yes,yes,yes,multi_word_expression,54,die Kenntnisse (Pl.),
+b1_1362,Karneval,der,-s/-e (D),,B1,noun,yes,yes,yes,regional_variant,54,"der Karneval, -s/-e (D) →",regional_variant_or_reference
+b1_1364,Karotte,die,-n,,B1,noun,yes,yes,yes,regional_variant,54,"die Karotte, -n →D:",regional_variant_or_reference
+b1_1365,Möhre; CH: Rüebli,,,,B1,phrase,yes,no,yes,multi_word_expression,54,Möhre; CH: Rüebli,
+b1_1370,Kartoffel,die,-n,,B1,noun,yes,yes,yes,regional_variant,54,"die Kartoffel, -n →A: Er-",regional_variant_or_reference
+b1_1375,Kasten,der,¨- (D),,B1,noun,yes,yes,yes,regional_variant,54,"der Kasten, ¨- (D) →Kiste",regional_variant_or_reference
+b1_1384,Kloß,der,¨-e (D),,B1,noun,yes,yes,yes,regional_variant,55,"der Kloß, ¨-e (D) →D, A:",regional_variant_or_reference
+b1_1391,Knödel,der,"- (D, A)",,B1,noun,yes,yes,yes,regional_variant,55,"der Knödel, - (D, A) →D:",regional_variant_or_reference
+b1_1400,Kiste,die,"-n (A, D)",,B1,noun,yes,yes,yes,regional_variant,55,"die Kiste, -n (A, D) →D:",regional_variant_or_reference
+b1_1428,sich konzentrieren,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,56,"sich konzentrieren,",reflexive
+b1_1437,Korridor,der,"-e (D, CH)",,B1,noun,yes,yes,yes,regional_variant,56,"der Korridor, -e (D, CH) →",regional_variant_or_reference
+b1_1438,Gang; D: Flur,,,,B1,phrase,yes,no,yes,multi_word_expression,56,Gang; D: Flur,
+b1_1459,Kriminal-,,,,B1,word_part,review,no,no,,57,Kriminal-,word_part_or_prefix
+b1_1473,Kosten,die,,,B1,noun,yes,yes,yes,multi_word_expression,57,die Kosten (Pl.),
+b1_1493,Kuvert,das,-s (A),,B1,noun,yes,yes,yes,regional_variant,58,"das Kuvert, -s (A) →der",regional_variant_or_reference
+b1_1494,Briefumschlag; CH: Cou-,,,,B1,phrase,yes,no,yes,multi_word_expression,58,Briefumschlag; CH: Cou-,
+b1_1508,sich kümmern,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,58,"sich kümmern, kümmert",reflexive
+b1_1533,Lebensmittel,die,,,B1,noun,yes,yes,yes,multi_word_expression,59,die Lebensmittel (Pl.),
+b1_1547,sich langweilen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,59,"sich langweilen, langweilt,",reflexive
+b1_1557,letzt-,,,,B1,word_part,review,no,no,,60,letzt-,word_part_or_prefix
+b1_1558,Leute,die,,,B1,noun,yes,yes,yes,multi_word_expression,60,die Leute (Pl.),
+b1_1564,Lieblings-,,,,B1,word_part,review,no,no,,60,Lieblings-,word_part_or_prefix
+b1_1573,leid tun,,,,B1,phrase,yes,no,yes,multi_word_expression,60,"leid tun, tut leid, tat leid,",
+b1_1586,so nichts sehen.,,,,B1,phrase,yes,no,yes,multi_word_expression,60,so nichts sehen.,
+b1_1587,Licht an?,das,,,B1,noun,yes,yes,yes,multi_word_expression,60,das Licht an?,
+b1_1601,Lift,der,-e,,B1,noun,yes,yes,yes,regional_variant,61,"der Lift, -e →D, A: Aufzug",regional_variant_or_reference
+b1_1605,link-,,,,B1,word_part,review,no,no,,61,link-,word_part_or_prefix
+b1_1614,sich lohnen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,61,"sich lohnen, lohnt sich,",reflexive
+b1_1616,los/los-,,,,B1,word_part,review,no,yes,multiple_forms,61,los/los-,word_part_or_prefix
+b1_1617,losfahren,,,,B1,verb,yes,no,yes,separable_verb,61,"losfahren, fährt los,",
+b1_1623,Matura,die,CH),,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,62,"die Matura (A, CH) →D:",regional_variant_or_reference
+b1_1629,Medien,die,,,B1,noun,yes,yes,yes,multi_word_expression,62,die Medien (Pl.),
+b1_1634,mehr (siehe auch viel),,,,B1,phrase,yes,no,yes,multi_word_expression,62,mehr (siehe auch viel),
+b1_1645,manch-,,,,B1,word_part,review,no,no,,62,manch-,word_part_or_prefix
+b1_1655,Marille,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,62,"die Marille, -n (A) →D, CH:",regional_variant_or_reference
+b1_1660,letzten Prüfung.,der,,,B1,noun,yes,yes,yes,multi_word_expression,62,der letzten Prüfung.,
+b1_1666,Metzger,der,-,,B1,noun,yes,yes,yes,regional_variant,63,"der Metzger, - →A: Fleis-",regional_variant_or_reference
+b1_1682,miss-,,,,B1,word_part,review,no,no,,63,miss-,word_part_or_prefix
+b1_1685,meist-,,,,B1,word_part,review,no,no,,63,"meist-, die meisten",word_part_or_prefix
+b1_1706,Möhre,die,-n (D),,B1,noun,yes,yes,yes,regional_variant,64,"die Möhre, -n (D) →",regional_variant_or_reference
+b1_1707,Karotte; CH: Rüebli,,,,B1,phrase,yes,no,yes,multi_word_expression,64,Karotte; CH: Rüebli,
+b1_1723,mitteilen,,,,B1,verb,yes,no,yes,separable_verb,64,"mitteilen, teilt mit,",
+b1_1726,mittler-,,,,B1,word_part,review,no,no,,64,mittler-,word_part_or_prefix
+b1_1731,mobil/mobil-,,,,B1,word_part,review,no,yes,multiple_forms,64,mobil/mobil-,word_part_or_prefix
+b1_1734,Sie wollen ans Meer? Da gibt es,,,,B1,phrase,yes,no,yes,multi_word_expression,64,Sie wollen ans Meer? Da gibt es,
+b1_1736,nachdenken,,,,B1,verb,yes,no,yes,separable_verb,65,"nachdenken, denkt nach,",
+b1_1743,nächst-,,,,B1,word_part,review,no,no,,65,nächst-,word_part_or_prefix
+b1_1751,sich nähern,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,65,"sich nähern, nähert sich,",reflexive
+b1_1762,Müsli,das,-,,B1,noun,yes,yes,yes,multiple_forms,65,"das Müesli/Müsli, -",
+b1_1770,Nach dem Essen gab es noch eine,,,,B1,phrase,yes,no,yes,multi_word_expression,65,Nach dem Essen gab es noch eine,
+b1_1793,national/national-,,,,B1,word_part,review,no,yes,multiple_forms,66,national/national-,word_part_or_prefix
+b1_1824,noch mal,,,,B1,phrase,yes,no,yes,multi_word_expression,67,noch mal,
+b1_1828,Not-,,,,B1,word_part,review,no,no,,67,Not-,word_part_or_prefix
+b1_1833,oft/öfter,,,,B1,adjective/adverb/other,yes,no,yes,multiple_forms,68,oft/öfter,
+b1_1836,Öko- (ökologisch),,,,B1,phrase,yes,no,yes,multi_word_expression,68,Öko- (ökologisch),
+b1_1850,ober-,,,,B1,word_part,review,no,no,,68,ober-,word_part_or_prefix
+b1_1851,Ober,der,"- (D, A)",,B1,noun,yes,yes,yes,regional_variant,68,"der Ober, - (D, A) →",regional_variant_or_reference
+b1_1854,Obst,das,A),,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,68,"das Obst (D, A) →CH:",regional_variant_or_reference
+b1_1868,Paradeiser,der,- (A),,B1,noun,yes,yes,yes,regional_variant,69,"der Paradeiser, - (A) →To-",regional_variant_or_reference
+b1_1884,Ordination,die,-en (A),,B1,noun,yes,yes,yes,regional_variant,69,"die Ordination, -en (A) →",regional_variant_or_reference
+b1_1908,Phantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,70,"die Phantasie/Fantasie, -n",
+b1_1911,Pilz,der,-e,,B1,noun,yes,yes,yes,regional_variant,70,"der Pilz, -e →",regional_variant_or_reference
+b1_1927,in Pension gehen/sein (D,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,70,"in Pension gehen/sein (D,",
+b1_1928,pensioniert werden/sein,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,70,pensioniert werden/sein,
+b1_1930,Pensionistin,,,,B1,other,yes,no,yes,regional_variant,70,"Pensionistin, -nen (A) →D,",regional_variant_or_reference
+b1_1933,Perron,der,-s (CH),,B1,noun,yes,yes,yes,regional_variant,70,"der Perron, -s (CH) →D, A:",regional_variant_or_reference
+b1_1937,Personalien,die,,,B1,noun,yes,yes,yes,multi_word_expression,70,die Personalien (Pl.),
+b1_1938,Personenstand,der,A:,,B1,noun,yes,yes,yes,regional_variant,70,"der Personenstand →D, A:",regional_variant_or_reference
+b1_1941,Pfanne,die,-n (CH),,B1,noun,yes,yes,yes,regional_variant,70,"die Pfanne, -n (CH) →D, A:",regional_variant_or_reference
+b1_1967,Pommes frites,die,,,B1,noun,yes,yes,yes,multi_word_expression,71,die Pommes frites (Pl.),
+b1_1969,Portemonnaie,das,,,B1,noun,yes,yes,yes,multiple_forms,71,das Portemonnaie/Port-,
+b1_1970,monee,,,,B1,adjective/adverb/other,yes,no,yes,regional_variant,71,"monee, -s (D, CH) →Brief-",regional_variant_or_reference
+b1_1971,tasche; A: Geldbörse,,,,B1,phrase,yes,no,yes,multi_word_expression,71,tasche; A: Geldbörse,
+b1_1978,lerin,,,,B1,adjective/adverb/other,yes,no,yes,regional_variant,71,"lerin, -nen (CH) →",regional_variant_or_reference
+b1_1980,Poulet,das,-s (CH),,B1,noun,yes,yes,yes,regional_variant,71,"das Poulet, -s (CH) →D:",regional_variant_or_reference
+b1_1981,Hähnchen/Hühnchen; A:,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,71,Hähnchen/Hühnchen; A:,
+b1_1988,Quartier,das,-e (CH),,B1,noun,yes,yes,yes,regional_variant,72,"das Quartier, -e (CH) →D,",regional_variant_or_reference
+b1_1994,Fahrrad; CH: Velo,,,,B1,phrase,yes,no,yes,multi_word_expression,72,Fahrrad; CH: Velo,
+b1_1998,Rahm,der,,,B1,noun,yes,yes,yes,regional_variant,72,der (Schlag-)Rahm (CH) →,regional_variant_or_reference
+b1_2048,rauf/rauf-,,,,B1,word_part,review,no,yes,multiple_forms,73,rauf/rauf-,word_part_or_prefix
+b1_2049,raus/raus-,,,,B1,word_part,review,no,yes,multiple_forms,73,raus/raus-,word_part_or_prefix
+b1_2063,recht-,,,,B1,word_part,review,no,no,,73,recht-,word_part_or_prefix
+b1_2075,Rezeption,die,-,,B1,noun,yes,yes,yes,multiple_forms,74,"die Rezeption/Reception, -",
+b1_2099,Rente,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,74,"die Rente, -n (D, CH) →A,",regional_variant_or_reference
+b1_2100,in Rente gehen/sein,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms; regional_variant,74,in Rente gehen/sein (D) →,regional_variant_or_reference
+b1_2111,Sahne,die,,,B1,noun,yes,yes,yes,regional_variant,75,die (Schlag-)Sahne (D) →,regional_variant_or_reference
+b1_2124,Rohr,das,-e (A),,B1,noun,yes,yes,yes,regional_variant,75,"das (Back-)Rohr, -e (A) →",regional_variant_or_reference
+b1_2129,rück-,,,,B1,word_part,review,no,no,,75,rück-,word_part_or_prefix
+b1_2135,Rüebli,das,- (CH),,B1,noun,yes,yes,yes,regional_variant,75,"das Rüebli, - (CH) →",regional_variant_or_reference
+b1_2136,Karotte; D: Möhre,,,,B1,phrase,yes,no,yes,multi_word_expression,75,Karotte; D: Möhre,
+b1_2148,sich scheiden lassen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,76,"sich scheiden lassen, lässt",reflexive
+b1_2214,Schulden,die,,,B1,noun,yes,yes,yes,multi_word_expression,78,die Schulden (Pl.),
+b1_2217,Schularbeit,die,-en (A),,B1,noun,yes,yes,yes,regional_variant,78,"die Schularbeit, -en (A) →",regional_variant_or_reference
+b1_2230,Schrank,der,"¨-e (D, CH)",,B1,noun,yes,yes,yes,regional_variant,78,"der Schrank, ¨-e (D, CH) →",regional_variant_or_reference
+b1_2244,selb-,,,,B1,word_part,review,no,no,,79,selb-,word_part_or_prefix
+b1_2251,Schwammerl,das,-n (A),,B1,noun,yes,yes,yes,regional_variant,79,"das Schwammerl, -n (A) →",regional_variant_or_reference
+b1_2258,Schwieger-,,,,B1,word_part,review,no,no,,79,Schwieger-,word_part_or_prefix
+b1_2266,Nordsee,die,,,B1,noun,yes,yes,yes,multiple_forms,79,die Nord-/Ostsee,
+b1_2281,Ski,der,-er/-,,B1,noun,yes,yes,yes,multiple_forms,80,"der Ski/Schi, -er/-",
+b1_2288,Semmel,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,80,"die Semmel, -n (A) →D:",regional_variant_or_reference
+b1_2289,Brötchen; CH: Brötli,,,,B1,phrase,yes,no,yes,multi_word_expression,80,Brötchen; CH: Brötli,
+b1_2293,Senioren,die,,,B1,noun,yes,yes,yes,multi_word_expression,80,die Senioren (Pl.),
+b1_2299,n,,,,B1,adjective/adverb/other,yes,no,yes,regional_variant,80,"n (CH) →Kellner; D, A:",regional_variant_or_reference
+b1_2301,Sessel,der,"- (D, CH)",,B1,noun,yes,yes,yes,regional_variant,80,"der Sessel, - (D, CH) →A,",regional_variant_or_reference
+b1_2308,so viel/so viel wie,,,,B1,phrase,yes,no,yes,multi_word_expression; multiple_forms,81,so viel/so viel wie,
+b1_2310,sowohl … als auch,,,,B1,phrase,yes,no,yes,multi_word_expression,81,sowohl … als auch,
+b1_2320,spazieren gehen,,,,B1,verb,yes,no,yes,multi_word_expression,81,"spazieren gehen, geht",
+b1_2327,sogenannt-,,,,B1,word_part,review,no,no,,81,sogenannt-,word_part_or_prefix
+b1_2331,solch-,,,,B1,word_part,review,no,no,,81,solch-,word_part_or_prefix
+b1_2333,Sonder-,,,,B1,word_part,review,no,no,,81,Sonder-,word_part_or_prefix
+b1_2341,Sauce,die,-n,,B1,noun,yes,yes,yes,multiple_forms,81,"die Soße/Sauce, -n",
+b1_2342,Sprechstunde,die,-n,,B1,noun,yes,yes,yes,regional_variant,82,"die Sprechstunde, -n →A:",regional_variant_or_reference
+b1_2358,Speise-/-speise,,,,B1,other,yes,no,yes,multiple_forms,82,"Speise-/-speise, -n",
+b1_2361,Spezial-,,,,B1,word_part,review,no,no,,82,Spezial-,word_part_or_prefix
+b1_2399,Stiege,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,83,"die Stiege, -n (A) →D, CH:",regional_variant_or_reference
+b1_2407,stattfinden,,,,B1,verb,yes,no,yes,separable_verb,83,"stattfinden, findet statt,",
+b1_2416,stehen bleiben,,,,B1,phrase,yes,no,yes,multi_word_expression,83,stehen bleiben,
+b1_2419,Streichholz,das,¨-er,,B1,noun,yes,yes,yes,regional_variant,84,"das Streichholz, ¨-er →",regional_variant_or_reference
+b1_2420,Zündholz; A: Zünder,,,,B1,phrase,yes,no,yes,multi_word_expression,84,Zündholz; A: Zünder,
+b1_2428,Stück,das,-e,,B1,noun,yes,yes,yes,multiple_forms,84,"das Stück/-stück, -e",
+b1_2444,Stock,der,CH: Etage,,B1,noun,yes,yes,yes,regional_variant,84,"der Stock →D, CH: Etage",regional_variant_or_reference
+b1_2456,A),,,,B1,other,yes,no,yes,regional_variant,84,A) →CH: Tram,regional_variant_or_reference
+b1_2527,Tee ziehen lassen,,,,B1,phrase,yes,no,yes,multi_word_expression,86,Tee ziehen lassen,
+b1_2532,teilnehmen,,,,B1,verb,yes,no,yes,separable_verb,86,"teilnehmen, nimmt teil,",
+b1_2544,Tram,das,-s,,B1,noun,yes,yes,yes,regional_variant,87,"das Tram, -s →D,",regional_variant_or_reference
+b1_2551,Traum-,,,,B1,word_part,review,no,no,,87,Traum-,word_part_or_prefix
+b1_2557,getrennt leben,,,,B1,phrase,yes,no,yes,multi_word_expression,87,getrennt leben,
+b1_2570,Tomate,die,-n,,B1,noun,yes,yes,yes,regional_variant,87,"die Tomate, -n →A: Pa-",regional_variant_or_reference
+b1_2572,Topf,der,"¨-e (D, A)",,B1,noun,yes,yes,yes,regional_variant,87,"der Topf, ¨-e (D, A) →CH:",regional_variant_or_reference
+b1_2594,Treppe,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,88,"die Treppe, -n (D, CH) →A:",regional_variant_or_reference
+b1_2597,CH),,,,B1,other,yes,no,yes,regional_variant,88,CH) →A: Stiegenhaus,regional_variant_or_reference
+b1_2604,Tropfen,die,,,B1,noun,yes,yes,yes,multi_word_expression,88,die Tropfen (Pl.),
+b1_2605,Trottoir,das,-s (CH),,B1,noun,yes,yes,yes,regional_variant,88,"das Trottoir, -s (CH) →",regional_variant_or_reference
+b1_2606,Gehsteig (D,,,,B1,phrase,yes,no,yes,multi_word_expression,88,"Gehsteig (D, A)",
+b1_2622,um … zu,,,,B1,phrase,yes,no,yes,multi_word_expression,89,um … zu,
+b1_2625,umgehen,,,,B1,verb,yes,no,yes,separable_verb,89,"umgehen, geht um,",
+b1_2645,über-,,,,B1,word_part,review,no,no,,89,über-,word_part_or_prefix
+b1_2652,unter-,,,,B1,word_part,review,no,no,,90,unter-,word_part_or_prefix
+b1_2656,Unterlagen,die,,,B1,noun,yes,yes,yes,multi_word_expression,90,die Unterlagen (Pl.),
+b1_2666,umsteigen,,,,B1,verb,yes,no,yes,separable_verb,90,"umsteigen, steigt um,",
+b1_2667,umtauschen,,,,B1,verb,yes,no,yes,separable_verb,90,"umtauschen, tauscht um,",
+b1_2673,umziehen,,,,B1,verb,yes,no,yes,separable_verb,90,"umziehen, zieht um, zog",
+b1_2675,sich umziehen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,90,"sich umziehen, zieht sich",reflexive
+b1_2676,un-,,,,B1,word_part,review,no,no,,90,un-,word_part_or_prefix
+b1_2685,Mein Sohn studiert an der Universität.,,,,B1,phrase,yes,no,yes,multi_word_expression,90,Mein Sohn studiert an der Universität.,
+b1_2689,Velo,das,-s (CH),,B1,noun,yes,yes,yes,regional_variant,91,"das Velo, -s (CH) →",regional_variant_or_reference
+b1_2690,Fahrrad; D,,,,B1,phrase,yes,no,yes,multi_word_expression,91,"Fahrrad; D, A: Rad",
+b1_2711,Urlaub,der,"-e (D, A)",,B1,noun,yes,yes,yes,regional_variant,91,"der Urlaub, -e (D, A) →CH:",regional_variant_or_reference
+b1_2717,Hast du eine Vase für die Blumen?,,,,B1,phrase,yes,no,yes,multi_word_expression,91,Hast du eine Vase für die Blumen?,
+b1_2722,sich verhalten,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,92,"sich verhalten, verhält",reflexive
+b1_2751,sich vergnügen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,92,"sich vergnügen, vergnügt",reflexive
+b1_2769,sich verlaufen,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,93,"sich verlaufen,",reflexive
+b1_2771,sich verlieben,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,93,"sich verlieben, verliebt",reflexive
+b1_2794,viel/viele,,,,B1,adjective/adverb/other,yes,no,yes,multiple_forms,94,viel/viele,
+b1_2796,Viertel,das,"- (D, A)",,B1,noun,yes,yes,yes,regional_variant,94,"das Viertel, - (D, A) →CH:",regional_variant_or_reference
+b1_2826,vorlesen,,,,B1,verb,yes,no,yes,separable_verb,95,"vorlesen, liest vor,",
+b1_2828,vorschlagen,,,,B1,verb,yes,no,yes,separable_verb,95,"vorschlagen, schlägt vor,",
+b1_2843,vor allem,,,,B1,phrase,yes,no,yes,multi_word_expression,95,vor allem,
+b1_2847,vorbei/vorbei-,,,,B1,word_part,review,no,yes,multiple_forms,95,vorbei/vorbei-,word_part_or_prefix
+b1_2849,vorder-,,,,B1,word_part,review,no,no,,95,vorder-,word_part_or_prefix
+b1_2852,vorhaben,,,,B1,verb,yes,no,yes,separable_verb,95,"vorhaben, hat vor,",
+b1_2855,vorkommen,,,,B1,verb,yes,no,yes,separable_verb,95,"vorkommen, kommt vor,",
+b1_2864,was für ein-,,,,B1,phrase,yes,no,yes,multi_word_expression,96,was für ein-,
+b1_2888,wenig/wenige,,,,B1,adjective/adverb/other,yes,no,yes,multiple_forms,97,wenig/wenige,
+b1_2903,weder … noch,,,,B1,phrase,yes,no,yes,multi_word_expression,97,weder … noch,
+b1_2905,weg/weg-,,,,B1,word_part,review,no,yes,multiple_forms,97,weg/weg-,word_part_or_prefix
+b1_2910,sich weigern,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,97,"sich weigern, weigert sich,",reflexive
+b1_2916,weiter/weiter-,,,,B1,word_part,review,no,yes,multiple_forms,97,weiter/weiter-,word_part_or_prefix
+b1_2920,wie viel(e),,,,B1,phrase,yes,no,yes,multi_word_expression,98,wie viel(e),
+b1_2949,wieder/wieder-,,,,B1,word_part,review,no,yes,multiple_forms,98,wieder/wieder-,word_part_or_prefix
+b1_2957,sich wundern,,,,B1,verb,yes,no,yes,multi_word_expression; reflexive,99,"sich wundern,",reflexive
+b1_2968,Zahncreme,die,,,B1,noun,yes,yes,yes,multiple_forms,99,die Zahncreme/-pasta,
+b1_2993,Zinsen,die,,,B1,noun,yes,yes,yes,multi_word_expression,100,die Zinsen (nur Pl.),
+b1_2996,Zivilstand,der,,,B1,noun,yes,yes,yes,regional_variant,100,der Zivilstand (CH) →Per-,regional_variant_or_reference
+b1_2997,sonenstand; D,,,,B1,phrase,yes,no,yes,multi_word_expression,100,"sonenstand; D, A: Fami-",
+b1_3003,zubereiten,,,,B1,verb,yes,no,yes,separable_verb,100,"zubereiten, bereitet zu,",
+b1_3023,Zeug,das,,,B1,noun,yes,yes,yes,multiple_forms,100,das Zeug/-zeug,
+b1_3026,Zünder,die,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,101,die Zünder (A) (Pl.) →,regional_variant_or_reference
+b1_3027,Streichholz; Zündholz,,,,B1,phrase,yes,no,yes,multi_word_expression,101,Streichholz; Zündholz,
+b1_3028,Zündholz,das,¨-er,,B1,noun,yes,yes,yes,regional_variant,101,"das Zündholz, ¨-er →Stre-",regional_variant_or_reference
+b1_3029,ichholz; A: Zünder,,,,B1,phrase,yes,no,yes,multi_word_expression,101,ichholz; A: Zünder,
+b1_3030,zunehmen,,,,B1,verb,yes,no,yes,separable_verb,101,"zunehmen, nimmt zu,",
+b1_3032,zurück/zurück-,,,,B1,word_part,review,no,yes,multiple_forms,101,zurück/zurück-,word_part_or_prefix
+b1_3033,zusagen,,,,B1,verb,yes,no,yes,separable_verb,101,"zusagen, sagt zu, sagte zu,",
+b1_3034,zusammen/zusammen-,,,,B1,word_part,review,no,yes,multiple_forms,101,zusammen/zusammen-,word_part_or_prefix
+b1_3049,zugehen,,,,B1,verb,yes,no,yes,separable_verb,101,"zugehen, geht zu, ging zu,",
+b1_3051,zuhören,,,,B1,verb,yes,no,yes,separable_verb,101,"zuhören, hört zu,",
+b1_3056,zumachen,,,,B1,verb,yes,no,yes,separable_verb,101,"zumachen, macht zu,",
+b1_3064,zu sein,,,,B1,phrase,yes,no,yes,multi_word_expression,102,"zu sein, ist zu, war zu, ist",
+b1_3067,zustimmen,,,,B1,verb,yes,no,yes,separable_verb,102,"zustimmen, stimmt zu,",
+b1_3069,Zutaten,die,,,B1,noun,yes,yes,yes,multi_word_expression,102,die Zutaten (Pl.),
+b1_3071,Zvieri/Znüni,der,-s,,B1,noun,yes,yes,yes,multiple_forms,102,"der Zvieri/Znüni, -s",
