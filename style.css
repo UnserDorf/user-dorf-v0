@@ -8370,3 +8370,203 @@ button:active {
     overflow-x: auto;
   }
 }
+
+/* Header responsive behavior: intentional desktop, tablet, and mobile states. */
+.settings-label-tablet,
+.mobile-nav-section {
+  display: none;
+}
+
+.topbar {
+  flex-wrap: nowrap;
+}
+
+.topbar .brand,
+.top-actions,
+.settings-menu,
+.settings-toggle-button,
+.top-actions .ghost-button {
+  display: flex;
+  align-items: center;
+}
+
+.top-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.settings-menu {
+  position: relative;
+}
+
+.settings-toggle-button,
+.top-actions .ghost-button {
+  justify-content: center;
+  line-height: 1;
+}
+
+@media (min-width: 1200px) {
+  .topbar {
+    min-height: 76px;
+    padding-inline: clamp(24px, 3vw, 32px);
+    gap: 28px;
+  }
+
+  .topbar-logo {
+    width: clamp(120px, 11vw, 150px);
+    max-height: 58px;
+  }
+
+  .top-actions {
+    gap: 12px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 12px;
+  }
+
+  .settings-label-desktop {
+    display: inline;
+  }
+
+  .settings-label-tablet,
+  .settings-label-mobile {
+    display: none;
+  }
+
+  #homeButton,
+  #switchProfile,
+  #logoutButton {
+    display: inline-flex;
+  }
+
+  .mobile-menu-logout {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .topbar {
+    min-height: 70px;
+    padding: 9px 18px;
+    gap: 16px;
+  }
+
+  .topbar-logo {
+    width: clamp(108px, 15vw, 130px);
+    max-height: 52px;
+  }
+
+  .top-actions {
+    gap: 8px;
+  }
+
+  .top-actions .ghost-button,
+  .settings-toggle-button {
+    height: 34px;
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+  }
+
+  .settings-label-desktop,
+  .settings-label-mobile,
+  #logoutButton,
+  .mobile-nav-section {
+    display: none;
+  }
+
+  .settings-label-tablet {
+    display: inline;
+  }
+
+  #homeButton,
+  #switchProfile {
+    display: inline-flex;
+  }
+
+  .label-full {
+    display: none;
+  }
+
+  .label-short {
+    display: inline;
+  }
+
+  .mobile-menu-logout {
+    display: block;
+  }
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    min-height: 64px;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .topbar .brand {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .topbar-logo {
+    width: clamp(92px, 29vw, 112px);
+    max-height: 42px;
+  }
+
+  .top-actions {
+    gap: 0;
+  }
+
+  #homeButton,
+  #switchProfile,
+  #logoutButton,
+  .settings-label-desktop,
+  .settings-label-tablet {
+    display: none;
+  }
+
+  .settings-label-mobile {
+    display: inline;
+  }
+
+  .settings-toggle-button {
+    width: 38px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    font-size: 1.05rem;
+  }
+
+  .settings-menu {
+    height: 34px;
+  }
+
+  .mobile-nav-section,
+  .mobile-menu-logout {
+    display: block;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    padding-inline: 8px;
+  }
+
+  .topbar-logo {
+    width: clamp(86px, 30vw, 100px);
+    max-height: 38px;
+  }
+
+  .settings-toggle-button {
+    width: 34px;
+    height: 32px;
+    min-height: 32px;
+  }
+}

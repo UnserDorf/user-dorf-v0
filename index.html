@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=172">
+    <link rel="stylesheet" href="style.css?v=173">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -164,9 +164,15 @@
           <div class="settings-menu">
             <button class="ghost-button settings-toggle-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings menu">
               <span class="settings-label-desktop">Settings</span>
+              <span class="settings-label-tablet">More</span>
               <span class="settings-label-mobile" aria-hidden="true">☰</span>
             </button>
             <div class="settings-panel hidden" id="settingsPanel">
+              <section class="settings-section mobile-nav-section" aria-label="Mobile navigation">
+                <h3>Menu</h3>
+                <button type="button" id="mobileMenuHomeButton">Home</button>
+                <button type="button" id="mobileMenuProfileButton">Profile</button>
+              </section>
               <section class="settings-section" aria-label="Village settings">
                 <h3>Village Settings</h3>
                 <p>Village Name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
@@ -858,6 +864,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=162"></script>
+    <script type="module" src="script.js?v=163"></script>
   </body>
 </html>
