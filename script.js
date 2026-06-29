@@ -6199,19 +6199,8 @@ function showTownCenterStageCelebration(stage) {
 }
 
 function awardLevelBonusIfNeeded(profile) {
+  if (!profile) return;
   profile.levelBonusesAwarded = normalizeLevelBonuses(profile.levelBonusesAwarded, 0);
-  const reachedLevel = [...COIN_LEVELS]
-    .reverse()
-    .find((level) => level.min > 0 && normalizeCoinCount(profile.coins) >= level.min);
-
-  if (!reachedLevel) return;
-
-  const levelId = getLevelId(reachedLevel);
-  if (profile.levelBonusesAwarded.includes(levelId)) return;
-
-  profile.levelBonusesAwarded.push(levelId);
-  profile.coins = normalizeCoinCount(profile.coins) + LEVEL_UP_BONUS;
-  showLevelCelebration(profile, reachedLevel);
 }
 
 function showLevelCelebration(profile, level) {
@@ -6229,14 +6218,6 @@ function celebrateFamilyLevelIfNeeded() {
   const group = getCurrentGroup();
   if (!group) return;
   group.familyLevelsReached = normalizeFamilyLevelsReached(group.familyLevelsReached, Object.fromEntries(getCurrentGroupProfiles().map((profile) => [profile.id, profile])));
-  const familyLevel = getFamilyWealthLevel(getGroupCoinTotal(group));
-  if (familyLevel.min === 0) return;
-
-  const levelId = getFamilyLevelId(familyLevel);
-  if (group.familyLevelsReached.includes(levelId)) return;
-
-  group.familyLevelsReached.push(levelId);
-  showFamilyLevelCelebration(familyLevel);
 }
 
 function showFamilyLevelCelebration(level) {
