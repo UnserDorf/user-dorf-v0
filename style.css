@@ -10272,13 +10272,14 @@ button:active {
 
 .clean-article-practice #questionText,
 .clean-quiz-mode #nounVerbPrompt {
-  max-width: min(100%, 18ch);
+  max-width: 100%;
   white-space: normal;
-  word-break: normal;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-  line-height: 1.08;
-  text-wrap: balance;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: normal;
 }
 
 .clean-article-practice .question-area,
@@ -10320,8 +10321,8 @@ button:active {
 @media (max-width: 520px) {
   .clean-article-practice #questionText,
   .clean-quiz-mode #nounVerbPrompt {
-    max-width: min(100%, 14ch);
-    font-size: clamp(2.35rem, 14vw, 4rem);
+    max-width: 100%;
+    font-size: clamp(2rem, 8.5vw, 3.5rem);
     line-height: 1.12;
   }
 }
