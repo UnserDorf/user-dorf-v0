@@ -3910,7 +3910,7 @@ function showFlashcardSetup() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
-  els.flashcardSetupLevel.textContent = `${selectedLearningLevel} Flashcards`;
+  els.flashcardSetupLevel.textContent = selectedLearningLevel;
   els.flashcardSetupForm.querySelectorAll('input[name="flashcardCategory"]').forEach((input) => {
     input.checked = input.value === flashcardStudyCategory;
   });
