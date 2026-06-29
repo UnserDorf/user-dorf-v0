@@ -537,10 +537,14 @@ const els = {
   dashboardFamilyProgressFill: document.querySelector("#dashboardFamilyProgressFill"),
   dashboardFamilyProgressText: document.querySelector("#dashboardFamilyProgressText"),
   levelCelebration: document.querySelector("#levelCelebration"),
+  levelCelebrationImageFrame: document.querySelector("#levelCelebrationImageFrame"),
+  levelCelebrationImage: document.querySelector("#levelCelebrationImage"),
+  levelCelebrationEyebrow: document.querySelector("#levelCelebrationEyebrow"),
   levelCelebrationTitle: document.querySelector("#levelCelebrationTitle"),
   levelCelebrationProfile: document.querySelector("#levelCelebrationProfile"),
   levelCelebrationLevel: document.querySelector("#levelCelebrationLevel"),
   levelCelebrationBonus: document.querySelector("#levelCelebrationBonus"),
+  levelCelebrationStatus: document.querySelector("#levelCelebrationStatus"),
   namingCeremonyForm: document.querySelector("#namingCeremonyForm"),
   namingCeremonyInput: document.querySelector("#namingCeremonyInput"),
   levelCelebrationViewAlbum: document.querySelector("#levelCelebrationViewAlbum"),
@@ -5865,6 +5869,11 @@ function checkRewardUnlocks(profile) {
 
 function showRewardUnlockCelebration(reward, source) {
   if (deferCelebration(() => showRewardUnlockCelebration(reward, source))) return;
+  if (source === "My Austria Album") {
+    showAustriaAlbumUnlockCelebration(reward);
+    return;
+  }
+  resetLevelCelebrationPresentation();
   hideNamingCeremonyForm();
   els.levelCelebrationTitle.textContent = "Congratulations!";
   els.levelCelebrationProfile.textContent = "You unlocked:";
@@ -5873,6 +5882,64 @@ function showRewardUnlockCelebration(reward, source) {
   els.levelCelebrationBonus.classList.remove("hidden");
   showRewardCelebrationActions(source === "Village Memories" ? "village-album" : "austria-album", source === "Village Memories" ? "View Memories" : "View Album");
   els.levelCelebration.classList.remove("hidden");
+}
+
+function showAustriaAlbumUnlockCelebration(reward) {
+  resetLevelCelebrationPresentation();
+  hideNamingCeremonyForm();
+  els.levelCelebration.classList.add("album-unlock-celebration");
+  els.levelCelebrationEyebrow.textContent = "NEW ALBUM ITEM";
+  els.levelCelebrationTitle.textContent = "Congratulations!";
+  els.levelCelebrationProfile.textContent = "You unlocked:";
+  els.levelCelebrationLevel.textContent = reward.title;
+  els.levelCelebrationBonus.textContent = reward.description || "";
+  els.levelCelebrationBonus.classList.toggle("hidden", !reward.description);
+  renderAlbumUnlockImage(reward);
+  renderAlbumUnlockStatus();
+  showRewardCelebrationActions("austria-album", "View Album");
+  els.levelCelebration.classList.remove("hidden");
+}
+
+function renderAlbumUnlockImage(reward) {
+  if (!els.levelCelebrationImageFrame || !els.levelCelebrationImage) return;
+  if (!isImagePath(reward.image)) {
+    els.levelCelebrationImage.removeAttribute("src");
+    els.levelCelebrationImage.alt = "";
+    els.levelCelebrationImageFrame.classList.add("hidden");
+    return;
+  }
+  els.levelCelebrationImageFrame.classList.remove("hidden");
+  els.levelCelebrationImage.alt = reward.title;
+  els.levelCelebrationImage.onerror = () => {
+    els.levelCelebrationImage.removeAttribute("src");
+    els.levelCelebrationImageFrame.classList.add("hidden");
+  };
+  els.levelCelebrationImage.src = reward.image;
+}
+
+function renderAlbumUnlockStatus() {
+  if (!els.levelCelebrationStatus) return;
+  const unlockedCount = getAustriaAlbumUnlockedRewardIds(getCurrentProfile(), true).length;
+  els.levelCelebrationStatus.innerHTML = `
+    <span>My Austria Album</span>
+    <strong>${unlockedCount} / ${AUSTRIA_ALBUM_REWARDS.length} items collected</strong>
+  `;
+  els.levelCelebrationStatus.classList.remove("hidden");
+}
+
+function resetLevelCelebrationPresentation() {
+  els.levelCelebration.classList.remove("album-unlock-celebration");
+  if (els.levelCelebrationEyebrow) els.levelCelebrationEyebrow.textContent = "Level up";
+  if (els.levelCelebrationImage) {
+    els.levelCelebrationImage.onerror = null;
+    els.levelCelebrationImage.removeAttribute("src");
+    els.levelCelebrationImage.alt = "";
+  }
+  els.levelCelebrationImageFrame?.classList.add("hidden");
+  if (els.levelCelebrationStatus) {
+    els.levelCelebrationStatus.textContent = "";
+    els.levelCelebrationStatus.classList.add("hidden");
+  }
 }
 
 function showRewardCelebrationActions(page, label = "View Album") {
@@ -5918,6 +5985,7 @@ function hasQualifiedForNamingCeremony(profile) {
 function showVillageNamingCeremony() {
   const group = getCurrentGroup();
   if (!group || normalizeVillageName(group.villageName)) return;
+  resetLevelCelebrationPresentation();
   hideRewardCelebrationActions();
   els.levelCelebrationTitle.textContent = "🎉 Village Naming Ceremony";
   els.levelCelebrationProfile.textContent = "Everyone in your village has contributed.";
@@ -5964,6 +6032,7 @@ function checkTownCenterStageUnlocks() {
 
 function showTownCenterStageCelebration(stage) {
   if (deferCelebration(() => showTownCenterStageCelebration(stage))) return;
+  resetLevelCelebrationPresentation();
   els.levelCelebrationTitle.textContent = "Village Upgrade!";
   els.levelCelebrationProfile.textContent = "The Town Center has unlocked:";
   els.levelCelebrationLevel.textContent = getTownCenterStageName(stage);
@@ -6059,6 +6128,7 @@ function showNextAchievementNotification() {
 }
 
 function renderAchievementNotification(achievement) {
+  resetLevelCelebrationPresentation();
   els.levelCelebrationTitle.textContent = "🎉 Flashcard Milestone!";
   els.levelCelebrationProfile.textContent = "Milestone:";
   els.levelCelebrationLevel.textContent = `${achievement.icon} ${achievement.name}`;
