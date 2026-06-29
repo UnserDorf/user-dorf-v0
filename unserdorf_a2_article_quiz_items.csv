@@ -1,0 +1,525 @@
+id,German,Article,English,ExampleSentence,CEFR,WordType,Category,ArticleQuizEligible,Source,Notes,Priority,ReviewNote
+a2_0007,Adresse,die,address,Schreiben Sie bitte Ihre Adresse auf.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0008,Ahnung,die,idea/clue,Ich habe keine Ahnung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0016,Alter,das,age,Wie ist Ihr Alter?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0017,Ampel,die,traffic light,Die Ampel ist grün.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0020,Angebot,das,offer/special offer,Heute ist Käse im Angebot.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0025,Anfang,der,beginning,Am Anfang war es schwer.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0026,Angst,die,fear,Das Kind hat Angst.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0028,Ankunft,die,arrival,Die Ankunft ist um zehn Uhr.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0031,Anmeldung,die,registration,Die Anmeldung ist bis Freitag möglich.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0032,Anrufbeantworter,der,answering machine,Sprechen Sie bitte auf den Anrufbeantworter.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0034,Anruf,der,phone call,Ich bekomme einen Anruf.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0035,Anschluss,der,connection,Wir haben Anschluss nach Berlin.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0038,Antwort,die,answer,Die Antwort ist richtig.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0039,Anzeige,die,advertisement,Ich habe die Anzeige gelesen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0040,Anzug,der,suit,Er trägt einen schwarzen Anzug.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0041,Apfel,der,apple,Ich esse einen Apfel.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0042,Apotheke,die,pharmacy,Die Apotheke ist neben dem Supermarkt.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0043,Arbeit,die,work/job,Ich gehe heute zur Arbeit.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0045,Arbeitgeber,der,employer,Mein Arbeitgeber ist sehr nett.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0046,Arbeitnehmer,der,employee,Der Arbeitnehmer hat heute frei.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0047,Arbeitsplatz,der,workplace/job,Mein Arbeitsplatz ist in der Stadt.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0048,Arbeitszeit,die,working hours,Meine Arbeitszeit beginnt um acht.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0050,Arm,der,arm,Mein Arm tut weh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0051,Arzt,der,doctor,Ich habe einen Termin beim Arzt.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0052,Ärztin,die,female doctor,Die Ärztin untersucht das Kind.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0055,Aufgabe,die,task/exercise,Die Aufgabe ist leicht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0061,Aufzug,der,elevator,Der Aufzug ist kaputt.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0062,Auge,das,eye,Mein linkes Auge tut weh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0064,Ausbildung,die,training/apprenticeship,Ich mache eine Ausbildung.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0065,Ausflug,der,excursion,Wir machen einen Ausflug.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0067,Ausgang,der,exit,Wo ist der Ausgang?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0070,Auskunft,die,information,Können Sie mir eine Auskunft geben?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0071,Ausland,das,abroad/foreign country,Sie arbeitet im Ausland.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0079,Auto,das,car,Wir fahren mit dem Auto.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0080,Autor,der,author,Der Autor schreibt ein Buch.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0081,Autorin,die,female author,Die Autorin liest aus ihrem Buch.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0082,Babysitter,der,babysitter,Der Babysitter kommt um sechs.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0083,Bäcker,der,baker,Der Bäcker verkauft Brot.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0084,Bäckerin,die,female baker,Die Bäckerin arbeitet früh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0085,Bäckerei,die,bakery,Ich kaufe Brötchen in der Bäckerei.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0087,Bahn,die,train/railway,Ich fahre mit der Bahn.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0088,Bahnhof,der,train station,Der Bahnhof ist nicht weit.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0089,Bahnsteig,der,platform,Der Zug fährt von Bahnsteig zwei.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0091,Balkon,der,balcony,Unsere Wohnung hat einen Balkon.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0092,Bank,die,bank/bench,Ich gehe zur Bank.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0094,Bauch,der,stomach/belly,Mein Bauch tut weh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0095,Baum,der,tree,Der Baum steht im Garten.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0105,Begrüßung,die,greeting,Die Begrüßung war sehr freundlich.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0109,Bein,das,leg,Mein Bein ist müde.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0110,Beispiel,das,example,Kannst du ein Beispiel geben?,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0116,Benzin,das,petrol/gasoline,Wir brauchen Benzin.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0120,Bereich,der,area/field,Dieser Bereich ist für Kinder.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0122,Bericht,der,report,Ich schreibe einen kurzen Bericht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0123,Beruf,der,profession/job,Was ist Ihr Beruf?,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0125,Bescheid,der,information/notice,Sag mir bitte Bescheid.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0132,Besuch,der,visit/visitor,Wir bekommen Besuch.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0134,Bett,das,bed,Das Bett ist sehr bequem.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0136,Bewerbung,die,application,Ich schreibe eine Bewerbung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0138,Bibliothek,die,library,Ich lerne in der Bibliothek.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0140,Bild,das,picture/image,Das Bild hängt an der Wand.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0146,Bitte,die,request,Ich habe eine Bitte.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0148,Blatt,das,sheet/leaf,Nimm bitte ein Blatt Papier.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0150,Bleistift,der,pencil,Ich schreibe mit dem Bleistift.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0151,Blick,der,view/look,Der Blick vom Fenster ist schön.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0154,Blume,die,flower,Die Blume ist gelb.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0155,Bluse,die,blouse,Die Bluse ist neu.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0156,Boden,der,floor/ground,Die Tasche steht auf dem Boden.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0158,Botschaft,die,embassy/message,Die Botschaft ist in der Nähe.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0161,Brief,der,letter,Ich schreibe einen Brief.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0162,Briefkasten,der,mailbox,Der Briefkasten ist vor dem Haus.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0163,Briefmarke,die,stamp,Ich kaufe eine Briefmarke.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0164,Brille,die,glasses,Ich brauche meine Brille.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0166,Brot,das,bread,Das Brot ist frisch.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0167,Brötchen,das,bread roll,Ich esse ein Brötchen.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0168,Brücke,die,bridge,Wir gehen über die Brücke.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0169,Bruder,der,brother,Mein Bruder wohnt in Wien.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0170,Buch,das,book,Ich lese ein Buch.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0171,Bücherei,die,library,Die Bücherei ist heute offen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0172,Buchstabe,der,letter of alphabet,Dieser Buchstabe ist schwierig.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0174,Büro,das,office,Mein Büro ist im Zentrum.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0175,Bus,der,bus,Der Bus kommt gleich.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0176,Butter,die,butter,Ich brauche Butter für das Brot.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0177,Café,das,café,Wir treffen uns im Café.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0178,Cent,der,cent,Das kostet fünfzig Cent.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0179,Chance,die,chance/opportunity,Das ist eine gute Chance.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0180,Chef,der,boss,Mein Chef ist heute im Büro.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0181,Chefin,die,female boss,Meine Chefin ist freundlich.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0182,Chemie,die,chemistry,Chemie ist mein Lieblingsfach.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0184,Computer,der,computer,Der Computer ist neu.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0185,Cousin,der,male cousin,Mein Cousin besucht uns.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0186,Cousine,die,female cousin,Meine Cousine wohnt in Berlin.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0192,Ding,das,thing,Was ist das für ein Ding?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0194,Disco,die,disco,Wir gehen heute Abend in die Disco.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0195,Disko,die,disco,Die Disko ist am Samstag offen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,Variant of Disco; keep Disco in core.
+a2_0198,Doppelzimmer,das,double room,Wir möchten ein Doppelzimmer buchen.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0199,Dorf,das,village,Das Dorf liegt am See.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0214,Durst,der,thirst,Ich habe Durst.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0216,Dusche,die,shower,Die Dusche ist frei.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0217,Ecke,die,corner,Die Apotheke ist an der Ecke.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0219,Ehe,die,marriage,Sie leben in einer glücklichen Ehe.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0220,Ehefrau,die,wife,Meine Ehefrau kommt später.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0221,Ehemann,der,husband,Ihr Ehemann arbeitet heute.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0223,Ei,das,egg,Ich esse ein Ei zum Frühstück.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0229,Eingang,der,entrance,Der Eingang ist links.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0232,Einkauf,der,shopping/purchase,Der Einkauf war teuer.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0233,Einkaufszentrum,das,shopping center,Wir treffen uns im Einkaufszentrum.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0235,Einladung,die,invitation,Danke für die Einladung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0240,Eintritt,der,entrance/admission,Der Eintritt kostet sechs Euro.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0242,Einwohner,der,inhabitant,Die Stadt hat viele Einwohner.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0244,Einzelzimmer,das,single room,Ich brauche ein Einzelzimmer.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0245,Eis,das,ice cream/ice,Die Kinder essen Eis.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0246,Eltern,die,parents,Meine Eltern wohnen in Österreich.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0248,Empfehlung,die,recommendation,Danke für die Empfehlung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0249,Ende,das,end,Am Ende gehen alle nach Hause.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0253,Enkel,der,grandson,Mein Enkel ist fünf Jahre alt.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0254,Enkelin,die,granddaughter,Meine Enkelin geht zur Schule.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0256,Entfernung,die,distance,Die Entfernung ist nicht groß.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0259,Entscheidung,die,decision,Das ist eine wichtige Entscheidung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0266,Erfahrung,die,experience,Ich habe Erfahrung mit Kindern.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0268,Erfolg,der,success,Viel Erfolg bei der Prüfung!,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0271,Erinnerung,die,memory/reminder,Das Foto ist eine schöne Erinnerung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0274,Erkältung,die,cold,Ich habe eine Erkältung.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0276,Erklärung,die,explanation,Die Erklärung ist leicht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0280,Erlebnis,das,experience/event,Die Reise war ein schönes Erlebnis.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0291,Essen,das,food/meal,Das Essen ist fertig.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0294,Euro,der,euro,Das kostet zehn Euro.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0295,Europa,das,Europe,Österreich liegt in Europa.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0299,Fach,das,subject/compartment,Mathematik ist mein Lieblingsfach.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0300,Fahrrad,das,bicycle,Ich fahre mit dem Fahrrad zur Schule.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0301,Fahrer,der,driver,Der Fahrer hält an der Haltestelle.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0302,Fahrerin,die,female driver,Die Fahrerin fährt sehr ruhig.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0303,Fahrkarte,die,ticket,Ich kaufe eine Fahrkarte am Automaten.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0304,Fahrplan,der,timetable,Der Fahrplan hängt an der Haltestelle.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0305,Fahrt,die,ride/trip,Die Fahrt dauert zwanzig Minuten.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0306,Fall,der,case,In diesem Fall rufe ich dich an.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0309,Familie,die,family,Meine Familie lebt in Wien.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0310,Familienname,der,surname,Mein Familienname ist Akishige.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0311,Familienstand,der,marital status,Bitte schreiben Sie Ihren Familienstand auf.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0312,Farbe,die,color,Welche Farbe magst du?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0316,Fehler,der,mistake,Ich habe einen Fehler gemacht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0317,Feier,die,celebration/party,Die Feier beginnt um sieben.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0319,Feierabend,der,end of workday,Um fünf habe ich Feierabend.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0320,Feiertag,der,public holiday,Morgen ist ein Feiertag.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0321,Fenster,das,window,Mach bitte das Fenster auf.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0322,Ferien,die,school holidays,In den Ferien fahren wir ans Meer.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0324,Fernseher,der,television set,Der Fernseher ist kaputt.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0327,Fest,das,festival/celebration,Im Dorf gibt es ein Fest.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0328,Festival,das,festival,Im Sommer besuchen wir ein Festival.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0330,Feuer,das,fire,Das Feuer ist sehr heiß.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0331,Fieber,das,fever,Mein Sohn hat Fieber.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0332,Film,der,film/movie,Der Film beginnt um acht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0334,Firma,die,company,Sie arbeitet in einer kleinen Firma.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0335,Fisch,der,fish,Ich esse gern Fisch.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0337,Flasche,die,bottle,Ich kaufe eine Flasche Wasser.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0338,Fleck,der,stain/spot,Auf der Hose ist ein Fleck.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0339,Fleisch,das,meat,Ich esse wenig Fleisch.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0342,Flug,der,flight,Der Flug dauert zwei Stunden.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0343,Flughafen,der,airport,Der Flughafen ist weit weg.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0344,Flugzeug,das,airplane,Das Flugzeug startet gleich.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0345,Fluss,der,river,Der Fluss ist breit.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0346,Formular,das,form,Bitte füllen Sie das Formular aus.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0347,Foto,das,photo,Ich mache ein Foto.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0349,Frage,die,question,Ich habe eine Frage.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0351,Frau,die,woman/Mrs./wife,Die Frau wartet am Eingang.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0353,Freiheit,die,freedom,Freiheit ist wichtig.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0354,Freizeit,die,free time,In meiner Freizeit lese ich.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0357,Freund,der,friend,Mein Freund kommt morgen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0358,Freundin,die,female friend,Meine Freundin lernt Deutsch.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0363,Gegenteil,das,opposite,Das Gegenteil von klein ist groß.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0365,Gehalt,das,salary,Sie ist mit ihrem Gehalt zufrieden.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0368,Geld,das,money,Ich habe nicht genug Geld.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0369,Geldbörse,die,wallet,Ich habe meine Geldbörse verloren.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0370,Gemüse,das,vegetables,Wir kaufen Gemüse auf dem Markt.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0373,Gepäck,das,luggage,Das Gepäck ist schwer.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0376,Gerät,das,device,Das Gerät funktioniert nicht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0377,Gericht,das,dish/court,Mein Lieblingsgericht ist Pizza.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0381,Geschäft,das,shop/business,Das Geschäft schließt um sechs.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0382,Geschenk,das,gift,Danke für das Geschenk.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0383,Geschichte,die,story/history,Erzähl mir eine Geschichte.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0384,Geschirr,das,dishes,Stell bitte das Geschirr in den Schrank.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0385,Gesicht,das,face,Wasch dir bitte das Gesicht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0386,Gespräch,das,conversation,Das Gespräch beginnt um zwei.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0389,Gesundheit,die,health,Gesundheit ist wichtig.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0390,Getränk,das,drink,Mein Lieblingsgetränk ist Apfelsaft.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0392,Gewitter,das,thunderstorm,Heute Abend gibt es ein Gewitter.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0393,Gitarre,die,guitar,Er spielt Gitarre.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0394,Glas,das,glass,Ich möchte ein Glas Wasser.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0397,Gleis,das,track/platform,Der Zug fährt von Gleis zwölf.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0398,Glück,das,luck,Viel Glück bei der Prüfung!,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0400,Glückwunsch,der,congratulations,Herzlichen Glückwunsch zum Geburtstag!,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0403,Grippe,die,flu,Ich habe Grippe und bleibe zu Hause.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0405,Größe,die,size,Haben Sie das T-Shirt in Größe M?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0406,Gruppe,die,group,Unsere Gruppe beginnt um vier Uhr.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0407,Gruß,der,greeting/regards,Viele Grüße an deine Familie.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0412,Haar,das,hair,Sie hat lange Haare.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0414,Hähnchen,das,chicken,"Ein Hähnchen mit Pommes, bitte.",A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0415,Halle,die,hall,Wir treffen uns in Halle B.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0417,Hals,der,throat/neck,Mir tut der Hals weh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0419,Haltestelle,die,stop,An der nächsten Haltestelle steigen wir aus.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0420,Hamburger,der,hamburger,"Einen Hamburger ohne Salat, bitte.",A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0421,Hand,die,hand,Wasch dir bitte die Hände.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0422,Handtuch,das,towel,Gib mir bitte ein Handtuch.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0423,Handy,das,mobile phone,Mach bitte dein Handy aus.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0427,Hauptstadt,die,capital city,Berlin ist die Hauptstadt von Deutschland.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0428,Haus,das,house,Ich gehe jetzt nach Hause.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0429,Haushalt,der,household/housework,Wir machen den Haushalt zusammen.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0430,Heft,das,notebook,Hast du dein Heft dabei?,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0431,Heimat,die,home/homeland,Österreich ist meine neue Heimat.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0435,Heizung,die,heating,Die Heizung ist kaputt.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0438,Hemd,das,shirt,Er trägt ein neues Hemd.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0445,Herd,der,stove,In der Küche fehlt noch der Herd.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0446,Herr,der,Mr./gentleman,"Guten Tag, Herr Sommer.",A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0452,Hilfe,die,help,Ich brauche Hilfe.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0453,Himmel,der,sky,Der Himmel ist heute blau.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0459,Hobby,das,hobby,Meine Hobbys sind Lesen und Schwimmen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0461,Hochzeit,die,wedding,Zur Hochzeit kommen viele Gäste.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0465,Homepage,die,homepage/website,Auf der Homepage gibt es Informationen.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0467,Hose,die,trousers/pants,Die Hose ist zu lang.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0468,Hotel,das,hotel,Wir schlafen in einem Hotel.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0469,Hund,der,dog,Meine Tochter hat Angst vor Hunden.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0470,Hunger,der,hunger,Ich habe Hunger.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0472,Idee,die,idea,Hast du eine gute Idee?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0475,Information,die,information,Ich brauche eine Information.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0477,Insel,die,island,Wir machen Urlaub auf einer Insel.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0478,Instrument,das,instrument,Spielst du ein Instrument?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0480,Interesse,das,interest,Ich habe viele Interessen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0484,Internet,das,internet,Du findest das im Internet.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0485,Jacke,die,jacket,Zieh deine Jacke an.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0486,Jahr,das,year,Ein Jahr hat zwölf Monate.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0487,Januar,der,January,Im Januar ist es kalt.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0488,Juli,der,July,Im Juli fahren wir weg.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0490,Junge,der,boy,Der Junge spielt im Garten.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0491,Kaffee,der,coffee,Zum Frühstück trinke ich Kaffee.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0492,Kalender,der,calendar,Ich schreibe den Termin in den Kalender.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0494,Kamera,die,camera,Sie hat eine neue Kamera.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0496,Karte,die,card/ticket/menu/map,Ich bezahle mit Karte.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0497,Kartoffel,die,potato,Für Pommes braucht man Kartoffeln.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0498,Käse,der,cheese,Ich esse Brot mit Käse.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0499,Kasse,die,checkout/cash desk,Bitte zahlen Sie an der Kasse.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0500,Katze,die,cat,Meine Tochter wünscht sich eine Katze.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0502,Kaufhaus,das,department store,Ich kaufe Kleidung im Kaufhaus.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0504,Keller,der,cellar/basement,Die Waschmaschine ist im Keller.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0507,Kenntnisse,die,knowledge/skills,Meine Deutschkenntnisse werden besser.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0508,Kette,die,necklace/chain,Meine Mutter bekommt eine Kette.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0509,Kind,das,child,Das Kind spielt draußen.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0510,Kindergarten,der,kindergarten,Meine Tochter geht in den Kindergarten.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0511,Kino,das,cinema,Gehen wir heute ins Kino?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0512,Kiosk,der,kiosk,Zeitungen kannst du am Kiosk kaufen.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0513,Kirche,die,church,Diese Kirche ist sehr alt.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0516,Klavier,das,piano,Jakob spielt Klavier.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0517,Kleid,das,dress,Julia kauft ein rotes Kleid.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0518,Kleidung,die,clothing,Wo finde ich Kleidung?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0522,Koffer,der,suitcase,Hast du den Koffer gepackt?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0523,Kollege,der,colleague,Mein Kollege kommt später.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0524,Kollegin,die,female colleague,Meine Kollegin hilft mir.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0528,Kontakt,der,contact,Wir haben Kontakt per E-Mail.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0529,Konto,das,bank account,Ich habe ein Konto bei der Bank.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0530,Konzert,das,concert,Das Konzert beginnt um acht.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0531,Kopf,der,head,Mein Kopf tut weh.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0532,Kopfschmerzen,die,headache,Ich habe Kopfschmerzen.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0534,Körper,der,body,Sport ist gut für den Körper.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0538,Krankenhaus,das,hospital,Meine Tante ist im Krankenhaus.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0539,Krankenkasse,die,health insurance fund,Bei welcher Krankenkasse sind Sie?,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0540,Krankheit,die,illness/disease,Welche Krankheit hat er?,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0551,Leben,das,life,Das Leben in Wien ist schön.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0552,Lebensmittel,die,groceries/food,Ich kaufe Lebensmittel im Supermarkt.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0563,Leute,die,people,Viele Leute warten an der Haltestelle.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0564,Link,der,link,Ich schicke dir den Link.,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0566,Löffel,der,spoon,Ich brauche einen Löffel.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0567,Lokal,das,restaurant/pub,Wir essen in einem kleinen Lokal.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0568,Lüge,die,lie,Das ist eine Lüge.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0570,Lust,die,desire/mood,Ich habe Lust auf Schokolade.,A2,noun,Feelings,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0573,Mädchen,das,girl,Das Mädchen malt ein Bild.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0574,Magen,der,stomach,Mein Magen tut weh.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0575,Mailbox,die,mailbox,Ich spreche auf die Mailbox.,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0576,Mal,das,time/occasion,Bis zum nächsten Mal!,A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0582,Mann,der,man/husband,Der Mann wartet draußen.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0584,Mannschaft,die,team,Unsere Mannschaft hat gewonnen.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0585,Mantel,der,coat,Zieh deinen Mantel an.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0586,Markt,der,market,Ich gehe heute auf den Markt.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0588,Menge,die,amount/lots,Wir haben noch eine Menge Zeit.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0589,Mensch,der,person/human,Viele Menschen leben in der Stadt.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0591,Messe,die,fair/trade fair,Wir gehen zur Buchmesse.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0592,Messer,das,knife,Das Messer ist scharf.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0593,Miete,die,rent,Die Miete ist hoch.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0595,Milch,die,milk,Die Milch steht im Kühlschrank.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0597,Mineralwasser,das,mineral water,"Ein Glas Mineralwasser, bitte.",A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0604,Mitarbeiter,der,employee/staff member,Unsere Firma hat viele Mitarbeiter.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0605,Mittagessen,das,lunch,Um zwölf Uhr gibt es Mittagessen.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0606,Mitte,die,middle,Der Tisch steht in der Mitte.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0607,Moment,der,moment,"Einen Moment, bitte.",A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0609,Motor,der,engine,Der Motor ist kaputt.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0610,Motorroller,der,scooter,Er fährt mit dem Motorroller.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0612,Müll,der,trash/garbage,Bring bitte den Müll raus.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0613,Mund,der,mouth,Öffnen Sie bitte den Mund.,A2,noun,Body,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0614,Museum,das,museum,Wir gehen ins Museum.,A2,noun,Culture,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0615,Musik,die,music,Ich höre gern Musik.,A2,noun,Culture,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0617,Mütze,die,hat/cap,Im Winter trage ich eine Mütze.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0619,Nachbar,der,neighbor,Mein Nachbar kommt aus Brasilien.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0620,Nachbarin,die,female neighbor,Meine Nachbarin ist freundlich.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0621,Nachricht,die,message/news,Ich schreibe dir eine Nachricht.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0623,Nähe,die,nearby/vicinity,Die Post ist in der Nähe.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0624,Name,der,name,Wie ist Ihr Name?,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0636,Norden,der,north,Hamburg liegt im Norden.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0638,Note,die,grade/mark,Eva hat gute Noten.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0640,Notiz,die,note,Ich schreibe eine Notiz.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0642,Nudel,die,noodle,Ich esse Nudeln mit Tomatensoße.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0643,Nummer,die,number,Welche Hausnummer haben Sie?,A2,noun,Numbers,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0648,Ohr,das,ear,Mein Ohr tut weh.,A2,noun,Body,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0649,Öl,das,oil,Wir brauchen Öl für den Salat.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0651,Onkel,der,uncle,Mein Onkel wohnt in Berlin.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0652,Opa,der,grandpa,Mein Opa liest Zeitung.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0653,Operation,die,operation/surgery,Die Operation ist morgen.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0654,Ordnung,die,order,Alles ist in Ordnung.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0655,Ort,der,place/town,Der Ort ist klein.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0656,Osten,der,east,Wien liegt im Osten von Österreich.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0657,Paar,das,couple/pair,Ich brauche ein Paar Schuhe.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0660,Paket,das,package,Das Paket ist für Sie.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0661,Papier,das,paper,Ich brauche Papier und Bleistift.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0662,Papiere,die,papers/documents,Haben Sie Ihre Papiere dabei?,A2,noun,Administration,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0663,Parfüm,das,perfume,Ich suche ein Parfüm als Geschenk.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,"Useful later, but not needed for v0 core."
+a2_0664,Passwort,das,password,Ich habe mein Passwort vergessen.,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0665,Pause,die,break,Wir machen eine kurze Pause.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0666,Person,die,person,Der Eintritt kostet fünf Euro pro Person.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0667,Pferd,das,horse,Amira liebt Pferde.,A2,noun,Animals,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0668,Pflanze,die,plant,Die Pflanze braucht Wasser.,A2,noun,Nature,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0669,Pizza,die,pizza,Mein Lieblingsessen ist Pizza.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0670,Plakat,das,poster,Wir machen ein Plakat im Unterricht.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0671,Plan,der,plan/map,Ich kaufe einen Stadtplan.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0673,Platz,der,place/seat/square,Hier ist noch ein Platz frei.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0675,Polizei,die,police,Rufen Sie die Polizei!,A2,noun,Public services,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0676,Pommes frites,die,fries,Die Kinder essen Pommes frites.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0677,Portion,die,portion,Ich nehme eine kleine Portion Eis.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0678,Post,die,post office/mail,Ist Post für mich da?,A2,noun,Public services,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0679,Poster,das,poster,Das Poster hängt über dem Bett.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0680,Postkarte,die,postcard,Schreib mir eine Postkarte.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0681,Postleitzahl,die,postal code,Wie ist Ihre Postleitzahl?,A2,noun,Administration,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0682,Praktikum,das,internship,Ich mache ein Praktikum.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0684,Praxis,die,doctor's office/practice,Die Praxis öffnet um acht.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0685,Preis,der,price,Der Preis ist hoch.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0689,Problem,das,problem,Ich habe ein Problem.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0690,Produkt,das,product,Das Produkt ist neu.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0691,Projekt,das,project,Wir machen ein Projekt in der Schule.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0692,Prospekt,der,brochure,Bitte schicken Sie mir einen Prospekt.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0694,Prüfung,die,exam,Ich habe die Prüfung bestanden.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0695,Pullover,der,sweater,Ich brauche einen warmen Pullover.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0698,Qualität,die,quality,Die Qualität ist gut.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0699,Quiz,das,quiz,Sie hat beim Quiz gewonnen.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0700,Radio,das,radio,Ich höre im Auto Radio.,A2,noun,Media,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0702,Rathaus,das,town hall,Das Formular bekommen Sie im Rathaus.,A2,noun,Public services,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0703,Rätsel,das,riddle/puzzle,Das Rätsel ist schwierig.,A2,noun,Games,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0705,Raum,der,room,Der Unterricht ist in Raum 332.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0707,Rechnung,die,bill/invoice,Die Rechnung bitte.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0709,Regen,der,rain,Der Regen ist stark.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0710,Regel,die,rule,Diese Regel ist wichtig.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0713,Reifen,der,tire,Wir müssen den Reifen wechseln.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0714,Reis,der,rice,Ich esse Reis mit Gemüse.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0715,Reise,die,trip/journey,Wir machen eine Reise nach Österreich.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0716,Reisebüro,das,travel agency,Wir buchen die Reise im Reisebüro.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0717,Reiseführer,der,guidebook/tour guide,Ich kaufe einen Reiseführer.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0721,Rentner,der,retiree,Mein Onkel ist Rentner.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0722,Rentnerin,die,female retiree,Meine Tante ist Rentnerin.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0723,Reparatur,die,repair,Die Reparatur ist teuer.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0726,Rest,der,rest/remainder,Den Rest gebe ich dir später.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0727,Restaurant,das,restaurant,Wir essen im Restaurant.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0728,Rezept,das,recipe/prescription,Hast du das Rezept für den Kuchen?,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0729,Rezeption,die,reception,Geben Sie den Schlüssel an der Rezeption ab.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0732,Rind,das,beef/cattle,Ich esse Fleisch vom Rind.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,"Useful later, but not needed for v0 core."
+a2_0733,Ring,der,ring,Ich habe meinen Ring verloren.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0734,Rock,der,skirt,Der Rock ist zu kurz.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0735,Roller,der,scooter,Der Roller steht vor dem Haus.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0737,Rückfahrt,die,return trip,Die Rückfahrt ist am Sonntag.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0738,Rucksack,der,backpack,Ich nehme meinen Rucksack mit.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0739,Ruhe,die,peace/quiet,Ich brauche Ruhe.,A2,noun,Feelings,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0742,Rundgang,der,tour/walk around,Der Rundgang beginnt um zehn.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0743,Sache,die,thing/matter,Das ist meine Sache.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0744,Saft,der,juice,Ich trinke Apfelsaft.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0746,Salat,der,salad,Der Salat ist frisch.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0747,Salz,das,salt,Kann ich bitte Salz haben?,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0749,Satz,der,sentence,Den Satz verstehe ich nicht.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0755,Schalter,der,counter/switch,Gehen Sie bitte zum Schalter drei.,A2,noun,Public services,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0759,Schlafzimmer,das,bedroom,Hier ist das Schlafzimmer.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0763,Schloss,das,castle/lock,Wir besichtigen ein Schloss.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0764,Schluss,der,end,Zum Schluss sagen wir danke.,A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0765,Schlüssel,der,key,Ich finde meinen Schlüssel nicht.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0767,Schmerz,der,pain,Ich habe Bauchschmerzen.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0769,Schnee,der,snow,In den Bergen liegt Schnee.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0773,Schokolade,die,chocolate,Julia liebt Schokolade.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0776,Schrank,der,cupboard/wardrobe,Die Gläser stehen im Schrank.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0780,Schuh,der,shoe,Die Schuhe sind zu eng.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0781,Schule,die,school,Meine Tochter geht in die Schule.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0782,Schüler,der,student/pupil,Der Schüler lernt Deutsch.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0783,Schülerin,die,female student/pupil,Die Schülerin liest ein Buch.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0786,Schwein,das,pig,Ich esse kein Schweinefleisch.,A2,noun,Animals,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0789,Schwimmbad,das,swimming pool,Wir gehen ins Schwimmbad.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0791,See,der,lake,Wir fahren an den See.,A2,noun,Nature,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0792,See,die,sea,Die See ist ruhig.,A2,noun,Nature,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0794,Sehenswürdigkeit,die,sight/attraction,Wien hat viele Sehenswürdigkeiten.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0796,Seife,die,soap,Hier gibt es keine Seife.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0804,Seite,die,page/side,Öffnen Sie das Buch auf Seite 20.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0806,Sendung,die,program/broadcast,Welche Sendung schaust du gern?,A2,noun,Media,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0807,Service,der,service,Der Service im Restaurant ist gut.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0811,Situation,die,situation,Das ist eine schwierige Situation.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0813,Ski,der,ski,Wir fahren am Wochenende Ski.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,"Useful later, but not needed for v0 core."
+a2_0815,Sofa,das,sofa,Das Sofa ist bequem.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0819,Sonne,die,sun,Die Sonne scheint.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0824,Spaß,der,fun,Deutsch macht Spaß.,A2,noun,Feelings,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0828,Spaziergang,der,walk,Abends mache ich einen Spaziergang.,A2,noun,Movement,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0830,Speisekarte,die,menu,Bringen Sie bitte die Speisekarte.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0831,Spiel,das,game,Monopoly ist ein bekanntes Spiel.,A2,noun,Games,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0833,Sport,der,sport,Ich mache viel Sport.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0835,Sportplatz,der,sports field,Das Training ist auf dem Sportplatz.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0836,Sprache,die,language,Welche Sprachen sprichst du?,A2,noun,Language,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0838,Sprechstunde,die,consultation hours,Die Ärztin hat Sprechstunde.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0839,Stadt,die,city,Heidelberg ist eine alte Stadt.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0840,Stadtplan,der,city map,Haben Sie einen Stadtplan?,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0841,Star,der,star,Diese Sängerin ist ein Star.,A2,noun,Culture,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0845,Stelle,die,job/place,Ich habe eine neue Stelle.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0848,Stiefel,der,boot,Die roten Stiefel sind teuer.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0849,Stift,der,pen/pencil,Kannst du mir einen Stift geben?,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0850,Stipendium,das,scholarship,Sie bekommt ein Stipendium.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0851,Stock,der,floor/storey,Wir wohnen im ersten Stock.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0852,Stockwerk,das,floor/storey,Das Gebäude hat vier Stockwerke.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0854,Strand,der,beach,Im Urlaub bin ich gern am Strand.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0855,Straße,die,street,In welcher Straße wohnen Sie?,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0856,Straßenbahn,die,tram,Wir fahren mit der Straßenbahn.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0859,Stress,der,stress,Ich habe bei der Arbeit viel Stress.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0861,Stück,das,piece/play,Möchtest du ein Stück Kuchen?,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0862,Student,der,student,Ich bin Student.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0863,Studentin,die,female student,Meine Schwester ist Studentin.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0865,Studium,das,university studies,Das Studium dauert drei Jahre.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0866,Stuhl,der,chair,Ist der Stuhl frei?,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0869,Supermarkt,der,supermarket,Ich kaufe im Supermarkt ein.,A2,noun,Shopping,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0870,Suppe,die,soup,Die Suppe schmeckt gut.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0873,Süßigkeiten,die,sweets/candy,Welche Süßigkeiten magst du?,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0875,Tabelle,die,table/chart,Schreiben Sie die Wörter in die Tabelle.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0876,Tablette,die,tablet/pill,Nehmen Sie eine Tablette.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0877,Tafel,die,board,Die Lehrerin schreibt an die Tafel.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0878,Tag,der,day,Heute ist ein schöner Tag.,A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0881,Tasche,die,bag,Die Tasche ist schwer.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0882,Tasse,die,cup,"Eine Tasse Kaffee, bitte.",A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0883,Taxi,das,taxi,Wir fahren mit dem Taxi.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0884,Technik,die,technology/technique,Ich interessiere mich für Technik.,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0885,Tee,der,tea,Ich trinke Tee.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0886,Teil,der,part,Der Test hat vier Teile.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0889,Telefon,das,telephone,Darf ich Ihr Telefon benutzen?,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0891,Teller,der,plate,Stell die Teller auf den Tisch.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0892,Tennis,das,tennis,Sie spielt sehr gut Tennis.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0893,Termin,der,appointment,Ich habe einen Termin beim Arzt.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0895,Text,der,text,Lesen Sie bitte den Text.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0896,Theater,das,theater,Ich gehe gern ins Theater.,A2,noun,Culture,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0897,Thema,das,topic,Unser Thema ist Essen.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0898,Ticket,das,ticket,Wie viel kostet das Ticket?,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0900,Tier,das,animal,Wir dürfen keine Tiere haben.,A2,noun,Animals,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0901,Tipp,der,tip/advice,Kannst du mir einen Tipp geben?,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0902,Tisch,der,table,Das Essen steht auf dem Tisch.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0903,Titel,der,title,Wie heißt der Titel?,A2,noun,Media,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0904,Toilette,die,toilet,Wo ist die Toilette?,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0906,Tomate,die,tomato,Die Tomate ist rot.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0907,Topf,der,pot,Ich brauche einen großen Topf.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0908,Torte,die,cake/tart,Die Torte ist zu süß.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,"Useful later, but not needed for v0 core."
+a2_0910,Tourist,der,tourist,Viele Touristen besuchen Wien.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0911,Touristin,die,female tourist,Die Touristin macht Fotos.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0913,Trainer,der,coach/trainer,Der Trainer ist streng.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0914,Training,das,training,Das Training beginnt um fünf.,A2,noun,Sports,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0917,Treppe,die,stairs,Die Treppe ist links.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0921,T-Shirt,das,T-shirt,Das T-Shirt ist blau.,A2,noun,Clothing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0923,Tür,die,door,Bitte schließen Sie die Tür.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0924,U-Bahn,die,subway,Wir fahren mit der U-Bahn.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0930,Überweisung,die,bank transfer/referral,Ich mache eine Überweisung.,A2,noun,Money,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0931,Uhr,die,clock/o'clock,Es ist acht Uhr.,A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0937,Unfall,der,accident,Es gab einen Unfall.,A2,noun,Health,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0940,Universität,die,university,Sie studiert an der Universität.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0944,Unterricht,der,lesson/class,Der Unterricht beginnt um acht.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0946,Unterschrift,die,signature,Hier fehlt Ihre Unterschrift.,A2,noun,Administration,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0947,Unterschied,der,difference,Der Unterschied ist klein.,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0949,Urlaub,der,vacation,Wir machen Urlaub am Meer.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0950,Vater,der,father,Mein Vater arbeitet heute.,A2,noun,Family,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0954,Verkäufer,der,salesperson,Der Verkäufer hilft mir.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0955,Verkäuferin,die,female salesperson,Die Verkäuferin ist freundlich.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0956,Verkehr,der,traffic,Der Verkehr ist laut.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0959,Vermieter,der,landlord,Unser Vermieter ist nett.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0960,Vermieterin,die,landlady,Die Vermieterin wohnt nebenan.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0965,Verspätung,die,delay,Der Zug hat Verspätung.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0968,Vertrag,der,contract,Ich muss den Vertrag unterschreiben.,A2,noun,Administration,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0971,Vogel,der,bird,Morgens singen die Vögel.,A2,noun,Animals,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_0978,Vorname,der,first name,Mein Vorname ist Eva.,A2,noun,People,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0979,Vorschlag,der,suggestion,Hast du einen Vorschlag?,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0984,Wagen,der,car/wagon,Wo steht Ihr Wagen?,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0988,Wald,der,forest,Ich gehe gern im Wald spazieren.,A2,noun,Nature,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_0995,Wäsche,die,laundry,Ich muss Wäsche waschen.,A2,noun,Home,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0997,Wasser,das,water,"Ein Glas Wasser, bitte.",A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_0998,Webseite,die,webpage,Die Webseite hat viele Übungen.,A2,noun,Technology,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1009,Weg,der,way/path,Können Sie mir den Weg zeigen?,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1015,Wein,der,wine,"Nein danke, ich möchte keinen Wein.",A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1022,Welt,die,world,Ich möchte um die Welt reisen.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1028,Werkstatt,die,workshop/garage,Mein Auto ist in der Werkstatt.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1029,Wettbewerb,der,competition,Mein Sohn hat den Wettbewerb gewonnen.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1030,Wetter,das,weather,Das Wetter ist heute schön.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1039,Wind,der,wind,Der Wind ist kalt.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1043,Witz,der,joke,Er erzählt einen Witz.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1049,Wohnung,die,apartment,Die Wohnung ist hell.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1050,Wohnzimmer,das,living room,Die Kinder sitzen im Wohnzimmer.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1051,Wolke,die,cloud,Heute gibt es viele Wolken.,A2,noun,Weather,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1053,Workshop,der,workshop,Der Workshop war sehr interessant.,A2,noun,Work,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1054,Wort,das,word,Ich kenne das Wort nicht.,A2,noun,Language,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1056,Wunsch,der,wish,Was ist dein größter Wunsch?,A2,noun,Feelings,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_1058,Wurst,die,sausage,"Eine Wurst mit Pommes, bitte.",A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1059,Zahl,die,number,Können Sie die Zahl wiederholen?,A2,noun,Numbers,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_1061,Zahn,der,tooth,Mein Zahn tut weh.,A2,noun,Body,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_1064,Zeit,die,time,Ich habe heute keine Zeit.,A2,noun,Time,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1065,Zeitschrift,die,magazine,Andrea kauft diese Zeitschrift jede Woche.,A2,noun,Media,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_1066,Zeitung,die,newspaper,Ich lese manchmal Zeitung.,A2,noun,Media,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,"Good for broader adult vocabulary, optional for first tests."
+a2_1067,Zelt,das,tent,Im Sommer schlafen wir im Zelt.,A2,noun,Travel,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1068,Zentrum,das,center,Der Bahnhof ist im Zentrum.,A2,noun,Directions,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1069,Zettel,der,note/slip of paper,Schreib die Nummer auf den Zettel.,A2,noun,Communication,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1070,Zeugnis,das,report card/certificate,Morgen bekommen die Kinder ihr Zeugnis.,A2,noun,School,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1073,Ziel,das,goal/destination,Was ist dein Ziel im Leben?,A2,noun,General,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_1074,Zimmer,das,room,Das Zimmer ist groß.,A2,noun,Housing,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1075,Zirkus,der,circus,Wir gehen mit den Kindern in den Zirkus.,A2,noun,Culture,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Optional,"Useful later, but not needed for v0 core."
+a2_1076,Zitrone,die,lemon,Ich trinke Tee mit Zitrone.,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1077,Zoo,der,zoo,Am Sonntag gehen wir in den Zoo.,A2,noun,Animals,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Useful,Keep in full list; review later if needed.
+a2_1079,Zucker,der,sugar,Trinkst du Tee mit Zucker?,A2,noun,Food,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
+a2_1082,Zug,der,train,Ich fahre gern mit dem Zug.,A2,noun,Transport,yes,Goethe A2 word list vocabulary; original Unser Dorf example sentence,,Core,Useful for adult A2 learners and v0 testing.
