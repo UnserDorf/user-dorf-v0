@@ -10326,3 +10326,32 @@ button:active {
     line-height: 1.12;
   }
 }
+
+/* Quiz title alignment: progress stays left, practice title centers on the quiz axis. */
+.clean-quiz-mode .card-meta {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+.clean-quiz-mode #cardCounter,
+.clean-quiz-mode #nounVerbCounter,
+.article-quiz-mode #cardCounter {
+  width: 100%;
+  justify-self: stretch;
+  text-align: left;
+}
+
+.clean-quiz-mode #cardMode,
+.article-quiz-mode #cardMode,
+.clean-quiz-mode #nounVerbTitle,
+.clean-quiz-mode .noun-verb-card .card-meta span:last-child {
+  width: min(100%, 32rem);
+  justify-self: center;
+  margin: 2px auto 0;
+  color: var(--green);
+  text-align: center;
+}

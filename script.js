@@ -6514,7 +6514,7 @@ function renderVocabularyReviewQuiz() {
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
-  els.nounVerbTitle.textContent = challengeSession.type === "vocabulary" ? "Vocabulary" : "Vocabulary Review";
+  els.nounVerbTitle.textContent = challengeSession.type === "vocabulary" ? "Vocabulary Practice" : "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the English meaning.";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
