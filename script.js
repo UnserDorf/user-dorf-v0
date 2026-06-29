@@ -456,14 +456,14 @@ const TOWN_CENTER_STAGES = [
 ];
 const VILLAGE_ALBUM_REWARDS = [
   { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
-  { id: "plant-sale", coins: 250, title: "Plant Sale", image: "", icon: "🌿", description: "Neighbors share plants and seedlings for the village green." },
+  { id: "plant-sale", coins: 250, title: "Plant Sale", image: "assets/plant-sale.png", icon: "🌿", description: "Neighbors share plants and seedlings for the village green." },
   { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/community-picnic.png", icon: "🥪", description: "Families gather together for a picnic in the village square." },
-  { id: "childrens-play-day", coins: 450, title: "Children's Play Day", image: "", icon: "🪁", description: "The village square fills with games, laughter, and play." },
+  { id: "childrens-play-day", coins: 450, title: "Children's Play Day", image: "assets/childrens-play-day.png", icon: "🪁", description: "The village square fills with games, laughter, and play." },
   { id: "music-day", coins: 600, title: "Music Day", image: "assets/music-day.png", icon: "🎶", description: "A small village music event brings everyone together." },
-  { id: "harvest-festival", coins: 800, title: "Harvest Festival", image: "", icon: "🌻", description: "The village celebrates a season of learning and growth." },
+  { id: "harvest-festival", coins: 800, title: "Harvest Festival", image: "assets/harvest-festival.png", icon: "🌻", description: "The village celebrates a season of learning and growth." },
   { id: "outdoor-movie", coins: 1250, title: "Outdoor Movie Night", image: "assets/outdoor-movie.png", icon: "🎬", description: "The village enjoys a movie under the stars." },
   { id: "village-carnival", coins: 1500, title: "Village Carnival", image: "assets/village-carnival.png", icon: "🎡", description: "The biggest celebration yet arrives in the village." },
-  { id: "lantern-festival", coins: 1800, title: "Lantern Festival", image: "", icon: "🕯️", description: "Lanterns glow as the village celebrates what everyone has built together." }
+  { id: "lantern-festival", coins: 1800, title: "Lantern Festival", image: "assets/lantern-festival.png", icon: "🕯️", description: "Lanterns glow as the village celebrates what everyone has built together." }
 ];
 const COIN_LEVELS = [
   { min: 0, next: 50, icon: "🪙", name: "Coin Pouch" },
