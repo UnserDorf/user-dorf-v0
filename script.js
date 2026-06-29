@@ -5278,6 +5278,14 @@ function normalizeDatasetWord(value) {
   return String(value || "").trim().toLocaleLowerCase("de");
 }
 
+function cleanArticleQuizDisplayWord(value) {
+  return String(value || "")
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/^[-–—]+|[-–—]+$/g, "")
+    .trim();
+}
+
 function normalizeArticleChallengeCards(rows, level) {
   const seen = new Set();
   const fallbackCardsByArticle = new Map(cards.map((card) => [
@@ -5289,14 +5297,15 @@ function normalizeArticleChallengeCards(rows, level) {
     .filter((row) => row.german && ["der", "die", "das"].includes(normalizeArticleValue(row.article)))
     .map((row, index) => {
       const article = normalizeArticleValue(row.article);
-      const wordKey = normalizeDatasetWord(row.german);
+      const displayWord = cleanArticleQuizDisplayWord(row.german);
+      const wordKey = normalizeDatasetWord(displayWord || row.german);
       const fallbackCard = fallbackCardsByArticle.get(`${article}:${wordKey}`)
         || fallbackCardsByWord.get(wordKey);
       const id = String(row.id || "").trim()
         || `${level.toLowerCase()}-articles-${slugify(row.german) || index}`;
       return {
         id,
-        word: row.german.trim(),
+        word: displayWord || row.german.trim(),
         article,
         english: String(row.english || fallbackCard?.english || "").trim(),
         example: String(row.examplesentence || fallbackCard?.example || "").trim(),

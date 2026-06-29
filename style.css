@@ -10269,3 +10269,35 @@ button:active {
     font-size: 0.76rem;
   }
 }
+
+.clean-article-practice #questionText,
+.clean-quiz-mode #nounVerbPrompt {
+  max-width: min(100%, 18ch);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.clean-article-practice .question-area,
+.clean-quiz-mode .question-area {
+  min-height: 0;
+  height: auto;
+}
+
+.clean-article-practice .flashcard,
+.clean-quiz-mode .noun-verb-card {
+  height: auto;
+  min-height: min(620px, calc(100vh - 72px));
+}
+
+@media (max-width: 520px) {
+  .clean-article-practice #questionText,
+  .clean-quiz-mode #nounVerbPrompt {
+    max-width: min(100%, 14ch);
+    font-size: clamp(2.35rem, 14vw, 4rem);
+    line-height: 1.12;
+  }
+}
