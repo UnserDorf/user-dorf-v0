@@ -593,7 +593,6 @@ const els = {
   profileGrid: document.querySelector("#profileGrid"),
   profileActions: document.querySelector("#profileActions"),
   emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
-  profileDebug: document.querySelector("#profileDebug"),
   profileLoginForm: document.querySelector("#profileLoginForm"),
   profileLoginTitle: document.querySelector("#profileLoginTitle"),
   profileLoginPassword: document.querySelector("#profileLoginPassword"),
@@ -711,7 +710,6 @@ const els = {
   collectionPageIntro: document.querySelector("#collectionPageIntro"),
   collectionPageHero: document.querySelector("#collectionPageHero"),
   collectionPageDescription: document.querySelector("#collectionPageDescription"),
-  collectionNavigation: document.querySelector("#collectionNavigation"),
   achievementsGrid: document.querySelector("#achievementsGrid"),
   challengeArticleProgressBar: document.querySelector("#challengeArticleProgressBar"),
   challengeArticleProgressLabel: document.querySelector("#challengeArticleProgressLabel"),
@@ -2062,7 +2060,6 @@ function showVillageNameSetup() {
   els.profileGrid.classList.add("hidden");
   els.profileActions.classList.add("hidden");
   els.emptyProfileMessage.classList.add("hidden");
-  els.profileDebug?.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
   els.createProfileForm.classList.add("hidden");
   els.villageNameForm.classList.remove("hidden");
@@ -2904,12 +2901,6 @@ function renderRewardsPage(page = "austria-album") {
   const unlockedCurrentAustriaIds = getAustriaAlbumUnlockedRewardIds(profile, true);
   const unlockedVillage = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
   const townCenter = getTownCenterProgress(sharedCoins);
-  if (els.collectionNavigation) {
-    els.collectionNavigation.classList.add("hidden");
-    els.collectionNavigation.querySelectorAll("button[data-dashboard-action]").forEach((button) => {
-      button.classList.toggle("active", button.dataset.dashboardAction === page);
-    });
-  }
   if (page === "achievements") {
     const achievementStates = getAchievementStates().filter(({ achievement }) => !achievement.testOnly);
     const earnedCount = achievementStates.filter(({ unlocked }) => unlocked).length;
