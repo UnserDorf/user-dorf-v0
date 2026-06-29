@@ -120,7 +120,7 @@ const ACHIEVEMENTS = [
   {
     id: "first-flashcard-reviewed",
     icon: "📇",
-    name: "First Flashcard Reviewed",
+    name: "1 Flashcard Reviewed",
     description: "Review your first flashcard.",
     reward: 0,
     scope: "profile",
@@ -128,49 +128,9 @@ const ACHIEVEMENTS = [
     target: 1
   },
   {
-    id: "first-quiz-completed",
-    icon: "🏆",
-    name: "First Quiz Completed",
-    description: "Complete your first challenge.",
-    reward: 0,
-    scope: "profile",
-    metric: "challengesCompleted",
-    target: 1
-  },
-  {
-    id: "first-correct-answer",
-    icon: "✅",
-    name: "First Correct Answer",
-    description: "Answer your first question correctly.",
-    reward: 0,
-    scope: "profile",
-    metric: "correctAnswers",
-    target: 1
-  },
-  {
-    id: "first-10-coins",
-    icon: "🪙",
-    name: "First 10 Coins Earned",
-    description: "Earn your first 10 coins.",
-    reward: 0,
-    scope: "profile",
-    metric: "coins",
-    target: 10
-  },
-  {
-    id: "first-austria-adventure",
-    icon: "🇦🇹",
-    name: "First Austria Album Reward",
-    description: "Unlock your first Austria Album reward.",
-    reward: 0,
-    scope: "profile",
-    metric: "austriaAlbumRewards",
-    target: 1
-  },
-  {
     id: "flashcards-reviewed-10",
     icon: "📇",
-    name: "10 Words Reviewed",
+    name: "10 Flashcards Reviewed",
     description: "Review 10 flashcards.",
     reward: 0,
     scope: "profile",
@@ -180,7 +140,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-50",
     icon: "📇",
-    name: "50 Words Reviewed",
+    name: "50 Flashcards Reviewed",
     description: "Review 50 flashcards.",
     reward: 0,
     scope: "profile",
@@ -190,7 +150,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-100",
     icon: "📇",
-    name: "100 Words Reviewed",
+    name: "100 Flashcards Reviewed",
     description: "Review 100 flashcards.",
     reward: 0,
     scope: "profile",
@@ -200,7 +160,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-250",
     icon: "📇",
-    name: "250 Words Reviewed",
+    name: "250 Flashcards Reviewed",
     description: "Review 250 flashcards.",
     reward: 0,
     scope: "profile",
@@ -210,7 +170,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-500",
     icon: "📇",
-    name: "500 Words Reviewed",
+    name: "500 Flashcards Reviewed",
     description: "Review 500 flashcards.",
     reward: 0,
     scope: "profile",
@@ -220,7 +180,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-1000",
     icon: "📇",
-    name: "1000 Words Reviewed",
+    name: "1000 Flashcards Reviewed",
     description: "Review 1000 flashcards.",
     reward: 0,
     scope: "profile",
@@ -230,7 +190,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-1500",
     icon: "📇",
-    name: "1500 Words Reviewed",
+    name: "1500 Flashcards Reviewed",
     description: "Review 1500 flashcards.",
     reward: 0,
     scope: "profile",
@@ -240,7 +200,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-2000",
     icon: "📇",
-    name: "2000 Words Reviewed",
+    name: "2000 Flashcards Reviewed",
     description: "Review 2000 flashcards.",
     reward: 0,
     scope: "profile",
@@ -250,7 +210,7 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-2500",
     icon: "📇",
-    name: "2500 Words Reviewed",
+    name: "2500 Flashcards Reviewed",
     description: "Review 2500 flashcards.",
     reward: 0,
     scope: "profile",
@@ -260,158 +220,12 @@ const ACHIEVEMENTS = [
   {
     id: "flashcards-reviewed-3000",
     icon: "📇",
-    name: "3000 Words Reviewed",
+    name: "3000 Flashcards Reviewed",
     description: "Review 3000 flashcards.",
     reward: 0,
     scope: "profile",
     metric: "flashcardsReviewed",
     target: 3000
-  },
-  {
-    id: "quiz-correct-10",
-    icon: "✅",
-    name: "10 Correct Answers",
-    description: "Reach 10 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 10
-  },
-  {
-    id: "quiz-correct-50",
-    icon: "✅",
-    name: "50 Correct Answers",
-    description: "Reach 50 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 50
-  },
-  {
-    id: "quiz-correct-100",
-    icon: "✅",
-    name: "100 Correct Answers",
-    description: "Reach 100 correct answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 100
-  },
-  {
-    id: "quiz-correct-250",
-    icon: "✅",
-    name: "250 Correct Answers",
-    description: "Reach 250 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 250
-  },
-  {
-    id: "quiz-correct-500",
-    icon: "✅",
-    name: "500 Correct Answers",
-    description: "Reach 500 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 500
-  },
-  {
-    id: "quiz-correct-1000",
-    icon: "✅",
-    name: "1000 Correct Answers",
-    description: "Reach 1000 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 1000
-  },
-  {
-    id: "quiz-correct-2000",
-    icon: "✅",
-    name: "2000 Correct Answers",
-    description: "Reach 2000 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 2000
-  },
-  {
-    id: "quiz-correct-3000",
-    icon: "✅",
-    name: "3000 Correct Answers",
-    description: "Reach 3000 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 3000
-  },
-  {
-    id: "quiz-correct-5000",
-    icon: "✅",
-    name: "5000 Correct Answers",
-    description: "Reach 5000 correct quiz answers.",
-    reward: 0,
-    scope: "profile",
-    metric: "totalCorrectAnswers",
-    target: 5000
-  }
-];
-const DAILY_CHALLENGES = [
-  {
-    id: "article-apprentice",
-    icon: "🏷",
-    name: "Article Apprentice",
-    description: "Answer 20 article questions.",
-    metric: "articleQuestions",
-    goal: 20,
-    reward: 10
-  },
-  {
-    id: "article-expert",
-    icon: "🏷",
-    name: "Article Expert",
-    description: "Answer 50 article questions.",
-    metric: "articleQuestions",
-    goal: 50,
-    reward: 25
-  },
-  {
-    id: "accuracy-challenge",
-    icon: "🎯",
-    name: "Accuracy Challenge",
-    description: "Get 10 article questions correct.",
-    metric: "correctArticleAnswers",
-    goal: 10,
-    reward: 15
-  },
-  {
-    id: "consistency-challenge",
-    icon: "🔥",
-    name: "Consistency Challenge",
-    description: "Answer 30 article questions.",
-    metric: "articleQuestions",
-    goal: 30,
-    reward: 15
-  },
-  {
-    id: "quick-practice",
-    icon: "⚡",
-    name: "Quick Practice",
-    description: "Answer 15 article questions.",
-    metric: "articleQuestions",
-    goal: 15,
-    reward: 8
-  },
-  {
-    id: "marathon-challenge",
-    icon: "🏆",
-    name: "Marathon Challenge",
-    description: "Answer 75 article questions.",
-    metric: "articleQuestions",
-    goal: 75,
-    reward: 40
   }
 ];
 const STREAK_ACTIVITY_GOAL = 10;
@@ -1992,7 +1806,7 @@ function pickLatestDailyChallenge(localChallenge, remoteChallenge) {
   if (remoteDate > localDate) return remoteChallenge;
   return {
     date: localDate || remoteDate || getTodayKey(),
-    challengeId: localChallenge?.challengeId || remoteChallenge?.challengeId || getDailyChallengeForDate(localDate || remoteDate || getTodayKey()).id,
+    challengeId: localChallenge?.challengeId || remoteChallenge?.challengeId || "",
     articleQuestions: Math.max(normalizeCounter(localChallenge?.articleQuestions), normalizeCounter(remoteChallenge?.articleQuestions)),
     correctArticleAnswers: Math.max(normalizeCounter(localChallenge?.correctArticleAnswers), normalizeCounter(remoteChallenge?.correctArticleAnswers)),
     completed: Boolean(localChallenge?.completed || remoteChallenge?.completed),
@@ -2604,11 +2418,10 @@ function renderProgressCards(profile) {
     els.dashboardStreak.textContent = streak > 0 ? `${streak} ${streak === 1 ? "Day" : "Days"}` : "No streak yet";
   }
   if (els.dashboardChallengeStatus) {
-    const challenge = getDailyChallengeForDate(profile.dailyChallenge.date);
-    const progress = getDailyChallengeProgress(profile.dailyChallenge, challenge);
-    els.dashboardChallengeStatus.textContent = profile.dailyChallenge.completed
-      ? "Completed today"
-      : `${progress.current} / ${challenge.goal}`;
+    const completed = normalizeCounter(profile.challengeSessionsCompleted);
+    els.dashboardChallengeStatus.textContent = completed > 0
+      ? `${completed} completed`
+      : "Ready to start";
   }
   if (els.dashboardChallengesCompleted) {
     els.dashboardChallengesCompleted.textContent = normalizeCounter(profile.challengeSessionsCompleted);
@@ -2947,20 +2760,20 @@ function renderRewardsPage(page = "austria-album") {
   if (page === "achievements") {
     const achievementStates = getAchievementStates().filter(({ achievement }) => !achievement.testOnly);
     const earnedCount = achievementStates.filter(({ unlocked }) => unlocked).length;
-    els.rewardPageTitle.textContent = "Achievements";
+    els.rewardPageTitle.textContent = "Flashcard Milestones";
     els.rewardPageSummary.textContent = `${earnedCount} earned`;
     setCollectionPageIntro({
       image: "assets/achievements.png",
-      alt: "Achievements collection",
+      alt: "Flashcard Milestones collection",
       summary: `${earnedCount} earned`,
-      description: "Your learning milestones will appear here as you study."
+      description: "Your flashcard review milestones will appear here as you study."
     });
     els.achievementsGrid.replaceChildren(
       createRewardSection(
         "",
         "",
         achievementStates.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress)),
-        earnedCount === 0 ? "Your learning milestones will appear here as you study." : ""
+        earnedCount === 0 ? "Your flashcard review milestones will appear here as you study." : ""
       )
     );
     return;
@@ -3327,7 +3140,7 @@ function renderDashboardAchievements(achievementStates) {
   els.recentAchievements.replaceChildren(
     ...(recentAchievements.length
       ? recentAchievements.map(({ achievement, unlocked, progress }) => createAchievementCard(achievement, unlocked, progress, { compact: true }))
-      : [createEmptyAchievementCard("No achievements earned yet.")]
+      : [createEmptyAchievementCard("No flashcard milestones earned yet.")]
     )
   );
 
@@ -3376,16 +3189,13 @@ function getRecentlyEarnedAchievements(achievementStates) {
 
 function getNextGoalAchievements(achievementStates) {
   const lockedGoals = achievementStates
-    .filter(({ achievement, unlocked, progress }) => !achievement.testOnly && !unlocked && progress.target > 0);
-  const preferredGoals = [
-    getClosestAchievementByMetric(lockedGoals, ["coins"]),
-    getClosestAchievementByMetric(lockedGoals, ["familyCoins"]),
-    getClosestAchievementByMetric(lockedGoals, ["articlesMastered", "nounVerbCorrect", "streak", "correctAnswers"])
-  ].filter(Boolean);
-  const fallbackGoals = lockedGoals
-    .sort(compareAchievementProgress)
-    .filter((goal) => !preferredGoals.some((preferred) => preferred.achievement.id === goal.achievement.id));
-  return [...preferredGoals, ...fallbackGoals].slice(0, 2);
+    .filter(({ achievement, unlocked, progress }) => {
+      return !achievement.testOnly
+        && achievement.metric === "flashcardsReviewed"
+        && !unlocked
+        && progress.target > 0;
+    });
+  return lockedGoals.sort(compareAchievementProgress).slice(0, 2);
 }
 
 function getClosestAchievementByMetric(achievementStates, metrics) {
@@ -3404,7 +3214,7 @@ function createAchievementBody(achievement, unlocked, progress) {
   const body = document.createElement("div");
   const rewardText = achievement.reward > 0
     ? `Reward: +${achievement.reward} coins`
-    : "Learning milestone";
+    : "Flashcard milestone";
   const children = [
     createTextElement("strong", "", achievement.name),
     createTextElement("span", "", achievement.description),
@@ -3486,7 +3296,6 @@ function renderRewardDebugPage() {
     createRewardDebugCurrentProgressSection(),
     createRewardDebugFlashcardAchievementsSection(),
     createQuizRewardDebugSection("Vocabulary Quiz Rewards", "vocabulary"),
-    createRewardDebugArticleAchievementsSection(),
     createRewardDebugAustriaAlbumSection(),
     createRewardDebugVillageMemoriesSection(),
     createRewardDebugVillageGrowthSection(),
@@ -3499,15 +3308,6 @@ function createQuizRewardDebugSection(title, quizType) {
   const profile = getCurrentProfile();
   const unlockedAustriaIds = new Set(getAustriaAlbumUnlockedRewardIds(profile, true));
   return createRewardDebugSection(title, [
-    createTextElement("h4", "", "Quiz achievements"),
-    createRewardDebugTable(
-      ["Threshold", "Achievement", "Status"],
-      getDebugAchievementsByMetric("totalCorrectAnswers").map((achievement) => [
-        `${achievement.target} correct`,
-        `${achievement.icon} ${achievement.name}`,
-        createRewardDebugStatusCell(getAchievementDebugStatus(achievement))
-      ])
-    ),
     createTextElement("h4", "", "Austria Album unlocks"),
     createRewardDebugTable(
       ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
@@ -3545,7 +3345,7 @@ function createRewardDebugCurrentProgressSection() {
         ["Current Village Stage", `Stage ${townCenter.current.stage}: ${getTownCenterStageName(townCenter.current)}`],
         ["Austria Album Progress", `${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`],
         ["Village Memories Progress", `${unlockedMemories.length} / ${VILLAGE_ALBUM_REWARDS.length}`],
-        ["Achievements Earned", `${earnedAchievements.length} / ${achievementStates.length}`],
+        ["Flashcard Milestones Earned", `${earnedAchievements.length} / ${achievementStates.length}`],
         ["Current Streak", `${normalizeCounter(profile?.streak?.current)}`],
         ["Challenges Completed", `${normalizeCounter(profile?.challengeSessionsCompleted)}`],
         ["Current reward waiting to display", currentWaiting]
@@ -3555,29 +3355,15 @@ function createRewardDebugCurrentProgressSection() {
 }
 
 function createRewardDebugFlashcardAchievementsSection() {
-  return createRewardDebugSection("Flashcard Achievements", [
+  return createRewardDebugSection("Flashcard Milestones", [
     createRewardDebugTable(
-      ["Milestone", "Achievement", "Status"],
+      ["Reviewed", "Milestone", "Status"],
       getDebugAchievementsByMetric("flashcardsReviewed").map((achievement) => [
         `${achievement.target} ${achievement.target === 1 ? "reviewed" : "reviewed"}`,
         `${achievement.icon} ${achievement.name}`,
         createRewardDebugStatusCell(getAchievementDebugStatus(achievement), "Earned", "Not Earned")
       ])
     )
-  ]);
-}
-
-function createRewardDebugArticleAchievementsSection() {
-  const articleAchievements = getDebugAchievementsByMetric("articlesMastered");
-  const rows = articleAchievements.length
-    ? articleAchievements.map((achievement) => [
-      `${achievement.target}`,
-      `${achievement.icon} ${achievement.name}`,
-      createRewardDebugStatusCell(getAchievementDebugStatus(achievement), "Earned", "Not Earned")
-    ])
-    : [["No article-only achievements configured", "Article mastery is tracked, but no separate article achievement milestones are currently active.", ""]];
-  return createRewardDebugSection("Article Quiz Achievements", [
-    createRewardDebugTable(["Threshold", "Achievement", "Status"], rows)
   ]);
 }
 
@@ -3644,7 +3430,7 @@ function createRewardDebugQueueSection() {
 }
 
 function getRewardDebugWaitingLabel() {
-  if (achievementNotificationShowing) return "Achievement popup is visible";
+  if (achievementNotificationShowing) return "Milestone popup is visible";
   if (achievementNotificationQueue[0]?.name) return achievementNotificationQueue[0].name;
   if (pendingCelebrations.length) return "Pending celebration";
   return "None";
@@ -3770,7 +3556,7 @@ function runRewardDebugSimulation(type, amount, destructive = false) {
 
   refreshRewardDebugAfterSimulation();
   const after = getRewardDebugProgressSnapshot();
-  return `Updated. Coins: ${before.coins} → ${after.coins}. Village Coins: ${before.villageCoins} → ${after.villageCoins}. Achievements: ${before.achievements} → ${after.achievements}.`;
+  return `Updated. Coins: ${before.coins} → ${after.coins}. Village Coins: ${before.villageCoins} → ${after.villageCoins}. Flashcard Milestones: ${before.achievements} → ${after.achievements}.`;
 }
 
 function getRewardDebugProgressSnapshot() {
@@ -4050,14 +3836,13 @@ function formatResumePosition(position, total) {
 
 function prepareProfileDailyState(profile) {
   const today = getTodayKey();
-  const todayChallenge = getDailyChallengeForDate(today);
   profile.dailyChallenge = normalizeDailyChallenge(profile.dailyChallenge);
   profile.streak = normalizeStreak(profile.streak);
 
-  if (profile.dailyChallenge.date !== today || profile.dailyChallenge.challengeId !== todayChallenge.id) {
+  if (profile.dailyChallenge.date !== today) {
     profile.dailyChallenge = {
       date: today,
-      challengeId: todayChallenge.id,
+      challengeId: "",
       articleQuestions: 0,
       correctArticleAnswers: 0,
       completed: false,
@@ -6243,6 +6028,7 @@ function showDailyChallengeComplete(challenge) {
 }
 
 function checkAchievements(reason = "") {
+  if (reason !== "flashcards") return;
   if (!profileStore || !currentProfileId || checkingAchievements) return;
   checkingAchievements = true;
   try {
@@ -6318,7 +6104,6 @@ function unlockAchievement(achievement, profile, reason = "") {
     celebrateFamilyLevelIfNeeded();
   }
   showAchievementCelebration(achievement);
-  if (reason !== "coins") checkAchievements("achievement-reward");
 }
 
 function showAchievementCelebration(achievement) {
@@ -6346,14 +6131,14 @@ function showNextAchievementNotification() {
 }
 
 function renderAchievementNotification(achievement) {
-  els.levelCelebrationTitle.textContent = "🎉 Achievement Unlocked!";
-  els.levelCelebrationProfile.textContent = achievement.scope === "family" ? "Shared achievement:" : "Achievement:";
+  els.levelCelebrationTitle.textContent = "🎉 Flashcard Milestone!";
+  els.levelCelebrationProfile.textContent = "Milestone:";
   els.levelCelebrationLevel.textContent = `${achievement.icon} ${achievement.name}`;
   if (achievement.reward > 0) {
     els.levelCelebrationBonus.textContent = `+${achievement.reward} Bonus ${achievement.reward === 1 ? "Coin" : "Coins"}`;
     els.levelCelebrationBonus.classList.remove("hidden");
   } else {
-    els.levelCelebrationBonus.textContent = "Learning milestone";
+    els.levelCelebrationBonus.textContent = "Flashcard milestone";
     els.levelCelebrationBonus.classList.remove("hidden");
   }
   hideRewardCelebrationActions();
@@ -6440,7 +6225,6 @@ function recordDailyActivity(type, details = {}) {
         profile.dailyChallenge.rewardAwardedFor = dailyChallenge.id;
         awardCoins(dailyChallenge.reward);
       }
-      showDailyChallengeComplete(dailyChallenge);
     }
   }
 
