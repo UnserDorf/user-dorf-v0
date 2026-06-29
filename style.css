@@ -10293,6 +10293,30 @@ button:active {
   min-height: min(620px, calc(100vh - 72px));
 }
 
+.article-quiz-mode .article-quiz-card {
+  isolation: isolate;
+}
+
+.article-quiz-mode .article-quiz-card .article-quiz,
+.article-quiz-mode .article-quiz-card .article-quiz-options,
+.article-quiz-mode .article-quiz-card .article-quiz-options button {
+  position: relative;
+  pointer-events: auto;
+}
+
+.article-quiz-mode .article-quiz-card .article-quiz {
+  z-index: 5;
+}
+
+.article-quiz-mode .article-quiz-card .article-quiz-options {
+  z-index: 6;
+}
+
+.article-quiz-mode .article-quiz-card .article-quiz-options button {
+  z-index: 7;
+  cursor: pointer;
+}
+
 @media (max-width: 520px) {
   .clean-article-practice #questionText,
   .clean-quiz-mode #nounVerbPrompt {
