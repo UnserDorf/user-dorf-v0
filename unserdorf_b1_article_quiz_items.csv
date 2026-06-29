@@ -137,7 +137,7 @@ b1_0278,Ball,der,¨-e,,B1,noun,yes,yes,no,,23,"der Ball, ¨-e",
 b1_0279,Ballett,das,-e,,B1,noun,yes,yes,no,,23,"das Ballett, -e",
 b1_0280,Banane,die,-n,,B1,noun,yes,yes,no,,23,"die Banane, -n",
 b1_0281,Bank,die,¨-e,,B1,noun,yes,yes,no,,23,"die Bank, ¨-e",
-b1_0282,Bancomat/Bankomat,der,,,B1,noun,yes,yes,yes,multiple_forms,23,"der Bancomat/Bankomat,",
+b1_0282,Bankomat,der,,,B1,noun,yes,yes,yes,multiple_forms,23,"der Bancomat/Bankomat,",display word cleaned from quiz word: Bancomat/Bankomat
 b1_0285,Bankleitzahl,die,-en,,B1,noun,yes,yes,no,,23,"die Bankleitzahl, -en",
 b1_0286,Bankomat-Karte,die,-n,,B1,noun,yes,yes,no,,23,"die Bankomat-Karte, -n",
 b1_0292,Behörde,die,-n,,B1,noun,yes,yes,no,,24,"die Behörde, -n",
@@ -294,7 +294,7 @@ b1_0617,Einfahrt,die,-en,,B1,noun,yes,yes,no,,33,"die Einfahrt, -en",
 b1_0619,Einfall,der,¨-e,,B1,noun,yes,yes,no,,33,"der Einfall, ¨-e",
 b1_0620,Einfluss,der,¨-e,,B1,noun,yes,yes,no,,33,"der Einfluss, ¨-e",
 b1_0621,e-card,die,,,B1,noun,yes,yes,no,,33,die e-card (A),regional_variant_or_reference
-b1_0623,ec-Karte/EC-Karte,die,,,B1,noun,yes,yes,yes,multiple_forms; regional_variant,33,die ec-Karte/EC-Karte →,regional_variant_or_reference
+b1_0623,EC-Karte,die,,,B1,noun,yes,yes,yes,multiple_forms; regional_variant,33,die ec-Karte/EC-Karte →,regional_variant_or_reference; display word cleaned from quiz word: ec-Karte/EC-Karte
 b1_0624,Ecke,die,"-n (D, CH)",,B1,noun,yes,yes,yes,regional_variant,33,"die Ecke, -n (D, CH) →A:",regional_variant_or_reference
 b1_0626,Eck,das,-en (A),,B1,noun,yes,yes,yes,regional_variant,33,"das Eck, -en (A) →D, CH:",regional_variant_or_reference
 b1_0630,Ehe,die,-n,,B1,noun,yes,yes,no,,33,"die Ehe, -n",
@@ -328,7 +328,7 @@ b1_0706,Empfang,der,¨-e,,B1,noun,yes,yes,no,,35,"der Empfang, ¨-e",
 b1_0707,Empfänger,der,-,,B1,noun,yes,yes,no,,35,"der Empfänger, -",
 b1_0709,Empfehlung,die,-en,,B1,noun,yes,yes,no,,35,"die Empfehlung, -en",
 b1_0710,Erdapfel,der,¨- (A),,B1,noun,yes,yes,yes,regional_variant,36,"der Erdapfel, ¨- (A) →",regional_variant_or_reference
-b1_0712,Erdgeschoss/,das,,,B1,noun,yes,yes,yes,multiple_forms,36,das Erdgeschoss/,
+b1_0712,Erdgeschoss,das,,,B1,noun,yes,yes,yes,multiple_forms,36,das Erdgeschoss/,display word cleaned from quiz word: Erdgeschoss/
 b1_0714,Ereignis,das,-se,,B1,noun,yes,yes,no,,36,"das Ereignis, -se",
 b1_0717,Erfahrung,die,-en,,B1,noun,yes,yes,no,,36,"die Erfahrung, -en",
 b1_0719,Erfindung,die,-en,,B1,noun,yes,yes,no,,36,"die Erfindung, -en",
@@ -388,7 +388,7 @@ b1_0838,Faktor,der,-en,,B1,noun,yes,yes,no,,39,"der Faktor, -en",
 b1_0839,Fall,der,¨-e,,B1,noun,yes,yes,no,,39,"der Fall, ¨-e",
 b1_0844,Familie,die,-n,,B1,noun,yes,yes,no,,39,"die Familie, -n",
 b1_0845,Familienstand,der,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,39,"der Familienstand (D, A) →","regional_variant_or_reference; display note removed from quiz word: (D, A)"
-b1_0848,Fantasie/Phantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,39,"die Fantasie/Phantasie, -n",
+b1_0848,Fantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,39,"die Fantasie/Phantasie, -n",display word cleaned from quiz word: Fantasie/Phantasie
 b1_0849,Fett,das,,,B1,noun,yes,yes,no,,40,das Fett,
 b1_0851,Feuer,das,,,B1,noun,yes,yes,no,,40,das Feuer,
 b1_0852,Feuerzeug,das,-e,,B1,noun,yes,yes,no,,40,"das Feuerzeug, -e",
@@ -516,7 +516,7 @@ b1_1066,Gerät,das,-e,,B1,noun,yes,yes,no,,45,"das Gerät, -e",
 b1_1068,Gewürz,das,-e,,B1,noun,yes,yes,no,,46,"das Gewürz, -e",
 b1_1070,Gift,das,-e,,B1,noun,yes,yes,no,,46,"das Gift, -e",
 b1_1072,Gitarre,die,-n,,B1,noun,yes,yes,no,,46,"die Gitarre, -n",
-b1_1073,Glace/Glacé,das,-n,,B1,noun,yes,yes,yes,multiple_forms,46,"das Glace/Glacé, -n",
+b1_1073,Glace,das,-n,,B1,noun,yes,yes,yes,multiple_forms,46,"das Glace/Glacé, -n",display word cleaned from quiz word: Glace/Glacé
 b1_1074,Glas,das,¨-er,,B1,noun,yes,yes,no,,46,"das Glas, ¨-er",
 b1_1081,Gleis,das,-e,,B1,noun,yes,yes,no,,46,"das Gleis, -e",
 b1_1082,Glück,das,,,B1,noun,yes,yes,no,,46,das Glück,
@@ -559,7 +559,7 @@ b1_1143,Handy,das,-s,,B1,noun,yes,yes,no,,48,"das Handy, -s",
 b1_1150,Hauptstadt,die,¨-e,,B1,noun,yes,yes,no,,48,"die Hauptstadt, ¨-e",
 b1_1151,Hackfleisch,das,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,48,"das Hackfleisch (D, CH) →","regional_variant_or_reference; display note removed from quiz word: (D, CH)"
 b1_1152,Hafen,der,¨-,,B1,noun,yes,yes,no,,48,"der Hafen, ¨-",
-b1_1154,Hähnchen/Hühnchen,das,,,B1,noun,yes,yes,yes,multiple_forms,48,"das Hähnchen/Hühnchen,",
+b1_1154,Hähnchen,das,,,B1,noun,yes,yes,yes,multiple_forms,48,"das Hähnchen/Hühnchen,",display word cleaned from quiz word: Hähnchen/Hühnchen
 b1_1158,Halbpension,die,,,B1,noun,yes,yes,no,,48,die Halbpension,
 b1_1160,Hälfte,die,-n,,B1,noun,yes,yes,no,,48,"die Hälfte, -n",
 b1_1161,Halle,die,-n,,B1,noun,yes,yes,no,,48,"die Halle, -n",
@@ -914,7 +914,7 @@ b1_1757,Musik,die,,,B1,noun,yes,yes,no,,65,die Musik,
 b1_1759,Musiker,der,-,,B1,noun,yes,yes,no,,65,"der Musiker, -",
 b1_1760,Musikerin,die,nen,,B1,noun,yes,yes,no,,65,"die Musikerin, nen",
 b1_1761,Muskel,der,-n,,B1,noun,yes,yes,no,,65,"der Muskel, -n",
-b1_1762,Müesli/Müsli,das,-,,B1,noun,yes,yes,yes,multiple_forms,65,"das Müesli/Müsli, -",
+b1_1762,Müsli,das,-,,B1,noun,yes,yes,yes,multiple_forms,65,"das Müesli/Müsli, -",display word cleaned from quiz word: Müesli/Müsli
 b1_1764,Mut,der,,,B1,noun,yes,yes,no,,65,der Mut,
 b1_1766,Mutter,die,¨-,,B1,noun,yes,yes,no,,65,"die Mutter, ¨-",
 b1_1768,Nachbar,der,-n,,B1,noun,yes,yes,no,,65,"der Nachbar, -n",
@@ -986,7 +986,7 @@ b1_1903,Pflaume,die,-n,,B1,noun,yes,yes,no,,70,"die Pflaume, -n",
 b1_1905,Pfleger,der,-,,B1,noun,yes,yes,no,,70,"der Pfleger, -",
 b1_1906,Pflegerin,die,-nen,,B1,noun,yes,yes,no,,70,"die Pflegerin, -nen",
 b1_1907,Pflicht,die,-en,,B1,noun,yes,yes,no,,70,"die Pflicht, -en",
-b1_1908,Phantasie/Fantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,70,"die Phantasie/Fantasie, -n",
+b1_1908,Phantasie,die,-n,,B1,noun,yes,yes,yes,multiple_forms,70,"die Phantasie/Fantasie, -n",display word cleaned from quiz word: Phantasie/Fantasie
 b1_1909,Picknick,das,-s,,B1,noun,yes,yes,no,,70,"das Picknick, -s",
 b1_1910,Pille,die,-n,,B1,noun,yes,yes,no,,70,"die Pille, -n",
 b1_1911,Pilz,der,-e,,B1,noun,yes,yes,yes,regional_variant,70,"der Pilz, -e →",regional_variant_or_reference
@@ -1025,7 +1025,7 @@ b1_1964,Polizei,die,,,B1,noun,yes,yes,no,,71,die Polizei,
 b1_1965,Polizist,der,-en,,B1,noun,yes,yes,no,,71,"der Polizist, -en",
 b1_1966,Polizistin,die,-nen,,B1,noun,yes,yes,no,,71,"die Polizistin, -nen",
 b1_1967,Pommes frites,die,,,B1,noun,yes,yes,yes,multi_word_expression,71,die Pommes frites (Pl.),display note removed from quiz word: (Pl.)
-b1_1969,Portemonnaie/Port,das,,,B1,noun,yes,yes,yes,multiple_forms,71,das Portemonnaie/Port-,
+b1_1969,Portemonnaie,das,,,B1,noun,yes,yes,yes,multiple_forms,71,das Portemonnaie/Port-,display word cleaned from quiz word: Portemonnaie/Port
 b1_1972,Portion,die,-en,,B1,noun,yes,yes,no,,71,"die Portion, -en",
 b1_1974,Post,die,,,B1,noun,yes,yes,no,,71,die Post,
 b1_1975,Postleitzahl,die,-en,,B1,noun,yes,yes,no,,71,"die Postleitzahl, -en",
@@ -1090,7 +1090,7 @@ b1_2070,Respekt,der,,,B1,noun,yes,yes,no,,74,der Respekt,
 b1_2071,Rest,der,-e,,B1,noun,yes,yes,no,,74,"der Rest, -e",
 b1_2072,Restaurant,das,-s,,B1,noun,yes,yes,no,,74,"das Restaurant, -s",
 b1_2074,Rezept,das,-e,,B1,noun,yes,yes,no,,74,"das Rezept, -e",
-b1_2075,Rezeption/Reception,die,-,,B1,noun,yes,yes,yes,multiple_forms,74,"die Rezeption/Reception, -",
+b1_2075,Rezeption,die,-,,B1,noun,yes,yes,yes,multiple_forms,74,"die Rezeption/Reception, -",display word cleaned from quiz word: Rezeption/Reception
 b1_2077,Richter,der,-,,B1,noun,yes,yes,no,,74,"der Richter, -",
 b1_2078,Richterin,die,-nen,,B1,noun,yes,yes,no,,74,"die Richterin, -nen",
 b1_2080,Richtung,die,-en,,B1,noun,yes,yes,no,,74,"die Richtung, -en",
@@ -1195,14 +1195,14 @@ b1_2260,Schwierigkeit,die,-en,,B1,noun,yes,yes,no,,79,"die Schwierigkeit, -en",
 b1_2262,Schwimmbad,das,¨-er,,B1,noun,yes,yes,no,,79,"das Schwimmbad, ¨-er",
 b1_2264,See,der,-n,,B1,noun,yes,yes,no,,79,"der See, -n",
 b1_2265,See,die,,,B1,noun,yes,yes,no,,79,die See,
-b1_2266,Nord-/Ostsee,die,,,B1,noun,yes,yes,yes,multiple_forms,79,die Nord-/Ostsee,
+b1_2266,Nordsee,die,,,B1,noun,yes,yes,yes,multiple_forms,79,die Nord-/Ostsee,display word cleaned from quiz word: Nord-/Ostsee
 b1_2270,Sieg,der,-e,,B1,noun,yes,yes,no,,80,"der Sieg, -e",
 b1_2271,Sieger,der,-,,B1,noun,yes,yes,no,,80,"der Sieger, -",
 b1_2272,Siegerin,die,-nen,,B1,noun,yes,yes,no,,80,"die Siegerin, -nen",
 b1_2275,Sinn,der,,,B1,noun,yes,yes,no,,80,der Sinn,
 b1_2278,Situation,die,-en,,B1,noun,yes,yes,no,,80,"die Situation, -en",
 b1_2280,Sitz,der,-e,,B1,noun,yes,yes,no,,80,"der Sitz, -e",
-b1_2281,Ski/Schi,der,-er/-,,B1,noun,yes,yes,yes,multiple_forms,80,"der Ski/Schi, -er/-",
+b1_2281,Ski,der,-er/-,,B1,noun,yes,yes,yes,multiple_forms,80,"der Ski/Schi, -er/-",display word cleaned from quiz word: Ski/Schi
 b1_2286,Semester,das,-,,B1,noun,yes,yes,no,,80,"das Semester, -",
 b1_2287,Seminar,das,-e,,B1,noun,yes,yes,no,,80,"das Seminar, -e",
 b1_2288,Semmel,die,-n (A),,B1,noun,yes,yes,yes,regional_variant,80,"die Semmel, -n (A) →D:",regional_variant_or_reference
@@ -1226,7 +1226,7 @@ b1_2329,Sohn,der,¨-e,,B1,noun,yes,yes,no,,81,"der Sohn, ¨-e",
 b1_2334,Sonderangebot,das,-e,,B1,noun,yes,yes,no,,81,"das Sonderangebot, -e",
 b1_2336,Sonne,die,,,B1,noun,yes,yes,no,,81,die Sonne,
 b1_2340,Sorge,die,-n,,B1,noun,yes,yes,no,,81,"die Sorge, -n",
-b1_2341,Soße/Sauce,die,-n,,B1,noun,yes,yes,yes,multiple_forms,81,"die Soße/Sauce, -n",
+b1_2341,Sauce,die,-n,,B1,noun,yes,yes,yes,multiple_forms,81,"die Soße/Sauce, -n",display word cleaned from quiz word: Soße/Sauce
 b1_2342,Sprechstunde,die,-n,,B1,noun,yes,yes,yes,regional_variant,82,"die Sprechstunde, -n →A:",regional_variant_or_reference
 b1_2344,Spritze,die,-n,,B1,noun,yes,yes,no,,82,"die Spritze, -n",
 b1_2346,Spur,die,-en,,B1,noun,yes,yes,no,,82,"die Spur, -en",
@@ -1279,7 +1279,7 @@ b1_2423,Streit,der,,,B1,noun,yes,yes,no,,84,der Streit,
 b1_2425,Stress,der,,,B1,noun,yes,yes,no,,84,der Stress,
 b1_2426,Strom,der,,,B1,noun,yes,yes,no,,84,der Strom,
 b1_2427,Strumpf,der,¨-e,,B1,noun,yes,yes,no,,84,"der Strumpf, ¨-e",
-b1_2428,Stück/-stück,das,-e,,B1,noun,yes,yes,yes,multiple_forms,84,"das Stück/-stück, -e",
+b1_2428,Stück,das,-e,,B1,noun,yes,yes,yes,multiple_forms,84,"das Stück/-stück, -e",display word cleaned from quiz word: Stück/-stück
 b1_2429,Studie,die,-n,,B1,noun,yes,yes,no,,84,"die Studie, -n",
 b1_2431,Student,der,-en,,B1,noun,yes,yes,no,,84,"der Student, -en",
 b1_2432,Studentin,die,-nen,,B1,noun,yes,yes,no,,84,"die Studentin, -nen",
@@ -1540,7 +1540,7 @@ b1_2961,Zahl,die,-en,,B1,noun,yes,yes,no,,99,"die Zahl, -en",
 b1_2962,Anzahl,die,-en,,B1,noun,yes,yes,no,,99,"die Anzahl, -en",
 b1_2965,Zahlung,die,-en,,B1,noun,yes,yes,no,,99,"die Zahlung, -en",
 b1_2967,Zahn,der,¨-e,,B1,noun,yes,yes,no,,99,"der Zahn, ¨-e",
-b1_2968,Zahncreme/-pasta,die,,,B1,noun,yes,yes,yes,multiple_forms,99,die Zahncreme/-pasta,
+b1_2968,Zahncreme,die,,,B1,noun,yes,yes,yes,multiple_forms,99,die Zahncreme/-pasta,display word cleaned from quiz word: Zahncreme/-pasta
 b1_2969,Zange,die,-n,,B1,noun,yes,yes,no,,99,"die Zange, -n",
 b1_2970,Zeichen,das,-,,B1,noun,yes,yes,no,,99,"das Zeichen, -",
 b1_2973,Wohnsitz,der,-e,,B1,noun,yes,yes,no,,99,"der Wohnsitz, -e",
@@ -1575,7 +1575,7 @@ b1_3016,Zelt,das,-e,,B1,noun,yes,yes,no,,100,"das Zelt, -e",
 b1_3019,Zentrum,das,Zentren,,B1,noun,yes,yes,no,,100,"das Zentrum, Zentren",
 b1_3021,Zertifikat,das,-e,,B1,noun,yes,yes,no,,100,"das Zertifikat, -e",
 b1_3022,Zettel,der,-,,B1,noun,yes,yes,no,,100,"der Zettel, -",
-b1_3023,Zeug/-zeug,das,,,B1,noun,yes,yes,yes,multiple_forms,100,das Zeug/-zeug,
+b1_3023,Zeug,das,,,B1,noun,yes,yes,yes,multiple_forms,100,das Zeug/-zeug,display word cleaned from quiz word: Zeug/-zeug
 b1_3024,Zeuge,der,-n,,B1,noun,yes,yes,no,,100,"der Zeuge, -n",
 b1_3025,Zeugin,die,-nen,,B1,noun,yes,yes,no,,100,"die Zeugin, -nen",
 b1_3026,Zünder,die,,,B1,noun,yes,yes,yes,multi_word_expression; regional_variant,101,die Zünder (A) (Pl.) →,regional_variant_or_reference; display note removed from quiz word: (Pl.)
@@ -1597,4 +1597,3 @@ b1_3062,Zwiebel,die,-n,,B1,noun,yes,yes,no,,102,"die Zwiebel, -n",
 b1_3065,Zustand,der,¨-e,,B1,noun,yes,yes,no,,102,"der Zustand, ¨-e",
 b1_3068,Zustimmung,die,-en,,B1,noun,yes,yes,no,,102,"die Zustimmung, -en",
 b1_3069,Zutaten,die,,,B1,noun,yes,yes,yes,multi_word_expression,102,die Zutaten (Pl.),display note removed from quiz word: (Pl.)
-b1_3071,Zvieri/Znüni,der,-s,,B1,noun,yes,yes,yes,multiple_forms,102,"der Zvieri/Znüni, -s",
