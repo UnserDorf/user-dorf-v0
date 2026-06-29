@@ -106,7 +106,6 @@ const ONBOARDING_PAGES = [
   }
 ];
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
-const VILLAGE_NAMING_CONTRIBUTION_GOAL = 10;
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
@@ -229,7 +228,7 @@ const ACHIEVEMENTS = [
   }
 ];
 const STREAK_ACTIVITY_GOAL = 10;
-const VILLAGE_NAMING_MIN_SHARED_COINS = 700;
+const VILLAGE_NAMING_MEMORY_ID = "name-your-village";
 const FAMILY_MILESTONES = [
   { coins: 500, reward: "" },
   { coins: 1000, reward: "" },
@@ -268,7 +267,8 @@ const TOWN_CENTER_STAGES = [
   { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
+  { id: VILLAGE_NAMING_MEMORY_ID, coins: 100, title: "Name Your Village", image: "assets/village-memories.png", icon: "🏡", description: "Your village is ready to receive its name." },
+  { id: "saturday-market", coins: 200, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
   { id: "plant-sale", coins: 250, title: "Plant Sale", image: "assets/plant-sale.png", icon: "🌿", description: "Neighbors share plants and seedlings for the village green." },
   { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/community-picnic.png", icon: "🥪", description: "Families gather together for a picnic in the village square." },
   { id: "childrens-play-day", coins: 450, title: "Children's Play Day", image: "assets/childrens-play-day.png", icon: "🪁", description: "The village square fills with games, laughter, and play." },
@@ -1135,9 +1135,21 @@ function hasVillageName() {
   return Boolean(normalizeVillageName(getCurrentGroup()?.villageName));
 }
 
+function isVillageNamingUnlocked(group = getCurrentGroup()) {
+  if (!group) return false;
+  return Boolean(
+    normalizeVillageName(group.villageName)
+      || group.namingCeremonyReady
+      || normalizeRewardIdList(group.villageAlbumSeenRewards).includes(VILLAGE_NAMING_MEMORY_ID)
+  );
+}
+
 function saveVillageName(value) {
   const group = getCurrentGroup();
-  if (group) group.villageName = normalizeVillageName(value) || "Unser Dorf";
+  if (group) {
+    group.villageName = normalizeVillageName(value) || "Unser Dorf";
+    group.namingCeremonyReady = true;
+  }
   profileStore.villageName = getVillageName();
   saveProfileStore();
 }
@@ -2401,7 +2413,6 @@ function renderDashboard() {
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
   renderHouseholdMembers();
-  if (!pendingCelebrations.length) checkVillageNamingCeremony();
   saveProfileStore();
   showNextPendingCelebration();
 }
@@ -2519,22 +2530,25 @@ function renderSettingsPanel() {
   renderVillageName();
   const profile = getCurrentProfile();
   const villageHasName = hasVillageName();
+  const villageNamingUnlocked = isVillageNamingUnlocked();
   if (els.settingsVillageName) {
     els.settingsVillageName.textContent = villageHasName ? getVillageName() : "Unnamed Village";
   }
   if (els.settingsVillageNameInput) {
     els.settingsVillageNameInput.value = villageHasName ? getVillageName() : "";
-    els.settingsVillageNameInput.placeholder = villageHasName ? getVillageName() : "Unlocked after Village Naming Ceremony";
-    els.settingsVillageNameInput.disabled = !villageHasName;
+    els.settingsVillageNameInput.placeholder = villageHasName
+      ? getVillageName()
+      : villageNamingUnlocked ? "Enter your village name" : "Unlocked after Name Your Village";
+    els.settingsVillageNameInput.disabled = !villageNamingUnlocked;
   }
   if (els.editVillageNameToggle) {
-    els.editVillageNameToggle.disabled = !villageHasName;
+    els.editVillageNameToggle.disabled = !villageNamingUnlocked;
   }
-  els.villageRenameLockNote?.classList.toggle("hidden", villageHasName);
+  els.villageRenameLockNote?.classList.toggle("hidden", villageNamingUnlocked);
   els.villageNameEditFields?.classList.add("hidden");
   els.profileNameEditFields?.classList.add("hidden");
   if (els.saveVillageName) {
-    els.saveVillageName.disabled = !villageHasName;
+    els.saveVillageName.disabled = !villageNamingUnlocked;
   }
   if (els.settingsProfileName) {
     els.settingsProfileName.textContent = profile?.name || "No profile";
@@ -5098,7 +5112,7 @@ function bindEvents() {
   });
 
   els.saveVillageName.addEventListener("click", () => {
-    if (!hasVillageName()) return;
+    if (!isVillageNamingUnlocked()) return;
     saveVillageName(els.settingsVillageNameInput.value);
     renderVillageName();
     renderSettingsPanel();
@@ -5112,7 +5126,7 @@ function bindEvents() {
   });
 
   els.editVillageNameToggle?.addEventListener("click", () => {
-    if (!hasVillageName()) return;
+    if (!isVillageNamingUnlocked()) return;
     els.villageNameEditFields?.classList.toggle("hidden");
   });
 
@@ -5863,6 +5877,11 @@ function checkRewardUnlocks(profile) {
   });
   if (newVillageReward) {
     group.villageAlbumSeenRewards.push(newVillageReward.id);
+    if (newVillageReward.id === VILLAGE_NAMING_MEMORY_ID && !normalizeVillageName(group.villageName)) {
+      group.namingCeremonyReady = true;
+      showVillageNamingCeremony();
+      return;
+    }
     showRewardUnlockCelebration(newVillageReward, "Village Memories");
   }
 }
@@ -5963,32 +5982,13 @@ function hideNamingCeremonyForm() {
   if (els.namingCeremonyInput) els.namingCeremonyInput.value = "";
 }
 
-function checkVillageNamingCeremony() {
-  const group = getCurrentGroup();
-  if (!group || normalizeVillageName(group.villageName)) return false;
-  const members = getCurrentGroupProfiles();
-  if (!members.length) return false;
-  if (getGroupCoinTotal(group) < VILLAGE_NAMING_MIN_SHARED_COINS) return false;
-  const everyMemberContributed = members.every(hasQualifiedForNamingCeremony);
-  if (!everyMemberContributed) return false;
-  group.namingCeremonyReady = true;
-  showVillageNamingCeremony();
-  return true;
-}
-
-function hasQualifiedForNamingCeremony(profile) {
-  const contribution = normalizeVillageContribution(profile?.villageContribution);
-  return contribution.articleQuestions >= VILLAGE_NAMING_CONTRIBUTION_GOAL
-    || contribution.vocabularyCards >= VILLAGE_NAMING_CONTRIBUTION_GOAL;
-}
-
 function showVillageNamingCeremony() {
   const group = getCurrentGroup();
   if (!group || normalizeVillageName(group.villageName)) return;
   resetLevelCelebrationPresentation();
   hideRewardCelebrationActions();
-  els.levelCelebrationTitle.textContent = "🎉 Village Naming Ceremony";
-  els.levelCelebrationProfile.textContent = "Everyone in your village has contributed.";
+  els.levelCelebrationTitle.textContent = "🎉 Name Your Village";
+  els.levelCelebrationProfile.textContent = "Your village has unlocked its first shared memory.";
   els.levelCelebrationLevel.textContent = "Your village is ready to receive its name.";
   els.levelCelebrationBonus.textContent = "";
   els.levelCelebrationBonus.classList.add("hidden");
@@ -6151,12 +6151,12 @@ function closeLevelCelebration() {
   if (wasAchievementNotification) {
     window.setTimeout(() => {
       if (showNextAchievementNotification()) return;
-      if (!showNextPendingCelebration()) checkVillageNamingCeremony();
+      showNextPendingCelebration();
     }, ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS);
     return;
   }
   if (showNextAchievementNotification()) return;
-  if (!showNextPendingCelebration()) checkVillageNamingCeremony();
+  showNextPendingCelebration();
 }
 
 function recordDailyActivity(type, details = {}) {
