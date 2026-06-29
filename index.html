@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=176">
+    <link rel="stylesheet" href="style.css?v=177">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -168,38 +168,48 @@
               <span class="settings-label-mobile" aria-hidden="true">☰</span>
             </button>
             <div class="settings-panel hidden" id="settingsPanel">
-              <section class="settings-section mobile-nav-section" aria-label="Mobile navigation">
+              <section class="settings-section settings-main-menu" id="settingsMainMenu" aria-label="Navigation menu">
                 <h3>Menu</h3>
-                <button type="button" id="mobileMenuHomeButton">Home</button>
-                <button type="button" id="mobileMenuProfileButton">Profile</button>
+                <button class="mobile-only-menu-item" type="button" id="mobileMenuHomeButton">🏠 Home</button>
+                <button class="mobile-only-menu-item" type="button" id="mobileMenuProfileButton">👤 Profile</button>
+                <button type="button" id="mobileMenuSettingsButton">⚙️ Settings</button>
+                <button class="mobile-menu-logout" type="button" id="mobileLogoutButton">🚪 Log Out</button>
               </section>
-              <section class="settings-section" aria-label="Village settings">
-                <h3>Village Settings</h3>
-                <p>Village Name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
-                <label>
-                  <span>Village Name</span>
-                  <input id="settingsVillageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
-                </label>
-                <button type="button" id="saveVillageName">Save Village Name</button>
-              </section>
-              <section class="settings-section" aria-label="Profile settings">
-                <h3>Profile Settings</h3>
-                <p>Current Profile Name<br><strong id="settingsProfileName">No profile</strong></p>
-                <label>
-                  <span>Profile Name</span>
-                  <input id="settingsProfileNameInput" type="text" autocomplete="name">
-                </label>
-                <button type="button" id="saveProfileName">Save Profile Name</button>
-              </section>
-              <section class="settings-section" aria-label="Security settings">
-                <h3>Security</h3>
-                <button type="button" id="changeProfilePassword">Change Password</button>
-              </section>
-              <section class="settings-section" aria-label="Settings navigation">
-                <h3>Navigation</h3>
-                <button type="button" id="settingsBackDashboard">Back</button>
-                <button class="mobile-menu-logout" type="button" id="mobileLogoutButton">Log Out</button>
-              </section>
+              <div class="settings-detail hidden" id="settingsDetail">
+                <section class="settings-section settings-detail-heading" aria-label="Settings heading">
+                  <button type="button" id="settingsMenuBack">← Menu</button>
+                  <h3>Settings</h3>
+                </section>
+                <section class="settings-section" id="villageSettingsSection" aria-label="Village settings">
+                  <h3>Village Settings</h3>
+                  <p>Village Name<br><strong id="settingsVillageName">Unnamed Village</strong></p>
+                  <button type="button" id="editVillageNameToggle">Rename Village</button>
+                  <p class="settings-lock-note" id="villageRenameLockNote">Locked until Village Naming Celebration</p>
+                  <div class="settings-edit-fields hidden" id="villageNameEditFields">
+                    <label>
+                      <span>Village Name</span>
+                      <input id="settingsVillageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
+                    </label>
+                    <button type="button" id="saveVillageName">Save Village Name</button>
+                  </div>
+                </section>
+                <section class="settings-section" aria-label="Profile settings">
+                  <h3>Profile Settings</h3>
+                  <p>Current Profile<br><strong id="settingsProfileName">No profile</strong></p>
+                  <button type="button" id="editProfileNameToggle">Change Profile Name</button>
+                  <div class="settings-edit-fields hidden" id="profileNameEditFields">
+                    <label>
+                      <span>Profile Name</span>
+                      <input id="settingsProfileNameInput" type="text" autocomplete="name">
+                    </label>
+                    <button type="button" id="saveProfileName">Save Profile Name</button>
+                  </div>
+                </section>
+                <section class="settings-section" aria-label="Security settings">
+                  <h3>Security</h3>
+                  <button type="button" id="changeProfilePassword">Change Password</button>
+                </section>
+              </div>
             </div>
           </div>
           <button class="ghost-button" id="logoutButton" type="button">Log Out</button>
@@ -862,6 +872,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=165"></script>
+    <script type="module" src="script.js?v=166"></script>
   </body>
 </html>

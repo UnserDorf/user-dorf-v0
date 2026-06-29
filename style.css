@@ -281,6 +281,332 @@
     padding: 12px 14px;
   }
 }
+/* Final menu/settings simplification override. */
+.settings-panel {
+  width: min(360px, 90vw);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 24px 70px rgba(31, 38, 35, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.settings-main-menu {
+  gap: 8px;
+  border: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+.settings-main-menu h3,
+.settings-detail-heading h3 {
+  color: var(--green);
+  font-size: 1.05rem;
+  font-weight: 850;
+}
+
+.settings-main-menu button,
+.settings-detail-heading button,
+.settings-section > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+}
+
+.settings-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-detail-heading {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.settings-detail-heading h3 {
+  margin: 0;
+}
+
+.settings-detail-heading button {
+  width: auto;
+}
+
+.settings-lock-note {
+  color: #8a7963;
+  font-size: 0.84rem;
+  font-weight: 720;
+}
+
+.settings-edit-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-section button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  background: rgba(239, 231, 216, 0.52);
+  color: #8a7963;
+}
+
+@media (min-width: 1200px) {
+  .settings-main-menu {
+    display: none;
+  }
+
+  #settingsMenuBack {
+    display: none;
+  }
+
+  .settings-detail-heading {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .settings-main-menu {
+    display: grid;
+  }
+
+  .settings-main-menu .mobile-only-menu-item {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .settings-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 72px);
+    right: max(10px, env(safe-area-inset-right));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - 92px - env(safe-area-inset-bottom));
+    padding: 12px;
+    background: rgba(255, 250, 241, 0.96);
+  }
+
+  .settings-main-menu {
+    display: grid;
+  }
+}
+
+/* Final menu/settings simplification override. */
+.settings-panel {
+  width: min(360px, 90vw);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 24px 70px rgba(31, 38, 35, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.settings-main-menu {
+  gap: 8px;
+  border: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+.settings-main-menu h3,
+.settings-detail-heading h3 {
+  color: var(--green);
+  font-size: 1.05rem;
+  font-weight: 850;
+}
+
+.settings-main-menu button,
+.settings-detail-heading button,
+.settings-section > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+}
+
+.settings-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-detail-heading {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.settings-detail-heading h3 {
+  margin: 0;
+}
+
+.settings-detail-heading button {
+  width: auto;
+}
+
+.settings-lock-note {
+  color: #8a7963;
+  font-size: 0.84rem;
+  font-weight: 720;
+}
+
+.settings-edit-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-section button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  background: rgba(239, 231, 216, 0.52);
+  color: #8a7963;
+}
+
+@media (min-width: 1200px) {
+  .settings-main-menu {
+    display: none;
+  }
+
+  #settingsMenuBack {
+    display: none;
+  }
+
+  .settings-detail-heading {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .settings-main-menu {
+    display: grid;
+  }
+
+  .settings-main-menu .mobile-only-menu-item {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .settings-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 72px);
+    right: max(10px, env(safe-area-inset-right));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - 92px - env(safe-area-inset-bottom));
+    padding: 12px;
+    background: rgba(255, 250, 241, 0.96);
+  }
+
+  .settings-main-menu {
+    display: grid;
+  }
+}
+
+/* Menu/settings simplification: short nav first, detailed editing second. */
+.settings-panel {
+  width: min(360px, 90vw);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 24px 70px rgba(31, 38, 35, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.settings-main-menu {
+  gap: 8px;
+  border: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+.settings-main-menu h3,
+.settings-detail-heading h3 {
+  color: var(--green);
+  font-size: 1.05rem;
+  font-weight: 850;
+}
+
+.settings-main-menu button,
+.settings-detail-heading button,
+.settings-section > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+}
+
+.settings-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-detail-heading {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.settings-detail-heading h3 {
+  margin: 0;
+}
+
+.settings-detail-heading button {
+  width: auto;
+}
+
+.settings-lock-note {
+  color: #8a7963;
+  font-size: 0.84rem;
+  font-weight: 720;
+}
+
+.settings-edit-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-section button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  background: rgba(239, 231, 216, 0.52);
+  color: #8a7963;
+}
+
+@media (min-width: 1200px) {
+  .settings-main-menu {
+    display: none;
+  }
+
+  #settingsMenuBack {
+    display: none;
+  }
+
+  .settings-detail-heading {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .settings-main-menu {
+    display: grid;
+  }
+
+  .settings-main-menu .mobile-only-menu-item {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .settings-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 72px);
+    right: max(10px, env(safe-area-inset-right));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - 92px - env(safe-area-inset-bottom));
+    padding: 12px;
+    background: rgba(255, 250, 241, 0.96);
+  }
+
+  .settings-main-menu {
+    display: grid;
+  }
+}
 
 /* Dashboard simplification: village story first, stats as quiet support. */
 .dashboard-screen > .dashboard-heading {
@@ -9456,5 +9782,114 @@ button:active {
 
   .dashboard-progress-row {
     padding: 12px 14px;
+  }
+}
+
+/* Final menu/settings simplification override at file end. */
+.settings-panel {
+  width: min(360px, 90vw);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 24px 70px rgba(31, 38, 35, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.settings-main-menu {
+  gap: 8px;
+  border: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+.settings-main-menu h3,
+.settings-detail-heading h3 {
+  color: var(--green);
+  font-size: 1.05rem;
+  font-weight: 850;
+}
+
+.settings-main-menu button,
+.settings-detail-heading button,
+.settings-section > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+}
+
+.settings-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-detail-heading {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.settings-detail-heading h3 {
+  margin: 0;
+}
+
+.settings-detail-heading button {
+  width: auto;
+}
+
+.settings-lock-note {
+  color: #8a7963;
+  font-size: 0.84rem;
+  font-weight: 720;
+}
+
+.settings-edit-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-section button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  background: rgba(239, 231, 216, 0.52);
+  color: #8a7963;
+}
+
+@media (min-width: 1200px) {
+  .settings-main-menu {
+    display: none;
+  }
+
+  #settingsMenuBack {
+    display: none;
+  }
+
+  .settings-detail-heading {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .settings-main-menu {
+    display: grid;
+  }
+
+  .settings-main-menu .mobile-only-menu-item {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .settings-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 72px);
+    right: max(10px, env(safe-area-inset-right));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - 92px - env(safe-area-inset-bottom));
+    padding: 12px;
+    background: rgba(255, 250, 241, 0.96);
+  }
+
+  .settings-main-menu {
+    display: grid;
   }
 }

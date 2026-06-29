@@ -774,13 +774,23 @@ const els = {
   mobileLogoutButton: document.querySelector("#mobileLogoutButton"),
   mobileMenuHomeButton: document.querySelector("#mobileMenuHomeButton"),
   mobileMenuProfileButton: document.querySelector("#mobileMenuProfileButton"),
+  mobileMenuSettingsButton: document.querySelector("#mobileMenuSettingsButton"),
   settingsToggle: document.querySelector("#settingsToggle"),
   settingsPanel: document.querySelector("#settingsPanel"),
+  settingsMainMenu: document.querySelector("#settingsMainMenu"),
+  settingsDetail: document.querySelector("#settingsDetail"),
+  settingsMenuBack: document.querySelector("#settingsMenuBack"),
   settingsVillageName: document.querySelector("#settingsVillageName"),
   settingsVillageNameInput: document.querySelector("#settingsVillageNameInput"),
+  villageSettingsSection: document.querySelector("#villageSettingsSection"),
+  editVillageNameToggle: document.querySelector("#editVillageNameToggle"),
+  villageRenameLockNote: document.querySelector("#villageRenameLockNote"),
+  villageNameEditFields: document.querySelector("#villageNameEditFields"),
   saveVillageName: document.querySelector("#saveVillageName"),
   settingsProfileName: document.querySelector("#settingsProfileName"),
   settingsProfileNameInput: document.querySelector("#settingsProfileNameInput"),
+  editProfileNameToggle: document.querySelector("#editProfileNameToggle"),
+  profileNameEditFields: document.querySelector("#profileNameEditFields"),
   saveProfileName: document.querySelector("#saveProfileName"),
   changeProfilePassword: document.querySelector("#changeProfilePassword"),
   resetLocalTestData: document.querySelector("#resetLocalTestData"),
@@ -2641,11 +2651,20 @@ function renderSettingsPanel() {
   renderVillageName();
   const profile = getCurrentProfile();
   const villageHasName = hasVillageName();
+  if (els.settingsVillageName) {
+    els.settingsVillageName.textContent = villageHasName ? getVillageName() : "Unnamed Village";
+  }
   if (els.settingsVillageNameInput) {
     els.settingsVillageNameInput.value = villageHasName ? getVillageName() : "";
     els.settingsVillageNameInput.placeholder = villageHasName ? getVillageName() : "Unlocked after Village Naming Ceremony";
     els.settingsVillageNameInput.disabled = !villageHasName;
   }
+  if (els.editVillageNameToggle) {
+    els.editVillageNameToggle.disabled = !villageHasName;
+  }
+  els.villageRenameLockNote?.classList.toggle("hidden", villageHasName);
+  els.villageNameEditFields?.classList.add("hidden");
+  els.profileNameEditFields?.classList.add("hidden");
   if (els.saveVillageName) {
     els.saveVillageName.disabled = !villageHasName;
   }
@@ -2655,6 +2674,28 @@ function renderSettingsPanel() {
   if (els.settingsProfileNameInput) {
     els.settingsProfileNameInput.value = profile?.name || "";
   }
+}
+
+function showSettingsMenuView() {
+  els.settingsMainMenu?.classList.remove("hidden");
+  els.settingsDetail?.classList.add("hidden");
+}
+
+function showSettingsDetailView() {
+  renderSettingsPanel();
+  els.settingsMainMenu?.classList.add("hidden");
+  els.settingsDetail?.classList.remove("hidden");
+}
+
+function openSettingsPanel() {
+  els.settingsPanel.classList.remove("hidden");
+  els.settingsToggle.setAttribute("aria-expanded", "true");
+  if (window.matchMedia("(min-width: 1200px)").matches) {
+    showSettingsDetailView();
+    return;
+  }
+  renderSettingsPanel();
+  showSettingsMenuView();
 }
 
 function renderHouseholdMembers() {
@@ -4961,14 +5002,17 @@ function bindEvents() {
     closeSettingsMenu();
     logoutToProfileScreen();
   });
+  els.mobileMenuSettingsButton?.addEventListener("click", showSettingsDetailView);
+  els.settingsMenuBack?.addEventListener("click", showSettingsMenuView);
   els.mobileLogoutButton?.addEventListener("click", lockSharedPasswordScreen);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
-    els.settingsPanel.classList.toggle("hidden", isOpen);
-    els.settingsToggle.setAttribute("aria-expanded", String(!isOpen));
-    if (isOpen) return;
-    renderSettingsPanel();
+    if (isOpen) {
+      closeSettingsMenu();
+      return;
+    }
+    openSettingsPanel();
   });
 
   document.addEventListener("click", (event) => {
@@ -4981,10 +5025,22 @@ function bindEvents() {
     saveVillageName(els.settingsVillageNameInput.value);
     renderVillageName();
     renderSettingsPanel();
+    showSettingsDetailView();
   });
 
   els.saveProfileName.addEventListener("click", () => {
     renameCurrentProfile(els.settingsProfileNameInput.value);
+    renderSettingsPanel();
+    showSettingsDetailView();
+  });
+
+  els.editVillageNameToggle?.addEventListener("click", () => {
+    if (!hasVillageName()) return;
+    els.villageNameEditFields?.classList.toggle("hidden");
+  });
+
+  els.editProfileNameToggle?.addEventListener("click", () => {
+    els.profileNameEditFields?.classList.toggle("hidden");
   });
 
   els.changeProfilePassword.addEventListener("click", () => {
@@ -5010,7 +5066,7 @@ function bindEvents() {
     resetCurrentProfileTestData();
   });
 
-  els.settingsBackDashboard.addEventListener("click", () => {
+  els.settingsBackDashboard?.addEventListener("click", () => {
     closeSettingsMenu();
     showDashboard();
   });
@@ -5053,6 +5109,7 @@ function bindEvents() {
 function closeSettingsMenu() {
   els.settingsPanel.classList.add("hidden");
   els.settingsToggle.setAttribute("aria-expanded", "false");
+  showSettingsMenuView();
 }
 
 function parseCsv(text) {
