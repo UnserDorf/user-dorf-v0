@@ -9981,3 +9981,59 @@ button:active {
     max-height: 190px;
   }
 }
+
+/* Compact mobile collection previews. */
+@media (max-width: 700px) {
+  .collections-preview-section {
+    gap: 10px;
+  }
+
+  .collections-preview-section .section-heading.simple {
+    margin-bottom: 0;
+  }
+
+  .collections-preview-section .reward-preview-grid {
+    gap: 9px;
+  }
+
+  .collections-preview-section .reward-preview-card {
+    grid-template-rows: auto auto auto;
+    gap: 8px;
+    border-radius: 16px;
+    padding: 9px;
+    box-shadow: 0 10px 26px rgba(73, 58, 35, 0.07);
+  }
+
+  .collection-preview-image {
+    height: clamp(110px, 30vw, 135px);
+    max-height: 135px;
+    aspect-ratio: auto;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .collections-preview-section .reward-preview-card h4 {
+    margin-bottom: 4px;
+    font-size: 0.98rem;
+  }
+
+  .collections-preview-section .reward-preview-card p {
+    gap: 3px;
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .collections-preview-section .reward-preview-count {
+    font-size: 0.9rem;
+  }
+
+  .collections-preview-section .reward-preview-latest {
+    gap: 0;
+    font-size: 0.78rem;
+  }
+
+  .collections-preview-section .reward-preview-card .primary-button {
+    min-height: 38px;
+    padding-block: 8px;
+  }
+}
