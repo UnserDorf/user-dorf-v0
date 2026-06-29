@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=175">
+    <link rel="stylesheet" href="style.css?v=176">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -271,7 +271,13 @@
           <div>
             <h2 id="dashboardVillageName">🏡 Unser Dorf</h2>
             <p id="dashboardWelcome">Welcome back</p>
+            <p class="dashboard-village-stage">
+              <span id="townCenterDashboardStageCount">Stage 1 / 5</span>
+              <span aria-hidden="true">•</span>
+              <span id="townCenterDashboardStage">Open Village Green</span>
+            </p>
             <p class="dashboard-welcome-subtitle" id="dashboardWelcomeSubtitle">Every word helps your village grow.</p>
+            <span class="sr-only" id="dashboardFamilyCoins">0</span>
           </div>
         </div>
 
@@ -293,32 +299,6 @@
                 <p>Review what you've learned.</p>
               </div>
               <button class="primary-button" type="button" data-dashboard-action="challenges">Start Challenge</button>
-            </article>
-          </div>
-        </section>
-
-        <section class="dashboard-section dashboard-progress-panel" aria-label="Your Progress">
-          <div class="section-heading simple">
-            <h3>Your Progress</h3>
-          </div>
-          <div class="dashboard-progress-grid">
-            <article class="dashboard-metric dashboard-village-progress" data-dashboard-action="town-center" tabindex="0" role="button" aria-label="Open Village Progress">
-              <span>🏡 Village Progress</span>
-              <strong id="townCenterDashboardStageCount">Stage 1 / 5</strong>
-              <small id="townCenterDashboardStage">Open Village Green</small>
-              <small><span id="dashboardFamilyCoins">0</span> village coins</small>
-            </article>
-            <article class="dashboard-metric" aria-label="Coins">
-              <span>🪙 Coins</span>
-              <strong id="levelCoins">0</strong>
-            </article>
-            <article class="dashboard-metric" aria-label="Streak">
-              <span>🔥 Streak</span>
-              <strong id="dashboardStreak">No streak yet</strong>
-            </article>
-            <article class="dashboard-metric" aria-label="Challenges completed">
-              <span>🏆 Challenges Completed</span>
-              <strong id="dashboardChallengesCompleted">0</strong>
             </article>
           </div>
         </section>
@@ -350,6 +330,26 @@
               <button class="primary-button" type="button" data-dashboard-action="village-album">Open</button>
             </article>
           </div>
+        </section>
+
+        <section class="dashboard-section dashboard-progress-panel" aria-label="Your Progress">
+          <div class="section-heading simple">
+            <h3>Your Progress</h3>
+          </div>
+          <article class="dashboard-progress-list-card">
+            <div class="dashboard-progress-row">
+              <span>🪙 Coins</span>
+              <strong id="levelCoins">0</strong>
+            </div>
+            <div class="dashboard-progress-row">
+              <span>🔥 Current Streak</span>
+              <strong id="dashboardStreak">No streak yet</strong>
+            </div>
+            <div class="dashboard-progress-row">
+              <span>🏆 Challenges Completed</span>
+              <strong id="dashboardChallengesCompleted">0</strong>
+            </div>
+          </article>
         </section>
 
       </section>
