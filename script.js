@@ -229,6 +229,15 @@ const ACHIEVEMENTS = [
 ];
 const STREAK_ACTIVITY_GOAL = 10;
 const VILLAGE_NAMING_MEMORY_ID = "name-your-village";
+const VILLAGE_NAMING_ENABLED = false;
+const FUTURE_VILLAGE_NAMING_MEMORY = {
+  id: VILLAGE_NAMING_MEMORY_ID,
+  coins: 100,
+  title: "Name Your Village",
+  image: "assets/village-memories.png",
+  icon: "🏡",
+  description: "Your village is ready to receive its name."
+};
 const FAMILY_MILESTONES = [
   { coins: 500, reward: "" },
   { coins: 1000, reward: "" },
@@ -267,8 +276,7 @@ const TOWN_CENTER_STAGES = [
   { id: "swing-set", coins: 1000, stage: 5, icon: "🌸", title: "Blooming Square", description: "The Town Center feels welcoming and full of life." }
 ];
 const VILLAGE_ALBUM_REWARDS = [
-  { id: VILLAGE_NAMING_MEMORY_ID, coins: 100, title: "Name Your Village", image: "assets/village-memories.png", icon: "🏡", description: "Your village is ready to receive its name." },
-  { id: "saturday-market", coins: 200, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
+  { id: "saturday-market", coins: 100, title: "Saturday Market", image: "assets/saturday-market.png", icon: "🧺", description: "The village celebrates its first market day." },
   { id: "plant-sale", coins: 250, title: "Plant Sale", image: "assets/plant-sale.png", icon: "🌿", description: "Neighbors share plants and seedlings for the village green." },
   { id: "community-picnic", coins: 300, title: "Community Picnic", image: "assets/community-picnic.png", icon: "🥪", description: "Families gather together for a picnic in the village square." },
   { id: "childrens-play-day", coins: 450, title: "Children's Play Day", image: "assets/childrens-play-day.png", icon: "🪁", description: "The village square fills with games, laughter, and play." },
@@ -957,7 +965,7 @@ function loadProfileStore() {
   store.familyLevelsReached = normalizeFamilyLevelsReached(store.familyLevelsReached, store.profiles);
   store.familyAchievementsUnlocked = normalizeAchievementList(store.familyAchievementsUnlocked);
   store.villageName = normalizeVillageName(store.villageName);
-  store.villageAlbumSeenRewards = normalizeRewardIdList(store.villageAlbumSeenRewards);
+  store.villageAlbumSeenRewards = normalizeVillageAlbumSeenRewardIds(store.villageAlbumSeenRewards);
   store.townCenterStagesSeen = normalizeRewardIdList(store.townCenterStagesSeen);
   store.groups = normalizeGroups(store.groups, store);
   store.currentGroup = normalizeGroupId(store.currentGroup, store.groups);
@@ -1006,7 +1014,7 @@ function createGroupData(group, source = {}) {
     password: group.password || source.password || "",
     villageName: savedVillageName === group.name && !ceremonyReady ? "" : savedVillageName,
     namingCeremonyReady: ceremonyReady,
-    villageAlbumSeenRewards: normalizeRewardIdList(source.villageAlbumSeenRewards),
+    villageAlbumSeenRewards: normalizeVillageAlbumSeenRewardIds(source.villageAlbumSeenRewards),
     townCenterStagesSeen: normalizeRewardIdList(source.townCenterStagesSeen),
     familyLevelsReached: Array.isArray(source.familyLevelsReached) ? source.familyLevelsReached.map(String) : [],
     familyAchievementsUnlocked: normalizeAchievementList(source.familyAchievementsUnlocked),
@@ -1027,7 +1035,7 @@ function normalizeGroups(groups, store = profileStore) {
   }
   normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards = normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards.length
     ? normalized[DEFAULT_GROUP_ID].villageAlbumSeenRewards
-    : normalizeRewardIdList(store?.villageAlbumSeenRewards);
+    : normalizeVillageAlbumSeenRewardIds(store?.villageAlbumSeenRewards);
   normalized[DEFAULT_GROUP_ID].townCenterStagesSeen = normalized[DEFAULT_GROUP_ID].townCenterStagesSeen.length
     ? normalized[DEFAULT_GROUP_ID].townCenterStagesSeen
     : normalizeRewardIdList(store?.townCenterStagesSeen);
@@ -1069,8 +1077,8 @@ function mergeGroupData(localStore, remoteStore, baseStore) {
       villageName: normalizeVillageName(localGroup?.villageName) || normalizeVillageName(remoteGroup?.villageName),
       namingCeremonyReady: Boolean(localGroup?.namingCeremonyReady || remoteGroup?.namingCeremonyReady),
       villageAlbumSeenRewards: [
-        ...normalizeRewardIdList(localGroup?.villageAlbumSeenRewards),
-        ...normalizeRewardIdList(remoteGroup?.villageAlbumSeenRewards)
+        ...normalizeVillageAlbumSeenRewardIds(localGroup?.villageAlbumSeenRewards),
+        ...normalizeVillageAlbumSeenRewardIds(remoteGroup?.villageAlbumSeenRewards)
       ],
       townCenterStagesSeen: [
         ...normalizeRewardIdList(localGroup?.townCenterStagesSeen),
@@ -1127,8 +1135,18 @@ function normalizeRewardIdList(value) {
   return Array.isArray(value) ? Array.from(new Set(value.map(String).filter(Boolean))) : [];
 }
 
+function normalizeVillageAlbumSeenRewardIds(value) {
+  const ids = normalizeRewardIdList(value);
+  const migratedIds = !VILLAGE_NAMING_ENABLED && ids.includes(VILLAGE_NAMING_MEMORY_ID)
+    ? [...ids, "saturday-market"]
+    : ids;
+  const activeIds = new Set(VILLAGE_ALBUM_REWARDS.map((reward) => reward.id));
+  return normalizeRewardIdList(migratedIds).filter((rewardId) => activeIds.has(rewardId));
+}
+
 function getVillageName() {
-  return normalizeVillageName(getCurrentGroup()?.villageName) || "Unnamed Village";
+  const group = getCurrentGroup();
+  return normalizeVillageName(group?.villageName) || normalizeVillageName(group?.name) || "Unser Dorf";
 }
 
 function hasVillageName() {
@@ -1136,6 +1154,7 @@ function hasVillageName() {
 }
 
 function isVillageNamingUnlocked(group = getCurrentGroup()) {
+  if (!VILLAGE_NAMING_ENABLED) return false;
   if (!group) return false;
   return Boolean(
     normalizeVillageName(group.villageName)
@@ -1705,8 +1724,8 @@ function mergeProfileStores(localStore, remoteStore) {
   baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
   baseStore.villageAlbumSeenRewards = Array.from(
     new Set([
-      ...normalizeRewardIdList(localStore?.villageAlbumSeenRewards),
-      ...normalizeRewardIdList(remoteStore?.villageAlbumSeenRewards)
+      ...normalizeVillageAlbumSeenRewardIds(localStore?.villageAlbumSeenRewards),
+      ...normalizeVillageAlbumSeenRewardIds(remoteStore?.villageAlbumSeenRewards)
     ])
   );
   baseStore.townCenterStagesSeen = Array.from(
@@ -2532,13 +2551,13 @@ function renderSettingsPanel() {
   const villageHasName = hasVillageName();
   const villageNamingUnlocked = isVillageNamingUnlocked();
   if (els.settingsVillageName) {
-    els.settingsVillageName.textContent = villageHasName ? getVillageName() : "Unnamed Village";
+    els.settingsVillageName.textContent = getVillageName();
   }
   if (els.settingsVillageNameInput) {
     els.settingsVillageNameInput.value = villageHasName ? getVillageName() : "";
     els.settingsVillageNameInput.placeholder = villageHasName
       ? getVillageName()
-      : villageNamingUnlocked ? "Enter your village name" : "Unlocked after Name Your Village";
+      : villageNamingUnlocked ? "Enter your village name" : "Village renaming is not available in v0";
     els.settingsVillageNameInput.disabled = !villageNamingUnlocked;
   }
   if (els.editVillageNameToggle) {
@@ -5861,7 +5880,7 @@ function checkRewardUnlocks(profile) {
   const group = getCurrentGroup();
   if (!group) return;
   profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
-  group.villageAlbumSeenRewards = normalizeRewardIdList(group.villageAlbumSeenRewards);
+  group.villageAlbumSeenRewards = normalizeVillageAlbumSeenRewardIds(group.villageAlbumSeenRewards);
   const sharedCoins = getGroupCoinTotal(group);
   const personalCoins = normalizeCoinCount(profile.coins);
   const newPersonalReward = AUSTRIA_ALBUM_REWARDS.find((reward) => {
