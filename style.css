@@ -8958,10 +8958,16 @@ button:active {
   background: #fffdf6;
 }
 
-.reward-debug-section h3,
+.reward-debug-section summary,
 .reward-debug-section h4 {
   margin: 0;
   color: #31583b;
+}
+
+.reward-debug-section summary {
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .reward-debug-table {
@@ -9010,6 +9016,32 @@ button:active {
   color: #31583b;
   font-weight: 700;
   cursor: pointer;
+}
+
+.reward-debug-simulation-actions button.danger {
+  border-color: rgb(142 66 54 / 28%);
+  background: #f7e8e2;
+  color: #77362a;
+}
+
+.reward-debug-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reward-debug-status.unlocked {
+  background: #e8f1e2;
+  color: #31583b;
+}
+
+.reward-debug-status.locked {
+  background: #f1eee6;
+  color: #6b6254;
 }
 
 .reward-debug-result-group {

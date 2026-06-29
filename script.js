@@ -108,6 +108,7 @@ const ONBOARDING_PAGES = [
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const VILLAGE_NAMING_CONTRIBUTION_GOAL = 10;
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
+const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
 const SUPABASE_SYNC_TABLE = "family_progress";
@@ -913,6 +914,7 @@ let pendingCelebrations = [];
 let achievementNotificationQueue = [];
 let achievementNotificationTimer = 0;
 let achievementNotificationShowing = false;
+let rewardDebugLastResult = "";
 let currentProfileId = "";
 let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
@@ -3477,95 +3479,196 @@ function hideRewardDebugPage() {
 function renderRewardDebugPage() {
   if (!els.rewardDebugContent) return;
   els.rewardDebugContent.replaceChildren(
-    createRewardDebugSection("Flashcards", [
-      createRewardDebugTable(
-        ["Milestone", "Achievement", "ID"],
-        getDebugAchievementsByMetric("flashcardsReviewed").map((achievement) => [
-          `${achievement.target} ${achievement.target === 1 ? "word reviewed" : "words reviewed"}`,
-          achievement.name,
-          achievement.id
-        ])
-      )
-    ]),
-    createQuizRewardDebugSection("Vocabulary Quizzes", "vocabulary"),
-    createQuizRewardDebugSection("Article Quizzes", "article"),
-    createRewardDebugSection("Village Progression", [
-      createRewardDebugTable(
-        ["Coins", "Stage", "Name"],
-        TOWN_CENTER_STAGES.map((stage) => [
-          `${stage.coins}`,
-          `Stage ${stage.stage}`,
-          `${stage.icon} ${stage.title}`
-        ])
-      )
-    ]),
-    createRewardDebugSection("Albums", [
-      createTextElement("h4", "", "Austria Album"),
-      createRewardDebugTable(
-        ["Unlock requirement", "Reward", "Image filename"],
-        AUSTRIA_ALBUM_REWARDS.map((reward, index) => [
-          `${reward.coins} personal coins`,
-          `#${index + 1} ${reward.title}`,
-          reward.image || "None"
-        ])
-      ),
-      createTextElement("h4", "", "Village Memories"),
-      createRewardDebugTable(
-        ["Unlock requirement", "Reward", "Image filename"],
-        VILLAGE_ALBUM_REWARDS.map((reward, index) => [
-          `${reward.coins} shared village coins`,
-          `#${index + 1} ${reward.title}`,
-          reward.image || "None"
-        ])
-      )
-    ]),
-    createRewardDebugSection("Achievement Queue", [
-      createRewardDebugTable(
-        ["Setting", "Current value"],
-        [
-          ["Current queue size", `${achievementNotificationQueue.length}`],
-          ["Current popup duration", `${ACHIEVEMENT_NOTIFICATION_DURATION_MS} ms`],
-          ["Delay between queued achievements", "220 ms"]
-        ]
-      )
-    ]),
+    createRewardDebugCurrentProgressSection(),
+    createRewardDebugFlashcardAchievementsSection(),
+    createQuizRewardDebugSection("Vocabulary Quiz Rewards", "vocabulary"),
+    createRewardDebugArticleAchievementsSection(),
+    createRewardDebugAustriaAlbumSection(),
+    createRewardDebugVillageMemoriesSection(),
+    createRewardDebugVillageGrowthSection(),
+    createRewardDebugQueueSection(),
     createRewardDebugSimulationSection()
   );
 }
 
 function createQuizRewardDebugSection(title, quizType) {
+  const profile = getCurrentProfile();
+  const sharedCoins = getGroupCoinTotal();
+  const unlockedAustriaIds = new Set(getAustriaAlbumUnlockedRewardIds(profile, true));
+  const unlockedMemoryIds = new Set(getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins).map((reward) => reward.id));
   const label = quizType === "article" ? "article correct" : "vocabulary correct";
   return createRewardDebugSection(title, [
     createTextElement("h4", "", "Quiz achievements"),
     createRewardDebugTable(
-      ["Required quiz count", "Reward type", "Reward name"],
+      ["Threshold", "Achievement", "Status"],
       getDebugAchievementsByMetric("totalCorrectAnswers").map((achievement) => [
         `${achievement.target} correct`,
-        "Achievement",
-        achievement.name
+        `${achievement.icon} ${achievement.name}`,
+        createRewardDebugStatusCell(getAchievementDebugStatus(achievement))
       ])
     ),
     createTextElement("h4", "", "Austria Album unlocks"),
     createRewardDebugTable(
-      ["Required quiz count", "Reward type", "Reward name", "Image filename"],
+      ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
       AUSTRIA_ALBUM_REWARDS.map((reward, index) => [
         `${reward.coins} ${label}`,
         `Austria Album #${index + 1}`,
         reward.title,
-        reward.image || "None"
+        reward.image || "None",
+        createRewardDebugStatusCell(unlockedAustriaIds.has(reward.id), "Unlocked", "Locked")
       ])
     ),
     createTextElement("h4", "", "Village Memories unlocks"),
     createRewardDebugTable(
-      ["Required quiz count", "Reward type", "Reward name", "Image filename"],
+      ["Threshold", "Reward type", "Reward name", "Image filename", "Status"],
       VILLAGE_ALBUM_REWARDS.map((reward, index) => [
         `${reward.coins} ${label}`,
         `Village Memories #${index + 1}`,
         reward.title,
-        reward.image || "None"
+        reward.image || "None",
+        createRewardDebugStatusCell(unlockedMemoryIds.has(reward.id), "Unlocked", "Locked")
       ])
     )
   ]);
+}
+
+function createRewardDebugCurrentProgressSection() {
+  const profile = getCurrentProfile();
+  const sharedCoins = getGroupCoinTotal();
+  const townCenter = getTownCenterProgress(sharedCoins);
+  const unlockedAustria = getAustriaAlbumUnlockedRewardIds(profile, true);
+  const unlockedMemories = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins);
+  const achievementStates = getAchievementStates().filter(({ achievement }) => !achievement.testOnly);
+  const earnedAchievements = achievementStates.filter(({ unlocked }) => unlocked);
+  const currentWaiting = getRewardDebugWaitingLabel();
+  return createRewardDebugSection("Current User Progress", [
+    createRewardDebugTable(
+      ["Metric", "Current value"],
+      [
+        ["Current village", getCurrentGroup()?.name || "None"],
+        ["Current profile", profile?.name || "None"],
+        ["Flashcards reviewed", `${getFlashcardsReviewedCount(profile)}`],
+        ["Vocabulary quiz correct", `${getDebugVocabularyCorrectCount(profile)}`],
+        ["Article quiz correct", `${getDebugArticleCorrectCount(profile)}`],
+        ["Coins", `${normalizeCoinCount(profile?.coins)}`],
+        ["Village Coins", `${sharedCoins}`],
+        ["Current Village Stage", `Stage ${townCenter.current.stage}: ${getTownCenterStageName(townCenter.current)}`],
+        ["Austria Album Progress", `${unlockedAustria.length} / ${AUSTRIA_ALBUM_REWARDS.length}`],
+        ["Village Memories Progress", `${unlockedMemories.length} / ${VILLAGE_ALBUM_REWARDS.length}`],
+        ["Achievements Earned", `${earnedAchievements.length} / ${achievementStates.length}`],
+        ["Current Streak", `${normalizeCounter(profile?.streak?.current)}`],
+        ["Challenges Completed", `${normalizeCounter(profile?.challengeSessionsCompleted)}`],
+        ["Current reward waiting to display", currentWaiting]
+      ]
+    )
+  ], true);
+}
+
+function createRewardDebugFlashcardAchievementsSection() {
+  return createRewardDebugSection("Flashcard Achievements", [
+    createRewardDebugTable(
+      ["Milestone", "Achievement", "Status"],
+      getDebugAchievementsByMetric("flashcardsReviewed").map((achievement) => [
+        `${achievement.target} ${achievement.target === 1 ? "reviewed" : "reviewed"}`,
+        `${achievement.icon} ${achievement.name}`,
+        createRewardDebugStatusCell(getAchievementDebugStatus(achievement), "Earned", "Not Earned")
+      ])
+    )
+  ]);
+}
+
+function createRewardDebugArticleAchievementsSection() {
+  const articleAchievements = getDebugAchievementsByMetric("articlesMastered");
+  const rows = articleAchievements.length
+    ? articleAchievements.map((achievement) => [
+      `${achievement.target}`,
+      `${achievement.icon} ${achievement.name}`,
+      createRewardDebugStatusCell(getAchievementDebugStatus(achievement), "Earned", "Not Earned")
+    ])
+    : [["No article-only achievements configured", "Article mastery is tracked, but no separate article achievement milestones are currently active.", ""]];
+  return createRewardDebugSection("Article Quiz Achievements", [
+    createRewardDebugTable(["Threshold", "Achievement", "Status"], rows)
+  ]);
+}
+
+function createRewardDebugAustriaAlbumSection() {
+  const unlockedIds = new Set(getAustriaAlbumUnlockedRewardIds(getCurrentProfile(), true));
+  return createRewardDebugSection("Austria Album", [
+    createRewardDebugTable(
+      ["#", "Reward", "Unlock requirement", "Image filename", "Status"],
+      AUSTRIA_ALBUM_REWARDS.map((reward, index) => [
+        `${index + 1}`,
+        reward.title,
+        `${reward.coins} personal coins`,
+        reward.image || "None",
+        createRewardDebugStatusCell(unlockedIds.has(reward.id), "Unlocked", "Locked")
+      ])
+    )
+  ]);
+}
+
+function createRewardDebugVillageMemoriesSection() {
+  const unlockedIds = new Set(getUnlockedRewards(VILLAGE_ALBUM_REWARDS, getGroupCoinTotal()).map((reward) => reward.id));
+  return createRewardDebugSection("Village Memories", [
+    createRewardDebugTable(
+      ["Memory", "Unlock requirement", "Image filename", "Status"],
+      VILLAGE_ALBUM_REWARDS.map((reward, index) => [
+        `${index + 1}: ${reward.title}`,
+        `${reward.coins} shared village coins`,
+        reward.image || "None",
+        createRewardDebugStatusCell(unlockedIds.has(reward.id), "Unlocked", "Locked")
+      ])
+    )
+  ]);
+}
+
+function createRewardDebugVillageGrowthSection() {
+  const sharedCoins = getGroupCoinTotal();
+  const current = getTownCenterProgress(sharedCoins).current;
+  return createRewardDebugSection("Village Growth", [
+    createRewardDebugTable(
+      ["Stage", "Stage name", "Village coin requirement", "Status"],
+      TOWN_CENTER_STAGES.map((stage) => [
+        `Stage ${stage.stage}`,
+        `${stage.icon} ${stage.title}`,
+        `${stage.coins}`,
+        createRewardDebugStatusCell(sharedCoins >= stage.coins, stage.id === current.id ? "Current" : "Unlocked", "Locked")
+      ])
+    )
+  ]);
+}
+
+function createRewardDebugQueueSection() {
+  return createRewardDebugSection("Reward Queue", [
+    createRewardDebugTable(
+      ["Setting", "Current value"],
+      [
+        ["Current queue size", `${achievementNotificationQueue.length}`],
+        ["Current popup duration", `${ACHIEVEMENT_NOTIFICATION_DURATION_MS} ms`],
+        ["Delay between queued achievements", `${ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS} ms`],
+        ["Current reward waiting to display", getRewardDebugWaitingLabel()]
+      ]
+    )
+  ]);
+}
+
+function getRewardDebugWaitingLabel() {
+  if (achievementNotificationShowing) return "Achievement popup is visible";
+  if (achievementNotificationQueue[0]?.name) return achievementNotificationQueue[0].name;
+  if (pendingCelebrations.length) return "Pending celebration";
+  return "None";
+}
+
+function getDebugVocabularyCorrectCount(profile = getCurrentProfile()) {
+  return Object.values(profile?.vocabularyProgress || {}).reduce((total, entry) => {
+    return total + normalizeCounter(entry.correctCount);
+  }, 0);
+}
+
+function getDebugArticleCorrectCount(profile = getCurrentProfile()) {
+  return Object.values(profile?.articleProgress || {}).reduce((total, entry) => {
+    return total + normalizeCounter(entry.articleCorrectCount);
+  }, 0);
 }
 
 function getDebugAchievementsByMetric(metric) {
@@ -3574,10 +3677,20 @@ function getDebugAchievementsByMetric(metric) {
     .sort((first, second) => normalizeCounter(first.target) - normalizeCounter(second.target));
 }
 
-function createRewardDebugSection(title, children = []) {
-  const section = document.createElement("section");
+function getAchievementDebugStatus(achievement) {
+  return getAchievementStates().find((state) => state.achievement.id === achievement.id)?.unlocked || false;
+}
+
+function createRewardDebugStatusCell(isUnlocked, earnedLabel = "Earned", lockedLabel = "Not Earned") {
+  const badge = createTextElement("span", isUnlocked ? "reward-debug-status unlocked" : "reward-debug-status locked", isUnlocked ? `✅ ${earnedLabel}` : `❌ ${lockedLabel}`);
+  return badge;
+}
+
+function createRewardDebugSection(title, children = [], open = false) {
+  const section = document.createElement("details");
   section.className = "reward-debug-section";
-  section.append(createTextElement("h3", "", title), ...children);
+  section.open = open;
+  section.append(createTextElement("summary", "", title), ...children);
   return section;
 }
 
@@ -3591,7 +3704,12 @@ function createRewardDebugTable(headers, rows) {
   const tbody = document.createElement("tbody");
   rows.forEach((row) => {
     const tableRow = document.createElement("tr");
-    row.forEach((cell) => tableRow.append(createTextElement("td", "", cell)));
+    row.forEach((cell) => {
+      const tableCell = document.createElement("td");
+      if (cell instanceof Node) tableCell.append(cell);
+      else tableCell.textContent = cell;
+      tableRow.append(tableCell);
+    });
     tbody.append(tableRow);
   });
   table.append(thead, tbody);
@@ -3599,86 +3717,225 @@ function createRewardDebugTable(headers, rows) {
 }
 
 function createRewardDebugSimulationSection() {
-  const output = createTextElement("div", "reward-debug-simulation-output", "Choose a dry-run simulation.");
+  const output = createTextElement("div", "reward-debug-simulation-output", rewardDebugLastResult || "Choose a simulation. These tools update the current local test profile.");
   const actions = [
-    ["Review 10 Flashcards", "flashcards", 10],
-    ["Review 25 Flashcards", "flashcards", 25],
-    ["Complete 25 Vocabulary Questions", "vocabulary", 25],
-    ["Complete 100 Vocabulary Questions", "vocabulary", 100],
-    ["Complete 500 Vocabulary Questions", "vocabulary", 500]
+    ["Review 10 Flashcards", "review-flashcards", 10],
+    ["Review 50 Flashcards", "review-flashcards", 50],
+    ["Review 250 Flashcards", "review-flashcards", 250],
+    ["Answer 10 Vocabulary Questions Correctly", "vocabulary-correct", 10],
+    ["Answer 100 Vocabulary Questions Correctly", "vocabulary-correct", 100],
+    ["Answer 500 Vocabulary Questions Correctly", "vocabulary-correct", 500],
+    ["Answer 10 Article Questions Correctly", "article-correct", 10],
+    ["Unlock Austria Album #5", "unlock-austria", 5],
+    ["Unlock Village Memory #3", "unlock-memory", 3],
+    ["Advance Village Stage", "advance-stage", 1],
+    ["Reset Rewards", "reset-rewards", 0, true],
+    ["Reset Collections", "reset-collections", 0, true],
+    ["Reset Progress", "reset-progress", 0, true],
+    ["Reset Everything", "reset-everything", 0, true]
   ];
   const buttons = document.createElement("div");
   buttons.className = "reward-debug-simulation-actions";
-  actions.forEach(([label, type, amount]) => {
+  actions.forEach(([label, type, amount, destructive]) => {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = label;
+    if (destructive) button.classList.add("danger");
     button.addEventListener("click", () => {
-      output.replaceChildren(...createRewardDebugSimulationResult(type, amount));
+      const result = runRewardDebugSimulation(type, amount, Boolean(destructive));
+      rewardDebugLastResult = result;
+      renderRewardDebugPage();
     });
     buttons.append(button);
   });
   return createRewardDebugSection("Simulate Reward", [
-    createTextElement("p", "reward-debug-note", "Dry run only. These buttons do not save profile, coin, or reward data."),
+    createTextElement("p", "reward-debug-note", "Developer tools only. Simulation buttons intentionally change the current local test profile so rewards can be verified quickly."),
     buttons,
     output
-  ]);
+  ], true);
 }
 
-function createRewardDebugSimulationResult(type, amount) {
-  const profile = createRewardDebugProfileClone();
-  const groupCoins = getGroupCoinTotal() + (type === "vocabulary" ? amount : 0);
-  if (type === "flashcards") {
-    profile.flashcardSessions = {
-      debug: {
-        ratings: Object.fromEntries(Array.from({ length: amount }, (_, index) => [`debug-card-${index + 1}`, "known"]))
-      }
-    };
-  } else {
-    profile.coins = normalizeCoinCount(profile.coins) + amount;
-    profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + Math.ceil(amount / CHALLENGE_QUESTION_COUNT);
-    profile.vocabularyProgress = {
-      debug: { correctCount: amount }
-    };
+function runRewardDebugSimulation(type, amount, destructive = false) {
+  const profile = getCurrentProfile();
+  if (!profile) return "No active profile. Sign in first, then open ?rewardDebug=1.";
+  if (destructive && !window.confirm("This developer action changes the current local test profile. Continue?")) {
+    return "Cancelled.";
+  }
+  if (!destructive && !window.confirm("Apply this simulation to the current local test profile?")) {
+    return "Cancelled.";
   }
 
-  const unlockedAchievementIds = new Set(normalizeAchievementList(getCurrentProfile()?.achievementsUnlocked));
-  const achievements = ACHIEVEMENTS
-    .filter((achievement) => achievement.scope !== "family")
-    .filter((achievement) => !unlockedAchievementIds.has(achievement.id))
-    .filter((achievement) => isAchievementConditionMet(achievement, profile))
-    .map((achievement) => achievement.name);
-  const austriaRewards = AUSTRIA_ALBUM_REWARDS
-    .filter((reward) => normalizeCoinCount(profile.coins) >= reward.coins)
-    .map((reward) => reward.title);
-  const villageMemories = VILLAGE_ALBUM_REWARDS
-    .filter((reward) => groupCoins >= reward.coins)
-    .map((reward) => reward.title);
-  const townStages = TOWN_CENTER_STAGES
-    .filter((stage) => groupCoins >= stage.coins)
-    .map((stage) => `Stage ${stage.stage}: ${stage.title}`);
+  const before = getRewardDebugProgressSnapshot();
+  if (type === "review-flashcards") addRewardDebugFlashcardReviews(amount);
+  if (type === "vocabulary-correct") addRewardDebugVocabularyCorrect(amount);
+  if (type === "article-correct") addRewardDebugArticleCorrect(amount);
+  if (type === "unlock-austria") unlockRewardDebugAustriaAlbum(amount);
+  if (type === "unlock-memory") unlockRewardDebugVillageMemory(amount);
+  if (type === "advance-stage") advanceRewardDebugVillageStage();
+  if (type === "reset-rewards") resetRewardDebugRewards();
+  if (type === "reset-collections") resetRewardDebugCollections();
+  if (type === "reset-progress") resetRewardDebugProgress();
+  if (type === "reset-everything") resetRewardDebugEverything();
 
-  return [
-    createTextElement("h4", "", `${type === "flashcards" ? "Flashcard" : "Vocabulary"} dry run: ${amount}`),
-    createRewardDebugList("Achievements that would be complete", achievements),
-    createRewardDebugList("Austria Album rewards available at simulated personal coins", austriaRewards),
-    createRewardDebugList("Village Memories available at simulated shared coins", villageMemories),
-    createRewardDebugList("Town Center stages available at simulated shared coins", townStages)
-  ];
+  refreshRewardDebugAfterSimulation();
+  const after = getRewardDebugProgressSnapshot();
+  return `Updated. Coins: ${before.coins} → ${after.coins}. Village Coins: ${before.villageCoins} → ${after.villageCoins}. Achievements: ${before.achievements} → ${after.achievements}.`;
 }
 
-function createRewardDebugProfileClone() {
-  const current = getCurrentProfile();
-  if (!current) {
-    return normalizeProfileData({}, {
-      id: "reward-debug-profile",
-      name: "Reward Debug",
-      emoji: "",
-      avatar: "",
-      password: ""
-    });
+function getRewardDebugProgressSnapshot() {
+  const profile = getCurrentProfile();
+  const achievements = getAchievementStates().filter(({ achievement, unlocked }) => !achievement.testOnly && unlocked).length;
+  return {
+    coins: normalizeCoinCount(profile?.coins),
+    villageCoins: getGroupCoinTotal(),
+    achievements
+  };
+}
+
+function addRewardDebugFlashcardReviews(amount) {
+  const profile = getCurrentProfile();
+  profile.flashcardSessions = normalizeFlashcardSessions(profile.flashcardSessions);
+  const key = "reward-debug-flashcards";
+  const session = profile.flashcardSessions[key] || { deckIds: [], index: 0, studiedIds: [], ratings: {}, studyDate: getTodayKey(), completed: false, updatedAt: "" };
+  session.ratings = normalizeFlashcardRatings(session.ratings);
+  session.studiedIds = Array.isArray(session.studiedIds) ? session.studiedIds : [];
+  const timestamp = Date.now();
+  Array.from({ length: amount }).forEach((_, index) => {
+    const cardId = `reward-debug-flashcard-${timestamp}-${index + 1}`;
+    session.ratings[cardId] = "known";
+    if (!session.studiedIds.includes(cardId)) session.studiedIds.push(cardId);
+  });
+  session.updatedAt = new Date().toISOString();
+  profile.flashcardSessions[key] = session;
+  recordDailyActivity("vocabulary");
+  checkAchievements("flashcards");
+}
+
+function addRewardDebugVocabularyCorrect(amount) {
+  const profile = getCurrentProfile();
+  vocabularyProgress = normalizeVocabularyProgress(profile.vocabularyProgress);
+  const timestamp = Date.now();
+  Array.from({ length: amount }).forEach((_, index) => {
+    const cardId = `reward-debug-vocabulary-${timestamp}-${index + 1}`;
+    vocabularyProgress[cardId] = {
+      correctCount: 1,
+      wrongCount: 0,
+      lastAnsweredAt: new Date().toISOString(),
+      lastWrongAt: "",
+      status: "learned",
+      updatedAt: new Date().toISOString()
+    };
+  });
+  profile.vocabularyProgress = vocabularyProgress;
+  profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + Math.ceil(amount / CHALLENGE_QUESTION_COUNT);
+  Array.from({ length: amount }).forEach(() => awardCoins(1));
+  recordDailyActivity("vocabulary");
+  checkAchievements("reward-debug-vocabulary");
+}
+
+function addRewardDebugArticleCorrect(amount) {
+  const profile = getCurrentProfile();
+  articleProgress = normalizeArticleProgress(profile.articleProgress);
+  const timestamp = Date.now();
+  Array.from({ length: amount }).forEach((_, index) => {
+    const cardId = `reward-debug-article-${timestamp}-${index + 1}`;
+    articleProgress[cardId] = {
+      articleCorrectCount: 1,
+      articleWrongCount: 0,
+      articleLastAnsweredAt: new Date().toISOString(),
+      articleLastWrongAt: "",
+      articleStatus: "learned",
+      updatedAt: new Date().toISOString()
+    };
+  });
+  profile.articleProgress = articleProgress;
+  profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + Math.ceil(amount / CHALLENGE_QUESTION_COUNT);
+  Array.from({ length: amount }).forEach(() => awardCoins(1));
+  recordDailyActivity("article", { isCorrect: true });
+  checkAchievements("reward-debug-article");
+}
+
+function unlockRewardDebugAustriaAlbum(index) {
+  const reward = AUSTRIA_ALBUM_REWARDS[normalizeCounter(index) - 1];
+  const profile = getCurrentProfile();
+  if (!reward || !profile) return;
+  const needed = Math.max(reward.coins - normalizeCoinCount(profile.coins), 0);
+  Array.from({ length: needed }).forEach(() => awardCoins(1));
+  checkRewardUnlocks(profile);
+}
+
+function unlockRewardDebugVillageMemory(index) {
+  const reward = VILLAGE_ALBUM_REWARDS[normalizeCounter(index) - 1];
+  if (!reward) return;
+  const needed = Math.max(reward.coins - getGroupCoinTotal(), 0);
+  Array.from({ length: needed }).forEach(() => awardCoins(1));
+}
+
+function advanceRewardDebugVillageStage() {
+  const next = getTownCenterProgress(getGroupCoinTotal()).next;
+  if (!next) return;
+  const needed = Math.max(next.coins - getGroupCoinTotal(), 0);
+  Array.from({ length: needed }).forEach(() => awardCoins(1));
+}
+
+function resetRewardDebugRewards() {
+  const profile = getCurrentProfile();
+  const group = getCurrentGroup();
+  if (profile) profile.achievementsUnlocked = [];
+  if (group) group.familyAchievementsUnlocked = [];
+  if (profileStore) profileStore.familyAchievementsUnlocked = [];
+  achievementNotificationQueue = [];
+  pendingCelebrations = [];
+}
+
+function resetRewardDebugCollections() {
+  const profile = getCurrentProfile();
+  const group = getCurrentGroup();
+  if (profile) profile.austriaAlbumSeenRewards = [];
+  if (group) {
+    group.villageAlbumSeenRewards = [];
+    group.townCenterStagesSeen = [];
+    group.familyLevelsReached = [];
   }
-  return normalizeProfileData(JSON.parse(JSON.stringify(current)), current);
+}
+
+function resetRewardDebugProgress() {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  progress = {};
+  vocabularyProgress = {};
+  articleProgress = {};
+  nounVerbProgress = {};
+  meaningMatchProgress = {};
+  prepositionProgress = {};
+  profile.progress = progress;
+  profile.vocabularyProgress = vocabularyProgress;
+  profile.articleProgress = articleProgress;
+  profile.nounVerbProgress = nounVerbProgress;
+  profile.meaningMatchProgress = meaningMatchProgress;
+  profile.prepositionProgress = prepositionProgress;
+  profile.flashcardSessions = {};
+  profile.challengeSessionsCompleted = 0;
+  profile.vocabularyReviewStats = normalizeVocabularyReviewStats({});
+  profile.streak = normalizeStreak({});
+  profile.villageContribution = normalizeVillageContribution({});
+}
+
+function resetRewardDebugEverything() {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  resetRewardDebugRewards();
+  resetRewardDebugCollections();
+  resetRewardDebugProgress();
+  profile.coins = 0;
+  profile.levelBonusesAwarded = [];
+}
+
+function refreshRewardDebugAfterSimulation() {
+  saveProfileStore();
+  refreshVisibleProfileState();
+  renderVillageCards();
+  renderRewardDebugPage();
 }
 
 function createRewardDebugList(title, items) {
@@ -6040,15 +6297,15 @@ function isAchievementConditionMet(achievement, profile) {
 }
 
 function hasAnyCorrectQuizAnswer(profile) {
-  return Object.values(profile.articleProgress || {}).some((entry) => normalizeCounter(entry.articleCorrectCount) > 0)
-    || Object.values(profile.vocabularyProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile.nounVerbProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile.meaningMatchProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
-    || Object.values(profile.prepositionProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0);
+  return Object.values(profile?.articleProgress || {}).some((entry) => normalizeCounter(entry.articleCorrectCount) > 0)
+    || Object.values(profile?.vocabularyProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
+    || Object.values(profile?.nounVerbProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
+    || Object.values(profile?.meaningMatchProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0)
+    || Object.values(profile?.prepositionProgress || {}).some((entry) => normalizeCounter(entry.correctCount) > 0);
 }
 
 function getNounVerbCorrectAnswerCount(profile) {
-  return Object.values(profile.nounVerbProgress || {}).reduce((total, entry) => {
+  return Object.values(profile?.nounVerbProgress || {}).reduce((total, entry) => {
     return total + normalizeCounter(entry.correctCount);
   }, 0);
 }
@@ -6140,7 +6397,7 @@ function closeLevelCelebration() {
     window.setTimeout(() => {
       if (showNextAchievementNotification()) return;
       if (!showNextPendingCelebration()) checkVillageNamingCeremony();
-    }, 220);
+    }, ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS);
     return;
   }
   if (showNextAchievementNotification()) return;
