@@ -929,6 +929,29 @@ let cloudPullTimer = 0;
 
 document.addEventListener("DOMContentLoaded", init);
 
+function scrollPageToTop(target = null) {
+  const containers = [
+    document.scrollingElement,
+    document.documentElement,
+    document.body,
+    els?.appShell,
+    els?.profileScreen,
+    target
+  ].filter(Boolean);
+
+  window.requestAnimationFrame(() => {
+    containers.forEach((container) => {
+      if (typeof container.scrollTo === "function") {
+        container.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      } else {
+        container.scrollTop = 0;
+        container.scrollLeft = 0;
+      }
+    });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
+}
+
 async function init() {
   bindLockEvents();
   await unlockApp();
@@ -1355,6 +1378,7 @@ function showVillageSelection() {
   els.villageSelection?.classList.remove("hidden");
   renderVillageCards();
   renderGroupSelectors();
+  scrollPageToTop(els.profileScreen);
 }
 
 function showVillagePassword() {
@@ -1366,6 +1390,7 @@ function showVillagePassword() {
   els.villagePasswordInput.value = "";
   els.villagePasswordError.classList.add("hidden");
   els.villagePasswordForm.classList.remove("hidden");
+  scrollPageToTop(els.profileScreen);
   els.villagePasswordInput.focus();
 }
 
@@ -2052,6 +2077,7 @@ function showProfileScreen() {
   els.demoScreen?.classList.add("hidden");
   els.profileScreen.classList.remove("hidden");
   showVillageSelection();
+  scrollPageToTop(els.profileScreen);
 }
 
 function showVillageNameSetup() {
@@ -2065,6 +2091,7 @@ function showVillageNameSetup() {
   els.villageNameForm.classList.remove("hidden");
   els.profileScreen.classList.add("first-use");
   els.villageNameInput.value = "";
+  scrollPageToTop(els.profileScreen);
   els.villageNameInput.focus();
 }
 
@@ -2092,6 +2119,7 @@ function showProfileLogin(profileId) {
   els.profileLoginPassword.value = "";
   els.profileLoginError.classList.add("hidden");
   els.profileLoginForm.classList.remove("hidden");
+  scrollPageToTop(els.profileScreen);
   els.profileLoginPassword.focus();
 }
 
@@ -2187,6 +2215,7 @@ function showDashboard() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.dashboardScreen);
 }
 
 function showLandingScreen() {
@@ -2220,6 +2249,7 @@ function showLandingScreen() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.landingScreen);
 }
 
 function showDemoScreen() {
@@ -2255,6 +2285,7 @@ function showDemoScreen() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   renderOnboardingPage();
+  scrollPageToTop(els.demoScreen);
 }
 
 function renderOnboardingPage() {
@@ -2354,6 +2385,7 @@ function showCoinChallenges() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.coinChallengesScreen);
 }
 
 function showAchievementCollection(page = "austria-album") {
@@ -2380,6 +2412,7 @@ function showAchievementCollection(page = "austria-album") {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.achievementCollectionScreen);
 }
 
 function showStudyView(options = {}) {
@@ -2417,6 +2450,7 @@ function showStudyView(options = {}) {
   } else {
     document.querySelector(".detailed-stats")?.removeAttribute("open");
   }
+  scrollPageToTop(els.studyStage);
 }
 
 function showNounVerbQuiz() {
@@ -2471,6 +2505,7 @@ function showVocabularyReviewQuiz() {
   applyVocabularyReviewOrder();
   generateVocabularyReviewQuestion("open quiz", vocabularyReviewCurrentIndex);
   renderVocabularyReviewQuiz();
+  scrollPageToTop(els.nounVerbStage);
 }
 
 function showMeaningMatchQuiz() {
@@ -2699,12 +2734,14 @@ function renderSettingsPanel() {
 function showSettingsMenuView() {
   els.settingsMainMenu?.classList.remove("hidden");
   els.settingsDetail?.classList.add("hidden");
+  scrollPageToTop(els.settingsPanel);
 }
 
 function showSettingsDetailView() {
   renderSettingsPanel();
   els.settingsMainMenu?.classList.add("hidden");
   els.settingsDetail?.classList.remove("hidden");
+  scrollPageToTop(els.settingsPanel);
 }
 
 function openSettingsPanel() {
@@ -3937,6 +3974,7 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   renderLearningFlashcard();
+  scrollPageToTop(els.learningFlashcardsScreen);
 }
 
 function showLevelSelection(path) {
@@ -3961,6 +3999,7 @@ function showLevelSelection(path) {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   renderLevelSelectionState();
+  scrollPageToTop(els.levelSelectionScreen);
 }
 
 function chooseLearningLevel(level) {
@@ -3998,6 +4037,7 @@ function showFlashcardSetup() {
   els.flashcardSetupForm.querySelectorAll('input[name="flashcardCategory"]').forEach((input) => {
     input.checked = input.value === flashcardStudyCategory;
   });
+  scrollPageToTop(els.flashcardSetupScreen);
 }
 
 function startLearningFlashcards() {
@@ -4286,6 +4326,7 @@ function showFlashcardCompletion() {
   currentView = "flashcard-complete";
   els.learningFlashcard.classList.add("hidden");
   els.flashcardCompletionCard.classList.remove("hidden");
+  scrollPageToTop(els.learningFlashcardsScreen);
 }
 
 function handleChallengeAction(action) {
@@ -4319,6 +4360,7 @@ function showChallengeReady(action) {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   els.challengeReadyScreen.classList.remove("hidden");
+  scrollPageToTop(els.challengeReadyScreen);
 }
 
 function beginPendingChallenge() {
@@ -4425,6 +4467,7 @@ function showChallengeResults() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   els.challengeResultsScreen.classList.remove("hidden");
+  scrollPageToTop(els.challengeResultsScreen);
 }
 
 function openStudyRoute(route) {
@@ -4598,6 +4641,7 @@ function showProfileChooser() {
   els.createProfileError.classList.add("hidden");
   els.createProfileError.textContent = "";
   renderProfileCards();
+  scrollPageToTop(els.profileScreen);
 }
 
 function showCreateProfileScreen() {
@@ -4610,6 +4654,7 @@ function showCreateProfileScreen() {
   els.createProfileError.classList.add("hidden");
   els.createProfileError.textContent = "";
   els.createProfileForm.classList.remove("hidden");
+  scrollPageToTop(els.profileScreen);
   els.createProfileName.focus();
 }
 
