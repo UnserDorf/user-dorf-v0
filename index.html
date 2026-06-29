@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=174">
+    <link rel="stylesheet" href="style.css?v=175">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -249,11 +249,10 @@
             <img src="assets/welcome-hero.png" alt="">
           </div>
           <div class="onboarding-copy">
-            <p class="eyebrow">Unser Dorf</p>
             <h2 id="demoTitle">Welcome to Unser Dorf</h2>
             <div id="demoBody">
-              <p>Learn German while helping your village grow.</p>
-              <p>Every word you learn contributes to something bigger.</p>
+              <p>Learn German.</p>
+              <p>Help your village grow.</p>
             </div>
           </div>
           <p class="onboarding-progress" id="demoProgress" aria-label="Onboarding progress">● ○ ○ ○ ○</p>
@@ -485,7 +484,6 @@
         <div class="dashboard-heading challenge-page-heading">
           <button class="small-link-button" id="challengeLevelBack" type="button">← Back</button>
           <h2>Challenges</h2>
-          <p>Choose what you would like to practice.</p>
         </div>
 
         <div class="challenge-selection-grid">
@@ -506,7 +504,7 @@
                 <label><input type="radio" name="challengeCategory" value="other"><span>Other Words</span></label>
               </div>
             </fieldset>
-            <button type="button" data-challenge-action="vocabulary-review">Start</button>
+            <button type="button" data-challenge-action="vocabulary-review">Start Vocabulary</button>
           </article>
 
           <article class="coin-challenge-card">
@@ -517,51 +515,54 @@
             <div class="challenge-choice-summary" aria-label="Article challenge settings">
               <span>Level: <strong id="articleSelectedLevel">A1</strong> ▼</span>
             </div>
-            <button type="button" data-challenge-action="articles">Start</button>
+            <button type="button" data-challenge-action="articles">Start Articles</button>
           </article>
         </div>
 
-        <details class="challenge-progress-details">
-          <summary>Show Progress</summary>
-          <div class="challenge-progress-panels">
-            <section class="challenge-mastery-panel" id="challengeMasteryPanel" aria-label="Mastery progress">
-              <p class="eyebrow" id="challengeMasteryDeck">A1 • Nouns</p>
-              <h4>Vocabulary Progress</h4>
-              <dl>
-                <div>
-                  <dt>Correct once</dt>
-                  <dd id="challengeCorrectOnce">0 / 0</dd>
-                </div>
-                <div>
-                  <dt>Mastered</dt>
-                  <dd id="challengeMasteredCount">0 / 0</dd>
-                </div>
-                <div>
-                  <dt>Remaining</dt>
-                  <dd id="challengeRemainingMastery">0 / 0</dd>
-                </div>
-              </dl>
-            </section>
-            <section class="challenge-mastery-panel" id="articleMasteryPanel" aria-label="Article progress">
-              <p class="eyebrow" id="articleMasteryDeck">A1 • Articles</p>
-              <h4>Article Progress</h4>
-              <dl>
-                <div>
-                  <dt>Correct once</dt>
-                  <dd id="articleCorrectOnce">0 / 0</dd>
-                </div>
-                <div>
-                  <dt>Mastered</dt>
-                  <dd id="articleMasteredCount">0 / 0</dd>
-                </div>
-                <div>
-                  <dt>Remaining</dt>
-                  <dd id="articleRemainingMastery">0 / 0</dd>
-                </div>
-              </dl>
-            </section>
-          </div>
-        </details>
+        <section class="challenge-progress-section" aria-label="Challenge progress">
+          <h3>Progress</h3>
+          <details class="challenge-progress-details">
+            <summary>Show Progress</summary>
+            <div class="challenge-progress-panels">
+              <section class="challenge-mastery-panel" id="challengeMasteryPanel" aria-label="Mastery progress">
+                <p class="eyebrow" id="challengeMasteryDeck">A1 • Nouns</p>
+                <h4>Vocabulary Progress</h4>
+                <dl>
+                  <div>
+                    <dt>Correct once</dt>
+                    <dd id="challengeCorrectOnce">0 / 0</dd>
+                  </div>
+                  <div>
+                    <dt>Mastered</dt>
+                    <dd id="challengeMasteredCount">0 / 0</dd>
+                  </div>
+                  <div>
+                    <dt>Remaining</dt>
+                    <dd id="challengeRemainingMastery">0 / 0</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="challenge-mastery-panel" id="articleMasteryPanel" aria-label="Article progress">
+                <p class="eyebrow" id="articleMasteryDeck">A1 • Articles</p>
+                <h4>Article Progress</h4>
+                <dl>
+                  <div>
+                    <dt>Correct once</dt>
+                    <dd id="articleCorrectOnce">0 / 0</dd>
+                  </div>
+                  <div>
+                    <dt>Mastered</dt>
+                    <dd id="articleMasteredCount">0 / 0</dd>
+                  </div>
+                  <div>
+                    <dt>Remaining</dt>
+                    <dd id="articleRemainingMastery">0 / 0</dd>
+                  </div>
+                </dl>
+              </section>
+            </div>
+          </details>
+        </section>
       </section>
 
       <section class="challenge-ready-screen hidden" id="challengeReadyScreen" aria-label="Challenge ready">
@@ -861,6 +862,6 @@
 
     </main>
 
-    <script type="module" src="script.js?v=164"></script>
+    <script type="module" src="script.js?v=165"></script>
   </body>
 </html>

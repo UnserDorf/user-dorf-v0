@@ -49,8 +49,8 @@ const ONBOARDING_PAGES = [
     illustrationAlt: "A welcoming view of Unser Dorf",
     title: "Welcome to Unser Dorf",
     body: [
-      "Learn German while helping your village grow.",
-      "Every word you learn contributes to something bigger."
+      "Learn German.",
+      "Help your village grow."
     ],
     progress: "● ○ ○ ○ ○",
     backLabel: "Skip",
@@ -61,8 +61,7 @@ const ONBOARDING_PAGES = [
     illustrationAlt: "Flashcards for learning German words",
     title: "📇 Learn",
     body: [
-      "Study new vocabulary with Flashcards.",
-      "Choose your level and learn at your own pace."
+      "Build your vocabulary with Flashcards."
     ],
     progress: "○ ● ○ ○ ○",
     backLabel: "Back",
@@ -73,8 +72,8 @@ const ONBOARDING_PAGES = [
     illustrationAlt: "Article practice in Unser Dorf",
     title: "🏆 Practice",
     body: [
-      "Complete Challenges to review what you've learned.",
-      "Correct answers strengthen your vocabulary and earn coins."
+      "Review what you've learned.",
+      "Earn coins for correct answers."
     ],
     progress: "○ ○ ● ○ ○",
     backLabel: "Back",
@@ -85,8 +84,9 @@ const ONBOARDING_PAGES = [
     illustrationAlt: "A growing village scene",
     title: "🏡 Grow",
     body: [
-      "Earn coins, unlock Austria Album rewards, and help your village grow.",
-      "Every learner contributes to a shared village."
+      "Earn coins.",
+      "Unlock beautiful places across Austria.",
+      "Watch your village come to life."
     ],
     progress: "○ ○ ○ ● ○",
     backLabel: "Back",
@@ -98,7 +98,7 @@ const ONBOARDING_PAGES = [
     title: "You're Ready!",
     body: [
       "Choose your village, begin learning, and watch it grow.",
-      "Your journey starts with your first word."
+      "Your village is waiting."
     ],
     progress: "○ ○ ○ ○ ●",
     backLabel: "Back",
