@@ -5286,6 +5286,20 @@ function cleanArticleQuizDisplayWord(value) {
     .trim();
 }
 
+function getArticleQuizMeaningFromRow(row, fallbackCard) {
+  return String(
+    row.meaning_en
+      || row.meaning
+      || row.translation
+      || row.english
+      || fallbackCard?.meaningEn
+      || fallbackCard?.meaning
+      || fallbackCard?.translation
+      || fallbackCard?.english
+      || ""
+  ).trim();
+}
+
 function normalizeArticleChallengeCards(rows, level) {
   const seen = new Set();
   const fallbackCardsByArticle = new Map(cards.map((card) => [
@@ -5303,11 +5317,15 @@ function normalizeArticleChallengeCards(rows, level) {
         || fallbackCardsByWord.get(wordKey);
       const id = String(row.id || "").trim()
         || `${level.toLowerCase()}-articles-${slugify(row.german) || index}`;
+      const meaning = getArticleQuizMeaningFromRow(row, fallbackCard);
       return {
         id,
         word: displayWord || row.german.trim(),
         article,
-        english: String(row.english || fallbackCard?.english || "").trim(),
+        english: meaning,
+        meaningEn: String(row.meaning_en || "").trim(),
+        meaning: String(row.meaning || "").trim(),
+        translation: String(row.translation || "").trim(),
         example: String(row.examplesentence || fallbackCard?.example || "").trim(),
         level,
         wordType: "noun",
@@ -5708,8 +5726,9 @@ function renderArticleResult(card) {
   }
 
   const fullAnswer = `${card.article} ${card.word}`;
-  const wordMeaning = card.english
-    ? `<span class="quiz-result-answer">${escapeHtml(fullAnswer)} = ${escapeHtml(capitalizeFirst(card.english))}</span>`
+  const meaning = getArticleQuizMeaning(card);
+  const wordMeaning = meaning
+    ? `<span class="quiz-result-answer">${escapeHtml(fullAnswer)} = ${escapeHtml(capitalizeFirst(meaning))}</span>`
     : `<span class="quiz-result-answer">${escapeHtml(fullAnswer)}</span>`;
   const isCorrect = selectedQuizArticle === card.article;
   els.articleQuizResult.innerHTML = isCorrect
@@ -5719,6 +5738,7 @@ function renderArticleResult(card) {
     `
     : `
       <span class="quiz-result-label">❌ Not quite</span>
+      <span class="quiz-result-correction">Correct answer:</span>
       ${wordMeaning}
     `;
   els.articleQuizResult.classList.toggle("hidden", !articleQuizAnswered);
@@ -5742,6 +5762,16 @@ function renderArticleResult(card) {
     button.classList.toggle("correct", articleQuizAnswered && article === card.article);
     button.classList.toggle("incorrect", articleQuizAnswered && selectedQuizArticle === article && article !== card.article);
   });
+}
+
+function getArticleQuizMeaning(card) {
+  return String(
+    card?.meaningEn
+      || card?.meaning
+      || card?.translation
+      || card?.english
+      || ""
+  ).trim();
 }
 
 function answerArticleQuiz(article) {
