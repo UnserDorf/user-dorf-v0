@@ -1637,6 +1637,10 @@ h1 {
   min-height: 48px;
 }
 
+.onboarding-actions:has(#demoSignIn:not(.hidden)) {
+  grid-template-columns: 1fr;
+}
+
 .landing-actions {
   width: min(360px, 100%);
   justify-self: center;

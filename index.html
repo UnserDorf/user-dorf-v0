@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=193">
+    <link rel="stylesheet" href="style.css?v=194">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -53,6 +53,9 @@
             <button class="ghost-button" id="firebaseEmailRegister" type="button">Create Account</button>
             <button class="ghost-button firebase-google-button" id="firebaseGoogleSignIn" type="button">Continue with Google</button>
             <button class="small-link-button" id="firebaseAuthSkip" type="button">Use this device only</button>
+            <button class="small-link-button hidden" id="firebaseAuthToggle" type="button">Already have an account? Sign in</button>
+            <button class="small-link-button" id="firebaseAuthTryDemo" type="button">Want to explore first? Try Demo</button>
+            <button class="small-link-button" id="firebaseAuthHome" type="button">Back to Home</button>
           </div>
           <p class="lock-error hidden" id="firebaseAuthStatus"></p>
         </section>
@@ -299,6 +302,7 @@
           <p class="onboarding-progress" id="demoProgress" aria-label="Onboarding progress">● ○ ○ ○ ○</p>
           <div class="onboarding-actions">
             <button class="ghost-button" id="demoBack" type="button">Skip</button>
+            <button class="ghost-button hidden" id="demoSignIn" type="button">Sign in</button>
             <button class="primary-button" id="demoNext" type="button">Next</button>
           </div>
         </article>
@@ -909,6 +913,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=186"></script>
+    <script type="module" src="script.js?v=187"></script>
   </body>
 </html>

@@ -407,6 +407,9 @@ const els = {
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
   firebaseGoogleSignIn: document.querySelector("#firebaseGoogleSignIn"),
   firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
+  firebaseAuthToggle: document.querySelector("#firebaseAuthToggle"),
+  firebaseAuthTryDemo: document.querySelector("#firebaseAuthTryDemo"),
+  firebaseAuthHome: document.querySelector("#firebaseAuthHome"),
   firebaseAuthStatus: document.querySelector("#firebaseAuthStatus"),
   villageSelection: document.querySelector("#villageSelection"),
   villageChoiceActions: document.querySelector("#villageChoiceActions"),
@@ -463,6 +466,7 @@ const els = {
   demoBody: document.querySelector("#demoBody"),
   demoProgress: document.querySelector("#demoProgress"),
   demoBack: document.querySelector("#demoBack"),
+  demoSignIn: document.querySelector("#demoSignIn"),
   demoNext: document.querySelector("#demoNext"),
   dashboardScreen: document.querySelector("#dashboardScreen"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
@@ -2262,11 +2266,34 @@ function renderFirebaseAuthScreen() {
     els.firebaseGoogleSignIn.textContent = "Continue with Google";
   }
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
+  if (els.firebaseAuthToggle) {
+    els.firebaseAuthToggle.textContent = isSignIn
+      ? "Don't have an account? Create your account"
+      : "Already have an account? Sign in";
+    els.firebaseAuthToggle.classList.remove("hidden");
+  }
+  if (els.firebaseAuthTryDemo) {
+    els.firebaseAuthTryDemo.textContent = "Want to explore first? Try Demo";
+    els.firebaseAuthTryDemo.classList.remove("hidden");
+  }
+  els.firebaseAuthHome?.classList.remove("hidden");
 }
 
 function startGoogleIdentityFlow() {
   showFirebaseAuthScreen("signup", "Opening Google sign-in...");
   handleFirebaseGoogleSignIn();
+}
+
+function toggleFirebaseAuthMode() {
+  showFirebaseAuthScreen(firebaseAuthMode === "signin" ? "signup" : "signin");
+}
+
+function returnAuthToDemo() {
+  showDemoScreen();
+}
+
+function returnAuthToHome() {
+  showLandingScreen();
 }
 
 function updateFirebaseAuthStatus(message = "", isError = false) {
@@ -2635,6 +2662,7 @@ function renderOnboardingPage() {
   }
   if (els.demoProgress) els.demoProgress.textContent = page.progress;
   if (els.demoBack) els.demoBack.textContent = page.backLabel;
+  els.demoSignIn?.classList.add("hidden");
   if (els.demoNext) els.demoNext.textContent = page.nextLabel;
 }
 
@@ -2655,6 +2683,7 @@ function renderDemoFinalScreen() {
   }
   if (els.demoProgress) els.demoProgress.textContent = "🌱";
   if (els.demoBack) els.demoBack.textContent = "Back to Home";
+  els.demoSignIn?.classList.remove("hidden");
   if (els.demoNext) els.demoNext.textContent = "Create your account";
 }
 
@@ -2702,6 +2731,10 @@ function handleDemoBack() {
     return;
   }
   moveDemoPage(-1);
+}
+
+function handleDemoSignIn() {
+  showFirebaseAuthScreen("signin");
 }
 
 function showCoinChallenges() {
@@ -5384,6 +5417,9 @@ function bindEvents() {
   els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
   els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthSkip?.addEventListener("click", continueWithoutFirebaseAuth);
+  els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
+  els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
+  els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);
   els.joinVillageButton?.addEventListener("click", showJoinVillageOptions);
   els.joinAnotherVillageButton?.addEventListener("click", showJoinAnotherVillageComingSoon);
   els.createVillageButton?.addEventListener("click", showCreateVillageComingSoon);
@@ -5510,6 +5546,7 @@ function bindEvents() {
   els.landingLocalButton?.addEventListener("click", continueWithoutFirebaseAuth);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
+  els.demoSignIn?.addEventListener("click", handleDemoSignIn);
   els.demoNext?.addEventListener("click", handleDemoNext);
 
   els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
