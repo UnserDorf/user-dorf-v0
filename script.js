@@ -860,6 +860,33 @@ function getErrorMessage(error) {
   return error?.message || String(error || "Unknown error");
 }
 
+function getIdentitySnapshotFromStore(store, profileId = "") {
+  const resolvedProfileId = profileId || store?.currentProfile || "";
+  const profile = resolvedProfileId ? store?.profiles?.[resolvedProfileId] : null;
+  return {
+    profileId: resolvedProfileId,
+    displayName: getVillageDisplayName(profile),
+    villageId: profile?.villageId || store?.currentGroup || "",
+    currentGroup: store?.currentGroup || ""
+  };
+}
+
+function logCloudIdentityDebug(label, details = {}) {
+  const localSnapshot = getIdentitySnapshotFromStore(profileStore, currentProfileId || profileStore?.currentProfile || "");
+  const remoteProfileId = details.userData?.currentProfile || details.remoteStore?.currentProfile || "";
+  const remoteSnapshot = getIdentitySnapshotFromStore(details.remoteStore, remoteProfileId);
+  const finalSnapshot = getIdentitySnapshotFromStore(profileStore, currentProfileId || profileStore?.currentProfile || "");
+  console.info("[Unser Dorf cloud identity]", label, {
+    firebaseUid: firebaseAuthUser?.uid || "none",
+    loadedFirestoreDisplayName: remoteSnapshot.displayName || "none",
+    loadedFirestoreVillageId: remoteSnapshot.villageId || "none",
+    localStorageDisplayName: localSnapshot.displayName || "none",
+    localStorageVillageId: localSnapshot.villageId || "none",
+    finalActiveDisplayName: finalSnapshot.displayName || "none",
+    finalActiveVillageId: finalSnapshot.villageId || "none"
+  });
+}
+
 async function init() {
   bindLockEvents();
   await unlockApp();
@@ -1862,16 +1889,6 @@ async function fetchProfileStoreFromCloud() {
       }
     }
 
-    const userSnapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
-    const userDocLoaded = userSnapshot.exists();
-    if (userSnapshot.exists()) {
-      const userData = userSnapshot.data() || {};
-      mergeRemoteProfilesIntoStore(remoteStore, userData.profiles || {});
-      remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
-      remoteStore.currentProfile = String(userData.currentProfile || "");
-      hasRemoteData = true;
-    }
-
     const villageDocsLoaded = [];
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
       const villageSnapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
@@ -1887,6 +1904,20 @@ async function fetchProfileStoreFromCloud() {
       hasRemoteData = true;
     }));
 
+    const userSnapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
+    const userDocLoaded = userSnapshot.exists();
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data() || {};
+      mergeRemoteProfilesIntoStore(remoteStore, userData.profiles || {}, { preferIncomingIdentity: true });
+      remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
+      remoteStore.currentProfile = String(userData.currentProfile || "");
+      hasRemoteData = true;
+      logCloudIdentityDebug("Firestore user document loaded", {
+        remoteStore,
+        userData
+      });
+    }
+
     updateCloudSyncDebug({
       userDocLoaded,
       villageDocsLoaded,
@@ -1901,7 +1932,7 @@ async function fetchProfileStoreFromCloud() {
   }
 }
 
-function mergeRemoteProfilesIntoStore(store, incomingProfiles = {}) {
+function mergeRemoteProfilesIntoStore(store, incomingProfiles = {}, options = {}) {
   Object.entries(incomingProfiles || {}).forEach(([profileId, incomingProfile]) => {
     if (!profileId || LEGACY_PROFILE_IDS.has(profileId)) return;
     const existingProfile = store.profiles?.[profileId];
@@ -1914,7 +1945,9 @@ function mergeRemoteProfilesIntoStore(store, incomingProfiles = {}) {
       password: sourceProfile.password || ""
     };
     store.profiles[profileId] = existingProfile
-      ? mergeProfileData(existingProfile, incomingProfile, defaultProfile)
+      ? mergeProfileData(existingProfile, incomingProfile, defaultProfile, {
+        preferRemoteIdentity: Boolean(options.preferIncomingIdentity)
+      })
       : normalizeProfileData(incomingProfile, defaultProfile);
   });
 }
@@ -1978,6 +2011,9 @@ function applyRemoteProfileStore(remoteStore) {
   const mergedStore = mergeProfileStores(profileStore, remoteStore);
   applyingRemoteStore = true;
   profileStore = mergedStore;
+  if (firebaseAuthUser && profileStore.currentProfile) {
+    currentProfileId = profileStore.currentProfile;
+  }
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
   if (currentProfileId && profileStore.profiles[currentProfileId]) {
     progress = profileStore.profiles[currentProfileId].progress;
@@ -1990,11 +2026,13 @@ function applyRemoteProfileStore(remoteStore) {
   }
   applyingRemoteStore = false;
   promoteFamilyAchievements(profileStore);
+  logCloudIdentityDebug("Remote profile store applied", { remoteStore });
   refreshVisibleProfileState();
   renderAchievementDebugPanel();
 }
 
 function mergeProfileStores(localStore, remoteStore) {
+  const preferRemoteIdentity = Boolean(firebaseAuthUser && remoteStore?.profiles);
   const baseStore = {
     ...createProfileStore(),
     ...(localStore || {}),
@@ -2017,10 +2055,14 @@ function mergeProfileStores(localStore, remoteStore) {
       avatar: customProfile?.avatar || "",
       password: customProfile?.password || ""
     };
-    baseStore.profiles[profileId] = mergeProfileData(localProfile, remoteProfile, defaultProfile);
+    baseStore.profiles[profileId] = mergeProfileData(localProfile, remoteProfile, defaultProfile, {
+      preferRemoteIdentity
+    });
   });
 
-  baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
+  baseStore.currentProfile = preferRemoteIdentity
+    ? remoteStore?.currentProfile || localStore?.currentProfile || ""
+    : localStore?.currentProfile || remoteStore?.currentProfile || "";
   baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
   baseStore.villageAlbumSeenRewards = Array.from(
     new Set([
@@ -2047,15 +2089,23 @@ function mergeProfileStores(localStore, remoteStore) {
     ].map(String))
   );
   baseStore.groups = mergeGroupData(localStore, remoteStore, baseStore);
-  baseStore.currentGroup = normalizeGroupId(localStore?.currentGroup || remoteStore?.currentGroup, baseStore.groups);
+  baseStore.currentGroup = normalizeGroupId(
+    preferRemoteIdentity
+      ? remoteStore?.currentGroup || localStore?.currentGroup
+      : localStore?.currentGroup || remoteStore?.currentGroup,
+    baseStore.groups
+  );
   currentGroupId = baseStore.currentGroup;
   baseStore.migratedLegacyProgress = Boolean(localStore?.migratedLegacyProgress || remoteStore?.migratedLegacyProgress);
   return promoteFamilyAchievements(baseStore);
 }
 
-function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
+function mergeProfileData(localProfile, remoteProfile, defaultProfile, options = {}) {
   const local = normalizeProfileData(localProfile, defaultProfile);
   const remote = normalizeProfileData(remoteProfile, defaultProfile);
+  const preferRemoteIdentity = Boolean(options.preferRemoteIdentity && remoteProfile);
+  const identitySource = preferRemoteIdentity ? remote : local;
+  const fallbackIdentitySource = preferRemoteIdentity ? local : remote;
   return normalizeProfileData(
     {
       ...local,
@@ -2090,11 +2140,15 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       ])),
       history: mergeHistory(local.history, remote.history),
       lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
-      ownerUid: local.ownerUid || remote.ownerUid || "",
-      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
-      displayName: local.displayName || remote.displayName || "",
-      villageDisplayName: local.villageDisplayName || remote.villageDisplayName || local.displayName || remote.displayName || "",
-      villageId: local.villageId || remote.villageId || "",
+      ownerUid: identitySource.ownerUid || fallbackIdentitySource.ownerUid || "",
+      ownerEmail: identitySource.ownerEmail || fallbackIdentitySource.ownerEmail || "",
+      displayName: identitySource.displayName || fallbackIdentitySource.displayName || "",
+      villageDisplayName: identitySource.villageDisplayName
+        || identitySource.displayName
+        || fallbackIdentitySource.villageDisplayName
+        || fallbackIdentitySource.displayName
+        || "",
+      villageId: identitySource.villageId || fallbackIdentitySource.villageId || "",
       contributionCoins: Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
       settings: remote.settings || local.settings
     },
@@ -2281,6 +2335,10 @@ function hasLocalIdentity() {
 function getIdentityProfileId() {
   if (!profileStore?.profiles) return "";
   if (firebaseAuthUser) {
+    const currentProfile = profileStore.currentProfile
+      ? profileStore.profiles[profileStore.currentProfile]
+      : null;
+    if (currentProfile?.ownerUid === firebaseAuthUser.uid) return profileStore.currentProfile;
     const ownedProfile = Object.values(profileStore.profiles)
       .find((profile) => profile?.ownerUid === firebaseAuthUser.uid);
     if (ownedProfile?.id) return ownedProfile.id;
