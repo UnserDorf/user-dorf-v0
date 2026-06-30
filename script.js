@@ -804,6 +804,7 @@ let cloudPullTimer = 0;
 let cloudSaveInFlight = false;
 let cloudSavePending = false;
 let profileDataSource = "localStorage";
+let lastIdentityProfileWasCreated = false;
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -965,6 +966,52 @@ function logDashboardDataDebug(profile) {
       "=========================="
     ].join("\n")
   );
+}
+
+function getUserProfileCheck(profileId, profile) {
+  const userDocumentExists = Boolean(cloudSyncDebug.userDocLoaded);
+  const villageId = profile?.villageId || profileStore?.currentGroup || "";
+  const displayName = String(profile?.villageDisplayName || profile?.displayName || profile?.name || "").trim();
+  const villageName = getVillageNameFromStore(profileStore, villageId);
+  const shouldShowOnboarding = firebaseAuthUser
+    ? Boolean(lastIdentityProfileWasCreated && !hasVillageDisplayName(profile))
+    : Boolean(profileId && !hasVillageDisplayName(profile));
+  let reason = "Existing profile found.";
+  if (!profileId || !profile) {
+    reason = "No active profile found.";
+  } else if (firebaseAuthUser && lastIdentityProfileWasCreated && !hasVillageDisplayName(profile)) {
+    reason = "A new Firebase profile was created and no display name exists yet.";
+  } else if (!firebaseAuthUser && !hasVillageDisplayName(profile)) {
+    reason = "Local-only profile has no display name yet.";
+  } else if (firebaseAuthUser && !lastIdentityProfileWasCreated && !hasVillageDisplayName(profile)) {
+    reason = "Existing Firebase profile found; display-name onboarding is skipped even though the new displayName field is empty.";
+  }
+  return {
+    userDocumentExists,
+    displayName,
+    villageId,
+    villageName,
+    shouldShowOnboarding,
+    reason
+  };
+}
+
+function logUserProfileCheck(profileId, profile) {
+  const check = getUserProfileCheck(profileId, profile);
+  console.info(
+    [
+      "USER PROFILE CHECK",
+      "------------------",
+      `Firebase UID: ${firebaseAuthUser?.uid || "none"}`,
+      `User document exists: ${check.userDocumentExists}`,
+      `displayName: ${check.displayName || "none"}`,
+      `villageId: ${check.villageId || "none"}`,
+      `villageName: ${check.villageName || "none"}`,
+      `Should show onboarding: ${check.shouldShowOnboarding}`,
+      `Reason: ${check.reason}`
+    ].join("\n")
+  );
+  return check;
 }
 
 async function init() {
@@ -2420,7 +2467,8 @@ function routeAfterStartup() {
 function routeAfterIdentityReady() {
   const profileId = ensureIdentityProfile();
   const profile = profileStore?.profiles?.[profileId] || null;
-  if (profileId && !hasVillageDisplayName(profile)) {
+  const profileCheck = logUserProfileCheck(profileId, profile);
+  if (profileId && profileCheck.shouldShowOnboarding) {
     showDisplayNameSetup(profileId);
     return;
   }
@@ -2467,7 +2515,9 @@ function ensureIdentityProfile() {
   if (!profileStore?.profiles) return "";
   const profileId = getIdentityProfileId();
   if (!profileId) return "";
+  lastIdentityProfileWasCreated = false;
   if (!profileStore.profiles[profileId]) {
+    lastIdentityProfileWasCreated = true;
     const identityName = getIdentityDisplayName();
     profileStore.profiles[profileId] = normalizeProfileData(
       {
