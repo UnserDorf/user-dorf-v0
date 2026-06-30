@@ -2256,6 +2256,7 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseAuthTitle) {
     els.firebaseAuthTitle.textContent = isSignIn ? "Sign in" : "Create your account";
   }
+  els.firebaseAuthCard?.classList.toggle("is-sign-in", isSignIn);
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
       ? "Sign in to your account."

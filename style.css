@@ -6224,6 +6224,10 @@ select,
   text-align: center;
 }
 
+.firebase-auth-card.is-sign-in .firebase-auth-divider {
+  display: none;
+}
+
 .firebase-auth-local-label {
   margin: 8px 0 0;
   color: var(--muted);
