@@ -6189,6 +6189,14 @@ select,
   gap: 10px;
 }
 
+.firebase-auth-divider {
+  margin: 2px 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 720;
+  text-align: center;
+}
+
 .firebase-auth-actions .primary-button,
 .firebase-auth-actions .ghost-button,
 .firebase-auth-actions .small-link-button {
@@ -7010,7 +7018,7 @@ button:active {
 
 .landing-hero {
   aspect-ratio: 16 / 9;
-  max-height: min(48vh, 440px);
+  max-height: min(42vh, 390px);
 }
 
 .landing-logo-large {
@@ -7036,12 +7044,50 @@ button:active {
 }
 
 .landing-actions {
-  gap: 16px;
-  margin-top: -4px;
+  width: min(340px, 100%);
+  gap: 22px;
+  margin-top: 0;
+}
+
+.landing-action-group {
+  gap: 9px;
+}
+
+.landing-action-group h3 {
+  color: var(--green);
+  font-size: 0.94rem;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.landing-action-group p {
+  max-width: min(100%, 310px);
+  color: #7d756b;
+  font-size: 0.84rem;
+  font-weight: 560;
+  line-height: 1.4;
+  justify-self: center;
+}
+
+.landing-action-group.compact {
+  gap: 7px;
+}
+
+.landing-action-demo {
+  padding-bottom: 2px;
+}
+
+.landing-action-group.compact .small-link-button {
+  min-height: auto;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .landing-benefits {
   align-items: stretch;
+  margin-top: clamp(18px, 4vw, 46px);
 }
 
 .landing-benefits div {

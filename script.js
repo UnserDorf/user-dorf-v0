@@ -2255,11 +2255,11 @@ function renderFirebaseAuthScreen() {
       : "Create an account to save your progress across devices.";
   }
   if (els.firebaseEmailSignIn) {
-    els.firebaseEmailSignIn.textContent = "Email + Password";
+    els.firebaseEmailSignIn.textContent = "Sign In";
     els.firebaseEmailSignIn.classList.toggle("hidden", !isSignIn);
   }
   if (els.firebaseEmailRegister) {
-    els.firebaseEmailRegister.textContent = "Create account with Email";
+    els.firebaseEmailRegister.textContent = "Create Account";
     els.firebaseEmailRegister.classList.toggle("hidden", isSignIn);
   }
   if (els.firebaseGoogleSignIn) {
@@ -2267,16 +2267,15 @@ function renderFirebaseAuthScreen() {
   }
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthToggle) {
-    els.firebaseAuthToggle.textContent = isSignIn
-      ? "Don't have an account? Create your account"
-      : "Already have an account? Sign in";
-    els.firebaseAuthToggle.classList.remove("hidden");
+    els.firebaseAuthToggle.classList.add("hidden");
   }
   if (els.firebaseAuthTryDemo) {
-    els.firebaseAuthTryDemo.textContent = "Want to explore first? Try Demo";
-    els.firebaseAuthTryDemo.classList.remove("hidden");
+    els.firebaseAuthTryDemo.classList.add("hidden");
   }
-  els.firebaseAuthHome?.classList.remove("hidden");
+  if (els.firebaseAuthHome) {
+    els.firebaseAuthHome.textContent = "← Back";
+    els.firebaseAuthHome.classList.remove("hidden");
+  }
 }
 
 function startGoogleIdentityFlow() {

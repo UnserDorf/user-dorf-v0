@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=196">
+    <link rel="stylesheet" href="style.css?v=197">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -49,9 +49,10 @@
             <input id="firebaseAuthPassword" type="password" autocomplete="current-password">
           </label>
           <div class="firebase-auth-actions">
-            <button class="primary-button" id="firebaseEmailSignIn" type="button">Sign In</button>
-            <button class="ghost-button" id="firebaseEmailRegister" type="button">Create Account</button>
             <button class="ghost-button firebase-google-button" id="firebaseGoogleSignIn" type="button">Continue with Google</button>
+            <p class="firebase-auth-divider">or</p>
+            <button class="primary-button" id="firebaseEmailSignIn" type="button">Sign In</button>
+            <button class="primary-button" id="firebaseEmailRegister" type="button">Create Account</button>
             <button class="small-link-button" id="firebaseAuthSkip" type="button">Use this device only</button>
             <button class="small-link-button hidden" id="firebaseAuthToggle" type="button">Already have an account? Sign in</button>
             <button class="small-link-button" id="firebaseAuthTryDemo" type="button">Want to explore first? Try Demo</button>
@@ -260,17 +261,17 @@
               <button class="primary-button" id="landingTryDemo" type="button">Try Demo</button>
             </section>
             <section class="landing-action-group" aria-label="Create your account">
-              <h3>New here?</h3>
-              <button class="ghost-button" id="landingGetStartedMain" type="button">Create your account</button>
-              <button class="ghost-button" id="landingGoogleButton" type="button">Continue with Google</button>
+              <h3>New to Unser Dorf?</h3>
+              <p>Create a personal account to save your progress and join a village.</p>
+              <button class="ghost-button" id="landingGetStartedMain" type="button">Get Started</button>
             </section>
             <section class="landing-action-group compact" aria-label="Returning users">
               <p>Already have an account?</p>
-              <button class="ghost-button" id="landingExistingAccountMain" type="button">Sign in</button>
+              <button class="ghost-button" id="landingExistingAccountMain" type="button">Sign In</button>
             </section>
             <section class="landing-action-group compact" aria-label="Local device mode">
-              <p>Prefer not to create an account?</p>
-              <button class="ghost-button" id="landingLocalButton" type="button">Use this device only</button>
+              <h3>Continue without an account</h3>
+              <button class="small-link-button" id="landingLocalButton" type="button">Use this device only</button>
             </section>
           </div>
           <div class="landing-benefits" aria-label="Unser Dorf benefits">
