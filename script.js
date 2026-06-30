@@ -401,6 +401,8 @@ const els = {
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
+  firebaseAuthDivider: document.querySelector("#firebaseAuthDivider"),
+  firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
@@ -2252,7 +2254,10 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
       ? "Continue with your existing account."
-      : "Create an account to save your progress across devices.";
+      : "Create an account to save your progress, join a village, and access your learning from any device.";
+  }
+  if (els.firebaseAuthDivider) {
+    els.firebaseAuthDivider.textContent = "Email + Password";
   }
   if (els.firebaseEmailSignIn) {
     els.firebaseEmailSignIn.textContent = "Sign In";
@@ -2265,6 +2270,7 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseGoogleSignIn) {
     els.firebaseGoogleSignIn.textContent = "Continue with Google";
   }
+  els.firebaseAuthLocalLabel?.classList.toggle("hidden", isSignIn);
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthToggle) {
     els.firebaseAuthToggle.classList.add("hidden");
