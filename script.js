@@ -803,6 +803,7 @@ let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
 let cloudSaveInFlight = false;
 let cloudSavePending = false;
+let profileDataSource = "localStorage";
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -900,6 +901,70 @@ function logCloudIdentityDebug(label, details = {}) {
     finalActiveVillageId: finalSnapshot.villageId || "none",
     finalActiveCoins: finalSnapshot.coins
   });
+}
+
+function getFirebaseProviderLabel(user = firebaseAuthUser) {
+  const providers = Array.isArray(user?.providerData)
+    ? user.providerData.map((provider) => provider?.providerId).filter(Boolean)
+    : [];
+  return providers.length ? providers.join(", ") : "password";
+}
+
+function getFirebaseUserDocumentPath(uid = firebaseAuthUser?.uid || "") {
+  return uid ? `unserDorf/v0Testing/users/${uid}` : "unserDorf/v0Testing/users/{no-uid}";
+}
+
+function getVillageNameFromStore(store, groupId = "") {
+  const resolvedGroupId = groupId || store?.currentGroup || "";
+  const group = resolvedGroupId ? store?.groups?.[resolvedGroupId] : null;
+  return normalizeVillageName(group?.villageName) || normalizeVillageName(group?.name) || "Unser Dorf";
+}
+
+function getProfileSnapshotForDebug(store, profileId = "") {
+  const snapshot = getIdentitySnapshotFromStore(store, profileId);
+  return {
+    ...snapshot,
+    villageName: getVillageNameFromStore(store, snapshot.villageId || snapshot.currentGroup)
+  };
+}
+
+function logAuthDebugBlock(label = "AUTH DEBUG", store = profileStore) {
+  const activeProfileId = currentProfileId || store?.currentProfile || "";
+  const snapshot = getProfileSnapshotForDebug(store, activeProfileId);
+  console.info(
+    [
+      "==========================",
+      label,
+      "==========================",
+      `Firebase UID: ${firebaseAuthUser?.uid || "none"}`,
+      `Firebase email: ${firebaseAuthUser?.email || "none"}`,
+      `Firebase provider: ${getFirebaseProviderLabel(firebaseAuthUser)}`,
+      `Firestore user document path: ${getFirebaseUserDocumentPath(firebaseAuthUser?.uid || "")}`,
+      `Loaded displayName: ${snapshot.displayName || "none"}`,
+      `Loaded villageId: ${snapshot.villageId || "none"}`,
+      `Loaded villageName: ${snapshot.villageName || "none"}`,
+      `Local profile id: ${activeProfileId || "none"}`,
+      `syncEnabled: ${Boolean(syncEnabled)}`,
+      "=========================="
+    ].join("\n")
+  );
+}
+
+function logDashboardDataDebug(profile) {
+  const snapshot = getProfileSnapshotForDebug(profileStore, currentProfileId || profileStore?.currentProfile || "");
+  console.info(
+    [
+      "==========================",
+      "DASHBOARD DATA DEBUG",
+      "==========================",
+      `Final displayName: ${getVillageDisplayName(profile)}`,
+      `Final villageId: ${profile?.villageId || snapshot.villageId || "none"}`,
+      `Final villageName: ${snapshot.villageName || "none"}`,
+      `Final coin count: ${normalizeCoinCount(profile?.coins)}`,
+      `Data source used (Firestore / localStorage / merged): ${profileDataSource}`,
+      "=========================="
+    ].join("\n")
+  );
 }
 
 async function init() {
@@ -1023,6 +1088,7 @@ async function initializeFamilySync() {
     if (remoteStore) {
       applyRemoteProfileStore(remoteStore);
     } else {
+      profileDataSource = "localStorage";
       await saveProfileStoreToCloudNow();
     }
 
@@ -2055,6 +2121,7 @@ function applyRemoteProfileStore(remoteStore) {
   const mergedStore = mergeProfileStores(profileStore, remoteStore);
   applyingRemoteStore = true;
   profileStore = mergedStore;
+  profileDataSource = "merged";
   if (firebaseAuthUser && profileStore.currentProfile) {
     currentProfileId = profileStore.currentProfile;
   }
@@ -2338,6 +2405,7 @@ function getFirebaseOwnedProfiles() {
 
 function routeAfterStartup() {
   if (firebaseAuthUser) {
+    logAuthDebugBlock("AUTH DEBUG", profileStore);
     routeAfterIdentityReady();
     return;
   }
@@ -2705,6 +2773,7 @@ async function handleFirebaseSignedIn(user) {
   updateCloudSyncDebug({ userDocLoaded: false }, "Firebase signed in");
   updateFirebaseAuthStatus("Signed in. Loading your progress...");
   await initializeFamilySync();
+  logAuthDebugBlock("AUTH DEBUG", profileStore);
   routeAfterIdentityReady();
 }
 
@@ -3327,6 +3396,7 @@ function returnToCoinChallenges(event) {
 function renderDashboard() {
   if (!currentProfileId) return;
   const profile = getCurrentProfile();
+  logDashboardDataDebug(profile);
   prepareProfileDailyState(profile);
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
