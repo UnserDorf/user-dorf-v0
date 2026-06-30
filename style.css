@@ -898,6 +898,27 @@ body {
   gap: 12px;
 }
 
+.village-choice-actions {
+  width: min(520px, 100%);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.village-create-notice {
+  width: min(520px, 100%);
+  margin: 0;
+  border: 1px solid rgba(190, 177, 153, 0.22);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: 0 14px 32px rgba(51, 39, 26, 0.12);
+  color: var(--green);
+  padding: 14px 18px;
+  font-weight: 820;
+  text-align: center;
+  backdrop-filter: blur(5px);
+}
+
 .village-card {
   min-height: 92px;
   border: 1px solid rgba(255, 253, 248, 0.86);
@@ -999,7 +1020,8 @@ body {
 .village-name-card,
 .village-password-card,
 .create-profile-card,
-.profile-login-card {
+.profile-login-card,
+.firebase-auth-card {
   width: min(430px, 100%);
   justify-self: center;
   border: 1px solid rgba(222, 216, 203, 0.95);
@@ -1014,7 +1036,8 @@ body {
 .village-name-card h2,
 .create-profile-card h2,
 .village-password-card h2,
-.profile-login-card h2 {
+.profile-login-card h2,
+.firebase-auth-card h2 {
   margin: 0;
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
@@ -1022,7 +1045,8 @@ body {
 .village-name-card label,
 .create-profile-card label,
 .village-password-card label,
-.profile-login-card label {
+.profile-login-card label,
+.firebase-auth-card label {
   display: grid;
   gap: 8px;
   color: var(--muted);
@@ -1032,7 +1056,8 @@ body {
 .village-name-card input,
 .create-profile-card input,
 .village-password-card input,
-.profile-login-card input {
+.profile-login-card input,
+.firebase-auth-card input {
   min-height: 56px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -6038,7 +6063,8 @@ select,
 .village-name-card,
 .village-password-card,
 .create-profile-card,
-.profile-login-card {
+.profile-login-card,
+.firebase-auth-card {
   width: min(400px, 100%);
   border-color: rgba(190, 177, 153, 0.3);
   border-radius: 8px;
@@ -6085,17 +6111,20 @@ select,
 .village-password-card .eyebrow,
 .profile-login-card .eyebrow,
 .create-profile-card .eyebrow,
-.village-name-card .eyebrow {
+.village-name-card .eyebrow,
+.firebase-auth-card .eyebrow {
   color: var(--green);
   font-size: 0.78rem;
   letter-spacing: 0;
 }
 
-.profile-login-card {
+.profile-login-card,
+.firebase-auth-card {
   text-align: center;
 }
 
-.profile-login-card h2 {
+.profile-login-card h2,
+.firebase-auth-card h2 {
   font-size: clamp(1.75rem, 5vw, 2.25rem);
   line-height: 1.08;
 }
@@ -6104,6 +6133,7 @@ select,
 .create-profile-card label,
 .village-password-card label,
 .profile-login-card label,
+.firebase-auth-card label,
 .lock-card label {
   text-align: left;
 }
@@ -6112,10 +6142,28 @@ select,
 .create-profile-card input,
 .village-password-card input,
 .profile-login-card input,
+.firebase-auth-card input,
 .lock-card input {
   border-color: rgba(190, 177, 153, 0.42);
   background: rgba(255, 255, 255, 0.86);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.firebase-auth-intro {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.firebase-auth-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.firebase-auth-actions .primary-button,
+.firebase-auth-actions .ghost-button,
+.firebase-auth-actions .small-link-button {
+  width: 100%;
 }
 
 .create-profile-buttons .primary-button,

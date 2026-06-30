@@ -113,6 +113,7 @@ const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/s
 const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -398,6 +399,8 @@ const els = {
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
+  firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
+  firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
@@ -406,6 +409,10 @@ const els = {
   firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
   firebaseAuthStatus: document.querySelector("#firebaseAuthStatus"),
   villageSelection: document.querySelector("#villageSelection"),
+  villageChoiceActions: document.querySelector("#villageChoiceActions"),
+  joinVillageButton: document.querySelector("#joinVillageButton"),
+  createVillageButton: document.querySelector("#createVillageButton"),
+  villageCreateNotice: document.querySelector("#villageCreateNotice"),
   villageCardGrid: document.querySelector("#villageCardGrid"),
   villagePasswordForm: document.querySelector("#villagePasswordForm"),
   villagePasswordTitle: document.querySelector("#villagePasswordTitle"),
@@ -444,6 +451,7 @@ const els = {
   familyWealthProgressText: document.querySelector("#familyWealthProgressText"),
   appShell: document.querySelector("#appShell"),
   landingScreen: document.querySelector("#landingScreen"),
+  landingTryDemo: document.querySelector("#landingTryDemo"),
   landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
   landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
@@ -759,6 +767,7 @@ let firebaseAuthUser = null;
 let firebaseAuthReady = false;
 let firebaseAuthUnsubscribe = null;
 let firebaseAuthSkipped = false;
+let firebaseAuthMode = "signup";
 let demoPageIndex = 0;
 let applyingRemoteStore = false;
 let firebaseSyncApi = null;
@@ -839,13 +848,7 @@ async function unlockApp() {
     prepositionItems = [];
   }
   await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level)));
-  if (shouldShowFirebaseAuthScreen()) {
-    showFirebaseAuthScreen();
-  } else if (isDeviceOnboardingComplete()) {
-    showProfileScreen();
-  } else {
-    showLandingScreen();
-  }
+  routeAfterStartup();
   maybeShowRewardDebugPage();
 }
 
@@ -1242,20 +1245,56 @@ function selectVillage(groupId) {
   if (!profileStore?.groups?.[groupId]) return;
   currentGroupId = groupId;
   profileStore.currentGroup = groupId;
-  saveProfileStore();
-  showVillagePassword();
+  enterSelectedVillage();
 }
 
 function showVillageSelection() {
-  currentProfileId = "";
   pendingProfileId = "";
   els.profileScreen.classList.add("village-landing-mode");
   els.profileScreen.classList.remove("first-use");
+  els.appShell.classList.remove("landing-mode");
+  els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.profileScreen.classList.remove("hidden");
   hideProfileOnboardingPanels();
   els.villageSelection?.classList.remove("hidden");
+  els.villageChoiceActions?.classList.remove("hidden");
+  els.villageCardGrid?.classList.add("hidden");
+  els.villageCreateNotice?.classList.add("hidden");
   renderVillageCards();
   renderGroupSelectors();
   scrollPageToTop(els.profileScreen);
+}
+
+function showJoinVillageOptions() {
+  els.villageCardGrid?.classList.remove("hidden");
+  els.villageCreateNotice?.classList.add("hidden");
+  renderVillageCards();
+  scrollPageToTop(els.profileScreen);
+}
+
+function showCreateVillageComingSoon() {
+  els.villageCardGrid?.classList.add("hidden");
+  els.villageCreateNotice?.classList.remove("hidden");
+}
+
+function enterSelectedVillage() {
+  const profileId = ensureIdentityProfile();
+  const group = getCurrentGroup();
+  if (!profileId || !group) return;
+  if (!group.memberIds.includes(profileId)) {
+    group.memberIds.push(profileId);
+  }
+  profileStore.currentGroup = group.id;
+  profileStore.currentProfile = profileId;
+  saveProfileStore();
+  completeProfileLogin(profileId);
 }
 
 function showVillagePassword() {
@@ -2016,6 +2055,100 @@ function getFirebaseOwnedProfiles() {
   }));
 }
 
+function routeAfterStartup() {
+  if (firebaseAuthUser) {
+    routeAfterIdentityReady();
+    return;
+  }
+  if (hasLocalIdentity()) {
+    firebaseAuthSkipped = true;
+    routeAfterIdentityReady();
+    return;
+  }
+  showLandingScreen();
+}
+
+function routeAfterIdentityReady() {
+  const profileId = ensureIdentityProfile();
+  const groupId = getVillageIdForProfile(profileId);
+  if (profileId && groupId) {
+    currentGroupId = groupId;
+    profileStore.currentGroup = groupId;
+    completeProfileLogin(profileId);
+    return;
+  }
+  showVillageSelection();
+}
+
+function hasLocalIdentity() {
+  const profileId = localStorage.getItem(LOCAL_IDENTITY_STORAGE_KEY) || "";
+  return Boolean(profileId && profileStore?.profiles?.[profileId]);
+}
+
+function getIdentityProfileId() {
+  if (!profileStore?.profiles) return "";
+  if (firebaseAuthUser) {
+    const ownedProfile = Object.values(profileStore.profiles)
+      .find((profile) => profile?.ownerUid === firebaseAuthUser.uid);
+    if (ownedProfile?.id) return ownedProfile.id;
+    return `firebase-${sanitizeIdentityId(firebaseAuthUser.uid)}`;
+  }
+  const localProfileId = localStorage.getItem(LOCAL_IDENTITY_STORAGE_KEY) || "";
+  if (localProfileId) return localProfileId;
+  const generatedId = `local-${Date.now().toString(36)}`;
+  localStorage.setItem(LOCAL_IDENTITY_STORAGE_KEY, generatedId);
+  return generatedId;
+}
+
+function ensureIdentityProfile() {
+  if (!profileStore?.profiles) return "";
+  const profileId = getIdentityProfileId();
+  if (!profileId) return "";
+  if (!profileStore.profiles[profileId]) {
+    const identityName = getIdentityDisplayName();
+    profileStore.profiles[profileId] = normalizeProfileData(
+      {
+        id: profileId,
+        name: identityName,
+        password: "",
+        emoji: "🌿",
+        avatar: "",
+        demoCompleted: true,
+        ownerUid: firebaseAuthUser?.uid || "",
+        ownerEmail: firebaseAuthUser?.email || ""
+      },
+      { id: profileId, name: identityName, password: "", emoji: "🌿", avatar: "" }
+    );
+  }
+  if (firebaseAuthUser) assignProfileToFirebaseUser(profileId);
+  profileStore.currentProfile = profileId;
+  saveProfileStore();
+  return profileId;
+}
+
+function getIdentityDisplayName() {
+  if (firebaseAuthUser?.displayName) return firebaseAuthUser.displayName;
+  if (firebaseAuthUser?.email) return firebaseAuthUser.email.split("@")[0] || "Learner";
+  return "Learner";
+}
+
+function sanitizeIdentityId(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    || Date.now().toString(36);
+}
+
+function getVillageIdForProfile(profileId) {
+  if (!profileId || !profileStore?.groups) return "";
+  const currentGroup = profileStore.groups[profileStore.currentGroup || currentGroupId];
+  if (currentGroup?.memberIds?.includes(profileId)) return currentGroup.id;
+  return Object.values(profileStore.groups)
+    .find((group) => group?.memberIds?.includes(profileId))
+    ?.id || "";
+}
+
 function assignProfileToFirebaseUser(profileId = currentProfileId || profileStore?.currentProfile) {
   if (!firebaseAuthUser || !profileId || !profileStore?.profiles?.[profileId]) return;
   const profile = profileStore.profiles[profileId];
@@ -2060,7 +2193,8 @@ function hideProfileOnboardingPanels() {
   els.createProfileForm?.classList.add("hidden");
 }
 
-function showFirebaseAuthScreen(message = "") {
+function showFirebaseAuthScreen(mode = "signup", message = "") {
+  firebaseAuthMode = mode === "signin" ? "signin" : "signup";
   currentProfileId = "";
   pendingProfileId = "";
   progress = {};
@@ -2077,9 +2211,34 @@ function showFirebaseAuthScreen(message = "") {
   els.profileScreen.classList.remove("village-landing-mode", "first-use");
   hideProfileOnboardingPanels();
   els.firebaseAuthCard?.classList.remove("hidden");
+  renderFirebaseAuthScreen();
   updateFirebaseAuthStatus(message);
   scrollPageToTop(els.profileScreen);
   els.firebaseAuthEmail?.focus();
+}
+
+function renderFirebaseAuthScreen() {
+  const isSignIn = firebaseAuthMode === "signin";
+  if (els.firebaseAuthTitle) {
+    els.firebaseAuthTitle.textContent = isSignIn ? "Sign in to Unser Dorf" : "Create your identity";
+  }
+  if (els.firebaseAuthIntro) {
+    els.firebaseAuthIntro.textContent = isSignIn
+      ? "Continue with your existing account."
+      : "Choose how you would like to save your personal progress.";
+  }
+  if (els.firebaseEmailSignIn) {
+    els.firebaseEmailSignIn.textContent = "Email + Password";
+    els.firebaseEmailSignIn.classList.toggle("hidden", !isSignIn);
+  }
+  if (els.firebaseEmailRegister) {
+    els.firebaseEmailRegister.textContent = "Create account with Email";
+    els.firebaseEmailRegister.classList.toggle("hidden", isSignIn);
+  }
+  if (els.firebaseGoogleSignIn) {
+    els.firebaseGoogleSignIn.textContent = "Continue with Google";
+  }
+  els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
 }
 
 function updateFirebaseAuthStatus(message = "", isError = false) {
@@ -2127,21 +2286,13 @@ async function handleFirebaseSignedIn(user) {
   syncEnabled = false;
   updateFirebaseAuthStatus("Signed in. Loading your progress...");
   await initializeFamilySync();
-  if (isDeviceOnboardingComplete()) {
-    showProfileScreen();
-  } else {
-    showLandingScreen();
-  }
+  routeAfterIdentityReady();
 }
 
 function continueWithoutFirebaseAuth() {
   firebaseAuthSkipped = true;
   syncEnabled = false;
-  if (isDeviceOnboardingComplete()) {
-    showProfileScreen();
-  } else {
-    showLandingScreen();
-  }
+  routeAfterIdentityReady();
 }
 
 async function signOutOfFirebase() {
@@ -2158,13 +2309,10 @@ async function signOutOfFirebase() {
   firebaseAuthUser = null;
   syncEnabled = false;
   firebaseAuthSkipped = false;
-  if (shouldShowFirebaseAuthScreen()) {
-    saveCurrentPosition();
-    closeSettingsMenu();
-    showFirebaseAuthScreen();
-  } else {
-    lockSharedPasswordScreen();
-  }
+  localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
+  saveCurrentPosition();
+  closeSettingsMenu();
+  showLandingScreen();
 }
 
 function getFriendlyFirebaseAuthError(error) {
@@ -2214,27 +2362,11 @@ function refreshVisibleProfileState() {
 }
 
 function showProfileScreen() {
-  currentProfileId = "";
-  pendingProfileId = "";
-  progress = {};
-  vocabularyProgress = {};
-  articleProgress = {};
-  nounVerbProgress = {};
-  meaningMatchProgress = {};
-  prepositionProgress = {};
-  recentMeaningMatchItems = [];
-  els.appShell.classList.remove("clean-article-practice");
-  els.appShell.classList.remove("clean-quiz-mode");
-  els.appShell.classList.remove("article-quiz-mode");
-  els.appShell.classList.remove("meaning-match-mode");
-  els.appShell.classList.remove("onboarding-mode");
-  els.appShell.classList.remove("landing-mode");
-  els.appShell.classList.add("locked");
-  els.landingScreen?.classList.add("hidden");
-  els.demoScreen?.classList.add("hidden");
-  els.profileScreen.classList.remove("hidden");
-  showVillageSelection();
-  scrollPageToTop(els.profileScreen);
+  if (firebaseAuthUser || hasLocalIdentity()) {
+    routeAfterIdentityReady();
+    return;
+  }
+  showLandingScreen();
 }
 
 function showVillageNameSetup() {
@@ -2487,13 +2619,15 @@ function moveDemoPage(direction) {
 }
 
 function completeDemoScreen() {
-  completeDeviceOnboarding();
-  showProfileScreen();
+  showLandingScreen();
 }
 
 function skipLandingToVillageSelection() {
-  completeDeviceOnboarding();
-  showProfileScreen();
+  showFirebaseAuthScreen("signin");
+}
+
+function startGetStartedFlow() {
+  showFirebaseAuthScreen("signup");
 }
 
 function handleDemoNext() {
@@ -5172,17 +5306,16 @@ function formatDate(value) {
 function logoutToProfileScreen() {
   saveCurrentPosition();
   closeSettingsMenu();
-  currentProfileId = "";
-  pendingProfileId = "";
-  els.appShell.classList.add("locked");
-  els.profileScreen.classList.remove("hidden");
-  showVillageEntry();
+  routeAfterIdentityReady();
 }
 
 function lockSharedPasswordScreen() {
   saveCurrentPosition();
   closeSettingsMenu();
-  showProfileScreen();
+  currentProfileId = "";
+  pendingProfileId = "";
+  localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
+  showLandingScreen();
 }
 
 function bindEvents() {
@@ -5193,6 +5326,8 @@ function bindEvents() {
   els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
   els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthSkip?.addEventListener("click", continueWithoutFirebaseAuth);
+  els.joinVillageButton?.addEventListener("click", showJoinVillageOptions);
+  els.createVillageButton?.addEventListener("click", showCreateVillageComingSoon);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
@@ -5310,7 +5445,8 @@ function bindEvents() {
     closeSettingsMenu();
     showDashboard();
   });
-  els.landingGetStartedMain?.addEventListener("click", showDemoScreen);
+  els.landingTryDemo?.addEventListener("click", showDemoScreen);
+  els.landingGetStartedMain?.addEventListener("click", startGetStartedFlow);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoNext?.addEventListener("click", handleDemoNext);

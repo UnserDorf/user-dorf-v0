@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=191">
+    <link rel="stylesheet" href="style.css?v=192">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -37,8 +37,8 @@
         <section class="firebase-auth-card hidden" id="firebaseAuthCard" aria-label="Cloud sync sign in">
           <div>
             <p class="eyebrow">Cloud Sync</p>
-            <h2>Sign in to Unser Dorf</h2>
-            <p class="firebase-auth-intro">Save progress across your phone and computer.</p>
+            <h2 id="firebaseAuthTitle">Create your identity</h2>
+            <p class="firebase-auth-intro" id="firebaseAuthIntro">Save progress across your phone and computer.</p>
           </div>
           <label>
             <span>Email</span>
@@ -62,7 +62,12 @@
             <h2>Choose Your Village</h2>
             <p>Select the village you would like to join.</p>
           </div>
-          <div class="village-card-grid" id="villageCardGrid"></div>
+          <div class="village-choice-actions" id="villageChoiceActions">
+            <button class="primary-button" id="joinVillageButton" type="button">Join Village</button>
+            <button class="ghost-button" id="createVillageButton" type="button">Create Village</button>
+          </div>
+          <p class="village-create-notice hidden" id="villageCreateNotice">Coming Soon</p>
+          <div class="village-card-grid hidden" id="villageCardGrid"></div>
           <p class="village-selection-helper">Each village has its own learners, progress, and rewards.</p>
         </section>
         <form class="village-password-card hidden" id="villagePasswordForm" aria-label="Village password">
@@ -247,8 +252,9 @@
             <p>Learn German while helping your village grow.</p>
           </div>
           <div class="landing-actions">
+            <button class="ghost-button" id="landingTryDemo" type="button">Try Demo</button>
             <button class="primary-button" id="landingGetStartedMain" type="button">Get Started</button>
-            <button class="ghost-button" id="landingExistingAccountMain" type="button">I already have an account</button>
+            <button class="small-link-button" id="landingExistingAccountMain" type="button">Already have an account? Sign in</button>
           </div>
           <div class="landing-benefits" aria-label="Unser Dorf benefits">
             <div>
@@ -900,6 +906,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=184"></script>
+    <script type="module" src="script.js?v=185"></script>
   </body>
 </html>
