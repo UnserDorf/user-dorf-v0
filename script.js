@@ -801,6 +801,8 @@ let firebaseSyncApi = null;
 let firebaseSyncPromise = null;
 let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
+let cloudSaveInFlight = false;
+let cloudSavePending = false;
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -809,7 +811,8 @@ let cloudSyncDebug = {
   lastCloudSaveTime: "",
   lastCloudLoadTime: "",
   lastCloudSaveError: "",
-  lastCloudLoadError: ""
+  lastCloudLoadError: "",
+  firestoreCoinsLoaded: 0
 };
 
 document.addEventListener("DOMContentLoaded", init);
@@ -838,6 +841,7 @@ function scrollPageToTop(target = null) {
 }
 
 function updateCloudSyncDebug(patch = {}, label = "sync status") {
+  const activeProfile = getCurrentProfile?.() || null;
   cloudSyncDebug = {
     ...cloudSyncDebug,
     firebaseSignedIn: Boolean(firebaseAuthUser),
@@ -845,8 +849,15 @@ function updateCloudSyncDebug(patch = {}, label = "sync status") {
     ...patch
   };
   console.info("[Unser Dorf cloud sync]", label, {
+    firebaseUid: firebaseAuthUser?.uid || "none",
+    signedInEmail: firebaseAuthUser?.email || "none",
     firebaseSignedIn: cloudSyncDebug.firebaseSignedIn ? "yes" : "no",
     syncEnabled: cloudSyncDebug.syncEnabled,
+    activeProfileId: currentProfileId || profileStore?.currentProfile || "none",
+    displayName: activeProfile ? getVillageDisplayName(activeProfile) : "none",
+    villageId: activeProfile?.villageId || profileStore?.currentGroup || "none",
+    localCoins: normalizeCoinCount(activeProfile?.coins),
+    firestoreCoinsLoaded: normalizeCoinCount(cloudSyncDebug.firestoreCoinsLoaded),
     userDocLoaded: cloudSyncDebug.userDocLoaded ? "yes" : "no",
     villageDocsLoaded: cloudSyncDebug.villageDocsLoaded,
     lastCloudSaveTime: cloudSyncDebug.lastCloudSaveTime || "none",
@@ -867,6 +878,7 @@ function getIdentitySnapshotFromStore(store, profileId = "") {
     profileId: resolvedProfileId,
     displayName: getVillageDisplayName(profile),
     villageId: profile?.villageId || store?.currentGroup || "",
+    coins: normalizeCoinCount(profile?.coins),
     currentGroup: store?.currentGroup || ""
   };
 }
@@ -880,10 +892,13 @@ function logCloudIdentityDebug(label, details = {}) {
     firebaseUid: firebaseAuthUser?.uid || "none",
     loadedFirestoreDisplayName: remoteSnapshot.displayName || "none",
     loadedFirestoreVillageId: remoteSnapshot.villageId || "none",
+    loadedFirestoreCoins: remoteSnapshot.coins,
     localStorageDisplayName: localSnapshot.displayName || "none",
     localStorageVillageId: localSnapshot.villageId || "none",
+    localStorageCoins: localSnapshot.coins,
     finalActiveDisplayName: finalSnapshot.displayName || "none",
-    finalActiveVillageId: finalSnapshot.villageId || "none"
+    finalActiveVillageId: finalSnapshot.villageId || "none",
+    finalActiveCoins: finalSnapshot.coins
   });
 }
 
@@ -1031,7 +1046,12 @@ function startFamilySyncPolling() {
   }, 5000);
 
   document.addEventListener("visibilitychange", async () => {
-    if (document.visibilityState !== "visible" || applyingRemoteStore) return;
+    if (document.visibilityState !== "visible") {
+      window.clearTimeout(cloudSaveTimer);
+      await saveProfileStoreToCloudNow();
+      return;
+    }
+    if (applyingRemoteStore) return;
     const remoteStore = await fetchProfileStoreFromCloud();
     if (remoteStore) applyRemoteProfileStore(remoteStore);
   });
@@ -1804,7 +1824,7 @@ function readStorageObject(key) {
   }
 }
 
-function saveProfileStore() {
+function saveProfileStore(options = {}) {
   const group = getCurrentGroup();
   if (group) {
     profileStore.currentGroup = group.id;
@@ -1816,12 +1836,16 @@ function saveProfileStore() {
   }
   promoteFamilyAchievements(profileStore);
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
-  scheduleCloudSave();
+  scheduleCloudSave(options);
 }
 
-function scheduleCloudSave() {
+function scheduleCloudSave(options = {}) {
   if (!syncEnabled || applyingRemoteStore) return;
   window.clearTimeout(cloudSaveTimer);
+  if (options.immediate) {
+    saveProfileStoreToCloudNow();
+    return;
+  }
   cloudSaveTimer = window.setTimeout(() => {
     saveProfileStoreToCloudNow();
   }, 450);
@@ -1829,11 +1853,23 @@ function scheduleCloudSave() {
 
 async function saveProfileStoreToCloudNow() {
   if (!profileStore || !hasCloudSyncConfig() || !firebaseAuthUser) return;
+  if (cloudSaveInFlight) {
+    cloudSavePending = true;
+    updateCloudSyncDebug({}, "Firestore save queued behind active save");
+    return;
+  }
+  cloudSaveInFlight = true;
+  cloudSavePending = false;
   promoteFamilyAchievements(profileStore);
   try {
     const firebase = await getFirebaseSyncApi();
     const ownedProfiles = getFirebaseOwnedProfiles();
     const savedAt = new Date().toISOString();
+    const activeProfileId = currentProfileId || profileStore.currentProfile || "";
+    const activeProfile = activeProfileId ? profileStore.profiles?.[activeProfileId] : null;
+    updateCloudSyncDebug({
+      lastCloudSaveError: ""
+    }, "Firestore save starting");
     await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
@@ -1860,11 +1896,18 @@ async function saveProfileStoreToCloudNow() {
     }));
     updateCloudSyncDebug({
       lastCloudSaveTime: savedAt,
-      lastCloudSaveError: ""
+      lastCloudSaveError: "",
+      firestoreCoinsLoaded: normalizeCoinCount(activeProfile?.coins)
     }, "Firestore save complete");
   } catch (error) {
     updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore save failed");
     console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
+  } finally {
+    cloudSaveInFlight = false;
+    if (cloudSavePending && firebaseAuthUser) {
+      cloudSavePending = false;
+      saveProfileStoreToCloudNow();
+    }
   }
 }
 
@@ -1921,6 +1964,7 @@ async function fetchProfileStoreFromCloud() {
     updateCloudSyncDebug({
       userDocLoaded,
       villageDocsLoaded,
+      firestoreCoinsLoaded: getIdentitySnapshotFromStore(remoteStore, remoteStore.currentProfile).coins,
       lastCloudLoadTime: new Date().toISOString(),
       lastCloudLoadError: ""
     }, "Firestore load complete");
@@ -2676,6 +2720,8 @@ async function signOutOfFirebase() {
     return;
   }
   try {
+    window.clearTimeout(cloudSaveTimer);
+    await saveProfileStoreToCloudNow();
     const firebase = await getFirebaseSyncApi();
     await firebase.authModule.signOut(firebase.auth);
   } catch (error) {
@@ -5394,7 +5440,7 @@ function showChallengeResults() {
     const profile = getCurrentProfile();
     if (profile) {
       profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + 1;
-      saveProfileStore();
+      saveProfileStore({ immediate: true });
     }
   }
   const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
@@ -6833,7 +6879,7 @@ function awardCoins(amount) {
   celebrateFamilyLevelIfNeeded();
   checkRewardUnlocks(profile);
   checkTownCenterStageUnlocks();
-  saveProfileStore();
+  saveProfileStore({ immediate: true });
 }
 
 function checkRewardUnlocks(profile) {
