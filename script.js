@@ -1290,22 +1290,6 @@ function showVillageEntry() {
   showProfileChooser();
 }
 
-function hideProfileOnboardingPanels() {
-  if (!els.villageSelection || !els.villageSelection.classList.contains("hidden")) {
-    els.profileScreen?.classList.remove("first-use");
-  }
-  els.villageSelection?.classList.add("hidden");
-  els.villagePasswordForm?.classList.add("hidden");
-  els.familyWealthCard?.classList.add("hidden");
-  els.villageNameForm?.classList.add("hidden");
-  els.profileSignInHeading?.classList.add("hidden");
-  els.profileGrid?.classList.add("hidden");
-  els.profileActions?.classList.add("hidden");
-  els.emptyProfileMessage?.classList.add("hidden");
-  els.profileLoginForm?.classList.add("hidden");
-  els.createProfileForm?.classList.add("hidden");
-}
-
 function promoteFamilyAchievements(store) {
   if (!store?.profiles) return store;
   const familyIds = new Set(getFamilyAchievementIds(store));
@@ -2060,6 +2044,9 @@ function shouldShowFirebaseAuthScreen() {
 }
 
 function hideProfileOnboardingPanels() {
+  if (!els.villageSelection || !els.villageSelection.classList.contains("hidden")) {
+    els.profileScreen?.classList.remove("first-use");
+  }
   els.firebaseAuthCard?.classList.add("hidden");
   els.villageSelection?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
