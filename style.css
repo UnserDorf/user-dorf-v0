@@ -6219,18 +6219,6 @@ select,
   gap: 10px;
 }
 
-.firebase-auth-divider {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 720;
-  text-align: center;
-}
-
-.firebase-auth-card.is-sign-in .firebase-auth-divider {
-  display: none;
-}
-
 .firebase-auth-local-label {
   margin: 8px 0 0;
   color: var(--muted);

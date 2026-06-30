@@ -401,13 +401,11 @@ const els = {
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
-  firebaseAuthDivider: document.querySelector("#firebaseAuthDivider"),
   firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
-  firebaseGoogleSignIn: document.querySelector("#firebaseGoogleSignIn"),
   firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
   firebaseAuthToggle: document.querySelector("#firebaseAuthToggle"),
   firebaseAuthTryDemo: document.querySelector("#firebaseAuthTryDemo"),
@@ -466,7 +464,6 @@ const els = {
   landingScreen: document.querySelector("#landingScreen"),
   landingTryDemo: document.querySelector("#landingTryDemo"),
   landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
-  landingGoogleButton: document.querySelector("#landingGoogleButton"),
   landingLocalButton: document.querySelector("#landingLocalButton"),
   landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
@@ -2302,9 +2299,6 @@ function renderFirebaseAuthScreen() {
       ? "Sign in to your account."
       : "Save your progress and learn from any device.";
   }
-  if (els.firebaseAuthDivider) {
-    els.firebaseAuthDivider.textContent = "or";
-  }
   if (els.firebaseEmailSignIn) {
     els.firebaseEmailSignIn.textContent = "Sign In";
     els.firebaseEmailSignIn.classList.toggle("hidden", !isSignIn);
@@ -2312,9 +2306,6 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseEmailRegister) {
     els.firebaseEmailRegister.textContent = "Create Account";
     els.firebaseEmailRegister.classList.toggle("hidden", isSignIn);
-  }
-  if (els.firebaseGoogleSignIn) {
-    els.firebaseGoogleSignIn.textContent = "Continue with Google";
   }
   els.firebaseAuthLocalLabel?.classList.toggle("hidden", isSignIn);
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
@@ -2328,11 +2319,6 @@ function renderFirebaseAuthScreen() {
     els.firebaseAuthHome.textContent = "← Back";
     els.firebaseAuthHome.classList.remove("hidden");
   }
-}
-
-function startGoogleIdentityFlow() {
-  showFirebaseAuthScreen("signup", "Opening Google sign-in...");
-  handleFirebaseGoogleSignIn();
 }
 
 function showLocalModeConfirmation() {
@@ -2386,18 +2372,6 @@ async function handleFirebaseEmailAuth(mode) {
   }
 }
 
-async function handleFirebaseGoogleSignIn() {
-  updateFirebaseAuthStatus("Opening Google sign-in...");
-  try {
-    const firebase = await getFirebaseSyncApi();
-    const provider = new firebase.authModule.GoogleAuthProvider();
-    const credential = await firebase.authModule.signInWithPopup(firebase.auth, provider);
-    await handleFirebaseSignedIn(credential.user);
-  } catch (error) {
-    updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
-  }
-}
-
 async function handleFirebaseSignedIn(user) {
   firebaseAuthUser = user || null;
   firebaseAuthReady = true;
@@ -2439,7 +2413,6 @@ function getFriendlyFirebaseAuthError(error) {
   if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "That email or password did not work.";
   if (code.includes("auth/user-not-found")) return "No account was found for that email.";
   if (code.includes("auth/email-already-in-use")) return "That email already has an account.";
-  if (code.includes("auth/popup-closed-by-user")) return "Google sign-in was closed before finishing.";
   if (code.includes("auth/weak-password")) return "Please use a longer password.";
   return "Sign-in did not finish. Please try again.";
 }
@@ -5479,7 +5452,6 @@ function bindEvents() {
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.firebaseEmailSignIn?.addEventListener("click", () => handleFirebaseEmailAuth("sign-in"));
   els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
-  els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
   els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
@@ -5608,7 +5580,6 @@ function bindEvents() {
   });
   els.landingTryDemo?.addEventListener("click", showDemoScreen);
   els.landingGetStartedMain?.addEventListener("click", startGetStartedFlow);
-  els.landingGoogleButton?.addEventListener("click", startGoogleIdentityFlow);
   els.landingLocalButton?.addEventListener("click", continueWithoutFirebaseAuth);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
