@@ -6206,6 +6206,24 @@ select,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+.firebase-auth-card .remember-email-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: -6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.firebase-auth-card .remember-email-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  box-shadow: none;
+}
+
 .firebase-auth-intro {
   margin: 10px auto 0;
   color: var(--muted);

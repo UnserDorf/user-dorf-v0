@@ -114,6 +114,7 @@ const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/fire
 const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
+const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -403,6 +404,7 @@ const els = {
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
   firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
+  rememberEmailCheckbox: document.querySelector("#rememberEmailCheckbox"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
@@ -2319,6 +2321,30 @@ function renderFirebaseAuthScreen() {
     els.firebaseAuthHome.textContent = "← Back";
     els.firebaseAuthHome.classList.remove("hidden");
   }
+  syncRememberedEmailField();
+}
+
+function getRememberedEmail() {
+  return localStorage.getItem(REMEMBERED_EMAIL_STORAGE_KEY) || "";
+}
+
+function syncRememberedEmailField() {
+  const rememberedEmail = getRememberedEmail();
+  if (els.rememberEmailCheckbox) {
+    els.rememberEmailCheckbox.checked = Boolean(rememberedEmail);
+  }
+  if (rememberedEmail && els.firebaseAuthEmail && !els.firebaseAuthEmail.value.trim()) {
+    els.firebaseAuthEmail.value = rememberedEmail;
+  }
+}
+
+function updateRememberedEmailPreference() {
+  const email = els.firebaseAuthEmail?.value.trim() || "";
+  if (els.rememberEmailCheckbox?.checked && email) {
+    localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, email);
+    return;
+  }
+  localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY);
 }
 
 function showLocalModeConfirmation() {
@@ -2356,6 +2382,7 @@ function updateFirebaseAuthStatus(message = "", isError = false) {
 async function handleFirebaseEmailAuth(mode) {
   const email = els.firebaseAuthEmail?.value.trim();
   const password = els.firebaseAuthPassword?.value || "";
+  updateRememberedEmailPreference();
   if (!email || !password) {
     updateFirebaseAuthStatus("Enter an email and password.", true);
     return;
@@ -5452,6 +5479,7 @@ function bindEvents() {
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.firebaseEmailSignIn?.addEventListener("click", () => handleFirebaseEmailAuth("sign-in"));
   els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
+  els.rememberEmailCheckbox?.addEventListener("change", updateRememberedEmailPreference);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
   els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
