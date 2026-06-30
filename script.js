@@ -2258,7 +2258,7 @@ function renderFirebaseAuthScreen() {
   }
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
-      ? "Continue with your existing account."
+      ? "Sign in to your account."
       : "Create an account to:";
   }
   els.firebaseAuthBenefits?.classList.toggle("hidden", isSignIn);
