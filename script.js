@@ -401,6 +401,7 @@ const els = {
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
+  firebaseAuthBenefits: document.querySelector("#firebaseAuthBenefits"),
   firebaseAuthDivider: document.querySelector("#firebaseAuthDivider"),
   firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
@@ -413,6 +414,9 @@ const els = {
   firebaseAuthTryDemo: document.querySelector("#firebaseAuthTryDemo"),
   firebaseAuthHome: document.querySelector("#firebaseAuthHome"),
   firebaseAuthStatus: document.querySelector("#firebaseAuthStatus"),
+  localModeConfirmCard: document.querySelector("#localModeConfirmCard"),
+  localModeContinue: document.querySelector("#localModeContinue"),
+  localModeBack: document.querySelector("#localModeBack"),
   villageSelection: document.querySelector("#villageSelection"),
   villageChoiceActions: document.querySelector("#villageChoiceActions"),
   joinVillageButton: document.querySelector("#joinVillageButton"),
@@ -2210,6 +2214,7 @@ function hideProfileOnboardingPanels() {
     els.profileScreen?.classList.remove("first-use");
   }
   els.firebaseAuthCard?.classList.add("hidden");
+  els.localModeConfirmCard?.classList.add("hidden");
   els.villageSelection?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
   els.villageNameForm?.classList.add("hidden");
@@ -2254,10 +2259,11 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
       ? "Continue with your existing account."
-      : "Create an account to save your progress, join a village, and access your learning from any device.";
+      : "Create an account to:";
   }
+  els.firebaseAuthBenefits?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthDivider) {
-    els.firebaseAuthDivider.textContent = "Email + Password";
+    els.firebaseAuthDivider.textContent = "or";
   }
   if (els.firebaseEmailSignIn) {
     els.firebaseEmailSignIn.textContent = "Sign In";
@@ -2287,6 +2293,19 @@ function renderFirebaseAuthScreen() {
 function startGoogleIdentityFlow() {
   showFirebaseAuthScreen("signup", "Opening Google sign-in...");
   handleFirebaseGoogleSignIn();
+}
+
+function showLocalModeConfirmation() {
+  currentProfileId = "";
+  pendingProfileId = "";
+  els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.profileScreen.classList.remove("hidden");
+  els.profileScreen.classList.remove("village-landing-mode", "first-use");
+  hideProfileOnboardingPanels();
+  els.localModeConfirmCard?.classList.remove("hidden");
+  scrollPageToTop(els.profileScreen);
 }
 
 function toggleFirebaseAuthMode() {
@@ -5421,7 +5440,9 @@ function bindEvents() {
   els.firebaseEmailSignIn?.addEventListener("click", () => handleFirebaseEmailAuth("sign-in"));
   els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
   els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
-  els.firebaseAuthSkip?.addEventListener("click", continueWithoutFirebaseAuth);
+  els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
+  els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
+  els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
   els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
   els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
   els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);

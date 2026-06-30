@@ -1021,7 +1021,8 @@ body {
 .village-password-card,
 .create-profile-card,
 .profile-login-card,
-.firebase-auth-card {
+.firebase-auth-card,
+.local-mode-card {
   width: min(430px, 100%);
   justify-self: center;
   border: 1px solid rgba(222, 216, 203, 0.95);
@@ -1037,7 +1038,8 @@ body {
 .create-profile-card h2,
 .village-password-card h2,
 .profile-login-card h2,
-.firebase-auth-card h2 {
+.firebase-auth-card h2,
+.local-mode-card h2 {
   margin: 0;
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
@@ -6093,7 +6095,8 @@ select,
 .village-password-card,
 .create-profile-card,
 .profile-login-card,
-.firebase-auth-card {
+.firebase-auth-card,
+.local-mode-card {
   width: min(400px, 100%);
   border-color: rgba(190, 177, 153, 0.3);
   border-radius: 8px;
@@ -6141,19 +6144,22 @@ select,
 .profile-login-card .eyebrow,
 .create-profile-card .eyebrow,
 .village-name-card .eyebrow,
-.firebase-auth-card .eyebrow {
+.firebase-auth-card .eyebrow,
+.local-mode-card .eyebrow {
   color: var(--green);
   font-size: 0.78rem;
   letter-spacing: 0;
 }
 
 .profile-login-card,
-.firebase-auth-card {
+.firebase-auth-card,
+.local-mode-card {
   text-align: center;
 }
 
 .profile-login-card h2,
-.firebase-auth-card h2 {
+.firebase-auth-card h2,
+.local-mode-card h2 {
   font-size: clamp(1.75rem, 5vw, 2.25rem);
   line-height: 1.08;
 }
@@ -6163,6 +6169,7 @@ select,
 .village-password-card label,
 .profile-login-card label,
 .firebase-auth-card label,
+.local-mode-card label,
 .lock-card label {
   text-align: left;
 }
@@ -6184,6 +6191,26 @@ select,
   font-weight: 650;
 }
 
+.firebase-auth-benefits {
+  width: min(280px, 100%);
+  margin: 12px auto 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.firebase-auth-benefits li::before {
+  content: "•";
+  color: var(--green);
+  font-weight: 900;
+  margin-right: 8px;
+}
+
 .firebase-auth-actions {
   display: grid;
   gap: 10px;
@@ -6203,6 +6230,22 @@ select,
   font-size: 0.84rem;
   font-weight: 650;
   text-align: center;
+}
+
+.local-mode-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.local-mode-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.local-mode-actions button {
+  width: 100%;
 }
 
 .firebase-auth-actions .primary-button,

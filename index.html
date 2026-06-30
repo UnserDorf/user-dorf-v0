@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=198">
+    <link rel="stylesheet" href="style.css?v=199">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -39,6 +39,11 @@
             <p class="eyebrow">Cloud Sync</p>
             <h2 id="firebaseAuthTitle">Create your identity</h2>
             <p class="firebase-auth-intro" id="firebaseAuthIntro">Save progress across your phone and computer.</p>
+            <ul class="firebase-auth-benefits" id="firebaseAuthBenefits">
+              <li>Save your progress</li>
+              <li>Join a village</li>
+              <li>Access your learning from any device</li>
+            </ul>
           </div>
           <label>
             <span>Email</span>
@@ -50,7 +55,7 @@
           </label>
           <div class="firebase-auth-actions">
             <button class="ghost-button firebase-google-button" id="firebaseGoogleSignIn" type="button">Continue with Google</button>
-            <p class="firebase-auth-divider" id="firebaseAuthDivider">Email + Password</p>
+            <p class="firebase-auth-divider" id="firebaseAuthDivider">or</p>
             <button class="primary-button" id="firebaseEmailSignIn" type="button">Sign In</button>
             <button class="primary-button" id="firebaseEmailRegister" type="button">Create Account</button>
             <p class="firebase-auth-local-label" id="firebaseAuthLocalLabel">Continue without an account</p>
@@ -60,6 +65,18 @@
             <button class="small-link-button" id="firebaseAuthHome" type="button">Back to Home</button>
           </div>
           <p class="lock-error hidden" id="firebaseAuthStatus"></p>
+        </section>
+        <section class="local-mode-card hidden" id="localModeConfirmCard" aria-label="Continue without an account">
+          <div>
+            <p class="eyebrow">Device only</p>
+            <h2>Continue without an account</h2>
+            <p>Your progress will be saved only on this device.</p>
+            <p>You can create an account later if you wish.</p>
+          </div>
+          <div class="local-mode-actions">
+            <button class="primary-button" id="localModeContinue" type="button">Continue</button>
+            <button class="ghost-button" id="localModeBack" type="button">Back</button>
+          </div>
         </section>
         <section class="village-selection" id="villageSelection" aria-label="Choose your village">
           <div class="village-selection-heading">
@@ -919,6 +936,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=188"></script>
+    <script type="module" src="script.js?v=189"></script>
   </body>
 </html>
