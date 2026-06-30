@@ -1247,7 +1247,7 @@ function renderGroupSelectors() {
   const group = getCurrentGroup();
   const profile = currentProfileId ? getCurrentProfile() : null;
   if (els.currentGroupLabel) els.currentGroupLabel.textContent = group ? `🏡 ${group.name}` : "Choose Village";
-	  if (els.currentUserLabel) els.currentUserLabel.textContent = profile ? `${profile.emoji || "⭐"} ${getVillageDisplayName(profile)}` : "No profile";
+  if (els.currentUserLabel) els.currentUserLabel.textContent = profile ? `${profile.emoji || "⭐"} ${getVillageDisplayName(profile)}` : "No profile";
 }
 
 function renderVillageCards() {
@@ -1348,12 +1348,12 @@ function enterSelectedVillage() {
   if (!group.memberIds.includes(profileId)) {
     group.memberIds.push(profileId);
   }
-	  profileStore.currentGroup = group.id;
-	  profileStore.currentProfile = profileId;
-	  profileStore.profiles[profileId].villageId = group.id;
-	  saveProfileStore();
-	  completeProfileLogin(profileId);
-	}
+  profileStore.currentGroup = group.id;
+  profileStore.currentProfile = profileId;
+  profileStore.profiles[profileId].villageId = group.id;
+  saveProfileStore();
+  completeProfileLogin(profileId);
+}
 
 function showVillagePassword() {
   const group = getCurrentGroup();
@@ -1914,21 +1914,19 @@ function mergeProfileStores(localStore, remoteStore) {
     ...Object.keys(localStore?.profiles || {}),
     ...Object.keys(remoteStore?.profiles || {})
   ].filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId)));
-  customIds.forEach((profileId) => {
-    const localProfile = localStore?.profiles?.[profileId];
-    const remoteProfile = remoteStore?.profiles?.[profileId];
-    const customProfile = localProfile || remoteProfile;
-    baseStore.profiles[profileId] = normalizeProfileData(
-      { ...(remoteProfile || {}), ...(localProfile || {}) },
-      {
-        id: profileId,
-        name: customProfile?.name || "Profile",
-        emoji: customProfile?.emoji || "🏡",
-        avatar: customProfile?.avatar || "",
-        password: customProfile?.password || ""
-      }
-    );
-  });
+	  customIds.forEach((profileId) => {
+	    const localProfile = localStore?.profiles?.[profileId];
+	    const remoteProfile = remoteStore?.profiles?.[profileId];
+	    const customProfile = localProfile || remoteProfile;
+	    const defaultProfile = {
+	      id: profileId,
+	      name: customProfile?.name || "Profile",
+	      emoji: customProfile?.emoji || "🏡",
+	      avatar: customProfile?.avatar || "",
+	      password: customProfile?.password || ""
+	    };
+	    baseStore.profiles[profileId] = mergeProfileData(localProfile, remoteProfile, defaultProfile);
+	  });
 
   baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
   baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
@@ -1986,10 +1984,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
         normalizeCounter(local.challengeSessionsCompleted),
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
-      flashcardSessions: {
-        ...local.flashcardSessions,
-        ...remote.flashcardSessions
-      },
+	      flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -2000,19 +1995,49 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       austriaAlbumSeenRewards: Array.from(new Set([
         ...normalizeRewardIdList(local.austriaAlbumSeenRewards),
         ...normalizeRewardIdList(remote.austriaAlbumSeenRewards)
-      ])),
-      history: mergeHistory(local.history, remote.history),
-      lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
-	      ownerUid: local.ownerUid || remote.ownerUid || "",
-	      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
-	      displayName: local.displayName || remote.displayName || "",
-	      villageDisplayName: local.villageDisplayName || remote.villageDisplayName || local.displayName || remote.displayName || "",
-	      villageId: local.villageId || remote.villageId || "",
-	      contributionCoins: Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
-	      settings: remote.settings || local.settings
-	    },
+	      ])),
+	      history: mergeHistory(local.history, remote.history),
+	      lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
+      ownerUid: local.ownerUid || remote.ownerUid || "",
+      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
+      displayName: local.displayName || remote.displayName || "",
+      villageDisplayName: local.villageDisplayName || remote.villageDisplayName || local.displayName || remote.displayName || "",
+      villageId: local.villageId || remote.villageId || "",
+      contributionCoins: Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
+      settings: remote.settings || local.settings
+    },
     defaultProfile
   );
+}
+
+function mergeFlashcardSessions(localSessions = {}, remoteSessions = {}) {
+  const local = normalizeFlashcardSessions(localSessions);
+  const remote = normalizeFlashcardSessions(remoteSessions);
+  const merged = {};
+  const keys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+  keys.forEach((key) => {
+    const localSession = local[key] || {};
+    const remoteSession = remote[key] || {};
+    const newest = latestString(localSession.updatedAt, remoteSession.updatedAt) === localSession.updatedAt
+      ? localSession
+      : remoteSession;
+    const sameStudyDate = localSession.studyDate && localSession.studyDate === remoteSession.studyDate;
+    merged[key] = {
+      ...newest,
+      deckIds: newest.deckIds || localSession.deckIds || remoteSession.deckIds || [],
+      index: normalizePosition(newest.index),
+      studiedIds: sameStudyDate
+        ? Array.from(new Set([...(localSession.studiedIds || []), ...(remoteSession.studiedIds || [])]))
+        : normalizeRecentItemList(newest.studiedIds || [], FLASHCARD_SESSION_SIZE),
+      ratings: {
+        ...normalizeFlashcardRatings(localSession.ratings),
+        ...normalizeFlashcardRatings(remoteSession.ratings)
+      },
+      completed: Boolean(localSession.completed || remoteSession.completed),
+      updatedAt: latestString(localSession.updatedAt, remoteSession.updatedAt)
+    };
+  });
+  return normalizeFlashcardSessions(merged);
 }
 
 function mergeProgressEntries(localEntries = {}, remoteEntries = {}) {
