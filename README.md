@@ -9,6 +9,7 @@ A plain HTML, CSS, and JavaScript flashcard app for Goethe B1 German vocabulary.
 - `index.html` - app structure
 - `style.css` - responsive iPad, iPhone, and desktop layout
 - `script.js` - CSV loading, study modes, filters, and progress tracking
+- `firebase-config.js` - optional Firebase settings for v0 cloud sync
 - `vocabulary.csv` - Goethe B1 headword deck
 
 ## Password Curtain
@@ -82,7 +83,7 @@ http://localhost:8080
 ## Publishing on GitHub Pages
 
 1. Create a new GitHub repository.
-2. Upload `index.html`, `style.css`, `script.js`, and `vocabulary.csv` to the repository root.
+2. Upload `index.html`, `style.css`, `script.js`, `firebase-config.js`, `vocabulary.csv`, `data/`, and `assets/` to the repository root.
 3. In GitHub, open **Settings**.
 4. Go to **Pages**.
 5. Under **Build and deployment**, choose **Deploy from a branch**.
@@ -97,3 +98,34 @@ http://localhost:8080
 4. Confirm the name and tap **Add**.
 
 Progress is saved on that device in the browser. If you clear Safari website data, progress will be reset.
+
+## Firebase Sync for v0 Testing
+
+The app can sync the same v0 progress store across devices with Firebase Firestore. Local storage remains the fallback if Firebase is not configured or cannot be reached.
+
+To enable sync:
+
+1. Create a Firebase project.
+2. Create a Firestore database.
+3. Add a Web App in Firebase project settings.
+4. Copy the Firebase web app config into `firebase-config.js`.
+5. Change `enabled: false` to `enabled: true`.
+
+The app writes one shared v0 testing document by default:
+
+```text
+unserDorf/v0Testing/profileStores/shared
+```
+
+That document contains the existing local app store, including:
+
+- profiles and selected test village
+- personal coins
+- shared village progress
+- Austria Album unlocks
+- Village Memories unlocks
+- Town Center growth
+- flashcard progress
+- vocabulary and article quiz progress
+
+For private testing, use Firestore rules that allow only your invited testers or temporarily allow the specific test document while you are validating v0.
