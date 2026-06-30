@@ -108,10 +108,9 @@ const ONBOARDING_PAGES = [
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
-const SUPABASE_URL = "https://fpbgaaswsgfdlydaoids.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_LcLGhSMEDZnMnqMw8xvkAw_a6JPQsgH";
-const SUPABASE_SYNC_TABLE = "family_progress";
-const FAMILY_SYNC_ID = "unser-dorf-household";
+const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/shared";
+const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -747,6 +746,8 @@ let currentView = "dashboard";
 let syncEnabled = false;
 let demoPageIndex = 0;
 let applyingRemoteStore = false;
+let firebaseSyncApi = null;
+let firebaseSyncPromise = null;
 let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
 
@@ -783,7 +784,7 @@ async function init() {
 async function unlockApp() {
   els.lockScreen.classList.add("hidden");
   profileStore = loadProfileStore();
-  syncEnabled = false;
+  await initializeFamilySync();
   bindEvents();
   try {
     const response = await fetch(CSV_URL, { cache: "no-store" });
@@ -880,7 +881,12 @@ async function loadCsvRows(path) {
 }
 
 async function initializeFamilySync() {
+  if (!hasCloudSyncConfig()) {
+    syncEnabled = false;
+    return;
+  }
   try {
+    await getFirebaseSyncApi();
     const remoteStore = await fetchProfileStoreFromCloud();
 
     if (remoteStore) {
@@ -893,7 +899,7 @@ async function initializeFamilySync() {
     startFamilySyncPolling();
   } catch (error) {
     syncEnabled = false;
-    console.warn("Family sync unavailable. Using this device only.", error);
+    console.warn("Firebase sync unavailable. Using this device only.", error);
   }
 }
 
@@ -1625,50 +1631,75 @@ function scheduleCloudSave() {
 }
 
 async function saveProfileStoreToCloudNow() {
-  if (!profileStore) return;
+  if (!profileStore || !hasCloudSyncConfig()) return;
   promoteFamilyAchievements(profileStore);
   try {
-    const response = await fetch(`${getSupabaseRowUrl()}?on_conflict=id`, {
-      method: "POST",
-      headers: getSupabaseHeaders({ prefer: "resolution=merge-duplicates,return=minimal" }),
-      body: JSON.stringify({
-        id: FAMILY_SYNC_ID,
-        profile_store: sanitizeProfileStoreForSync(profileStore),
-        updated_at: new Date().toISOString()
-      })
-    });
-    if (!response.ok) throw new Error(`Supabase save failed: ${response.status}`);
+    const firebase = await getFirebaseSyncApi();
+    await firebase.setDoc(firebase.docRef, {
+      profileStore: sanitizeProfileStoreForSync(profileStore),
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: new Date().toISOString()
+    }, { merge: true });
   } catch (error) {
-    console.warn("Could not sync family progress. Local progress is still saved.", error);
+    console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
   }
 }
 
 async function fetchProfileStoreFromCloud() {
+  if (!hasCloudSyncConfig()) return null;
   try {
-    const response = await fetch(`${getSupabaseRowUrl()}?id=eq.${encodeURIComponent(FAMILY_SYNC_ID)}&select=profile_store&limit=1`, {
-      headers: getSupabaseHeaders()
-    });
-    if (!response.ok) throw new Error(`Supabase load failed: ${response.status}`);
-    const rows = await response.json();
-    return rows?.[0]?.profile_store || null;
+    const firebase = await getFirebaseSyncApi();
+    const snapshot = await firebase.getDoc(firebase.docRef);
+    if (!snapshot.exists()) return null;
+    const data = snapshot.data() || {};
+    return data.profileStore || data.profile_store || null;
   } catch (error) {
-    console.warn("Could not load shared family progress.", error);
+    console.warn("Could not load shared Firebase progress.", error);
     return null;
   }
 }
 
-function getSupabaseRowUrl() {
-  return `${SUPABASE_URL}/rest/v1/${SUPABASE_SYNC_TABLE}`;
+function getFirebaseSyncConfig() {
+  const config = window.UNSER_DORF_FIREBASE_SYNC || window.UNSER_DORF_FIREBASE_CONFIG || {};
+  const firebaseConfig = config.firebaseConfig || config.config || {};
+  const enabled = Boolean(config.enabled && firebaseConfig.apiKey && firebaseConfig.projectId);
+  return {
+    enabled,
+    firebaseConfig,
+    documentPath: String(config.documentPath || FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH)
+  };
 }
 
-function getSupabaseHeaders(options = {}) {
-  const headers = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    "Content-Type": "application/json"
+async function getFirebaseSyncApi() {
+  if (firebaseSyncApi) return firebaseSyncApi;
+  if (!firebaseSyncPromise) {
+    firebaseSyncPromise = initializeFirebaseSyncApi();
+  }
+  firebaseSyncApi = await firebaseSyncPromise;
+  return firebaseSyncApi;
+}
+
+async function initializeFirebaseSyncApi() {
+  const syncConfig = getFirebaseSyncConfig();
+  if (!syncConfig.enabled) throw new Error("Firebase sync is not configured.");
+  const documentPathParts = syncConfig.documentPath.split("/").map((part) => part.trim()).filter(Boolean);
+  if (documentPathParts.length % 2 !== 0) {
+    throw new Error("Firebase documentPath must point to a Firestore document.");
+  }
+  const [{ initializeApp }, firestoreModule] = await Promise.all([
+    import(FIREBASE_APP_MODULE_URL),
+    import(FIREBASE_FIRESTORE_MODULE_URL)
+  ]);
+  const app = initializeApp(syncConfig.firebaseConfig);
+  const db = firestoreModule.getFirestore(app);
+  return {
+    app,
+    db,
+    docRef: firestoreModule.doc(db, ...documentPathParts),
+    getDoc: firestoreModule.getDoc,
+    setDoc: firestoreModule.setDoc,
+    serverTimestamp: firestoreModule.serverTimestamp
   };
-  if (options.prefer) headers.Prefer = options.prefer;
-  return headers;
 }
 
 function applyRemoteProfileStore(remoteStore) {
@@ -3730,7 +3761,7 @@ function renderAchievementDebugPanel() {
   els.debugPersonalAchievements.textContent = formatDebugAchievementList(personalAchievements);
   els.debugFamilyAchievements.textContent = formatDebugAchievementList(familyAchievements);
   els.debugAchievementSource.textContent = hasCloudSyncConfig()
-    ? "Firebase/Supabase + Local Storage"
+    ? "Firebase + Local Storage"
     : "Local Storage";
 }
 
@@ -3742,7 +3773,7 @@ function formatDebugAchievementList(achievementIds) {
 }
 
 function hasCloudSyncConfig() {
-  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SYNC_TABLE);
+  return getFirebaseSyncConfig().enabled;
 }
 
 function getAchievementById(achievementId) {
