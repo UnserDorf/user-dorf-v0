@@ -801,6 +801,16 @@ let firebaseSyncApi = null;
 let firebaseSyncPromise = null;
 let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
+let cloudSyncDebug = {
+  firebaseSignedIn: false,
+  syncEnabled: false,
+  userDocLoaded: false,
+  villageDocsLoaded: [],
+  lastCloudSaveTime: "",
+  lastCloudLoadTime: "",
+  lastCloudSaveError: "",
+  lastCloudLoadError: ""
+};
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -825,6 +835,29 @@ function scrollPageToTop(target = null) {
     });
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   });
+}
+
+function updateCloudSyncDebug(patch = {}, label = "sync status") {
+  cloudSyncDebug = {
+    ...cloudSyncDebug,
+    firebaseSignedIn: Boolean(firebaseAuthUser),
+    syncEnabled: Boolean(syncEnabled),
+    ...patch
+  };
+  console.info("[Unser Dorf cloud sync]", label, {
+    firebaseSignedIn: cloudSyncDebug.firebaseSignedIn ? "yes" : "no",
+    syncEnabled: cloudSyncDebug.syncEnabled,
+    userDocLoaded: cloudSyncDebug.userDocLoaded ? "yes" : "no",
+    villageDocsLoaded: cloudSyncDebug.villageDocsLoaded,
+    lastCloudSaveTime: cloudSyncDebug.lastCloudSaveTime || "none",
+    lastCloudLoadTime: cloudSyncDebug.lastCloudLoadTime || "none",
+    lastCloudSaveError: cloudSyncDebug.lastCloudSaveError || "none",
+    lastCloudLoadError: cloudSyncDebug.lastCloudLoadError || "none"
+  });
+}
+
+function getErrorMessage(error) {
+  return error?.message || String(error || "Unknown error");
 }
 
 async function init() {
@@ -931,6 +964,7 @@ async function initializeFamilySync() {
   if (!hasCloudSyncConfig()) {
     syncEnabled = false;
     firebaseSyncAvailable = false;
+    updateCloudSyncDebug({ userDocLoaded: false }, "Firebase config disabled");
     return;
   }
   try {
@@ -939,6 +973,7 @@ async function initializeFamilySync() {
     await waitForFirebaseAuthState();
     if (!firebaseAuthUser) {
       syncEnabled = false;
+      updateCloudSyncDebug({ userDocLoaded: false }, "No Firebase user signed in");
       return;
     }
     const remoteStore = await fetchProfileStoreFromCloud();
@@ -950,10 +985,12 @@ async function initializeFamilySync() {
     }
 
     syncEnabled = true;
+    updateCloudSyncDebug({}, "Firebase sync enabled");
     startFamilySyncPolling();
   } catch (error) {
     syncEnabled = false;
     firebaseSyncAvailable = false;
+    updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, "Firebase sync unavailable");
     console.warn("Firebase sync unavailable. Using this device only.", error);
   }
 }
@@ -1034,14 +1071,35 @@ function loadProfileStore() {
   promoteFamilyAchievements(store);
 
   if (!store.migratedLegacyProgress) {
-    const legacyProgress = readStorageObject(STORAGE_KEY);
-    const legacyArticleProgress = readStorageObject(ARTICLE_STORAGE_KEY);
-    const hasLegacyData = Object.keys(legacyProgress).length > 0 || Object.keys(legacyArticleProgress).length > 0;
-    store.migratedLegacyProgress = true;
+    const hasLegacyData = hasLegacyLocalProgress();
+    const migrated = migrateLegacyProgressToProfile(store, store.currentProfile);
+    store.migratedLegacyProgress = !hasLegacyData || migrated;
   }
 
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(store));
   return store;
+}
+
+function hasLegacyLocalProgress() {
+  return Object.keys(readStorageObject(STORAGE_KEY)).length > 0
+    || Object.keys(readStorageObject(ARTICLE_STORAGE_KEY)).length > 0;
+}
+
+function migrateLegacyProgressToProfile(store, profileId) {
+  if (!store?.profiles || !profileId || !store.profiles[profileId]) return false;
+  const legacyProgress = normalizeMeaningProgress(readStorageObject(STORAGE_KEY));
+  const legacyArticleProgress = normalizeArticleProgress(readStorageObject(ARTICLE_STORAGE_KEY));
+  const hasLegacyData = Object.keys(legacyProgress).length > 0 || Object.keys(legacyArticleProgress).length > 0;
+  if (!hasLegacyData) return false;
+  const profile = store.profiles[profileId];
+  profile.progress = mergeProgressEntries(profile.progress || {}, legacyProgress);
+  profile.articleProgress = mergeProgressEntries(profile.articleProgress || {}, legacyArticleProgress);
+  console.info("[Unser Dorf cloud sync] Migrated legacy local progress into profile store.", {
+    profileId,
+    flashcardItems: Object.keys(legacyProgress).length,
+    articleItems: Object.keys(legacyArticleProgress).length
+  });
+  return true;
 }
 
 function createProfileStore() {
@@ -1421,18 +1479,18 @@ function getPersonalAchievementIds(profile) {
 
 function normalizeProfileData(data, profile) {
   return {
-	    id: profile.id,
-	    name: data?.name || profile.name,
-	    displayName: data?.displayName || profile.displayName || "",
-	    villageDisplayName: data?.villageDisplayName || data?.displayName || profile.villageDisplayName || "",
-	    emoji: profile.emoji,
-	    avatar: data?.avatar || profile.avatar,
-	    password: data?.password || profile.password || "",
-	    ownerUid: typeof data?.ownerUid === "string" ? data.ownerUid : "",
-	    ownerEmail: typeof data?.ownerEmail === "string" ? data.ownerEmail : "",
-	    villageId: typeof data?.villageId === "string" ? data.villageId : "",
-	    contributionCoins: normalizeCoinCount(data?.contributionCoins),
-	    coins: normalizeCoinCount(data?.coins),
+    id: profile.id,
+    name: data?.name || profile.name,
+    displayName: data?.displayName || profile.displayName || "",
+    villageDisplayName: data?.villageDisplayName || data?.displayName || profile.villageDisplayName || "",
+    emoji: profile.emoji,
+    avatar: data?.avatar || profile.avatar,
+    password: data?.password || profile.password || "",
+    ownerUid: typeof data?.ownerUid === "string" ? data.ownerUid : "",
+    ownerEmail: typeof data?.ownerEmail === "string" ? data.ownerEmail : "",
+    villageId: typeof data?.villageId === "string" ? data.villageId : "",
+    contributionCoins: normalizeCoinCount(data?.contributionCoins),
+    coins: normalizeCoinCount(data?.coins),
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
     streak: normalizeStreak(data?.streak),
@@ -1748,6 +1806,7 @@ async function saveProfileStoreToCloudNow() {
   try {
     const firebase = await getFirebaseSyncApi();
     const ownedProfiles = getFirebaseOwnedProfiles();
+    const savedAt = new Date().toISOString();
     await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
@@ -1755,7 +1814,7 @@ async function saveProfileStoreToCloudNow() {
       currentProfile: currentProfileId || profileStore.currentProfile || "",
       profiles: ownedProfiles,
       updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: new Date().toISOString()
+      updatedAtIso: savedAt
     }, { merge: true });
 
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
@@ -1769,10 +1828,15 @@ async function saveProfileStoreToCloudNow() {
         group: sanitizeGroupForSync(group),
         profiles: groupProfiles,
         updatedAt: firebase.serverTimestamp(),
-        updatedAtIso: new Date().toISOString()
+        updatedAtIso: savedAt
       }, { merge: true });
     }));
+    updateCloudSyncDebug({
+      lastCloudSaveTime: savedAt,
+      lastCloudSaveError: ""
+    }, "Firestore save complete");
   } catch (error) {
+    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore save failed");
     console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
   }
 }
@@ -1789,7 +1853,7 @@ async function fetchProfileStoreFromCloud() {
       const legacyData = legacySnapshot.data() || {};
       const legacyStore = legacyData.profileStore || legacyData.profile_store;
       if (legacyStore?.profiles) {
-        Object.assign(remoteStore.profiles, legacyStore.profiles);
+        mergeRemoteProfilesIntoStore(remoteStore, legacyStore.profiles);
         remoteStore.groups = mergeGroupData(remoteStore, legacyStore, {
           ...remoteStore,
           profiles: { ...remoteStore.profiles, ...(legacyStore.profiles || {}) }
@@ -1799,32 +1863,60 @@ async function fetchProfileStoreFromCloud() {
     }
 
     const userSnapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
+    const userDocLoaded = userSnapshot.exists();
     if (userSnapshot.exists()) {
       const userData = userSnapshot.data() || {};
-      Object.assign(remoteStore.profiles, userData.profiles || {});
+      mergeRemoteProfilesIntoStore(remoteStore, userData.profiles || {});
       remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
       remoteStore.currentProfile = String(userData.currentProfile || "");
       hasRemoteData = true;
     }
 
+    const villageDocsLoaded = [];
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
       const villageSnapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
       if (!villageSnapshot.exists()) return;
       const villageData = villageSnapshot.data() || {};
-      Object.assign(remoteStore.profiles, villageData.profiles || {});
+      mergeRemoteProfilesIntoStore(remoteStore, villageData.profiles || {});
       remoteStore.groups[groupInfo.id] = createGroupData(groupInfo, villageData.group || {});
       remoteStore.groups[groupInfo.id].memberIds = normalizeGroupMemberIds([
         ...remoteStore.groups[groupInfo.id].memberIds,
         ...Object.keys(villageData.profiles || {})
       ]);
+      villageDocsLoaded.push(groupInfo.id);
       hasRemoteData = true;
     }));
 
+    updateCloudSyncDebug({
+      userDocLoaded,
+      villageDocsLoaded,
+      lastCloudLoadTime: new Date().toISOString(),
+      lastCloudLoadError: ""
+    }, "Firestore load complete");
     return hasRemoteData ? remoteStore : null;
   } catch (error) {
+    updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, "Firestore load failed");
     console.warn("Could not load shared Firebase progress.", error);
     return null;
   }
+}
+
+function mergeRemoteProfilesIntoStore(store, incomingProfiles = {}) {
+  Object.entries(incomingProfiles || {}).forEach(([profileId, incomingProfile]) => {
+    if (!profileId || LEGACY_PROFILE_IDS.has(profileId)) return;
+    const existingProfile = store.profiles?.[profileId];
+    const sourceProfile = existingProfile || incomingProfile || {};
+    const defaultProfile = {
+      id: profileId,
+      name: sourceProfile.name || "Profile",
+      emoji: sourceProfile.emoji || "🏡",
+      avatar: sourceProfile.avatar || "",
+      password: sourceProfile.password || ""
+    };
+    store.profiles[profileId] = existingProfile
+      ? mergeProfileData(existingProfile, incomingProfile, defaultProfile)
+      : normalizeProfileData(incomingProfile, defaultProfile);
+  });
 }
 
 function getFirebaseSyncConfig() {
@@ -1914,19 +2006,19 @@ function mergeProfileStores(localStore, remoteStore) {
     ...Object.keys(localStore?.profiles || {}),
     ...Object.keys(remoteStore?.profiles || {})
   ].filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId)));
-	  customIds.forEach((profileId) => {
-	    const localProfile = localStore?.profiles?.[profileId];
-	    const remoteProfile = remoteStore?.profiles?.[profileId];
-	    const customProfile = localProfile || remoteProfile;
-	    const defaultProfile = {
-	      id: profileId,
-	      name: customProfile?.name || "Profile",
-	      emoji: customProfile?.emoji || "🏡",
-	      avatar: customProfile?.avatar || "",
-	      password: customProfile?.password || ""
-	    };
-	    baseStore.profiles[profileId] = mergeProfileData(localProfile, remoteProfile, defaultProfile);
-	  });
+  customIds.forEach((profileId) => {
+    const localProfile = localStore?.profiles?.[profileId];
+    const remoteProfile = remoteStore?.profiles?.[profileId];
+    const customProfile = localProfile || remoteProfile;
+    const defaultProfile = {
+      id: profileId,
+      name: customProfile?.name || "Profile",
+      emoji: customProfile?.emoji || "🏡",
+      avatar: customProfile?.avatar || "",
+      password: customProfile?.password || ""
+    };
+    baseStore.profiles[profileId] = mergeProfileData(localProfile, remoteProfile, defaultProfile);
+  });
 
   baseStore.currentProfile = localStore?.currentProfile || remoteStore?.currentProfile || "";
   baseStore.villageName = normalizeVillageName(localStore?.villageName) || normalizeVillageName(remoteStore?.villageName);
@@ -1984,7 +2076,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
         normalizeCounter(local.challengeSessionsCompleted),
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
-	      flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
+      flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -1995,9 +2087,9 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       austriaAlbumSeenRewards: Array.from(new Set([
         ...normalizeRewardIdList(local.austriaAlbumSeenRewards),
         ...normalizeRewardIdList(remote.austriaAlbumSeenRewards)
-	      ])),
-	      history: mergeHistory(local.history, remote.history),
-	      lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
+      ])),
+      history: mergeHistory(local.history, remote.history),
+      lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
       ownerUid: local.ownerUid || remote.ownerUid || "",
       ownerEmail: local.ownerEmail || remote.ownerEmail || "",
       displayName: local.displayName || remote.displayName || "",
@@ -2222,6 +2314,11 @@ function ensureIdentityProfile() {
     );
   }
   if (firebaseAuthUser) assignProfileToFirebaseUser(profileId);
+  if (!profileStore.migratedLegacyProgress) {
+    const hasLegacyData = hasLegacyLocalProgress();
+    const migrated = migrateLegacyProgressToProfile(profileStore, profileId);
+    profileStore.migratedLegacyProgress = !hasLegacyData || migrated;
+  }
   profileStore.currentProfile = profileId;
   saveProfileStore();
   return profileId;
@@ -2334,10 +2431,10 @@ function hideProfileOnboardingPanels() {
   if (!els.villageSelection || !els.villageSelection.classList.contains("hidden")) {
     els.profileScreen?.classList.remove("first-use");
   }
-	  els.firebaseAuthCard?.classList.add("hidden");
-	  els.localModeConfirmCard?.classList.add("hidden");
-	  els.displayNameForm?.classList.add("hidden");
-	  els.villageSelection?.classList.add("hidden");
+  els.firebaseAuthCard?.classList.add("hidden");
+  els.localModeConfirmCard?.classList.add("hidden");
+  els.displayNameForm?.classList.add("hidden");
+  els.villageSelection?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
   els.villageNameForm?.classList.add("hidden");
   els.villagePasswordForm?.classList.add("hidden");
@@ -2503,6 +2600,7 @@ async function handleFirebaseSignedIn(user) {
   firebaseAuthReady = true;
   firebaseAuthSkipped = false;
   syncEnabled = false;
+  updateCloudSyncDebug({ userDocLoaded: false }, "Firebase signed in");
   updateFirebaseAuthStatus("Signed in. Loading your progress...");
   await initializeFamilySync();
   routeAfterIdentityReady();
@@ -2554,7 +2652,7 @@ function refreshVisibleProfileState() {
     showProfileScreen();
     return;
   }
-	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
+  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   if (currentView === "dashboard") {
     renderDashboard();
   } else if (currentView === "achievements") {
@@ -2646,22 +2744,22 @@ function completeProfileLogin(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
   currentProfileId = profileId;
-	  assignProfileToFirebaseUser(profileId);
-	  pendingProfileId = "";
-	  profileStore.currentProfile = profileId;
-	  const group = getCurrentGroup();
-	  if (group && !group.memberIds.includes(profileId) && group.memberIds.length < 6) group.memberIds.push(profileId);
-	  if (group) profile.villageId = group.id;
+  assignProfileToFirebaseUser(profileId);
+  pendingProfileId = "";
+  profileStore.currentProfile = profileId;
+  const group = getCurrentGroup();
+  if (group && !group.memberIds.includes(profileId) && group.memberIds.length < 6) group.memberIds.push(profileId);
+  if (group) profile.villageId = group.id;
   progress = profile.progress;
   vocabularyProgress = profile.vocabularyProgress;
   articleProgress = profile.articleProgress;
   nounVerbProgress = profile.nounVerbProgress;
   meaningMatchProgress = profile.meaningMatchProgress;
   prepositionProgress = profile.prepositionProgress;
-	  recentMeaningMatchItems = normalizeRecentItemList(profile.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER);
-	  applyProfileSettings(profile.settings);
-	  saveProfileStore();
-	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
+  recentMeaningMatchItems = normalizeRecentItemList(profile.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER);
+  applyProfileSettings(profile.settings);
+  saveProfileStore();
+  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderGroupSelectors();
   els.profileScreen.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
@@ -2705,14 +2803,14 @@ function showDashboard() {
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
-	  setChallengeBackButtons(false, false);
-	  renderDashboard();
-	  els.landingScreen?.classList.add("hidden");
-	  els.demoScreen?.classList.add("hidden");
-	  els.dashboardScreen.classList.remove("hidden");
-	  els.achievementCollectionScreen.classList.add("hidden");
-	  els.villageMembersScreen?.classList.add("hidden");
-	  els.coinChallengesScreen.classList.add("hidden");
+  setChallengeBackButtons(false, false);
+  renderDashboard();
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.dashboardScreen.classList.remove("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -2910,10 +3008,10 @@ function showCoinChallenges() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-	  els.dashboardScreen.classList.add("hidden");
-	  els.achievementCollectionScreen.classList.add("hidden");
-	  els.villageMembersScreen?.classList.add("hidden");
-	  els.coinChallengesScreen.classList.remove("hidden");
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
+  els.coinChallengesScreen.classList.remove("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -2945,11 +3043,11 @@ function showAchievementCollection(page = "austria-album") {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-	  renderAchievementCollection(page);
-	  els.dashboardScreen.classList.add("hidden");
-	  els.achievementCollectionScreen.classList.remove("hidden");
-	  els.villageMembersScreen?.classList.add("hidden");
-	  els.coinChallengesScreen.classList.add("hidden");
+  renderAchievementCollection(page);
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.remove("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -3128,15 +3226,15 @@ function renderDashboard() {
   prepareProfileDailyState(profile);
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
-	  els.dashboardWelcome.textContent = `Welcome back, ${getVillageDisplayName(profile)}`;
+  els.dashboardWelcome.textContent = `Welcome back, ${getVillageDisplayName(profile)}`;
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
   renderProgressCards(profile);
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
-	  renderVillageMembersPreview();
-	  renderHouseholdMembers();
+  renderVillageMembersPreview();
+  renderHouseholdMembers();
   saveProfileStore();
   showNextPendingCelebration();
 }
@@ -4638,16 +4736,16 @@ function handleDashboardAction(action) {
     showFlashcardsEntry();
     return;
   }
-	  if (action === "challenges") {
-	    showChallengesEntry();
-	    return;
-	  }
-	  if (action === "village-members") {
-	    showVillageMembers();
-	    return;
-	  }
+  if (action === "challenges") {
+    showChallengesEntry();
+    return;
+  }
+  if (action === "village-members") {
+    showVillageMembers();
+    return;
+  }
 
-	  if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
+  if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
     showAchievementCollection(action);
     return;
   }
@@ -5485,11 +5583,11 @@ function createCustomProfile(name, password, emoji = selectedAvatar) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
     {
-	      id,
-	      name,
-	      displayName: name,
-	      villageDisplayName: name,
-	      password,
+      id,
+      name,
+      displayName: name,
+      villageDisplayName: name,
+      password,
       emoji,
       avatar: "",
       demoCompleted: false,
@@ -5528,11 +5626,11 @@ function renameCurrentProfile(nextName) {
     window.alert("A profile with that name already exists.");
     return false;
   }
-	  profile.name = normalizedName;
-	  profile.displayName = normalizedName;
-	  profile.villageDisplayName = normalizedName;
-	  saveProfileStore();
-	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
+  profile.name = normalizedName;
+  profile.displayName = normalizedName;
+  profile.villageDisplayName = normalizedName;
+  saveProfileStore();
+  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderProfileCards();
   renderDashboard();
   renderSettingsPanel();
@@ -5653,8 +5751,8 @@ function lockSharedPasswordScreen() {
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
-	  els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
-	  els.displayNameForm?.addEventListener("submit", handleDisplayNameSubmit);
+  els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
+  els.displayNameForm?.addEventListener("submit", handleDisplayNameSubmit);
   els.firebaseAuthForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     handleFirebaseEmailAuth(firebaseAuthMode === "signin" ? "sign-in" : "register");
@@ -5676,8 +5774,8 @@ function bindEvents() {
   els.cancelCreateProfile.addEventListener("click", cancelCreateProfile);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
   els.cancelProfileLogin.addEventListener("click", showProfileChooser);
-	  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
-	  els.villageMembersBack?.addEventListener("click", showDashboard);
+  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
+  els.villageMembersBack?.addEventListener("click", showDashboard);
 
   els.appShell.addEventListener("click", (event) => {
     const actionTarget = event.target.closest("[data-dashboard-action]");
