@@ -6232,6 +6232,15 @@ select,
   line-height: 1.45;
 }
 
+.firebase-auth-form {
+  display: grid;
+  gap: 14px;
+}
+
+.firebase-auth-form .primary-button {
+  width: 100%;
+}
+
 .firebase-auth-actions {
   display: grid;
   gap: 10px;

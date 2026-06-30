@@ -39,21 +39,23 @@
             <h2 id="firebaseAuthTitle">Create your identity</h2>
             <p class="firebase-auth-intro" id="firebaseAuthIntro">Save progress across your phone and computer.</p>
           </div>
-          <label>
-            <span>Email</span>
-            <input id="firebaseAuthEmail" type="email" autocomplete="email">
-          </label>
-          <label class="remember-email-option">
-            <input id="rememberEmailCheckbox" type="checkbox">
-            <span>Remember my email</span>
-          </label>
-          <label>
-            <span>Password</span>
-            <input id="firebaseAuthPassword" type="password" autocomplete="current-password">
-          </label>
+          <form class="firebase-auth-form" id="firebaseAuthForm">
+            <label>
+              <span>Email</span>
+              <input id="firebaseAuthEmail" type="email" autocomplete="email" required>
+            </label>
+            <label class="remember-email-option">
+              <input id="rememberEmailCheckbox" type="checkbox">
+              <span>Remember my email</span>
+            </label>
+            <label>
+              <span>Password</span>
+              <input id="firebaseAuthPassword" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="primary-button" id="firebaseEmailSignIn" type="submit">Sign In</button>
+            <button class="primary-button" id="firebaseEmailRegister" type="submit">Create Account</button>
+          </form>
           <div class="firebase-auth-actions">
-            <button class="primary-button" id="firebaseEmailSignIn" type="button">Sign In</button>
-            <button class="primary-button" id="firebaseEmailRegister" type="button">Create Account</button>
             <p class="firebase-auth-local-label" id="firebaseAuthLocalLabel">Continue without an account</p>
             <button class="small-link-button" id="firebaseAuthSkip" type="button">Use this device only</button>
             <button class="small-link-button hidden" id="firebaseAuthToggle" type="button">Already have an account? Sign in</button>

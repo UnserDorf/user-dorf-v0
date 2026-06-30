@@ -403,6 +403,7 @@ const els = {
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
   firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
+  firebaseAuthForm: document.querySelector("#firebaseAuthForm"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   rememberEmailCheckbox: document.querySelector("#rememberEmailCheckbox"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
@@ -2308,6 +2309,9 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseEmailRegister) {
     els.firebaseEmailRegister.textContent = "Create Account";
     els.firebaseEmailRegister.classList.toggle("hidden", isSignIn);
+  }
+  if (els.firebaseAuthPassword) {
+    els.firebaseAuthPassword.autocomplete = isSignIn ? "current-password" : "new-password";
   }
   els.firebaseAuthLocalLabel?.classList.toggle("hidden", isSignIn);
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
@@ -5477,8 +5481,10 @@ function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
-  els.firebaseEmailSignIn?.addEventListener("click", () => handleFirebaseEmailAuth("sign-in"));
-  els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
+  els.firebaseAuthForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleFirebaseEmailAuth(firebaseAuthMode === "signin" ? "sign-in" : "register");
+  });
   els.rememberEmailCheckbox?.addEventListener("change", updateRememberedEmailPreference);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
