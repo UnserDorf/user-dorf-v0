@@ -417,6 +417,9 @@ const els = {
   localModeConfirmCard: document.querySelector("#localModeConfirmCard"),
   localModeContinue: document.querySelector("#localModeContinue"),
   localModeBack: document.querySelector("#localModeBack"),
+  displayNameForm: document.querySelector("#displayNameForm"),
+  displayNameInput: document.querySelector("#displayNameInput"),
+  displayNameError: document.querySelector("#displayNameError"),
   villageSelection: document.querySelector("#villageSelection"),
   villageSelectionBack: document.querySelector("#villageSelectionBack"),
   villageSelectionTitle: document.querySelector("#villageSelectionTitle"),
@@ -543,6 +546,12 @@ const els = {
   challengeReadyStart: document.querySelector("#challengeReadyStart"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
+  dashboardVillageMembersCount: document.querySelector("#dashboardVillageMembersCount"),
+  dashboardVillageMembersPreview: document.querySelector("#dashboardVillageMembersPreview"),
+  villageMembersScreen: document.querySelector("#villageMembersScreen"),
+  villageMembersBack: document.querySelector("#villageMembersBack"),
+  villageMembersSummary: document.querySelector("#villageMembersSummary"),
+  villageMembersList: document.querySelector("#villageMembersList"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
   currentGroupLabel: document.querySelector("#currentGroupLabel"),
   currentUserLabel: document.querySelector("#currentUserLabel"),
@@ -1238,7 +1247,7 @@ function renderGroupSelectors() {
   const group = getCurrentGroup();
   const profile = currentProfileId ? getCurrentProfile() : null;
   if (els.currentGroupLabel) els.currentGroupLabel.textContent = group ? `🏡 ${group.name}` : "Choose Village";
-  if (els.currentUserLabel) els.currentUserLabel.textContent = profile ? `${profile.emoji || "⭐"} ${profile.name}` : "No profile";
+	  if (els.currentUserLabel) els.currentUserLabel.textContent = profile ? `${profile.emoji || "⭐"} ${getVillageDisplayName(profile)}` : "No profile";
 }
 
 function renderVillageCards() {
@@ -1339,11 +1348,12 @@ function enterSelectedVillage() {
   if (!group.memberIds.includes(profileId)) {
     group.memberIds.push(profileId);
   }
-  profileStore.currentGroup = group.id;
-  profileStore.currentProfile = profileId;
-  saveProfileStore();
-  completeProfileLogin(profileId);
-}
+	  profileStore.currentGroup = group.id;
+	  profileStore.currentProfile = profileId;
+	  profileStore.profiles[profileId].villageId = group.id;
+	  saveProfileStore();
+	  completeProfileLogin(profileId);
+	}
 
 function showVillagePassword() {
   const group = getCurrentGroup();
@@ -1411,14 +1421,18 @@ function getPersonalAchievementIds(profile) {
 
 function normalizeProfileData(data, profile) {
   return {
-    id: profile.id,
-    name: data?.name || profile.name,
-    emoji: profile.emoji,
-    avatar: data?.avatar || profile.avatar,
-    password: data?.password || profile.password || "",
-    ownerUid: typeof data?.ownerUid === "string" ? data.ownerUid : "",
-    ownerEmail: typeof data?.ownerEmail === "string" ? data.ownerEmail : "",
-    coins: normalizeCoinCount(data?.coins),
+	    id: profile.id,
+	    name: data?.name || profile.name,
+	    displayName: data?.displayName || profile.displayName || "",
+	    villageDisplayName: data?.villageDisplayName || data?.displayName || profile.villageDisplayName || "",
+	    emoji: profile.emoji,
+	    avatar: data?.avatar || profile.avatar,
+	    password: data?.password || profile.password || "",
+	    ownerUid: typeof data?.ownerUid === "string" ? data.ownerUid : "",
+	    ownerEmail: typeof data?.ownerEmail === "string" ? data.ownerEmail : "",
+	    villageId: typeof data?.villageId === "string" ? data.villageId : "",
+	    contributionCoins: normalizeCoinCount(data?.contributionCoins),
+	    coins: normalizeCoinCount(data?.coins),
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
     streak: normalizeStreak(data?.streak),
@@ -1989,10 +2003,14 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       ])),
       history: mergeHistory(local.history, remote.history),
       lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
-      ownerUid: local.ownerUid || remote.ownerUid || "",
-      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
-      settings: remote.settings || local.settings
-    },
+	      ownerUid: local.ownerUid || remote.ownerUid || "",
+	      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
+	      displayName: local.displayName || remote.displayName || "",
+	      villageDisplayName: local.villageDisplayName || remote.villageDisplayName || local.displayName || remote.displayName || "",
+	      villageId: local.villageId || remote.villageId || "",
+	      contributionCoins: Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
+	      settings: remote.settings || local.settings
+	    },
     defaultProfile
   );
 }
@@ -2118,6 +2136,11 @@ function routeAfterStartup() {
 
 function routeAfterIdentityReady() {
   const profileId = ensureIdentityProfile();
+  const profile = profileStore?.profiles?.[profileId] || null;
+  if (profileId && !hasVillageDisplayName(profile)) {
+    showDisplayNameSetup(profileId);
+    return;
+  }
   const villageIds = getVillageIdsForProfile(profileId);
   const groupId = getVillageIdForProfile(profileId);
   if (villageIds.length > 1) {
@@ -2185,6 +2208,52 @@ function getIdentityDisplayName() {
   return "Learner";
 }
 
+function hasVillageDisplayName(profile) {
+  return Boolean(String(profile?.villageDisplayName || profile?.displayName || "").trim());
+}
+
+function getVillageDisplayName(profile) {
+  return String(profile?.villageDisplayName || profile?.displayName || profile?.name || "Learner").trim() || "Learner";
+}
+
+function showDisplayNameSetup(profileId = currentProfileId || profileStore?.currentProfile) {
+  const profile = profileStore?.profiles?.[profileId] || null;
+  currentProfileId = profileId || "";
+  els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.profileScreen?.classList.remove("hidden");
+  els.profileScreen?.classList.remove("village-landing-mode", "first-use");
+  hideProfileOnboardingPanels();
+  if (els.displayNameInput) {
+    els.displayNameInput.value = hasVillageDisplayName(profile) ? getVillageDisplayName(profile) : profile?.name || "";
+  }
+  els.displayNameError?.classList.add("hidden");
+  els.displayNameForm?.classList.remove("hidden");
+  scrollPageToTop(els.profileScreen);
+  els.displayNameInput?.focus();
+}
+
+function handleDisplayNameSubmit(event) {
+  event.preventDefault();
+  const profileId = ensureIdentityProfile();
+  const profile = profileStore?.profiles?.[profileId];
+  const displayName = String(els.displayNameInput?.value || "").trim();
+  if (!profile || !displayName) {
+    els.displayNameError?.classList.remove("hidden");
+    els.displayNameInput?.focus();
+    return;
+  }
+  profile.displayName = displayName;
+  profile.villageDisplayName = displayName;
+  if (!profile.name || profile.name === "Learner") profile.name = displayName;
+  profile.ownerUid = profile.ownerUid || firebaseAuthUser?.uid || "";
+  profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
+  profileStore.currentProfile = profileId;
+  saveProfileStore();
+  routeAfterIdentityReady();
+}
+
 function sanitizeIdentityId(value) {
   return String(value || "")
     .toLowerCase()
@@ -2240,9 +2309,10 @@ function hideProfileOnboardingPanels() {
   if (!els.villageSelection || !els.villageSelection.classList.contains("hidden")) {
     els.profileScreen?.classList.remove("first-use");
   }
-  els.firebaseAuthCard?.classList.add("hidden");
-  els.localModeConfirmCard?.classList.add("hidden");
-  els.villageSelection?.classList.add("hidden");
+	  els.firebaseAuthCard?.classList.add("hidden");
+	  els.localModeConfirmCard?.classList.add("hidden");
+	  els.displayNameForm?.classList.add("hidden");
+	  els.villageSelection?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
   els.villageNameForm?.classList.add("hidden");
   els.villagePasswordForm?.classList.add("hidden");
@@ -2459,7 +2529,7 @@ function refreshVisibleProfileState() {
     showProfileScreen();
     return;
   }
-  els.currentProfileLabel.textContent = profile.name;
+	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   if (currentView === "dashboard") {
     renderDashboard();
   } else if (currentView === "achievements") {
@@ -2551,21 +2621,22 @@ function completeProfileLogin(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
   currentProfileId = profileId;
-  assignProfileToFirebaseUser(profileId);
-  pendingProfileId = "";
-  profileStore.currentProfile = profileId;
-  const group = getCurrentGroup();
-  if (group && !group.memberIds.includes(profileId) && group.memberIds.length < 6) group.memberIds.push(profileId);
+	  assignProfileToFirebaseUser(profileId);
+	  pendingProfileId = "";
+	  profileStore.currentProfile = profileId;
+	  const group = getCurrentGroup();
+	  if (group && !group.memberIds.includes(profileId) && group.memberIds.length < 6) group.memberIds.push(profileId);
+	  if (group) profile.villageId = group.id;
   progress = profile.progress;
   vocabularyProgress = profile.vocabularyProgress;
   articleProgress = profile.articleProgress;
   nounVerbProgress = profile.nounVerbProgress;
   meaningMatchProgress = profile.meaningMatchProgress;
   prepositionProgress = profile.prepositionProgress;
-  recentMeaningMatchItems = normalizeRecentItemList(profile.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER);
-  applyProfileSettings(profile.settings);
-  saveProfileStore();
-  els.currentProfileLabel.textContent = profile.name;
+	  recentMeaningMatchItems = normalizeRecentItemList(profile.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER);
+	  applyProfileSettings(profile.settings);
+	  saveProfileStore();
+	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderGroupSelectors();
   els.profileScreen.classList.add("hidden");
   els.profileLoginForm.classList.add("hidden");
@@ -2609,13 +2680,14 @@ function showDashboard() {
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
-  setChallengeBackButtons(false, false);
-  renderDashboard();
-  els.landingScreen?.classList.add("hidden");
-  els.demoScreen?.classList.add("hidden");
-  els.dashboardScreen.classList.remove("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
-  els.coinChallengesScreen.classList.add("hidden");
+	  setChallengeBackButtons(false, false);
+	  renderDashboard();
+	  els.landingScreen?.classList.add("hidden");
+	  els.demoScreen?.classList.add("hidden");
+	  els.dashboardScreen.classList.remove("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
+	  els.villageMembersScreen?.classList.add("hidden");
+	  els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -2813,9 +2885,10 @@ function showCoinChallenges() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-  els.dashboardScreen.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
-  els.coinChallengesScreen.classList.remove("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
+	  els.villageMembersScreen?.classList.add("hidden");
+	  els.coinChallengesScreen.classList.remove("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -2847,10 +2920,11 @@ function showAchievementCollection(page = "austria-album") {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
-  renderAchievementCollection(page);
-  els.dashboardScreen.classList.add("hidden");
-  els.achievementCollectionScreen.classList.remove("hidden");
-  els.coinChallengesScreen.classList.add("hidden");
+	  renderAchievementCollection(page);
+	  els.dashboardScreen.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.remove("hidden");
+	  els.villageMembersScreen?.classList.add("hidden");
+	  els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -3029,14 +3103,15 @@ function renderDashboard() {
   prepareProfileDailyState(profile);
   const familySummary = getFamilyWealthSummary();
   profile.positions = normalizePositions(profile.positions);
-  els.dashboardWelcome.textContent = `Welcome back, ${profile.name}`;
+	  els.dashboardWelcome.textContent = `Welcome back, ${getVillageDisplayName(profile)}`;
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
   renderProgressCards(profile);
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
-  renderHouseholdMembers();
+	  renderVillageMembersPreview();
+	  renderHouseholdMembers();
   saveProfileStore();
   showNextPendingCelebration();
 }
@@ -3211,19 +3286,84 @@ function renderHouseholdMembers() {
   const rows = getOrderedVillageMembers();
 
   els.householdList.replaceChildren(
-    ...rows.map((profile) => {
-      const card = document.createElement("article");
-      card.className = "village-member-card";
-      card.classList.toggle("current", profile.id === currentProfileId);
-      card.replaceChildren(
-        createTextElement("span", "village-member-avatar", profile.emoji || "⭐"),
-        createTextElement("strong", "village-member-name", profile.name),
-        createTextElement("span", "village-member-coins", `${normalizeCoinCount(profile.coins)} coins`),
-        createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
-      );
-      return card;
-    })
+    ...rows.map((profile) => createVillageMemberCard(profile))
   );
+}
+
+function renderVillageMembersPreview() {
+  const members = getOrderedVillageMembers();
+  if (els.dashboardVillageMembersCount) {
+    const count = members.length || 1;
+    els.dashboardVillageMembersCount.textContent = `${count} ${count === 1 ? "learner" : "learners"} contributing`;
+  }
+  if (els.dashboardVillageMembersPreview) {
+    const previewNames = members.slice(0, 4).map((profile) => getVillageDisplayName(profile));
+    const extraCount = Math.max(members.length - previewNames.length, 0);
+    const preview = previewNames.length
+      ? `${previewNames.join(", ")}${extraCount > 0 ? ` +${extraCount} more` : ""}`
+      : "Helping the village grow";
+    els.dashboardVillageMembersPreview.textContent = preview;
+  }
+}
+
+function showVillageMembers() {
+  discardIncompleteChallengeSession();
+  currentView = "village-members";
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  setChallengeBackButtons(false, false);
+  renderVillageMembersPage();
+  els.dashboardScreen.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.villageMembersScreen?.classList.remove("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.villageMembersScreen);
+}
+
+function renderVillageMembersPage() {
+  const members = getOrderedVillageMembers();
+  if (els.villageMembersSummary) {
+    const count = members.length || 1;
+    els.villageMembersSummary.textContent = `${count} ${count === 1 ? "learner is" : "learners are"} helping the village grow.`;
+  }
+  if (!els.villageMembersList) return;
+  els.villageMembersList.replaceChildren(...members.map((profile) => createVillageMemberCard(profile, true)));
+}
+
+function createVillageMemberCard(profile, showContributionLabel = false) {
+  const card = document.createElement("article");
+  card.className = "village-member-card";
+  card.classList.toggle("current", profile.id === currentProfileId);
+  card.replaceChildren(
+    createTextElement("span", "village-member-avatar", profile.emoji || "⭐"),
+    createTextElement("strong", "village-member-name", getVillageDisplayName(profile)),
+    createTextElement(
+      "span",
+      "village-member-coins",
+      `${getVillageContributionCoins(profile)} ${showContributionLabel ? "contribution " : ""}coins`
+    ),
+    createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
+  );
+  return card;
+}
+
+function getVillageContributionCoins(profile) {
+  const explicitContribution = normalizeCoinCount(profile?.contributionCoins);
+  return explicitContribution > 0 ? explicitContribution : normalizeCoinCount(profile?.coins);
 }
 
 function getOrderedVillageMembers() {
@@ -4473,12 +4613,16 @@ function handleDashboardAction(action) {
     showFlashcardsEntry();
     return;
   }
-  if (action === "challenges") {
-    showChallengesEntry();
-    return;
-  }
+	  if (action === "challenges") {
+	    showChallengesEntry();
+	    return;
+	  }
+	  if (action === "village-members") {
+	    showVillageMembers();
+	    return;
+	  }
 
-  if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
+	  if (["achievements", "austria-album", "town-center", "village-album"].includes(action)) {
     showAchievementCollection(action);
     return;
   }
@@ -5316,9 +5460,11 @@ function createCustomProfile(name, password, emoji = selectedAvatar) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
     {
-      id,
-      name,
-      password,
+	      id,
+	      name,
+	      displayName: name,
+	      villageDisplayName: name,
+	      password,
       emoji,
       avatar: "",
       demoCompleted: false,
@@ -5357,9 +5503,11 @@ function renameCurrentProfile(nextName) {
     window.alert("A profile with that name already exists.");
     return false;
   }
-  profile.name = normalizedName;
-  saveProfileStore();
-  els.currentProfileLabel.textContent = profile.name;
+	  profile.name = normalizedName;
+	  profile.displayName = normalizedName;
+	  profile.villageDisplayName = normalizedName;
+	  saveProfileStore();
+	  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderProfileCards();
   renderDashboard();
   renderSettingsPanel();
@@ -5480,7 +5628,8 @@ function lockSharedPasswordScreen() {
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
-  els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
+	  els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
+	  els.displayNameForm?.addEventListener("submit", handleDisplayNameSubmit);
   els.firebaseAuthForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     handleFirebaseEmailAuth(firebaseAuthMode === "signin" ? "sign-in" : "register");
@@ -5502,7 +5651,8 @@ function bindEvents() {
   els.cancelCreateProfile.addEventListener("click", cancelCreateProfile);
   els.createProfileForm.addEventListener("submit", handleCreateProfile);
   els.cancelProfileLogin.addEventListener("click", showProfileChooser);
-  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
+	  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
+	  els.villageMembersBack?.addEventListener("click", showDashboard);
 
   els.appShell.addEventListener("click", (event) => {
     const actionTarget = event.target.closest("[data-dashboard-action]");

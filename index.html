@@ -76,6 +76,18 @@
             <button class="ghost-button" id="localModeBack" type="button">Back</button>
           </div>
         </section>
+        <form class="display-name-card hidden" id="displayNameForm" aria-label="Village display name">
+          <div>
+            <h2>What should people call you in the village?</h2>
+            <p class="display-name-intro">This name will appear when your village learns and grows together.</p>
+          </div>
+          <label>
+            <span>Village name / display name</span>
+            <input id="displayNameInput" type="text" autocomplete="nickname" maxlength="40" required>
+          </label>
+          <button class="primary-button" type="submit">Continue</button>
+          <p class="lock-error hidden" id="displayNameError">Enter a display name.</p>
+        </form>
         <section class="village-selection" id="villageSelection" aria-label="Choose your village">
           <button class="small-link-button village-selection-back hidden" id="villageSelectionBack" type="button">← Back</button>
           <div class="village-selection-heading">
@@ -372,6 +384,17 @@
           </div>
         </section>
 
+        <section class="dashboard-section dashboard-members-panel" aria-label="Village Members">
+          <article class="dashboard-village-members-card">
+            <div>
+              <h3>Village Members</h3>
+              <p id="dashboardVillageMembersCount">1 learner contributing</p>
+              <p class="dashboard-members-preview" id="dashboardVillageMembersPreview">Helping the village grow</p>
+            </div>
+            <button class="primary-button" type="button" data-dashboard-action="village-members">View village</button>
+          </article>
+        </section>
+
         <section class="dashboard-section collections-preview-section" aria-label="Collection">
           <div class="section-heading simple">
             <h3>Collection</h3>
@@ -439,6 +462,19 @@
           <p class="collection-page-description" id="collectionPageDescription">Austria adventures will appear here as you earn them.</p>
         </div>
         <div class="rewards-grid" id="achievementsGrid"></div>
+      </section>
+
+      <section class="village-members-screen hidden" id="villageMembersScreen" aria-label="Village Members">
+        <div class="dashboard-heading reward-page-heading">
+          <div class="reward-title-stack">
+            <button type="button" class="small-link-button" id="villageMembersBack">← Back</button>
+            <h2>Village Members</h2>
+            <p id="villageMembersSummary">Learners helping the village grow together.</p>
+          </div>
+        </div>
+        <article class="village-members-page-card">
+          <div class="village-members-grid" id="villageMembersList"></div>
+        </article>
       </section>
 
       <section class="level-selection-screen hidden" id="levelSelectionScreen" aria-label="Choose level">
