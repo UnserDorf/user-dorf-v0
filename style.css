@@ -905,6 +905,27 @@ body {
   gap: 10px;
 }
 
+.village-selection-back {
+  justify-self: start;
+}
+
+.village-create-button {
+  display: grid;
+  gap: 3px;
+  line-height: 1.15;
+}
+
+.village-create-button small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.join-village-intro {
+  width: min(520px, 100%);
+  min-height: clamp(22px, 4vw, 42px);
+}
+
 .village-create-notice {
   width: min(520px, 100%);
   margin: 0;

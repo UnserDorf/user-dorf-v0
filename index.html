@@ -78,17 +78,21 @@
           </div>
         </section>
         <section class="village-selection" id="villageSelection" aria-label="Choose your village">
+          <button class="small-link-button village-selection-back hidden" id="villageSelectionBack" type="button">← Back</button>
           <div class="village-selection-heading">
             <img class="village-selection-logo" src="assets/unser-dorf-logo.png" alt="Unser Dorf">
-            <h2>Choose Your Village</h2>
-            <p>Select the village you would like to join.</p>
+            <h2 id="villageSelectionTitle">Choose Your Village</h2>
+            <p id="villageSelectionSubtitle">How would you like to get started?</p>
           </div>
           <div class="village-choice-actions" id="villageChoiceActions">
-            <button class="primary-button" id="joinVillageButton" type="button">Join Village</button>
-            <button class="ghost-button" id="joinAnotherVillageButton" type="button">Join another village</button>
-            <button class="ghost-button" id="createVillageButton" type="button">Create Village</button>
+            <button class="primary-button" id="joinVillageButton" type="button">Join a Village</button>
+            <button class="ghost-button village-create-button" id="createVillageButton" type="button">
+              <span>Create a Village</span>
+              <small>Coming Soon</small>
+            </button>
           </div>
           <p class="village-create-notice hidden" id="villageCreateNotice">Coming Soon</p>
+          <div class="join-village-intro hidden" id="joinVillageIntro" aria-hidden="true"></div>
           <div class="village-card-grid hidden" id="villageCardGrid"></div>
           <p class="village-selection-helper">Each village has its own learners, progress, and rewards.</p>
         </section>

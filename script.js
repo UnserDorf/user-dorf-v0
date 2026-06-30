@@ -418,12 +418,16 @@ const els = {
   localModeContinue: document.querySelector("#localModeContinue"),
   localModeBack: document.querySelector("#localModeBack"),
   villageSelection: document.querySelector("#villageSelection"),
+  villageSelectionBack: document.querySelector("#villageSelectionBack"),
+  villageSelectionTitle: document.querySelector("#villageSelectionTitle"),
+  villageSelectionSubtitle: document.querySelector("#villageSelectionSubtitle"),
   villageChoiceActions: document.querySelector("#villageChoiceActions"),
   joinVillageButton: document.querySelector("#joinVillageButton"),
-  joinAnotherVillageButton: document.querySelector("#joinAnotherVillageButton"),
   createVillageButton: document.querySelector("#createVillageButton"),
   villageCreateNotice: document.querySelector("#villageCreateNotice"),
+  joinVillageIntro: document.querySelector("#joinVillageIntro"),
   villageCardGrid: document.querySelector("#villageCardGrid"),
+  villageSelectionHelper: document.querySelector(".village-selection-helper"),
   villagePasswordForm: document.querySelector("#villagePasswordForm"),
   villagePasswordTitle: document.querySelector("#villagePasswordTitle"),
   villagePasswordInput: document.querySelector("#villagePasswordInput"),
@@ -781,6 +785,7 @@ let firebaseAuthReady = false;
 let firebaseAuthUnsubscribe = null;
 let firebaseAuthSkipped = false;
 let firebaseAuthMode = "signup";
+let villageSelectionMode = "choose";
 let demoPageIndex = 0;
 let demoFinalScreenActive = false;
 let applyingRemoteStore = false;
@@ -1263,6 +1268,7 @@ function selectVillage(groupId) {
 }
 
 function showVillageSelection() {
+  villageSelectionMode = "choose";
   pendingProfileId = "";
   els.profileScreen.classList.add("village-landing-mode");
   els.profileScreen.classList.remove("first-use");
@@ -1278,31 +1284,53 @@ function showVillageSelection() {
   els.profileScreen.classList.remove("hidden");
   hideProfileOnboardingPanels();
   els.villageSelection?.classList.remove("hidden");
+  if (els.villageSelectionTitle) els.villageSelectionTitle.textContent = "Choose Your Village";
+  if (els.villageSelectionSubtitle) els.villageSelectionSubtitle.textContent = "How would you like to get started?";
+  if (els.villageSelectionBack) {
+    els.villageSelectionBack.textContent = "← Back";
+    els.villageSelectionBack.classList.remove("hidden");
+  }
   els.villageChoiceActions?.classList.remove("hidden");
+  els.joinVillageIntro?.classList.add("hidden");
   els.villageCardGrid?.classList.add("hidden");
   els.villageCreateNotice?.classList.add("hidden");
+  els.villageSelectionHelper?.classList.add("hidden");
   renderVillageCards();
   renderGroupSelectors();
   scrollPageToTop(els.profileScreen);
 }
 
 function showJoinVillageOptions() {
+  villageSelectionMode = "join";
+  if (els.villageSelectionTitle) els.villageSelectionTitle.textContent = "Join a Village";
+  if (els.villageSelectionSubtitle) els.villageSelectionSubtitle.textContent = "Select the village you would like to join.";
+  if (els.villageSelectionBack) {
+    els.villageSelectionBack.textContent = "← Back";
+    els.villageSelectionBack.classList.remove("hidden");
+  }
+  els.villageChoiceActions?.classList.add("hidden");
+  els.joinVillageIntro?.classList.remove("hidden");
   els.villageCardGrid?.classList.remove("hidden");
   els.villageCreateNotice?.classList.add("hidden");
+  els.villageSelectionHelper?.classList.remove("hidden");
   renderVillageCards();
   scrollPageToTop(els.profileScreen);
 }
 
 function showCreateVillageComingSoon() {
+  villageSelectionMode = "choose";
   els.villageCardGrid?.classList.add("hidden");
+  els.joinVillageIntro?.classList.add("hidden");
   if (els.villageCreateNotice) els.villageCreateNotice.textContent = "Coming Soon";
   els.villageCreateNotice?.classList.remove("hidden");
 }
 
-function showJoinAnotherVillageComingSoon() {
-  els.villageCardGrid?.classList.add("hidden");
-  if (els.villageCreateNotice) els.villageCreateNotice.textContent = "Coming Soon";
-  els.villageCreateNotice?.classList.remove("hidden");
+function handleVillageSelectionBack() {
+  if (villageSelectionMode === "join") {
+    showVillageSelection();
+    return;
+  }
+  showLandingScreen();
 }
 
 function enterSelectedVillage() {
@@ -2246,9 +2274,22 @@ function showFirebaseAuthScreen(mode = "signup", message = "") {
   hideProfileOnboardingPanels();
   els.firebaseAuthCard?.classList.remove("hidden");
   renderFirebaseAuthScreen();
+  preloadFirebaseAuthForSignIn();
   updateFirebaseAuthStatus(message);
   scrollPageToTop(els.profileScreen);
   els.firebaseAuthEmail?.focus();
+}
+
+function preloadFirebaseAuthForSignIn() {
+  if (!hasCloudSyncConfig()) return;
+  getFirebaseSyncApi()
+    .then(() => {
+      firebaseSyncAvailable = true;
+    })
+    .catch((error) => {
+      firebaseSyncAvailable = false;
+      console.warn("Firebase authentication unavailable.", error);
+    });
 }
 
 function renderFirebaseAuthScreen() {
@@ -5447,8 +5488,8 @@ function bindEvents() {
   els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
   els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
   els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);
+  els.villageSelectionBack?.addEventListener("click", handleVillageSelectionBack);
   els.joinVillageButton?.addEventListener("click", showJoinVillageOptions);
-  els.joinAnotherVillageButton?.addEventListener("click", showJoinAnotherVillageComingSoon);
   els.createVillageButton?.addEventListener("click", showCreateVillageComingSoon);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
