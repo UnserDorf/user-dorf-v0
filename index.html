@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=194">
+    <link rel="stylesheet" href="style.css?v=195">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -256,11 +256,22 @@
             <p>Learn German while helping your village grow.</p>
           </div>
           <div class="landing-actions">
-            <button class="ghost-button" id="landingTryDemo" type="button">Try Demo</button>
-            <button class="primary-button" id="landingGetStartedMain" type="button">Create your account</button>
-            <button class="ghost-button" id="landingGoogleButton" type="button">Continue with Google</button>
-            <button class="ghost-button" id="landingLocalButton" type="button">Use this device only</button>
-            <button class="small-link-button" id="landingExistingAccountMain" type="button">Already have an account? Sign in</button>
+            <section class="landing-action-group landing-action-demo" aria-label="Explore Unser Dorf">
+              <button class="primary-button" id="landingTryDemo" type="button">Try Demo</button>
+            </section>
+            <section class="landing-action-group" aria-label="Create your account">
+              <h3>Create your account</h3>
+              <button class="ghost-button" id="landingGetStartedMain" type="button">Create account with Email</button>
+              <button class="ghost-button" id="landingGoogleButton" type="button">Continue with Google</button>
+            </section>
+            <section class="landing-action-group compact" aria-label="Returning users">
+              <p>Already have an account?</p>
+              <button class="small-link-button" id="landingExistingAccountMain" type="button">Sign in</button>
+            </section>
+            <section class="landing-action-group compact" aria-label="Local device mode">
+              <p>Prefer not to make an account?</p>
+              <button class="ghost-button" id="landingLocalButton" type="button">Use this device only</button>
+            </section>
           </div>
           <div class="landing-benefits" aria-label="Unser Dorf benefits">
             <div>
