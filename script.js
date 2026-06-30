@@ -108,9 +108,11 @@ const ONBOARDING_PAGES = [
 const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
+const FIREBASE_SYNC_DEFAULT_ROOT_PATH = "unserDorf/v0Testing";
 const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/shared";
 const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -395,6 +397,14 @@ const els = {
   passwordInput: document.querySelector("#passwordInput"),
   lockError: document.querySelector("#lockError"),
   profileScreen: document.querySelector("#profileScreen"),
+  firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
+  firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
+  firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
+  firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
+  firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
+  firebaseGoogleSignIn: document.querySelector("#firebaseGoogleSignIn"),
+  firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
+  firebaseAuthStatus: document.querySelector("#firebaseAuthStatus"),
   villageSelection: document.querySelector("#villageSelection"),
   villageCardGrid: document.querySelector("#villageCardGrid"),
   villagePasswordForm: document.querySelector("#villagePasswordForm"),
@@ -744,6 +754,11 @@ let randomSessionKey = "";
 let randomSessionIds = [];
 let currentView = "dashboard";
 let syncEnabled = false;
+let firebaseSyncAvailable = false;
+let firebaseAuthUser = null;
+let firebaseAuthReady = false;
+let firebaseAuthUnsubscribe = null;
+let firebaseAuthSkipped = false;
 let demoPageIndex = 0;
 let applyingRemoteStore = false;
 let firebaseSyncApi = null;
@@ -824,7 +839,9 @@ async function unlockApp() {
     prepositionItems = [];
   }
   await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level)));
-  if (isDeviceOnboardingComplete()) {
+  if (shouldShowFirebaseAuthScreen()) {
+    showFirebaseAuthScreen();
+  } else if (isDeviceOnboardingComplete()) {
     showProfileScreen();
   } else {
     showLandingScreen();
@@ -883,10 +900,17 @@ async function loadCsvRows(path) {
 async function initializeFamilySync() {
   if (!hasCloudSyncConfig()) {
     syncEnabled = false;
+    firebaseSyncAvailable = false;
     return;
   }
   try {
     await getFirebaseSyncApi();
+    firebaseSyncAvailable = true;
+    await waitForFirebaseAuthState();
+    if (!firebaseAuthUser) {
+      syncEnabled = false;
+      return;
+    }
     const remoteStore = await fetchProfileStoreFromCloud();
 
     if (remoteStore) {
@@ -899,6 +923,7 @@ async function initializeFamilySync() {
     startFamilySyncPolling();
   } catch (error) {
     syncEnabled = false;
+    firebaseSyncAvailable = false;
     console.warn("Firebase sync unavailable. Using this device only.", error);
   }
 }
@@ -1320,6 +1345,8 @@ function normalizeProfileData(data, profile) {
     emoji: profile.emoji,
     avatar: data?.avatar || profile.avatar,
     password: data?.password || profile.password || "",
+    ownerUid: typeof data?.ownerUid === "string" ? data.ownerUid : "",
+    ownerEmail: typeof data?.ownerEmail === "string" ? data.ownerEmail : "",
     coins: normalizeCoinCount(data?.coins),
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
@@ -1631,28 +1658,84 @@ function scheduleCloudSave() {
 }
 
 async function saveProfileStoreToCloudNow() {
-  if (!profileStore || !hasCloudSyncConfig()) return;
+  if (!profileStore || !hasCloudSyncConfig() || !firebaseAuthUser) return;
   promoteFamilyAchievements(profileStore);
   try {
     const firebase = await getFirebaseSyncApi();
-    await firebase.setDoc(firebase.docRef, {
-      profileStore: sanitizeProfileStoreForSync(profileStore),
+    const ownedProfiles = getFirebaseOwnedProfiles();
+    await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email || "",
+      currentGroup: currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
+      currentProfile: currentProfileId || profileStore.currentProfile || "",
+      profiles: ownedProfiles,
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: new Date().toISOString()
     }, { merge: true });
+
+    await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
+      const group = profileStore.groups?.[groupInfo.id];
+      if (!group) return;
+      const groupProfiles = Object.fromEntries(
+        Object.entries(ownedProfiles)
+          .filter(([profileId]) => group.memberIds.includes(profileId))
+      );
+      await firebase.setDoc(getFirebaseVillageDocRef(firebase, groupInfo.id), {
+        group: sanitizeGroupForSync(group),
+        profiles: groupProfiles,
+        updatedAt: firebase.serverTimestamp(),
+        updatedAtIso: new Date().toISOString()
+      }, { merge: true });
+    }));
   } catch (error) {
     console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
   }
 }
 
 async function fetchProfileStoreFromCloud() {
-  if (!hasCloudSyncConfig()) return null;
+  if (!hasCloudSyncConfig() || !firebaseAuthUser) return null;
   try {
     const firebase = await getFirebaseSyncApi();
-    const snapshot = await firebase.getDoc(firebase.docRef);
-    if (!snapshot.exists()) return null;
-    const data = snapshot.data() || {};
-    return data.profileStore || data.profile_store || null;
+    const remoteStore = createProfileStore();
+    let hasRemoteData = false;
+
+    const legacySnapshot = await firebase.getDoc(firebase.docRef);
+    if (legacySnapshot.exists()) {
+      const legacyData = legacySnapshot.data() || {};
+      const legacyStore = legacyData.profileStore || legacyData.profile_store;
+      if (legacyStore?.profiles) {
+        Object.assign(remoteStore.profiles, legacyStore.profiles);
+        remoteStore.groups = mergeGroupData(remoteStore, legacyStore, {
+          ...remoteStore,
+          profiles: { ...remoteStore.profiles, ...(legacyStore.profiles || {}) }
+        });
+        hasRemoteData = true;
+      }
+    }
+
+    const userSnapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data() || {};
+      Object.assign(remoteStore.profiles, userData.profiles || {});
+      remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
+      remoteStore.currentProfile = String(userData.currentProfile || "");
+      hasRemoteData = true;
+    }
+
+    await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
+      const villageSnapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
+      if (!villageSnapshot.exists()) return;
+      const villageData = villageSnapshot.data() || {};
+      Object.assign(remoteStore.profiles, villageData.profiles || {});
+      remoteStore.groups[groupInfo.id] = createGroupData(groupInfo, villageData.group || {});
+      remoteStore.groups[groupInfo.id].memberIds = normalizeGroupMemberIds([
+        ...remoteStore.groups[groupInfo.id].memberIds,
+        ...Object.keys(villageData.profiles || {})
+      ]);
+      hasRemoteData = true;
+    }));
+
+    return hasRemoteData ? remoteStore : null;
   } catch (error) {
     console.warn("Could not load shared Firebase progress.", error);
     return null;
@@ -1666,6 +1749,7 @@ function getFirebaseSyncConfig() {
   return {
     enabled,
     firebaseConfig,
+    rootPath: String(config.rootPath || FIREBASE_SYNC_DEFAULT_ROOT_PATH),
     documentPath: String(config.documentPath || FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH)
   };
 }
@@ -1686,16 +1770,26 @@ async function initializeFirebaseSyncApi() {
   if (documentPathParts.length % 2 !== 0) {
     throw new Error("Firebase documentPath must point to a Firestore document.");
   }
-  const [{ initializeApp }, firestoreModule] = await Promise.all([
+  const rootPathParts = syncConfig.rootPath.split("/").map((part) => part.trim()).filter(Boolean);
+  if (rootPathParts.length % 2 !== 0) {
+    throw new Error("Firebase rootPath must point to a Firestore document.");
+  }
+  const [{ initializeApp }, firestoreModule, authModule] = await Promise.all([
     import(FIREBASE_APP_MODULE_URL),
-    import(FIREBASE_FIRESTORE_MODULE_URL)
+    import(FIREBASE_FIRESTORE_MODULE_URL),
+    import(FIREBASE_AUTH_MODULE_URL)
   ]);
   const app = initializeApp(syncConfig.firebaseConfig);
   const db = firestoreModule.getFirestore(app);
+  const auth = authModule.getAuth(app);
   return {
     app,
     db,
+    auth,
+    authModule,
+    rootPathParts,
     docRef: firestoreModule.doc(db, ...documentPathParts),
+    doc: firestoreModule.doc,
     getDoc: firestoreModule.getDoc,
     setDoc: firestoreModule.setDoc,
     serverTimestamp: firestoreModule.serverTimestamp
@@ -1824,6 +1918,8 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile) {
       ])),
       history: mergeHistory(local.history, remote.history),
       lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
+      ownerUid: local.ownerUid || remote.ownerUid || "",
+      ownerEmail: local.ownerEmail || remote.ownerEmail || "",
       settings: remote.settings || local.settings
     },
     defaultProfile
@@ -1895,6 +1991,203 @@ function latestString(first = "", second = "") {
 
 function sanitizeProfileStoreForSync(store) {
   return JSON.parse(JSON.stringify(store));
+}
+
+function sanitizeGroupForSync(group) {
+  return JSON.parse(JSON.stringify(group || {}));
+}
+
+function getFirebaseUserDocRef(firebase, uid) {
+  return firebase.doc(firebase.db, ...firebase.rootPathParts, "users", uid);
+}
+
+function getFirebaseVillageDocRef(firebase, groupId) {
+  return firebase.doc(firebase.db, ...firebase.rootPathParts, "villages", groupId);
+}
+
+function getFirebaseOwnedProfileIds() {
+  if (!firebaseAuthUser || !profileStore?.profiles) return [];
+  const ownedIds = Object.entries(profileStore.profiles)
+    .filter(([, profile]) => profile?.ownerUid === firebaseAuthUser.uid)
+    .map(([profileId]) => profileId);
+  if (currentProfileId && profileStore.profiles[currentProfileId]) ownedIds.push(currentProfileId);
+  if (profileStore.currentProfile && profileStore.profiles[profileStore.currentProfile]) {
+    ownedIds.push(profileStore.currentProfile);
+  }
+  return Array.from(new Set(ownedIds));
+}
+
+function getFirebaseOwnedProfiles() {
+  if (!firebaseAuthUser) return {};
+  return Object.fromEntries(getFirebaseOwnedProfileIds().map((profileId) => {
+    const profile = profileStore.profiles[profileId];
+    return [
+      profileId,
+      sanitizeProfileStoreForSync({
+        ...profile,
+        ownerUid: profile.ownerUid || firebaseAuthUser.uid,
+        ownerEmail: profile.ownerEmail || firebaseAuthUser.email || ""
+      })
+    ];
+  }));
+}
+
+function assignProfileToFirebaseUser(profileId = currentProfileId || profileStore?.currentProfile) {
+  if (!firebaseAuthUser || !profileId || !profileStore?.profiles?.[profileId]) return;
+  const profile = profileStore.profiles[profileId];
+  profile.ownerUid = profile.ownerUid || firebaseAuthUser.uid;
+  profile.ownerEmail = profile.ownerEmail || firebaseAuthUser.email || "";
+}
+
+async function waitForFirebaseAuthState() {
+  if (!hasCloudSyncConfig()) return null;
+  const firebase = await getFirebaseSyncApi();
+  if (firebaseAuthReady) return firebaseAuthUser;
+  return new Promise((resolve) => {
+    firebaseAuthUnsubscribe?.();
+    firebaseAuthUnsubscribe = firebase.authModule.onAuthStateChanged(firebase.auth, (user) => {
+      firebaseAuthUser = user || null;
+      firebaseAuthReady = true;
+      if (firebaseAuthUser) firebaseAuthSkipped = false;
+      updateFirebaseAuthStatus("");
+      resolve(firebaseAuthUser);
+    });
+  });
+}
+
+function shouldShowFirebaseAuthScreen() {
+  return hasCloudSyncConfig() && firebaseSyncAvailable && !firebaseAuthUser && !firebaseAuthSkipped;
+}
+
+function hideProfileOnboardingPanels() {
+  els.firebaseAuthCard?.classList.add("hidden");
+  els.villageSelection?.classList.add("hidden");
+  els.familyWealthCard?.classList.add("hidden");
+  els.villageNameForm?.classList.add("hidden");
+  els.villagePasswordForm?.classList.add("hidden");
+  els.profileSignInHeading?.classList.add("hidden");
+  els.profileGrid?.classList.add("hidden");
+  els.profileActions?.classList.add("hidden");
+  els.emptyProfileMessage?.classList.add("hidden");
+  els.profileLoginForm?.classList.add("hidden");
+  els.createProfileForm?.classList.add("hidden");
+}
+
+function showFirebaseAuthScreen(message = "") {
+  currentProfileId = "";
+  pendingProfileId = "";
+  progress = {};
+  vocabularyProgress = {};
+  articleProgress = {};
+  nounVerbProgress = {};
+  meaningMatchProgress = {};
+  prepositionProgress = {};
+  recentMeaningMatchItems = [];
+  els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.profileScreen.classList.remove("hidden");
+  els.profileScreen.classList.remove("village-landing-mode", "first-use");
+  hideProfileOnboardingPanels();
+  els.firebaseAuthCard?.classList.remove("hidden");
+  updateFirebaseAuthStatus(message);
+  scrollPageToTop(els.profileScreen);
+  els.firebaseAuthEmail?.focus();
+}
+
+function updateFirebaseAuthStatus(message = "", isError = false) {
+  if (!els.firebaseAuthStatus) return;
+  els.firebaseAuthStatus.textContent = message;
+  els.firebaseAuthStatus.classList.toggle("hidden", !message);
+  els.firebaseAuthStatus.classList.toggle("firebase-auth-status-ok", Boolean(message && !isError));
+}
+
+async function handleFirebaseEmailAuth(mode) {
+  const email = els.firebaseAuthEmail?.value.trim();
+  const password = els.firebaseAuthPassword?.value || "";
+  if (!email || !password) {
+    updateFirebaseAuthStatus("Enter an email and password.", true);
+    return;
+  }
+  updateFirebaseAuthStatus(mode === "register" ? "Creating account..." : "Signing in...");
+  try {
+    const firebase = await getFirebaseSyncApi();
+    const credential = mode === "register"
+      ? await firebase.authModule.createUserWithEmailAndPassword(firebase.auth, email, password)
+      : await firebase.authModule.signInWithEmailAndPassword(firebase.auth, email, password);
+    await handleFirebaseSignedIn(credential.user);
+  } catch (error) {
+    updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
+  }
+}
+
+async function handleFirebaseGoogleSignIn() {
+  updateFirebaseAuthStatus("Opening Google sign-in...");
+  try {
+    const firebase = await getFirebaseSyncApi();
+    const provider = new firebase.authModule.GoogleAuthProvider();
+    const credential = await firebase.authModule.signInWithPopup(firebase.auth, provider);
+    await handleFirebaseSignedIn(credential.user);
+  } catch (error) {
+    updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
+  }
+}
+
+async function handleFirebaseSignedIn(user) {
+  firebaseAuthUser = user || null;
+  firebaseAuthReady = true;
+  firebaseAuthSkipped = false;
+  syncEnabled = false;
+  updateFirebaseAuthStatus("Signed in. Loading your progress...");
+  await initializeFamilySync();
+  if (isDeviceOnboardingComplete()) {
+    showProfileScreen();
+  } else {
+    showLandingScreen();
+  }
+}
+
+function continueWithoutFirebaseAuth() {
+  firebaseAuthSkipped = true;
+  syncEnabled = false;
+  if (isDeviceOnboardingComplete()) {
+    showProfileScreen();
+  } else {
+    showLandingScreen();
+  }
+}
+
+async function signOutOfFirebase() {
+  if (!firebaseAuthUser) {
+    lockSharedPasswordScreen();
+    return;
+  }
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await firebase.authModule.signOut(firebase.auth);
+  } catch (error) {
+    console.warn("Could not sign out of Firebase.", error);
+  }
+  firebaseAuthUser = null;
+  syncEnabled = false;
+  firebaseAuthSkipped = false;
+  if (shouldShowFirebaseAuthScreen()) {
+    saveCurrentPosition();
+    closeSettingsMenu();
+    showFirebaseAuthScreen();
+  } else {
+    lockSharedPasswordScreen();
+  }
+}
+
+function getFriendlyFirebaseAuthError(error) {
+  const code = String(error?.code || "");
+  if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "That email or password did not work.";
+  if (code.includes("auth/user-not-found")) return "No account was found for that email.";
+  if (code.includes("auth/email-already-in-use")) return "That email already has an account.";
+  if (code.includes("auth/popup-closed-by-user")) return "Google sign-in was closed before finishing.";
+  if (code.includes("auth/weak-password")) return "Please use a longer password.";
+  return "Sign-in did not finish. Please try again.";
 }
 
 function refreshVisibleProfileState() {
@@ -2016,6 +2309,7 @@ function completeProfileLogin(profileId) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
   currentProfileId = profileId;
+  assignProfileToFirebaseUser(profileId);
   pendingProfileId = "";
   profileStore.currentProfile = profileId;
   const group = getCurrentGroup();
@@ -4741,7 +5035,16 @@ function renderAvatarPicker() {
 function createCustomProfile(name, password, emoji = selectedAvatar) {
   const id = createCustomProfileId(name);
   profileStore.profiles[id] = normalizeProfileData(
-    { id, name, password, emoji, avatar: "", demoCompleted: false },
+    {
+      id,
+      name,
+      password,
+      emoji,
+      avatar: "",
+      demoCompleted: false,
+      ownerUid: firebaseAuthUser?.uid || "",
+      ownerEmail: firebaseAuthUser?.email || ""
+    },
     { id, name, password, emoji, avatar: "" }
   );
   const group = getCurrentGroup();
@@ -4899,6 +5202,10 @@ function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
+  els.firebaseEmailSignIn?.addEventListener("click", () => handleFirebaseEmailAuth("sign-in"));
+  els.firebaseEmailRegister?.addEventListener("click", () => handleFirebaseEmailAuth("register"));
+  els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
+  els.firebaseAuthSkip?.addEventListener("click", continueWithoutFirebaseAuth);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
@@ -5134,7 +5441,7 @@ function bindEvents() {
   });
 
   els.switchProfile.addEventListener("click", logoutToProfileScreen);
-  els.logoutButton.addEventListener("click", lockSharedPasswordScreen);
+  els.logoutButton.addEventListener("click", signOutOfFirebase);
   els.mobileMenuHomeButton?.addEventListener("click", () => {
     closeSettingsMenu();
     showDashboard();
@@ -5145,7 +5452,7 @@ function bindEvents() {
   });
   els.mobileMenuSettingsButton?.addEventListener("click", showSettingsDetailView);
   els.settingsMenuBack?.addEventListener("click", showSettingsMenuView);
-  els.mobileLogoutButton?.addEventListener("click", lockSharedPasswordScreen);
+  els.mobileLogoutButton?.addEventListener("click", signOutOfFirebase);
 
   els.settingsToggle.addEventListener("click", () => {
     const isOpen = !els.settingsPanel.classList.contains("hidden");
