@@ -411,6 +411,7 @@ const els = {
   villageSelection: document.querySelector("#villageSelection"),
   villageChoiceActions: document.querySelector("#villageChoiceActions"),
   joinVillageButton: document.querySelector("#joinVillageButton"),
+  joinAnotherVillageButton: document.querySelector("#joinAnotherVillageButton"),
   createVillageButton: document.querySelector("#createVillageButton"),
   villageCreateNotice: document.querySelector("#villageCreateNotice"),
   villageCardGrid: document.querySelector("#villageCardGrid"),
@@ -453,6 +454,8 @@ const els = {
   landingScreen: document.querySelector("#landingScreen"),
   landingTryDemo: document.querySelector("#landingTryDemo"),
   landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
+  landingGoogleButton: document.querySelector("#landingGoogleButton"),
+  landingLocalButton: document.querySelector("#landingLocalButton"),
   landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
   demoIllustration: document.querySelector("#demoIllustration"),
@@ -769,6 +772,7 @@ let firebaseAuthUnsubscribe = null;
 let firebaseAuthSkipped = false;
 let firebaseAuthMode = "signup";
 let demoPageIndex = 0;
+let demoFinalScreenActive = false;
 let applyingRemoteStore = false;
 let firebaseSyncApi = null;
 let firebaseSyncPromise = null;
@@ -1281,6 +1285,13 @@ function showJoinVillageOptions() {
 
 function showCreateVillageComingSoon() {
   els.villageCardGrid?.classList.add("hidden");
+  if (els.villageCreateNotice) els.villageCreateNotice.textContent = "Coming Soon";
+  els.villageCreateNotice?.classList.remove("hidden");
+}
+
+function showJoinAnotherVillageComingSoon() {
+  els.villageCardGrid?.classList.add("hidden");
+  if (els.villageCreateNotice) els.villageCreateNotice.textContent = "Coming Soon";
   els.villageCreateNotice?.classList.remove("hidden");
 }
 
@@ -2070,7 +2081,12 @@ function routeAfterStartup() {
 
 function routeAfterIdentityReady() {
   const profileId = ensureIdentityProfile();
+  const villageIds = getVillageIdsForProfile(profileId);
   const groupId = getVillageIdForProfile(profileId);
+  if (villageIds.length > 1) {
+    showVillageSelection();
+    return;
+  }
   if (profileId && groupId) {
     currentGroupId = groupId;
     profileStore.currentGroup = groupId;
@@ -2141,12 +2157,19 @@ function sanitizeIdentityId(value) {
 }
 
 function getVillageIdForProfile(profileId) {
-  if (!profileId || !profileStore?.groups) return "";
+  return getVillageIdsForProfile(profileId)[0] || "";
+}
+
+function getVillageIdsForProfile(profileId) {
+  if (!profileId || !profileStore?.groups) return [];
   const currentGroup = profileStore.groups[profileStore.currentGroup || currentGroupId];
-  if (currentGroup?.memberIds?.includes(profileId)) return currentGroup.id;
-  return Object.values(profileStore.groups)
-    .find((group) => group?.memberIds?.includes(profileId))
-    ?.id || "";
+  const villageIds = Object.values(profileStore.groups)
+    .filter((group) => group?.memberIds?.includes(profileId))
+    .map((group) => group.id);
+  if (currentGroup?.memberIds?.includes(profileId)) {
+    return [currentGroup.id, ...villageIds.filter((groupId) => groupId !== currentGroup.id)];
+  }
+  return villageIds;
 }
 
 function assignProfileToFirebaseUser(profileId = currentProfileId || profileStore?.currentProfile) {
@@ -2220,12 +2243,12 @@ function showFirebaseAuthScreen(mode = "signup", message = "") {
 function renderFirebaseAuthScreen() {
   const isSignIn = firebaseAuthMode === "signin";
   if (els.firebaseAuthTitle) {
-    els.firebaseAuthTitle.textContent = isSignIn ? "Sign in to Unser Dorf" : "Create your identity";
+    els.firebaseAuthTitle.textContent = isSignIn ? "Sign in" : "Create your account";
   }
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
       ? "Continue with your existing account."
-      : "Choose how you would like to save your personal progress.";
+      : "Create an account to save your progress across devices.";
   }
   if (els.firebaseEmailSignIn) {
     els.firebaseEmailSignIn.textContent = "Email + Password";
@@ -2239,6 +2262,11 @@ function renderFirebaseAuthScreen() {
     els.firebaseGoogleSignIn.textContent = "Continue with Google";
   }
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
+}
+
+function startGoogleIdentityFlow() {
+  showFirebaseAuthScreen("signup", "Opening Google sign-in...");
+  handleFirebaseGoogleSignIn();
 }
 
 function updateFirebaseAuthStatus(message = "", isError = false) {
@@ -2546,6 +2574,7 @@ function showDemoScreen() {
   discardIncompleteChallengeSession();
   currentView = "demo";
   demoPageIndex = 0;
+  demoFinalScreenActive = false;
   currentProfileId = "";
   pendingProfileId = "";
   els.profileScreen.classList.add("hidden");
@@ -2579,6 +2608,7 @@ function showDemoScreen() {
 }
 
 function renderOnboardingPage() {
+  demoFinalScreenActive = false;
   const page = ONBOARDING_PAGES[demoPageIndex] || ONBOARDING_PAGES[0];
   if (els.demoIllustration) {
     const image = document.createElement("img");
@@ -2608,6 +2638,26 @@ function renderOnboardingPage() {
   if (els.demoNext) els.demoNext.textContent = page.nextLabel;
 }
 
+function renderDemoFinalScreen() {
+  demoFinalScreenActive = true;
+  if (els.demoIllustration) {
+    const image = document.createElement("img");
+    image.src = "assets/grow-hero.png";
+    image.alt = "A growing Unser Dorf village";
+    image.loading = "eager";
+    els.demoIllustration.replaceChildren(image);
+  }
+  if (els.demoTitle) els.demoTitle.textContent = "Your village grew!";
+  if (els.demoBody) {
+    els.demoBody.replaceChildren(
+      createTextElement("p", "", "That's how Unser Dorf works.")
+    );
+  }
+  if (els.demoProgress) els.demoProgress.textContent = "🌱";
+  if (els.demoBack) els.demoBack.textContent = "Back to Home";
+  if (els.demoNext) els.demoNext.textContent = "Create your account";
+}
+
 function moveDemoPage(direction) {
   const nextIndex = demoPageIndex + direction;
   if (nextIndex < 0) {
@@ -2631,14 +2681,22 @@ function startGetStartedFlow() {
 }
 
 function handleDemoNext() {
+  if (demoFinalScreenActive) {
+    startGetStartedFlow();
+    return;
+  }
   if (demoPageIndex >= ONBOARDING_PAGES.length - 1) {
-    completeDemoScreen();
+    renderDemoFinalScreen();
     return;
   }
   moveDemoPage(1);
 }
 
 function handleDemoBack() {
+  if (demoFinalScreenActive) {
+    completeDemoScreen();
+    return;
+  }
   if (demoPageIndex === 0) {
     completeDemoScreen();
     return;
@@ -5327,6 +5385,7 @@ function bindEvents() {
   els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthSkip?.addEventListener("click", continueWithoutFirebaseAuth);
   els.joinVillageButton?.addEventListener("click", showJoinVillageOptions);
+  els.joinAnotherVillageButton?.addEventListener("click", showJoinAnotherVillageComingSoon);
   els.createVillageButton?.addEventListener("click", showCreateVillageComingSoon);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
@@ -5447,6 +5506,8 @@ function bindEvents() {
   });
   els.landingTryDemo?.addEventListener("click", showDemoScreen);
   els.landingGetStartedMain?.addEventListener("click", startGetStartedFlow);
+  els.landingGoogleButton?.addEventListener("click", startGoogleIdentityFlow);
+  els.landingLocalButton?.addEventListener("click", continueWithoutFirebaseAuth);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoNext?.addEventListener("click", handleDemoNext);
