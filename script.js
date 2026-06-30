@@ -401,7 +401,6 @@ const els = {
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
-  firebaseAuthBenefits: document.querySelector("#firebaseAuthBenefits"),
   firebaseAuthDivider: document.querySelector("#firebaseAuthDivider"),
   firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
@@ -2301,9 +2300,8 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseAuthIntro) {
     els.firebaseAuthIntro.textContent = isSignIn
       ? "Sign in to your account."
-      : "Create an account to:";
+      : "Save your progress and learn from any device.";
   }
-  els.firebaseAuthBenefits?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthDivider) {
     els.firebaseAuthDivider.textContent = "or";
   }
