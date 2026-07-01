@@ -10281,6 +10281,19 @@ body:has(#villageMembersScreen:not(.hidden)) {
   align-items: start;
 }
 
+.village-page-row-secondary {
+  align-items: stretch;
+}
+
+.village-page-row-secondary > .village-page-card {
+  align-content: start;
+  height: 100%;
+}
+
+.village-memories-section {
+  width: 100%;
+}
+
 .village-page-picture {
   display: block;
 }
@@ -10484,6 +10497,10 @@ body:has(#villageMembersScreen:not(.hidden)) {
 .village-page-card .reward-card-grid {
   gap: 6px;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.village-memories-section .reward-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .village-page-card .village-memory-card {
