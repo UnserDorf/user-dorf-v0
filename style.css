@@ -10386,6 +10386,19 @@ button:active {
   font-weight: 700;
 }
 
+.village-contribution-list p:not(.village-empty-note) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: baseline;
+}
+
+.village-contribution-list p:not(.village-empty-note)::before {
+  content: "•";
+  color: var(--green);
+  font-weight: 900;
+}
+
 @media (max-width: 760px) {
   .village-members-screen {
     gap: 20px;

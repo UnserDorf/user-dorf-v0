@@ -4039,12 +4039,12 @@ function createVillageProgressSection(townCenter, sharedCoins) {
   progressTrack.replaceChildren(progressFill);
   section.replaceChildren(
     createVillageSectionHeading("Village Progress", "Shared progress from everyone in the village"),
+    progressTrack,
     createVillageSummaryGrid([
-      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
+      ["Total Village Coins", `${normalizeCoinCount(sharedCoins)}`],
       ["Current Stage", getTownCenterStageName(townCenter.current)],
       ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
     ]),
-    progressTrack,
     createTextElement(
       "p",
       "village-progress-note",
