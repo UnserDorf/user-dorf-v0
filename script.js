@@ -3993,7 +3993,7 @@ function createVillageMemberCard(profile, showContributionLabel = false) {
   card.replaceChildren(
     memberHeader,
     memberSummary,
-    createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
+    ...getVillageMemberStatusLines(profile).map((status) => createTextElement("span", "village-member-status", status))
   );
   return card;
 }
@@ -4091,7 +4091,6 @@ function createVillageMemberDetails(profile, contributionCoins) {
   const wrapper = document.createElement("span");
   wrapper.className = "village-member-details";
   wrapper.replaceChildren(
-    createTextElement("span", "", `Level: ${getVillageMemberLearningLevel(profile)}`),
     createTextElement("span", "", `${contributionCoins} coins contributed`)
   );
   return wrapper;
@@ -4217,6 +4216,13 @@ function getVillageMemberStatus(profile) {
   const coins = normalizeCoinCount(profile.coins);
   if (coins > 0) return "Active today";
   return "Just started";
+}
+
+function getVillageMemberStatusLines(profile) {
+  const streak = getDisplayStreak(profile).current;
+  const streakText = streak > 0 ? `🔥 ${streak}-day streak` : "🔥 No streak yet";
+  const activityText = profile?.lastStudyDate ? "Active today" : "Just started";
+  return [streakText, activityText];
 }
 
 function renderCoinChallenges() {
