@@ -10382,15 +10382,17 @@ button:active {
 
 @media (max-width: 760px) {
   .village-members-screen {
-    gap: 18px;
+    gap: 20px;
   }
 
   .village-members-screen .reward-page-heading {
     text-align: left;
+    border-radius: 22px;
+    padding: 18px;
   }
 
   .village-members-page-card {
-    gap: 18px;
+    gap: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
@@ -10398,36 +10400,65 @@ button:active {
   }
 
   .village-members-grid {
-    gap: 18px;
+    gap: 22px;
   }
 
   .village-page-header {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 18px;
   }
 
   .village-page-hero-media img {
-    min-height: 170px;
-    max-height: 220px;
+    min-height: 210px;
+    max-height: 280px;
+    border-radius: 22px;
   }
 
   .village-summary-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .village-page-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .village-page-section:not(.village-page-header),
   .village-page-hero-summary {
     width: 100%;
-    border-radius: 18px;
-    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255, 250, 241, 0.78);
+    padding: 18px;
+    box-shadow: 0 14px 34px rgba(73, 58, 35, 0.08);
+  }
+
+  .village-page-hero-summary .village-page-kicker,
+  .village-page-hero-summary h3 {
+    display: none;
   }
 
   .village-section-heading {
-    gap: 5px;
+    gap: 6px;
+  }
+
+  .village-section-heading h3,
+  .village-page-hero-summary h3 {
+    font-size: clamp(1.25rem, 6vw, 1.58rem);
+  }
+
+  .village-section-heading p {
+    font-size: 0.94rem;
+    line-height: 1.42;
+  }
+
+  .village-summary-grid span,
+  .village-contribution-list p {
+    padding: 13px 14px;
+  }
+
+  .village-summary-grid strong {
+    font-size: 1.05rem;
   }
 }
 

@@ -3993,10 +3993,9 @@ function createVillageHeaderSection(townCenter, sharedCoins, memberCount) {
     createTextElement("span", "village-page-kicker", "Your Village"),
     createTextElement("h3", "", `🏡 ${getVillageName()}`),
     createVillageSummaryGrid([
-      ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
-      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
       ["Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
-      ["Current Growth", getTownCenterStageName(townCenter.current)]
+      ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
+      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`]
     ])
   );
   section.replaceChildren(media, summary);
@@ -4025,7 +4024,7 @@ function createVillageProgressSection(townCenter, sharedCoins) {
   section.replaceChildren(
     createVillageSectionHeading("Village Progress", "Shared progress from everyone in the village"),
     createVillageSummaryGrid([
-      ["Total Village Coins", `${normalizeCoinCount(sharedCoins)}`],
+      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
       ["Current Stage", getTownCenterStageName(townCenter.current)],
       ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
     ]),
