@@ -3940,7 +3940,7 @@ function renderVillageMembersPage() {
     els.villageMembersTitle.textContent = `🏡 ${getVillageName()}`;
   }
   if (els.villageMembersSummary) {
-    els.villageMembersSummary.textContent = `${memberCount} ${memberCount === 1 ? "learner is" : "learners are"} helping ${getVillageName()} grow.`;
+    els.villageMembersSummary.textContent = "";
   }
   if (!els.villageMembersList) return;
   els.villageMembersList.replaceChildren(
@@ -4006,7 +4006,7 @@ function createVillageOverviewSection(townCenter, sharedCoins, memberCount) {
   const section = document.createElement("section");
   section.className = "village-page-section village-page-card village-overview-card";
   section.replaceChildren(
-    createVillageSectionHeading("Village Overview", "A snapshot of your shared village"),
+    createVillageSectionHeading("Village Overview"),
     createVillageSummaryList([
       ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
       ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
@@ -4029,7 +4029,7 @@ function createVillageMembersSection(members) {
   const section = document.createElement("section");
   section.className = "village-page-section village-page-card";
   section.replaceChildren(
-    createVillageSectionHeading("Village Members", `${members.length || 1} learners contributing`),
+    createVillageSectionHeading("Village Members"),
     createVillageCardGrid(members.map((profile) => createVillageMemberCard(profile, true)))
   );
   return section;
@@ -4045,7 +4045,7 @@ function createVillageProgressSection(townCenter, sharedCoins) {
   progressFill.style.width = `${townCenter.progressPercent}%`;
   progressTrack.replaceChildren(progressFill);
   section.replaceChildren(
-    createVillageSectionHeading("Village Progress", "Shared progress from everyone in the village"),
+    createVillageSectionHeading("Village Progress"),
     progressTrack,
     createTextElement(
       "p",
@@ -4065,7 +4065,7 @@ function createVillageMemoriesSection(sharedCoins) {
   const section = document.createElement("section");
   section.className = "village-page-section village-page-card village-memories-section";
   section.replaceChildren(
-    createVillageSectionHeading("Village Memories", `${unlockedCount} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
+    createVillageSectionHeading("Village Memories"),
     createVillageCardGrid(VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins)))
   );
   return section;
@@ -4084,7 +4084,7 @@ function createVillageRecentContributionsSection(members) {
     )
   );
   section.replaceChildren(
-    createVillageSectionHeading("Recent Contributions", "Latest positive activity"),
+    createVillageSectionHeading("Recent Contributions"),
     list
   );
   return section;
@@ -4104,10 +4104,9 @@ function createVillageMemberDetails(profile, contributionCoins) {
 function createVillageSectionHeading(title, summary) {
   const heading = document.createElement("div");
   heading.className = "village-section-heading";
-  heading.replaceChildren(
-    createTextElement("h3", "", title),
-    createTextElement("p", "", summary)
-  );
+  const children = [createTextElement("h3", "", title)];
+  if (summary) children.push(createTextElement("p", "", summary));
+  heading.replaceChildren(...children);
   return heading;
 }
 
