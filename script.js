@@ -3947,10 +3947,10 @@ function renderVillageMembersPage() {
     createVillagePictureSection(townCenter),
     createVillageTwoColumnRow(
       createVillageOverviewSection(townCenter, sharedCoins, memberCount),
-      createVillageMembersSection(members)
+      createVillageProgressSection(townCenter, sharedCoins)
     ),
     createVillageTwoColumnRow(
-      createVillageProgressSection(townCenter, sharedCoins),
+      createVillageMembersSection(members),
       createVillageRecentContributionsSection(members),
       "village-page-row-secondary"
     ),
