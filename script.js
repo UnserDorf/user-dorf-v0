@@ -3300,6 +3300,7 @@ function showLandingScreen() {
   currentView = "landing";
   currentProfileId = "";
   pendingProfileId = "";
+  hideAuthenticatedAppViews();
   els.profileScreen.classList.add("hidden");
   els.appShell.classList.remove("locked");
   els.appShell.classList.remove("onboarding-mode");
@@ -3311,8 +3312,17 @@ function showLandingScreen() {
   setChallengeBackButtons(false, false);
   els.landingScreen?.classList.remove("hidden");
   els.demoScreen?.classList.add("hidden");
+  closeSettingsMenu();
+  hideRewardDetail();
+  hideRewardDebugPage();
+  resetLoggedOutTransientUi();
+  scrollPageToTop(els.landingScreen);
+}
+
+function hideAuthenticatedAppViews() {
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
@@ -3326,7 +3336,15 @@ function showLandingScreen() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
-  scrollPageToTop(els.landingScreen);
+}
+
+function resetLoggedOutTransientUi() {
+  window.clearTimeout(achievementNotificationTimer);
+  achievementNotificationTimer = 0;
+  achievementNotificationShowing = false;
+  achievementNotificationQueue = [];
+  pendingCelebrations = [];
+  els.levelCelebration?.classList.add("hidden");
 }
 
 function showDemoScreen() {
