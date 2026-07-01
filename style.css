@@ -233,16 +233,28 @@
 }
 
 .dashboard-village-explore {
+  min-height: 42px;
+  width: min(240px, 100%);
+  display: inline-grid;
+  place-items: center;
+  justify-self: center;
+  margin-top: 4px;
+  border: 1px solid rgba(65, 125, 87, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.58);
   color: var(--green);
   font-size: 0.96rem;
   font-weight: 820;
   line-height: 1.2;
+  padding: 0 18px;
+  box-shadow: 0 8px 18px rgba(73, 58, 35, 0.06);
 }
 
 .dashboard-village-link:hover .dashboard-village-explore,
 .dashboard-village-link:focus-visible .dashboard-village-explore {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  border-color: rgba(65, 125, 87, 0.64);
+  background: rgba(239, 247, 238, 0.72);
+  box-shadow: 0 10px 22px rgba(73, 58, 35, 0.09);
 }
 
 .dashboard-village-copy {
@@ -10205,6 +10217,8 @@ button:active {
   }
 
   .dashboard-village-explore {
+    min-height: 44px;
+    width: min(230px, 92%);
     font-size: 0.9rem;
   }
 
@@ -10220,19 +10234,39 @@ button:active {
 }
 
 /* Village page community overview. */
+body:has(#villageMembersScreen:not(.hidden)) {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.app-shell:has(#villageMembersScreen:not(.hidden)) {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+  grid-template-rows: auto auto auto auto auto auto;
+}
+
 .village-members-screen {
   width: min(var(--dashboard-width), 100%);
+  grid-row: 2 / 6;
+  justify-self: center;
+  min-height: 0;
+  overflow: visible;
 }
 
 .village-members-page-card {
   display: grid;
+  grid-auto-rows: auto;
   gap: clamp(16px, 2.6vw, 26px);
+  overflow: visible;
 }
 
 .village-members-grid {
   display: grid;
   grid-template-columns: 1fr;
+  grid-auto-rows: auto;
   gap: clamp(16px, 2.6vw, 26px);
+  overflow: visible;
 }
 
 .village-page-section {
