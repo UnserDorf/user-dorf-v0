@@ -550,6 +550,7 @@ const els = {
   dashboardVillageMembersPreview: document.querySelector("#dashboardVillageMembersPreview"),
   villageMembersScreen: document.querySelector("#villageMembersScreen"),
   villageMembersBack: document.querySelector("#villageMembersBack"),
+  villageMembersTitle: document.querySelector("#villageMembersTitle"),
   villageMembersSummary: document.querySelector("#villageMembersSummary"),
   villageMembersList: document.querySelector("#villageMembersList"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
@@ -3935,6 +3936,9 @@ function renderVillageMembersPage() {
   const memberCount = members.length || 1;
   const sharedCoins = getGroupCoinTotal();
   const townCenter = getTownCenterProgress(sharedCoins);
+  if (els.villageMembersTitle) {
+    els.villageMembersTitle.textContent = `🏡 ${getVillageName()}`;
+  }
   if (els.villageMembersSummary) {
     els.villageMembersSummary.textContent = `${memberCount} ${memberCount === 1 ? "learner is" : "learners are"} helping ${getVillageName()} grow.`;
   }
