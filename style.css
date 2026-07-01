@@ -10239,25 +10239,31 @@ button:active {
   gap: 14px;
 }
 
-.village-page-header {
-  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.75fr);
-  align-items: stretch;
+.village-page-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(16px, 2.6vw, 26px);
+  align-items: start;
+}
+
+.village-page-picture {
+  display: block;
 }
 
 .village-page-hero-media img {
   display: block;
   width: 100%;
-  min-height: clamp(240px, 30vw, 420px);
-  height: 100%;
+  min-height: clamp(280px, 34vw, 460px);
+  max-height: 520px;
+  height: auto;
+  aspect-ratio: 16 / 7.5;
   border-radius: 18px;
   object-fit: cover;
   object-position: center;
   box-shadow: 0 18px 42px rgba(73, 58, 35, 0.14);
 }
 
-.village-page-hero-summary,
-.village-progress-section,
-.village-page-section:not(.village-page-header) {
+.village-page-card {
   border: 1px solid rgba(190, 177, 153, 0.22);
   border-radius: 18px;
   background: rgba(255, 250, 241, 0.62);
@@ -10403,14 +10409,15 @@ button:active {
     gap: 22px;
   }
 
-  .village-page-header {
+  .village-page-row {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 22px;
   }
 
   .village-page-hero-media img {
     min-height: 210px;
     max-height: 280px;
+    aspect-ratio: 16 / 10;
     border-radius: 22px;
   }
 
@@ -10424,8 +10431,7 @@ button:active {
     gap: 12px;
   }
 
-  .village-page-section:not(.village-page-header),
-  .village-page-hero-summary {
+  .village-page-card {
     width: 100%;
     border-radius: 22px;
     background: rgba(255, 250, 241, 0.78);
@@ -10433,17 +10439,11 @@ button:active {
     box-shadow: 0 14px 34px rgba(73, 58, 35, 0.08);
   }
 
-  .village-page-hero-summary .village-page-kicker,
-  .village-page-hero-summary h3 {
-    display: none;
-  }
-
   .village-section-heading {
     gap: 6px;
   }
 
-  .village-section-heading h3,
-  .village-page-hero-summary h3 {
+  .village-section-heading h3 {
     font-size: clamp(1.25rem, 6vw, 1.58rem);
   }
 

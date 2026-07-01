@@ -3944,10 +3944,15 @@ function renderVillageMembersPage() {
   }
   if (!els.villageMembersList) return;
   els.villageMembersList.replaceChildren(
-    createVillageHeaderSection(townCenter, sharedCoins, memberCount),
-    createVillageMembersSection(members),
-    createVillageProgressSection(townCenter, sharedCoins),
-    createVillageMemoriesSection(sharedCoins),
+    createVillagePictureSection(townCenter),
+    createVillageTwoColumnRow(
+      createVillageOverviewSection(townCenter, sharedCoins, memberCount),
+      createVillageMembersSection(members)
+    ),
+    createVillageTwoColumnRow(
+      createVillageProgressSection(townCenter, sharedCoins),
+      createVillageMemoriesSection(sharedCoins)
+    ),
     createVillageRecentContributionsSection(members)
   );
 }
@@ -3978,33 +3983,44 @@ function getVillageContributionCoins(profile) {
   return explicitContribution > 0 ? explicitContribution : normalizeCoinCount(profile?.coins);
 }
 
-function createVillageHeaderSection(townCenter, sharedCoins, memberCount) {
+function createVillagePictureSection(townCenter) {
   const section = document.createElement("section");
-  section.className = "village-page-section village-page-header";
+  section.className = "village-page-picture";
   const media = document.createElement("div");
   media.className = "village-page-hero-media";
   const image = document.createElement("img");
   image.loading = "lazy";
   setTownCenterImage(image, townCenter.current);
   media.replaceChildren(image);
-  const summary = document.createElement("div");
-  summary.className = "village-page-hero-summary";
-  summary.replaceChildren(
-    createTextElement("span", "village-page-kicker", "Your Village"),
-    createTextElement("h3", "", `🏡 ${getVillageName()}`),
+  section.replaceChildren(media);
+  return section;
+}
+
+function createVillageOverviewSection(townCenter, sharedCoins, memberCount) {
+  const section = document.createElement("section");
+  section.className = "village-page-section village-page-card village-overview-card";
+  section.replaceChildren(
+    createVillageSectionHeading("Village Overview", "A snapshot of your shared village"),
     createVillageSummaryGrid([
-      ["Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
       ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
-      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`]
+      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
+      ["Current Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
+      ["Current Growth", getTownCenterStageName(townCenter.current)]
     ])
   );
-  section.replaceChildren(media, summary);
   return section;
+}
+
+function createVillageTwoColumnRow(...sections) {
+  const row = document.createElement("div");
+  row.className = "village-page-row";
+  row.replaceChildren(...sections);
+  return row;
 }
 
 function createVillageMembersSection(members) {
   const section = document.createElement("section");
-  section.className = "village-page-section";
+  section.className = "village-page-section village-page-card";
   section.replaceChildren(
     createVillageSectionHeading("Village Members", `${members.length || 1} learners contributing`),
     createVillageCardGrid(members.map((profile) => createVillageMemberCard(profile, true)))
@@ -4015,7 +4031,7 @@ function createVillageMembersSection(members) {
 function createVillageProgressSection(townCenter, sharedCoins) {
   const nextMemory = getNextVillageMemory(sharedCoins);
   const section = document.createElement("section");
-  section.className = "village-page-section village-progress-section";
+  section.className = "village-page-section village-page-card village-progress-section";
   const progressTrack = document.createElement("div");
   progressTrack.className = "town-center-progress-track";
   const progressFill = document.createElement("span");
@@ -4041,7 +4057,7 @@ function createVillageProgressSection(townCenter, sharedCoins) {
 function createVillageMemoriesSection(sharedCoins) {
   const unlockedCount = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins).length;
   const section = document.createElement("section");
-  section.className = "village-page-section";
+  section.className = "village-page-section village-page-card";
   section.replaceChildren(
     createVillageSectionHeading("Village Memories", `${unlockedCount} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
     createVillageCardGrid(VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins)))
@@ -4052,7 +4068,7 @@ function createVillageMemoriesSection(sharedCoins) {
 function createVillageRecentContributionsSection(members) {
   const activities = getVillageRecentContributions(members);
   const section = document.createElement("section");
-  section.className = "village-page-section";
+  section.className = "village-page-section village-page-card village-recent-section";
   const list = document.createElement("div");
   list.className = "village-contribution-list";
   list.replaceChildren(
