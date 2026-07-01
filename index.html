@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Unser Dorf">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Unser Dorf</title>
-    <link rel="stylesheet" href="style.css?v=202">
+    <link rel="stylesheet" href="style.css?v=203">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -223,10 +223,9 @@
         </div>
         <div class="top-actions">
           <button class="ghost-button" id="homeButton" type="button">Home</button>
-          <button class="ghost-button" id="switchProfile" type="button"><span class="label-full">Switch Profile</span><span class="label-short">Profile</span></button>
           <div class="settings-menu">
             <button class="ghost-button settings-toggle-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Settings menu">
-              <span class="settings-label-desktop">Settings</span>
+              <span class="settings-label-desktop">More</span>
               <span class="settings-label-tablet">More</span>
               <span class="settings-label-mobile" aria-hidden="true">☰</span>
             </button>
@@ -234,7 +233,6 @@
               <section class="settings-section settings-main-menu" id="settingsMainMenu" aria-label="Navigation menu">
                 <h3>Menu</h3>
                 <button class="mobile-only-menu-item" type="button" id="mobileMenuHomeButton">🏠 Home</button>
-                <button class="mobile-only-menu-item" type="button" id="mobileMenuProfileButton">👤 Profile</button>
                 <button type="button" id="mobileMenuSettingsButton">⚙️ Settings</button>
                 <button class="mobile-menu-logout" type="button" id="mobileLogoutButton">🚪 Log Out</button>
               </section>
@@ -275,7 +273,6 @@
               </div>
             </div>
           </div>
-          <button class="ghost-button" id="logoutButton" type="button">Log Out</button>
         </div>
       </header>
 
@@ -964,6 +961,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=190"></script>
+    <script type="module" src="script.js?v=192"></script>
   </body>
 </html>

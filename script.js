@@ -6718,15 +6718,11 @@ function bindEvents() {
     openFlashcardDeck(button.dataset.flashcardDeckLevel, button.dataset.flashcardDeckCategory);
   });
 
-  els.switchProfile.addEventListener("click", logoutToProfileScreen);
-  els.logoutButton.addEventListener("click", signOutOfFirebase);
+  els.switchProfile?.addEventListener("click", logoutToProfileScreen);
+  els.logoutButton?.addEventListener("click", signOutOfFirebase);
   els.mobileMenuHomeButton?.addEventListener("click", () => {
     closeSettingsMenu();
     showDashboard();
-  });
-  els.mobileMenuProfileButton?.addEventListener("click", () => {
-    closeSettingsMenu();
-    logoutToProfileScreen();
   });
   els.mobileMenuSettingsButton?.addEventListener("click", showSettingsDetailView);
   els.settingsMenuBack?.addEventListener("click", showSettingsMenuView);
