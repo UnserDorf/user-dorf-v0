@@ -3951,9 +3951,9 @@ function renderVillageMembersPage() {
     ),
     createVillageTwoColumnRow(
       createVillageProgressSection(townCenter, sharedCoins),
-      createVillageMemoriesSection(sharedCoins)
+      createVillageRecentContributionsSection(members)
     ),
-    createVillageRecentContributionsSection(members)
+    createVillageMemoriesSection(sharedCoins)
   );
 }
 
