@@ -3969,9 +3969,14 @@ function createVillageMemberCard(profile, showContributionLabel = false) {
         "village-member-coins",
         `${contributionCoins} ${showContributionLabel ? "contribution " : ""}coins`
       );
-  card.replaceChildren(
+  const memberHeader = document.createElement("span");
+  memberHeader.className = "village-member-header";
+  memberHeader.replaceChildren(
     createAvatarElement(profile, "village-member-avatar"),
-    createTextElement("strong", "village-member-name", getVillageDisplayName(profile)),
+    createTextElement("strong", "village-member-name", getVillageDisplayName(profile))
+  );
+  card.replaceChildren(
+    memberHeader,
     memberSummary,
     createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
   );

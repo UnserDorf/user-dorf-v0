@@ -10257,7 +10257,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
 .village-members-page-card {
   display: grid;
   grid-auto-rows: auto;
-  gap: clamp(12px, 2vw, 18px);
+  gap: clamp(10px, 1.6vw, 14px);
   overflow: visible;
 }
 
@@ -10265,19 +10265,19 @@ body:has(#villageMembersScreen:not(.hidden)) {
   display: grid;
   grid-template-columns: 1fr;
   grid-auto-rows: auto;
-  gap: clamp(12px, 2vw, 18px);
+  gap: clamp(10px, 1.6vw, 14px);
   overflow: visible;
 }
 
 .village-page-section {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 .village-page-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(12px, 2vw, 18px);
+  gap: clamp(10px, 1.6vw, 14px);
   align-items: start;
 }
 
@@ -10303,7 +10303,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
   border-radius: 18px;
   background: rgba(255, 250, 241, 0.62);
   box-shadow: 0 12px 28px rgba(73, 58, 35, 0.07);
-  padding: clamp(12px, 1.8vw, 16px);
+  padding: clamp(10px, 1.45vw, 14px);
 }
 
 .village-page-hero-summary {
@@ -10377,15 +10377,15 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
 .village-summary-list.two-column {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 18px;
+  column-gap: 14px;
 }
 
 .village-summary-list span {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 10px;
+  gap: 8px;
   align-items: baseline;
-  padding: 7px 0;
+  padding: 4px 0;
   border-bottom: 1px solid rgba(190, 177, 153, 0.2);
 }
 
@@ -10396,14 +10396,14 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
 .village-summary-list small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 820;
   line-height: 1.18;
 }
 
 .village-summary-list strong {
   color: var(--ink);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   line-height: 1.18;
   font-weight: 820;
 }
@@ -10420,56 +10420,59 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
 .village-page-card .village-member-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  column-gap: 10px;
-  row-gap: 2px;
-  padding: 10px;
+  gap: 3px;
+  padding: 7px 8px;
   border-radius: 12px;
 }
 
+.village-member-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .village-member-avatar {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
   border-radius: 999px;
   background: rgba(230, 244, 234, 0.72);
-  font-size: 1.18rem;
-}
-
-.village-page-card .village-member-avatar {
-  grid-row: 1 / span 3;
+  font-size: 0.98rem;
 }
 
 .village-page-card .village-member-name {
-  font-size: 0.94rem;
+  min-width: 0;
+  font-size: 0.9rem;
   line-height: 1.12;
 }
 
 .village-member-details {
   display: grid;
-  gap: 1px;
+  gap: 0;
   color: var(--muted);
-  font-size: 0.76rem;
-  line-height: 1.18;
+  font-size: 0.73rem;
+  line-height: 1.14;
   font-weight: 740;
 }
 
 .village-page-card .village-member-status {
-  font-size: 0.76rem;
-  line-height: 1.18;
+  font-size: 0.73rem;
+  line-height: 1.14;
 }
 
 .village-progress-note,
 .village-empty-note {
   margin: 0;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 650;
 }
 
 .village-progress-section .town-center-progress-track {
+  height: 8px;
   margin: 0;
 }
 
@@ -10479,13 +10482,13 @@ body:has(#villageMembersScreen:not(.hidden)) {
 }
 
 .village-page-card .reward-card-grid {
-  gap: 8px;
+  gap: 6px;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .village-page-card .village-memory-card {
-  gap: 5px;
-  padding: 8px;
+  gap: 4px;
+  padding: 7px;
   border-radius: 12px;
 }
 
@@ -10495,30 +10498,30 @@ body:has(#villageMembersScreen:not(.hidden)) {
 }
 
 .village-page-card .village-memory-card .reward-image-placeholder {
-  min-height: 54px;
+  min-height: 46px;
   border-radius: 8px;
   font-size: 1rem;
 }
 
 .village-page-card .village-memory-card .reward-image-frame,
 .village-page-card .village-memory-card .reward-image-frame img {
-  min-height: 64px;
-  height: 64px;
+  min-height: 54px;
+  height: 54px;
 }
 
 .village-page-card .village-memory-card strong {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   line-height: 1.08;
 }
 
 .village-page-card .village-memory-card span:not(.reward-image-placeholder) {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   line-height: 1.16;
 }
 
 .village-contribution-list {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 
 .village-contribution-list p {
@@ -10526,8 +10529,8 @@ body:has(#villageMembersScreen:not(.hidden)) {
   border-radius: 10px;
   background: rgba(255, 253, 248, 0.72);
   color: var(--ink);
-  padding: 7px 10px;
-  font-size: 0.84rem;
+  padding: 6px 8px;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -10546,7 +10549,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
 @media (max-width: 760px) {
   .village-members-screen {
-    gap: 16px;
+    gap: 12px;
   }
 
   .village-members-screen .reward-page-heading {
@@ -10564,12 +10567,12 @@ body:has(#villageMembersScreen:not(.hidden)) {
   }
 
   .village-members-grid {
-    gap: 14px;
+    gap: 10px;
   }
 
   .village-page-row {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 10px;
   }
 
   .village-page-hero-media img {
@@ -10593,7 +10596,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
     width: 100%;
     border-radius: 22px;
     background: rgba(255, 250, 241, 0.78);
-    padding: 14px;
+    padding: 11px;
     box-shadow: 0 14px 34px rgba(73, 58, 35, 0.08);
   }
 
@@ -10602,7 +10605,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
   }
 
   .village-section-heading h3 {
-    font-size: clamp(1.12rem, 5.3vw, 1.42rem);
+    font-size: clamp(1.05rem, 5vw, 1.34rem);
   }
 
   .village-section-heading p {
@@ -10612,7 +10615,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
   .village-summary-grid span,
   .village-contribution-list p {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
 
   .village-summary-grid strong {
@@ -10634,25 +10637,25 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
   .village-page-card .reward-card-grid {
     grid-template-columns: 1fr;
-    gap: 7px;
+    gap: 6px;
   }
 
   .village-page-card .village-memory-card {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 64px minmax(0, 1fr);
     align-items: center;
-    column-gap: 9px;
+    column-gap: 8px;
   }
 
   .village-page-card .village-memory-card .reward-image-placeholder {
     grid-row: 1 / span 3;
-    min-height: 56px;
-    height: 56px;
+    min-height: 48px;
+    height: 48px;
   }
 
   .village-page-card .village-memory-card .reward-image-frame,
   .village-page-card .village-memory-card .reward-image-frame img {
-    min-height: 56px;
-    height: 56px;
+    min-height: 48px;
+    height: 48px;
   }
 }
 
