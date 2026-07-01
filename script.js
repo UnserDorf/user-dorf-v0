@@ -4001,12 +4001,12 @@ function createVillageOverviewSection(townCenter, sharedCoins, memberCount) {
   section.className = "village-page-section village-page-card village-overview-card";
   section.replaceChildren(
     createVillageSectionHeading("Village Overview", "A snapshot of your shared village"),
-    createVillageSummaryGrid([
+    createVillageSummaryList([
       ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
       ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
       ["Current Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
       ["Current Growth", getTownCenterStageName(townCenter.current)]
-    ])
+    ], "two-column")
   );
   return section;
 }
@@ -4040,16 +4040,15 @@ function createVillageProgressSection(townCenter, sharedCoins) {
   section.replaceChildren(
     createVillageSectionHeading("Village Progress", "Shared progress from everyone in the village"),
     progressTrack,
-    createVillageSummaryGrid([
-      ["Total Village Coins", `${normalizeCoinCount(sharedCoins)}`],
-      ["Current Stage", getTownCenterStageName(townCenter.current)],
-      ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
-    ]),
     createTextElement(
       "p",
       "village-progress-note",
-      townCenter.next ? `${sharedCoins} / ${townCenter.next.coins} coins toward the next village stage` : "All village stages are complete"
-    )
+      townCenter.next ? `${normalizeCoinCount(sharedCoins)} / ${townCenter.next.coins} coins` : `${normalizeCoinCount(sharedCoins)} coins`
+    ),
+    createVillageSummaryList([
+      ["Current Stage", getTownCenterStageName(townCenter.current)],
+      ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
+    ])
   );
   return section;
 }
@@ -4117,6 +4116,20 @@ function createVillageSummaryGrid(items) {
     return item;
   }));
   return grid;
+}
+
+function createVillageSummaryList(items, modifier = "") {
+  const list = document.createElement("div");
+  list.className = `village-summary-list${modifier ? ` ${modifier}` : ""}`;
+  list.replaceChildren(...items.map(([label, value]) => {
+    const item = document.createElement("span");
+    item.replaceChildren(
+      createTextElement("small", "", label),
+      createTextElement("strong", "", value)
+    );
+    return item;
+  }));
+  return list;
 }
 
 function createVillageCardGrid(cards) {
