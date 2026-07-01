@@ -213,6 +213,38 @@
   font-weight: 820;
 }
 
+.dashboard-village-link {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashboard-village-link:focus-visible {
+  outline: 3px solid rgba(65, 125, 87, 0.32);
+  outline-offset: 6px;
+  border-radius: 18px;
+}
+
+.dashboard-village-explore {
+  color: var(--green);
+  font-size: 0.96rem;
+  font-weight: 820;
+  line-height: 1.2;
+}
+
+.dashboard-village-link:hover .dashboard-village-explore,
+.dashboard-village-link:focus-visible .dashboard-village-explore {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .dashboard-screen > .dashboard-heading .dashboard-welcome-subtitle {
   margin-top: 2px;
 }
@@ -10117,6 +10149,34 @@ button:active {
   .dashboard-screen > .dashboard-heading > div:last-child,
   .dashboard-village-stage {
     justify-content: center;
+  }
+
+  .dashboard-screen > .dashboard-heading {
+    gap: 10px;
+  }
+
+  .dashboard-screen > .dashboard-heading > div:last-child {
+    gap: 5px;
+  }
+
+  .dashboard-screen > .dashboard-heading .dashboard-village-image-wrap {
+    height: clamp(128px, 35vw, 150px);
+    max-height: 150px;
+  }
+
+  .dashboard-village-link {
+    gap: 7px;
+    text-align: center;
+  }
+
+  .dashboard-village-explore {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-village-stage {
+    gap: 6px;
+    margin-top: 0;
+    font-size: 0.9rem;
   }
 
   .dashboard-progress-row {

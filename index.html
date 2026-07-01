@@ -346,18 +346,20 @@
 
       <section class="dashboard-screen" id="dashboardScreen" aria-label="Home dashboard">
         <div class="dashboard-heading">
-          <div class="dashboard-village-image-wrap" aria-hidden="true">
-            <img id="townCenterDashboardImage" src="assets/town-center-stage-1.png" alt="">
-          </div>
+          <button class="dashboard-village-link" type="button" data-dashboard-action="town-center" aria-label="Explore village">
+            <span class="dashboard-village-image-wrap" aria-hidden="true">
+              <img id="townCenterDashboardImage" src="assets/town-center-stage-1.png" alt="">
+            </span>
+            <span class="dashboard-village-explore">Explore Village →</span>
+          </button>
           <div>
             <h2 id="dashboardVillageName">🏡 Unser Dorf</h2>
             <p id="dashboardWelcome">Welcome back</p>
             <p class="dashboard-village-stage">
               <span id="townCenterDashboardStageCount">Stage 1 / 5</span>
               <span aria-hidden="true">•</span>
-              <span id="townCenterDashboardStage">Open Village Green</span>
+              <span id="townCenterDashboardStage">1 Village Member</span>
             </p>
-            <p class="dashboard-welcome-subtitle" id="dashboardWelcomeSubtitle">Every word helps your village grow.</p>
             <span class="sr-only" id="dashboardFamilyCoins">0</span>
           </div>
         </div>

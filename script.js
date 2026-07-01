@@ -3778,9 +3778,13 @@ function renderRewardPreviewText(container, countText, latestElement) {
 
 function renderDashboardTownCenter(townCenter, sharedCoins) {
   if (!townCenter?.current) return;
-  const stageName = getTownCenterStageName(townCenter.current);
-  if (els.townCenterDashboardStage) els.townCenterDashboardStage.textContent = stageName;
-  if (els.townCenterDashboardStageCount) els.townCenterDashboardStageCount.textContent = `Stage ${townCenter.current.stage} / ${TOWN_CENTER_STAGES.length}`;
+  const villageMemberCount = getOrderedVillageMembers().length || 1;
+  if (els.townCenterDashboardStage) {
+    els.townCenterDashboardStage.textContent = `${villageMemberCount} Village ${villageMemberCount === 1 ? "Member" : "Members"}`;
+  }
+  if (els.townCenterDashboardStageCount) {
+    els.townCenterDashboardStageCount.textContent = `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`;
+  }
   if (els.townCenterDashboardImage) {
     setTownCenterImage(els.townCenterDashboardImage, townCenter.current);
   }
