@@ -5296,9 +5296,9 @@ select,
     min-height: 50px;
   }
 
-  .village-members-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+	  .village-members-grid {
+	    grid-template-columns: 1fr;
+	  }
 
   body {
     overflow: auto;
@@ -10231,6 +10231,7 @@ button:active {
 
 .village-members-grid {
   display: grid;
+  grid-template-columns: 1fr;
   gap: clamp(16px, 2.6vw, 26px);
 }
 
