@@ -3946,14 +3946,10 @@ function renderVillageMembersPage() {
   els.villageMembersList.replaceChildren(
     createVillagePictureSection(townCenter),
     createVillageTwoColumnRow(
-      createVillageOverviewSection(townCenter, sharedCoins, memberCount),
-      createVillageProgressSection(townCenter, sharedCoins)
+      createVillageProgressSection(townCenter, sharedCoins, memberCount),
+      createVillageMembersSection(members)
     ),
-    createVillageTwoColumnRow(
-      createVillageMembersSection(members),
-      createVillageRecentContributionsSection(members),
-      "village-page-row-secondary"
-    ),
+    createVillageRecentContributionsSection(members),
     createVillageMemoriesSection(sharedCoins)
   );
 }
@@ -4002,21 +3998,6 @@ function createVillagePictureSection(townCenter) {
   return section;
 }
 
-function createVillageOverviewSection(townCenter, sharedCoins, memberCount) {
-  const section = document.createElement("section");
-  section.className = "village-page-section village-page-card village-overview-card";
-  section.replaceChildren(
-    createVillageSectionHeading("Village Overview"),
-    createVillageSummaryList([
-      ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
-      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
-      ["Current Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
-      ["Current Growth", getTownCenterStageName(townCenter.current)]
-    ], "two-column")
-  );
-  return section;
-}
-
 function createVillageTwoColumnRow(...sections) {
   const modifier = typeof sections.at(-1) === "string" ? sections.pop() : "";
   const row = document.createElement("div");
@@ -4035,7 +4016,7 @@ function createVillageMembersSection(members) {
   return section;
 }
 
-function createVillageProgressSection(townCenter, sharedCoins) {
+function createVillageProgressSection(townCenter, sharedCoins, memberCount) {
   const nextMemory = getNextVillageMemory(sharedCoins);
   const section = document.createElement("section");
   section.className = "village-page-section village-page-card village-progress-section";
@@ -4047,15 +4028,13 @@ function createVillageProgressSection(townCenter, sharedCoins) {
   section.replaceChildren(
     createVillageSectionHeading("Village Progress"),
     progressTrack,
-    createTextElement(
-      "p",
-      "village-progress-note",
-      townCenter.next ? `${normalizeCoinCount(sharedCoins)} / ${townCenter.next.coins} coins` : `${normalizeCoinCount(sharedCoins)} coins`
-    ),
     createVillageSummaryList([
-      ["Current Stage", getTownCenterStageName(townCenter.current)],
-      ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
-    ])
+      ["Village Coins", townCenter.next ? `${normalizeCoinCount(sharedCoins)} / ${townCenter.next.coins}` : `${normalizeCoinCount(sharedCoins)}`],
+      ["Current Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
+      ["Current Growth", getTownCenterStageName(townCenter.current)],
+      ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"],
+      ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`]
+    ], "two-column")
   );
   return section;
 }
@@ -4095,7 +4074,6 @@ function createVillageMemberDetails(profile, contributionCoins) {
   wrapper.className = "village-member-details";
   wrapper.replaceChildren(
     createTextElement("span", "", `Level: ${getVillageMemberLearningLevel(profile)}`),
-    createTextElement("span", "", `House: ${getVillageMemberHouseStage(profile)}`),
     createTextElement("span", "", `${contributionCoins} coins contributed`)
   );
   return wrapper;

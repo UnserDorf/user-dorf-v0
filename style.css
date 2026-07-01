@@ -10334,15 +10334,7 @@ body:has(#villageMembersScreen:not(.hidden)) {
   align-items: start;
 }
 
-.village-page-row-secondary {
-  align-items: stretch;
-}
-
-.village-page-row-secondary > .village-page-card {
-  align-content: start;
-  height: 100%;
-}
-
+.village-recent-section,
 .village-memories-section {
   width: 100%;
 }
