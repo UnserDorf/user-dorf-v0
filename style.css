@@ -10549,6 +10549,49 @@ body:has(#villageMembersScreen:not(.hidden)) {
   font-weight: 840;
 }
 
+@media (min-width: 761px) {
+  .village-progress-section {
+    gap: 10px;
+    padding: clamp(14px, 1.8vw, 18px);
+  }
+
+  .village-progress-section .town-center-progress-track {
+    margin: 2px 0 4px;
+  }
+
+  .village-progress-section .village-summary-list.two-column {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .village-progress-section .village-summary-list span {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    align-items: start;
+    padding: 8px 0;
+  }
+
+  .village-progress-section .village-summary-list.two-column span:nth-last-child(-n + 2) {
+    border-bottom: 1px solid rgba(190, 177, 153, 0.2);
+  }
+
+  .village-progress-section .village-summary-list span:last-child {
+    border-bottom: 0;
+  }
+
+  .village-progress-section .village-summary-list small {
+    font-size: 0.72rem;
+    letter-spacing: 0;
+  }
+
+  .village-progress-section .village-summary-list strong {
+    font-size: 0.92rem;
+    line-height: 1.24;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+}
+
 .village-page-card .reward-card-grid {
   gap: 8px;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
