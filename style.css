@@ -10272,6 +10272,37 @@ body:has(#villageMembersScreen:not(.hidden)) {
   overflow: visible;
 }
 
+.village-members-screen .village-page-heading {
+  display: block;
+  margin: 0;
+  padding: 0 0 clamp(8px, 1.4vw, 14px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.village-members-screen .village-page-heading .reward-title-stack {
+  gap: 8px;
+}
+
+.village-members-screen .village-page-heading h2 {
+  margin: clamp(8px, 1.6vw, 14px) 0 0;
+  color: var(--green);
+  font-size: clamp(1.75rem, 3.2vw, 2.45rem);
+  font-weight: 840;
+  line-height: 1.08;
+}
+
+.village-members-screen .village-page-heading p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.45vw, 1.06rem);
+  font-weight: 650;
+  line-height: 1.35;
+}
+
 .village-members-page-card {
   display: grid;
   grid-auto-rows: auto;
@@ -10587,10 +10618,10 @@ body:has(#villageMembersScreen:not(.hidden)) {
     gap: 12px;
   }
 
-  .village-members-screen .reward-page-heading {
+  .village-members-screen .village-page-heading {
     text-align: left;
-    border-radius: 22px;
-    padding: 18px;
+    padding: 0 0 8px;
+    border-radius: 0;
   }
 
   .village-members-page-card {
