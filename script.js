@@ -3932,26 +3932,38 @@ function showVillageMembers() {
 
 function renderVillageMembersPage() {
   const members = getOrderedVillageMembers();
+  const memberCount = members.length || 1;
+  const sharedCoins = getGroupCoinTotal();
+  const townCenter = getTownCenterProgress(sharedCoins);
   if (els.villageMembersSummary) {
-    const count = members.length || 1;
-    els.villageMembersSummary.textContent = `${count} ${count === 1 ? "learner is" : "learners are"} helping the village grow.`;
+    els.villageMembersSummary.textContent = `${memberCount} ${memberCount === 1 ? "learner is" : "learners are"} helping ${getVillageName()} grow.`;
   }
   if (!els.villageMembersList) return;
-  els.villageMembersList.replaceChildren(...members.map((profile) => createVillageMemberCard(profile, true)));
+  els.villageMembersList.replaceChildren(
+    createVillageHeaderSection(townCenter, sharedCoins, memberCount),
+    createVillageMembersSection(members),
+    createVillageProgressSection(townCenter, sharedCoins),
+    createVillageMemoriesSection(sharedCoins),
+    createVillageRecentContributionsSection(members)
+  );
 }
 
 function createVillageMemberCard(profile, showContributionLabel = false) {
   const card = document.createElement("article");
   card.className = "village-member-card";
   card.classList.toggle("current", profile.id === currentProfileId);
+  const contributionCoins = getVillageContributionCoins(profile);
+  const memberSummary = showContributionLabel
+    ? createVillageMemberDetails(profile, contributionCoins)
+    : createTextElement(
+        "span",
+        "village-member-coins",
+        `${contributionCoins} ${showContributionLabel ? "contribution " : ""}coins`
+      );
   card.replaceChildren(
-    createTextElement("span", "village-member-avatar", profile.emoji || "⭐"),
+    createAvatarElement(profile, "village-member-avatar"),
     createTextElement("strong", "village-member-name", getVillageDisplayName(profile)),
-    createTextElement(
-      "span",
-      "village-member-coins",
-      `${getVillageContributionCoins(profile)} ${showContributionLabel ? "contribution " : ""}coins`
-    ),
+    memberSummary,
     createTextElement("span", "village-member-status", getVillageMemberStatus(profile))
   );
   return card;
@@ -3960,6 +3972,202 @@ function createVillageMemberCard(profile, showContributionLabel = false) {
 function getVillageContributionCoins(profile) {
   const explicitContribution = normalizeCoinCount(profile?.contributionCoins);
   return explicitContribution > 0 ? explicitContribution : normalizeCoinCount(profile?.coins);
+}
+
+function createVillageHeaderSection(townCenter, sharedCoins, memberCount) {
+  const section = document.createElement("section");
+  section.className = "village-page-section village-page-header";
+  const media = document.createElement("div");
+  media.className = "village-page-hero-media";
+  const image = document.createElement("img");
+  image.loading = "lazy";
+  setTownCenterImage(image, townCenter.current);
+  media.replaceChildren(image);
+  const summary = document.createElement("div");
+  summary.className = "village-page-hero-summary";
+  summary.replaceChildren(
+    createTextElement("span", "village-page-kicker", "Your Village"),
+    createTextElement("h3", "", `🏡 ${getVillageName()}`),
+    createVillageSummaryGrid([
+      ["Members", `${memberCount} ${memberCount === 1 ? "Member" : "Members"}`],
+      ["Village Coins", `${normalizeCoinCount(sharedCoins)}`],
+      ["Stage", `Stage ${townCenter.current.stage}/${TOWN_CENTER_STAGES.length}`],
+      ["Current Growth", getTownCenterStageName(townCenter.current)]
+    ])
+  );
+  section.replaceChildren(media, summary);
+  return section;
+}
+
+function createVillageMembersSection(members) {
+  const section = document.createElement("section");
+  section.className = "village-page-section";
+  section.replaceChildren(
+    createVillageSectionHeading("Village Members", `${members.length || 1} learners contributing`),
+    createVillageCardGrid(members.map((profile) => createVillageMemberCard(profile, true)))
+  );
+  return section;
+}
+
+function createVillageProgressSection(townCenter, sharedCoins) {
+  const nextMemory = getNextVillageMemory(sharedCoins);
+  const section = document.createElement("section");
+  section.className = "village-page-section village-progress-section";
+  const progressTrack = document.createElement("div");
+  progressTrack.className = "town-center-progress-track";
+  const progressFill = document.createElement("span");
+  progressFill.style.width = `${townCenter.progressPercent}%`;
+  progressTrack.replaceChildren(progressFill);
+  section.replaceChildren(
+    createVillageSectionHeading("Village Progress", "Shared progress from everyone in the village"),
+    createVillageSummaryGrid([
+      ["Total Village Coins", `${normalizeCoinCount(sharedCoins)}`],
+      ["Current Stage", getTownCenterStageName(townCenter.current)],
+      ["Next Village Memory", nextMemory ? `${nextMemory.title} at ${nextMemory.coins} coins` : "All memories unlocked"]
+    ]),
+    progressTrack,
+    createTextElement(
+      "p",
+      "village-progress-note",
+      townCenter.next ? `${sharedCoins} / ${townCenter.next.coins} coins toward the next village stage` : "All village stages are complete"
+    )
+  );
+  return section;
+}
+
+function createVillageMemoriesSection(sharedCoins) {
+  const unlockedCount = getUnlockedRewards(VILLAGE_ALBUM_REWARDS, sharedCoins).length;
+  const section = document.createElement("section");
+  section.className = "village-page-section";
+  section.replaceChildren(
+    createVillageSectionHeading("Village Memories", `${unlockedCount} / ${VILLAGE_ALBUM_REWARDS.length} unlocked`),
+    createVillageCardGrid(VILLAGE_ALBUM_REWARDS.map((reward) => createVillageMemoryCard(reward, sharedCoins >= reward.coins)))
+  );
+  return section;
+}
+
+function createVillageRecentContributionsSection(members) {
+  const activities = getVillageRecentContributions(members);
+  const section = document.createElement("section");
+  section.className = "village-page-section";
+  const list = document.createElement("div");
+  list.className = "village-contribution-list";
+  list.replaceChildren(
+    ...(activities.length
+      ? activities.slice(0, 5).map((activity) => createTextElement("p", "", activity.text))
+      : [createTextElement("p", "village-empty-note", "Recent village activity will appear here as learners study.")]
+    )
+  );
+  section.replaceChildren(
+    createVillageSectionHeading("Recent Contributions", "Latest positive activity"),
+    list
+  );
+  return section;
+}
+
+function createVillageMemberDetails(profile, contributionCoins) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "village-member-details";
+  wrapper.replaceChildren(
+    createTextElement("span", "", `Level: ${getVillageMemberLearningLevel(profile)}`),
+    createTextElement("span", "", `House: ${getVillageMemberHouseStage(profile)}`),
+    createTextElement("span", "", `${contributionCoins} coins contributed`)
+  );
+  return wrapper;
+}
+
+function createVillageSectionHeading(title, summary) {
+  const heading = document.createElement("div");
+  heading.className = "village-section-heading";
+  heading.replaceChildren(
+    createTextElement("h3", "", title),
+    createTextElement("p", "", summary)
+  );
+  return heading;
+}
+
+function createVillageSummaryGrid(items) {
+  const grid = document.createElement("div");
+  grid.className = "village-summary-grid";
+  grid.replaceChildren(...items.map(([label, value]) => {
+    const item = document.createElement("span");
+    item.replaceChildren(
+      createTextElement("small", "", label),
+      createTextElement("strong", "", value)
+    );
+    return item;
+  }));
+  return grid;
+}
+
+function createVillageCardGrid(cards) {
+  const grid = document.createElement("div");
+  grid.className = "village-page-grid";
+  grid.replaceChildren(...cards);
+  return grid;
+}
+
+function getNextVillageMemory(sharedCoins) {
+  const coins = normalizeCoinCount(sharedCoins);
+  return VILLAGE_ALBUM_REWARDS.find((reward) => reward.coins > coins) || null;
+}
+
+function getVillageMemberLearningLevel(profile) {
+  const sessions = Object.keys(profile?.flashcardSessions || {}).join(" ");
+  const history = (profile?.history || []).map((entry) => `${entry.cardId || ""} ${entry.word || ""}`).join(" ");
+  const text = `${sessions} ${history}`.toUpperCase();
+  if (text.includes("B1")) return "B1";
+  if (text.includes("A2")) return "A2";
+  return "A1";
+}
+
+function getVillageMemberHouseStage(profile) {
+  const coins = getVillageContributionCoins(profile);
+  if (coins >= 250) return "Stage 5";
+  if (coins >= 100) return "Stage 4";
+  if (coins >= 50) return "Stage 3";
+  if (coins >= 10) return "Stage 2";
+  return "Stage 1";
+}
+
+function getVillageRecentContributions(members) {
+  return members.flatMap((profile) => {
+    const name = getVillageDisplayName(profile);
+    const activities = [];
+    const coins = getVillageContributionCoins(profile);
+    if (coins > 0) {
+      activities.push({
+        date: profile.lastStudyDate || "",
+        text: `${name} earned ${coins} ${coins === 1 ? "coin" : "coins"}`
+      });
+    }
+    const completedChallenges = normalizeCounter(profile.challengeSessionsCompleted);
+    if (completedChallenges > 0) {
+      activities.push({
+        date: profile.lastStudyDate || "",
+        text: `${name} completed ${completedChallenges} ${completedChallenges === 1 ? "Challenge" : "Challenges"}`
+      });
+    }
+    const recentHistory = Array.isArray(profile.history) ? profile.history.slice(0, 2) : [];
+    recentHistory.forEach((entry) => {
+      activities.push({
+        date: entry.studiedAt || "",
+        text: getVillageHistoryContributionText(name, entry)
+      });
+    });
+    return activities;
+  })
+    .filter((activity) => activity.text)
+    .sort((first, second) => String(second.date).localeCompare(String(first.date)))
+    .slice(0, 5);
+}
+
+function getVillageHistoryContributionText(name, entry) {
+  if (entry?.type === "article-quiz") return `${name} practiced articles`;
+  if (entry?.type === "vocabulary-review") return `${name} completed a Vocabulary Challenge`;
+  if (entry?.type === "flashcard") return `${name} reviewed flashcards`;
+  if (entry?.type === "article-practice") return `${name} practiced articles`;
+  return `${name} studied vocabulary`;
 }
 
 function getOrderedVillageMembers() {

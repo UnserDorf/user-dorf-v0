@@ -346,7 +346,7 @@
 
       <section class="dashboard-screen" id="dashboardScreen" aria-label="Home dashboard">
         <div class="dashboard-heading">
-          <button class="dashboard-village-link" type="button" data-dashboard-action="town-center" aria-label="Explore village">
+          <button class="dashboard-village-link" type="button" data-dashboard-action="village-members" aria-label="Explore village">
             <span class="dashboard-village-image-wrap" aria-hidden="true">
               <img id="townCenterDashboardImage" src="assets/town-center-stage-1.png" alt="">
             </span>
@@ -384,17 +384,6 @@
               <button class="primary-button" type="button" data-dashboard-action="challenges">Start Challenge</button>
             </article>
           </div>
-        </section>
-
-        <section class="dashboard-section dashboard-members-panel" aria-label="Village Members">
-          <article class="dashboard-village-members-card">
-            <div>
-              <h3>Village Members</h3>
-              <p id="dashboardVillageMembersCount">1 learner contributing</p>
-              <p class="dashboard-members-preview" id="dashboardVillageMembersPreview">Helping the village grow</p>
-            </div>
-            <button class="primary-button" type="button" data-dashboard-action="village-members">View village</button>
-          </article>
         </section>
 
         <section class="dashboard-section collections-preview-section" aria-label="Collection">
@@ -466,11 +455,11 @@
         <div class="rewards-grid" id="achievementsGrid"></div>
       </section>
 
-      <section class="village-members-screen hidden" id="villageMembersScreen" aria-label="Village Members">
+      <section class="village-members-screen hidden" id="villageMembersScreen" aria-label="Village">
         <div class="dashboard-heading reward-page-heading">
           <div class="reward-title-stack">
             <button type="button" class="small-link-button" id="villageMembersBack">← Back</button>
-            <h2>Village Members</h2>
+            <h2>Village</h2>
             <p id="villageMembersSummary">Learners helping the village grow together.</p>
           </div>
         </div>
