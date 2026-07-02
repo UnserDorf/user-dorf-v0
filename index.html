@@ -56,6 +56,7 @@
               <span>Password</span>
               <input id="firebaseAuthPassword" type="password" autocomplete="current-password" required>
             </label>
+            <button class="small-link-button firebase-forgot-password hidden" id="forgotPasswordLink" type="button">Forgot your password?</button>
             <button class="primary-button" id="firebaseEmailSignIn" type="submit">Sign In</button>
             <button class="primary-button" id="firebaseEmailRegister" type="submit">Create Account</button>
           </form>
@@ -67,6 +68,26 @@
             <button class="small-link-button" id="firebaseAuthHome" type="button">Back to Home</button>
           </div>
           <p class="lock-error hidden" id="firebaseAuthStatus"></p>
+        </section>
+        <section class="firebase-auth-card reset-password-card hidden" id="resetPasswordCard" aria-label="Reset password">
+          <form class="firebase-auth-form" id="resetPasswordForm">
+            <div id="resetPasswordFormContent">
+              <h2>Forgot your password?</h2>
+              <p class="firebase-auth-intro">Enter the email address associated with your account.</p>
+            </div>
+            <label>
+              <span>Email</span>
+              <input id="resetPasswordEmail" type="email" autocomplete="email" placeholder="Enter your email" required>
+            </label>
+            <button class="primary-button" id="sendResetEmailButton" type="submit">Send Reset Email</button>
+            <button class="ghost-button" id="resetPasswordBack" type="button">Back to Sign In</button>
+            <p class="lock-error hidden" id="resetPasswordStatus"></p>
+          </form>
+          <div class="reset-password-success hidden" id="resetPasswordSuccess">
+            <h2>Password reset email sent</h2>
+            <p>If an account exists for that email address, we've sent instructions to reset your password.</p>
+            <button class="primary-button" id="resetPasswordSuccessBack" type="button">Back to Sign In</button>
+          </div>
         </section>
         <section class="local-mode-card hidden" id="localModeConfirmCard" aria-label="Continue without an account">
           <div>

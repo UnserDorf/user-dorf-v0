@@ -407,6 +407,7 @@ const els = {
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   rememberEmailCheckbox: document.querySelector("#rememberEmailCheckbox"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
+  forgotPasswordLink: document.querySelector("#forgotPasswordLink"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
   firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
@@ -414,6 +415,15 @@ const els = {
   firebaseAuthTryDemo: document.querySelector("#firebaseAuthTryDemo"),
   firebaseAuthHome: document.querySelector("#firebaseAuthHome"),
   firebaseAuthStatus: document.querySelector("#firebaseAuthStatus"),
+  resetPasswordCard: document.querySelector("#resetPasswordCard"),
+  resetPasswordForm: document.querySelector("#resetPasswordForm"),
+  resetPasswordFormContent: document.querySelector("#resetPasswordFormContent"),
+  resetPasswordEmail: document.querySelector("#resetPasswordEmail"),
+  sendResetEmailButton: document.querySelector("#sendResetEmailButton"),
+  resetPasswordBack: document.querySelector("#resetPasswordBack"),
+  resetPasswordStatus: document.querySelector("#resetPasswordStatus"),
+  resetPasswordSuccess: document.querySelector("#resetPasswordSuccess"),
+  resetPasswordSuccessBack: document.querySelector("#resetPasswordSuccessBack"),
   localModeConfirmCard: document.querySelector("#localModeConfirmCard"),
   localModeContinue: document.querySelector("#localModeContinue"),
   localModeBack: document.querySelector("#localModeBack"),
@@ -2898,6 +2908,7 @@ function hideProfileOnboardingPanels() {
     els.profileScreen?.classList.remove("first-use");
   }
   els.firebaseAuthCard?.classList.add("hidden");
+  els.resetPasswordCard?.classList.add("hidden");
   els.localModeConfirmCard?.classList.add("hidden");
   els.displayNameForm?.classList.add("hidden");
   els.villageSelection?.classList.add("hidden");
@@ -2971,6 +2982,7 @@ function renderFirebaseAuthScreen() {
   if (els.firebaseAuthPassword) {
     els.firebaseAuthPassword.autocomplete = isSignIn ? "current-password" : "new-password";
   }
+  els.forgotPasswordLink?.classList.toggle("hidden", !isSignIn);
   els.firebaseAuthLocalLabel?.classList.toggle("hidden", isSignIn);
   els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthToggle) {
@@ -3032,6 +3044,68 @@ function returnAuthToDemo() {
 
 function returnAuthToHome() {
   showLandingScreen();
+}
+
+function showResetPasswordScreen() {
+  els.appShell.classList.add("locked");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.profileScreen.classList.remove("hidden");
+  els.profileScreen.classList.remove("village-landing-mode", "first-use");
+  hideProfileOnboardingPanels();
+  els.resetPasswordCard?.classList.remove("hidden");
+  els.resetPasswordForm?.classList.remove("hidden");
+  els.resetPasswordFormContent?.classList.remove("hidden");
+  els.resetPasswordEmail?.closest("label")?.classList.remove("hidden");
+  els.sendResetEmailButton?.classList.remove("hidden");
+  els.resetPasswordBack?.classList.remove("hidden");
+  els.resetPasswordSuccess?.classList.add("hidden");
+  updateResetPasswordStatus("");
+  const currentEmail = els.firebaseAuthEmail?.value.trim() || getRememberedEmail();
+  if (els.resetPasswordEmail) {
+    els.resetPasswordEmail.value = currentEmail;
+  }
+  scrollPageToTop(els.profileScreen);
+  els.resetPasswordEmail?.focus();
+}
+
+function showResetPasswordSuccess() {
+  els.resetPasswordForm?.classList.add("hidden");
+  els.resetPasswordSuccess?.classList.remove("hidden");
+  updateResetPasswordStatus("");
+  scrollPageToTop(els.profileScreen);
+}
+
+function returnToSignInFromResetPassword() {
+  showFirebaseAuthScreen("signin");
+}
+
+function updateResetPasswordStatus(message = "", isError = false) {
+  if (!els.resetPasswordStatus) return;
+  els.resetPasswordStatus.textContent = message;
+  els.resetPasswordStatus.classList.toggle("hidden", !message);
+  els.resetPasswordStatus.classList.toggle("firebase-auth-status-ok", Boolean(message && !isError));
+}
+
+async function handlePasswordResetSubmit() {
+  const email = els.resetPasswordEmail?.value.trim() || "";
+  if (!email) {
+    updateResetPasswordStatus("Enter your email address.", true);
+    els.resetPasswordEmail?.focus();
+    return;
+  }
+  updateResetPasswordStatus("Sending reset email...");
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await firebase.authModule.sendPasswordResetEmail(firebase.auth, email);
+    showResetPasswordSuccess();
+  } catch (error) {
+    if (String(error?.code || "").includes("auth/user-not-found")) {
+      showResetPasswordSuccess();
+      return;
+    }
+    updateResetPasswordStatus(getFriendlyPasswordResetError(error), true);
+  }
 }
 
 function updateFirebaseAuthStatus(message = "", isError = false) {
@@ -3108,6 +3182,14 @@ function getFriendlyFirebaseAuthError(error) {
   if (code.includes("auth/email-already-in-use")) return "That email already has an account.";
   if (code.includes("auth/weak-password")) return "Please use a longer password.";
   return "Sign-in did not finish. Please try again.";
+}
+
+function getFriendlyPasswordResetError(error) {
+  const code = String(error?.code || "");
+  if (code.includes("auth/invalid-email")) return "Enter a valid email address.";
+  if (code.includes("auth/network-request-failed")) return "We could not connect. Check your internet connection and try again.";
+  if (code.includes("auth/too-many-requests")) return "Too many attempts. Please wait a moment and try again.";
+  return "We could not send the reset email. Please try again.";
 }
 
 function refreshVisibleProfileState() {
@@ -6479,6 +6561,13 @@ function bindEvents() {
     handleFirebaseEmailAuth(firebaseAuthMode === "signin" ? "sign-in" : "register");
   });
   els.rememberEmailCheckbox?.addEventListener("change", updateRememberedEmailPreference);
+  els.forgotPasswordLink?.addEventListener("click", showResetPasswordScreen);
+  els.resetPasswordForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handlePasswordResetSubmit();
+  });
+  els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
+  els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
   els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
