@@ -10568,10 +10568,10 @@ body:has(#villageMembersScreen:not(.hidden)) {
 
   .village-progress-section .village-summary-list span {
     width: 100%;
-    grid-template-columns: minmax(8.5rem, 0.42fr) minmax(12rem, 1fr);
-    gap: 12px;
+    grid-template-columns: minmax(8.75rem, max-content) minmax(0, 1fr);
+    gap: clamp(18px, 3vw, 34px);
     align-items: baseline;
-    padding: 8px 0;
+    padding: 7px 0;
   }
 
   .village-progress-section .village-summary-list.two-column span:nth-last-child(-n + 2) {
@@ -10588,11 +10588,12 @@ body:has(#villageMembersScreen:not(.hidden)) {
   }
 
   .village-progress-section .village-summary-list strong {
+    min-width: 0;
     font-size: 0.92rem;
     line-height: 1.24;
     white-space: normal;
     word-break: normal;
-    overflow-wrap: normal;
+    overflow-wrap: break-word;
   }
 }
 
