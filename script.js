@@ -1087,38 +1087,6 @@ function logIdentityCleanupReport(report = getIdentityCleanupReport()) {
   return report;
 }
 
-async function overwriteFirebaseUserIdentityDoc() {
-  if (!firebaseAuthUser || !profileStore?.profiles) return;
-  const firebase = await getFirebaseSyncApi();
-  const canonicalId = getFirebaseProfileId(firebaseAuthUser);
-  const canonicalProfile = profileStore.profiles[canonicalId];
-  const savedAt = new Date().toISOString();
-  await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
-    uid: firebaseAuthUser.uid,
-    email: firebaseAuthUser.email || "",
-    currentGroup: currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
-    currentProfile: canonicalId,
-    profiles: canonicalProfile ? {
-      [canonicalId]: sanitizeProfileStoreForSync({
-        ...canonicalProfile,
-        ownerUid: firebaseAuthUser.uid,
-        ownerEmail: firebaseAuthUser.email || ""
-      })
-    } : {},
-    updatedAt: firebase.serverTimestamp(),
-    updatedAtIso: savedAt
-  });
-  await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
-    const group = profileStore.groups?.[groupInfo.id];
-    if (!group) return;
-    await firebase.setDoc(getFirebaseVillageDocRef(firebase, groupInfo.id), {
-      group: sanitizeGroupForSync(group),
-      updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: savedAt
-    }, { merge: true });
-  }));
-}
-
 async function cleanupDuplicateTestIdentityProfiles(options = {}) {
   const before = getIdentityCleanupReport();
   logIdentityCleanupReport(before);
@@ -1132,7 +1100,8 @@ async function cleanupDuplicateTestIdentityProfiles(options = {}) {
   });
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
   if (firebaseAuthUser) {
-    await overwriteFirebaseUserIdentityDoc();
+    syncEnabled = true;
+    await saveProfileStoreToCloudNow();
   }
   const after = getIdentityCleanupReport();
   console.info("[Unser Dorf v0 debug] Duplicate cleanup complete.", { result, after });
@@ -1282,11 +1251,13 @@ async function initializeFamilySync() {
       applyRemoteProfileStore(remoteStore);
     } else {
       profileDataSource = "localStorage";
-      await saveProfileStoreToCloudNow();
     }
 
     syncEnabled = true;
     updateCloudSyncDebug({}, "Firebase sync enabled");
+    if (getFirebaseOwnedProfileIds().length) {
+      await saveProfileStoreToCloudNow();
+    }
     startFamilySyncPolling();
   } catch (error) {
     syncEnabled = false;
@@ -1725,9 +1696,7 @@ function enterSelectedVillage() {
   const profileId = ensureIdentityProfile();
   const group = getCurrentGroup();
   if (!profileId || !group) return;
-  if (!group.memberIds.includes(profileId)) {
-    group.memberIds.push(profileId);
-  }
+  keepProfileInOnlyOneGroup(profileStore, profileId, group.id);
   profileStore.currentGroup = group.id;
   profileStore.currentProfile = profileId;
   profileStore.profiles[profileId].villageId = group.id;
@@ -2149,6 +2118,10 @@ async function saveProfileStoreToCloudNow() {
   try {
     const firebase = await getFirebaseSyncApi();
     const ownedProfiles = getFirebaseOwnedProfiles();
+    if (!Object.keys(ownedProfiles).length) {
+      updateCloudSyncDebug({}, "Firestore save skipped until Firebase profile exists");
+      return;
+    }
     const savedAt = new Date().toISOString();
     const activeProfileId = currentProfileId || profileStore.currentProfile || "";
     const activeProfile = activeProfileId ? profileStore.profiles?.[activeProfileId] : null;
@@ -2163,21 +2136,23 @@ async function saveProfileStoreToCloudNow() {
       profiles: ownedProfiles,
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
-    }, { merge: true });
+    });
 
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
       const group = profileStore.groups?.[groupInfo.id];
       if (!group) return;
-      const groupProfiles = Object.fromEntries(
-        Object.entries(ownedProfiles)
-          .filter(([profileId]) => group.memberIds.includes(profileId))
-      );
+      const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
+      if (!group.memberIds.length) {
+        await firebase.deleteDoc(villageRef);
+        return;
+      }
+      const groupProfiles = getProfilesForGroupSync(group);
       await firebase.setDoc(getFirebaseVillageDocRef(firebase, groupInfo.id), {
         group: sanitizeGroupForSync(group),
         profiles: groupProfiles,
         updatedAt: firebase.serverTimestamp(),
         updatedAtIso: savedAt
-      }, { merge: true });
+      });
     }));
     updateCloudSyncDebug({
       lastCloudSaveTime: savedAt,
@@ -2313,6 +2288,16 @@ function replaceProfileIdsInGroups(store, duplicateIds, canonicalId) {
   });
 }
 
+function keepProfileInOnlyOneGroup(store, profileId, selectedGroupId) {
+  if (!store?.groups || !profileId || !selectedGroupId) return;
+  Object.values(store.groups).forEach((group) => {
+    const memberIds = normalizeGroupMemberIds(group.memberIds || []);
+    group.memberIds = group.id === selectedGroupId
+      ? normalizeGroupMemberIds([...memberIds, profileId])
+      : memberIds.filter((memberId) => memberId !== profileId);
+  });
+}
+
 function findFirstGroupForProfile(store, profileId) {
   return Object.values(store?.groups || {}).find((group) => group?.memberIds?.includes(profileId)) || null;
 }
@@ -2391,9 +2376,7 @@ function consolidateFirebaseIdentityProfiles(store = profileStore, options = {})
   currentProfileId = canonicalId;
   currentGroupId = resolvedGroupId;
   const currentGroup = store.groups?.[resolvedGroupId];
-  if (currentGroup && !currentGroup.memberIds.includes(canonicalId)) {
-    currentGroup.memberIds = normalizeGroupMemberIds([...currentGroup.memberIds, canonicalId]);
-  }
+  if (currentGroup) keepProfileInOnlyOneGroup(store, canonicalId, resolvedGroupId);
 
   if (duplicateIds.length || !existingIds.includes(canonicalId)) {
     console.info("[Unser Dorf identity cleanup] Consolidated Firebase identity profiles.", {
@@ -2748,6 +2731,16 @@ function getFirebaseOwnedProfiles() {
       })
     ];
   }));
+}
+
+function getProfilesForGroupSync(group) {
+  if (!group?.memberIds || !profileStore?.profiles) return {};
+  return Object.fromEntries(
+    group.memberIds
+      .map((profileId) => [profileId, profileStore.profiles[profileId]])
+      .filter(([, profile]) => Boolean(profile))
+      .map(([profileId, profile]) => [profileId, sanitizeProfileStoreForSync(profile)])
+  );
 }
 
 function routeAfterStartup() {
@@ -3158,6 +3151,11 @@ async function handleFirebaseEmailAuth(mode) {
   const email = els.firebaseAuthEmail?.value.trim();
   const password = els.firebaseAuthPassword?.value || "";
   updateRememberedEmailPreference();
+  if (mode === "register" && firebaseAuthUser) {
+    updateFirebaseAuthStatus("You are already signed in. Loading your profile...");
+    await handleFirebaseSignedIn(firebaseAuthUser);
+    return;
+  }
   if (!email || !password) {
     updateFirebaseAuthStatus("Enter an email and password.", true);
     return;
@@ -3170,6 +3168,11 @@ async function handleFirebaseEmailAuth(mode) {
       : await firebase.authModule.signInWithEmailAndPassword(firebase.auth, email, password);
     await handleFirebaseSignedIn(credential.user);
   } catch (error) {
+    if (mode === "register" && String(error?.code || "").includes("auth/email-already-in-use")) {
+      showFirebaseAuthScreen("signin", "An account with this email already exists. Please sign in instead.");
+      return;
+    }
+    console.error("Firebase email authentication failed.", error);
     updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
   }
 }
@@ -3218,7 +3221,7 @@ function getFriendlyFirebaseAuthError(error) {
   const code = String(error?.code || "");
   if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "That email or password did not work.";
   if (code.includes("auth/user-not-found")) return "No account was found for that email.";
-  if (code.includes("auth/email-already-in-use")) return "That email already has an account.";
+  if (code.includes("auth/email-already-in-use")) return "An account with this email already exists. Please sign in instead.";
   if (code.includes("auth/weak-password")) return "Please use a longer password.";
   return "Sign-in did not finish. Please try again.";
 }
@@ -6719,6 +6722,23 @@ function handleCreateProfile(event) {
   event.preventDefault();
   const name = els.createProfileName.value.trim();
   const password = els.createProfilePassword.value;
+  if (firebaseAuthUser) {
+    const profileId = ensureIdentityProfile();
+    const profile = profileStore.profiles?.[profileId];
+    if (!profile || !name) {
+      els.createProfileError.textContent = "Enter a display name.";
+      els.createProfileError.classList.remove("hidden");
+      return;
+    }
+    profile.name = name;
+    profile.displayName = name;
+    profile.villageDisplayName = name;
+    profile.ownerUid = firebaseAuthUser.uid;
+    profile.ownerEmail = firebaseAuthUser.email || "";
+    saveProfileStore();
+    completeProfileLogin(profileId);
+    return;
+  }
   if (!name || !password) {
     els.createProfileError.textContent = "Enter a name and password.";
     els.createProfileError.classList.remove("hidden");
