@@ -839,7 +839,11 @@ let cloudSyncDebug = {
   firestoreCoinsLoaded: 0
 };
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  init().catch((error) => {
+    console.error("Unser Dorf failed to initialize.", error);
+  });
+});
 
 function scrollPageToTop(target = null) {
   const containers = [
@@ -1154,9 +1158,13 @@ function installV0DebugTools() {
 }
 
 async function init() {
-  installV0DebugTools();
-  bindLockEvents();
-  await unlockApp();
+  try {
+    installV0DebugTools();
+    bindLockEvents();
+    await unlockApp();
+  } catch (error) {
+    console.error("Initialization did not finish.", error);
+  }
 }
 
 async function unlockApp() {
@@ -1201,7 +1209,10 @@ async function unlockApp() {
     console.warn("Could not load preposition questions.", error);
     prepositionItems = [];
   }
-  await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level)));
+  await Promise.all(LEARNING_LEVELS.map((level) => loadLevelDatasets(level).catch((error) => {
+    console.error(`Could not initialize ${level} datasets.`, error);
+    levelDatasets[level] = createEmptyLevelDatasets()[level];
+  })));
   routeAfterStartup();
   maybeShowRewardDebugPage();
 }
@@ -1293,34 +1304,50 @@ async function initializeFamilySync() {
 function startFamilySyncPolling() {
   window.clearInterval(cloudPullTimer);
   cloudPullTimer = window.setInterval(async () => {
-    if (applyingRemoteStore) return;
-    const remoteStore = await fetchProfileStoreFromCloud();
-    if (remoteStore) applyRemoteProfileStore(remoteStore);
+    try {
+      if (applyingRemoteStore) return;
+      const remoteStore = await fetchProfileStoreFromCloud();
+      if (remoteStore) applyRemoteProfileStore(remoteStore);
+    } catch (error) {
+      console.error("Cloud sync polling failed.", error);
+    }
   }, 5000);
 
   document.addEventListener("visibilitychange", async () => {
-    if (document.visibilityState !== "visible") {
-      window.clearTimeout(cloudSaveTimer);
-      await saveProfileStoreToCloudNow();
-      return;
+    try {
+      if (document.visibilityState !== "visible") {
+        window.clearTimeout(cloudSaveTimer);
+        await saveProfileStoreToCloudNow();
+        return;
+      }
+      if (applyingRemoteStore) return;
+      const remoteStore = await fetchProfileStoreFromCloud();
+      if (remoteStore) applyRemoteProfileStore(remoteStore);
+    } catch (error) {
+      console.error("Cloud sync visibility refresh failed.", error);
     }
-    if (applyingRemoteStore) return;
-    const remoteStore = await fetchProfileStoreFromCloud();
-    if (remoteStore) applyRemoteProfileStore(remoteStore);
   });
 }
 
 function bindLockEvents() {
+  if (!els.lockForm) {
+    console.warn("Optional UI element #lockForm is missing. Shared password lock is skipped.");
+    return;
+  }
   els.lockForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (els.passwordInput.value === APP_PASSWORD) {
-      localStorage.setItem(UNLOCK_STORAGE_KEY, "true");
-      els.lockError.classList.add("hidden");
-      await unlockApp();
-      return;
+    try {
+      event.preventDefault();
+      if (els.passwordInput.value === APP_PASSWORD) {
+        localStorage.setItem(UNLOCK_STORAGE_KEY, "true");
+        els.lockError.classList.add("hidden");
+        await unlockApp();
+        return;
+      }
+      els.lockError.classList.remove("hidden");
+      els.passwordInput.select();
+    } catch (error) {
+      console.error("Unlock form failed.", error);
     }
-    els.lockError.classList.remove("hidden");
-    els.passwordInput.select();
   });
 }
 
@@ -3324,6 +3351,13 @@ async function deleteFirebaseUserData(firebase, user) {
     ownedProfileIds.forEach((profileId) => {
       delete profiles[profileId];
     });
+    if (group.memberIds.length === 0) {
+      console.info("Deleting empty village document after account deletion.", {
+        villageId: groupInfo.id
+      });
+      await firebase.deleteDoc(villageRef);
+      return;
+    }
     await firebase.setDoc(villageRef, {
       group,
       profiles,
@@ -3359,7 +3393,11 @@ async function deleteLegacySharedProfileStoreReferences(firebase, ownedProfileId
   Object.values(cleanedStore.groups || {}).forEach((group) => {
     group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !ownedProfileIds.includes(profileId)));
   });
+  Object.entries(cleanedStore.groups || {}).forEach(([groupId, group]) => {
+    if (group?.memberIds?.length === 0) delete cleanedStore.groups[groupId];
+  });
   if (ownedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
+  if (!cleanedStore.groups?.[cleanedStore.currentGroup]) cleanedStore.currentGroup = DEFAULT_GROUP_ID;
   await firebase.setDoc(firebase.docRef, {
     profileStore: cleanedStore,
     updatedAt: firebase.serverTimestamp(),
@@ -4181,8 +4219,12 @@ function showSettingsDetailView() {
 }
 
 function openSettingsPanel() {
+  if (!els.settingsPanel) {
+    console.warn("Optional UI element #settingsPanel is missing. Settings cannot open.");
+    return;
+  }
   els.settingsPanel.classList.remove("hidden");
-  els.settingsToggle.setAttribute("aria-expanded", "true");
+  els.settingsToggle?.setAttribute("aria-expanded", "true");
   if (window.matchMedia("(min-width: 1200px)").matches) {
     showSettingsDetailView();
     return;
@@ -4223,7 +4265,7 @@ async function saveAccountDisplayName() {
   profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
   saveProfileStore();
   await saveProfileStoreToCloudNow();
-  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
+  if (els.currentProfileLabel) els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   if (els.currentUserLabel) els.currentUserLabel.textContent = getVillageDisplayName(profile);
   renderProfileCards();
   if (currentView === "dashboard") renderDashboard();
@@ -6823,10 +6865,85 @@ function warnMissingSettingsElements() {
   ].forEach(([key, selector]) => warnMissingOptionalElement(key, selector));
 }
 
+function runSafely(label, callback) {
+  try {
+    const result = callback();
+    if (result && typeof result.catch === "function") {
+      result.catch((error) => console.error(`${label} failed.`, error));
+    }
+  } catch (error) {
+    console.error(`${label} failed.`, error);
+  }
+}
+
+function bindOptionalEvent(element, selector, eventName, handler) {
+  if (!element) {
+    console.warn(`Optional UI element ${selector} is missing. ${eventName} listener was skipped.`);
+    return;
+  }
+  element.addEventListener(eventName, (event) => {
+    runSafely(`${selector} ${eventName} handler`, () => handler(event));
+  });
+}
+
+function bindSettingsEvents() {
+  warnMissingSettingsElements();
+  bindOptionalEvent(els.settingsChangeDisplayName, "#settingsChangeDisplayName", "click", showAccountDisplayNameEditor);
+  bindOptionalEvent(els.saveAccountDisplayName, "#saveAccountDisplayName", "click", saveAccountDisplayName);
+  bindOptionalEvent(els.settingsResetPassword, "#settingsResetPassword", "click", () => {
+    closeSettingsMenu();
+    showResetPasswordScreen();
+  });
+  bindOptionalEvent(els.deleteAccountButton, "#deleteAccountButton", "click", openDeleteAccountConfirmation);
+  bindOptionalEvent(els.cancelDeleteAccount, "#cancelDeleteAccount", "click", closeDeleteAccountConfirmation);
+  bindOptionalEvent(els.deleteAccountConfirmInput, "#deleteAccountConfirmInput", "input", updateDeleteAccountButtonState);
+  bindOptionalEvent(els.deleteAccountForm, "#deleteAccountForm", "submit", handleDeleteAccountSubmit);
+  bindOptionalEvent(els.mobileMenuSettingsButton, "#mobileMenuSettingsButton", "click", showSettingsDetailView);
+  bindOptionalEvent(els.settingsMenuBack, "#settingsMenuBack", "click", showSettingsMenuView);
+  bindOptionalEvent(els.settingsToggle, "#settingsToggle", "click", () => {
+    if (!els.settingsPanel) {
+      console.warn("Optional UI element #settingsPanel is missing. Settings menu cannot open.");
+      return;
+    }
+    const isOpen = !els.settingsPanel.classList.contains("hidden");
+    if (isOpen) {
+      closeSettingsMenu();
+      return;
+    }
+    openSettingsPanel();
+  });
+  bindOptionalEvent(els.saveVillageName, "#saveVillageName", "click", () => {
+    if (!isVillageNamingUnlocked()) return;
+    saveVillageName(els.settingsVillageNameInput?.value || "");
+    renderVillageName();
+    renderSettingsPanel();
+    showSettingsDetailView();
+  });
+  bindOptionalEvent(els.editVillageNameToggle, "#editVillageNameToggle", "click", () => {
+    if (!isVillageNamingUnlocked()) return;
+    els.villageNameEditFields?.classList.toggle("hidden");
+  });
+  bindOptionalEvent(els.changeProfilePassword, "#changeProfilePassword", "click", () => {
+    const profile = getCurrentProfile();
+    if (!profile) return;
+    const nextPassword = window.prompt(`New password for ${getVillageDisplayName(profile)}`);
+    if (nextPassword === null) return;
+    const normalizedPassword = nextPassword.trim();
+    if (!normalizedPassword) {
+      window.alert("Password was not changed.");
+      return;
+    }
+    profile.password = normalizedPassword;
+    saveProfileStore();
+    renderSettingsPanel();
+    showSettingsDetailView();
+  });
+}
+
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
-  warnMissingSettingsElements();
+  bindSettingsEvents();
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.displayNameForm?.addEventListener("submit", handleDisplayNameSubmit);
   els.firebaseAuthForm?.addEventListener("submit", (event) => {
@@ -6841,16 +6958,6 @@ function bindEvents() {
   });
   els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
-  els.settingsChangeDisplayName?.addEventListener("click", showAccountDisplayNameEditor);
-  els.saveAccountDisplayName?.addEventListener("click", saveAccountDisplayName);
-  els.settingsResetPassword?.addEventListener("click", () => {
-    closeSettingsMenu();
-    showResetPasswordScreen();
-  });
-  els.deleteAccountButton?.addEventListener("click", openDeleteAccountConfirmation);
-  els.cancelDeleteAccount?.addEventListener("click", closeDeleteAccountConfirmation);
-  els.deleteAccountConfirmInput?.addEventListener("input", updateDeleteAccountButtonState);
-  els.deleteAccountForm?.addEventListener("submit", handleDeleteAccountSubmit);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
   els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
@@ -7104,50 +7211,11 @@ function bindEvents() {
     closeSettingsMenu();
     showDashboard();
   });
-  els.mobileMenuSettingsButton?.addEventListener("click", showSettingsDetailView);
-  els.settingsMenuBack?.addEventListener("click", showSettingsMenuView);
   els.mobileLogoutButton?.addEventListener("click", signOutOfFirebase);
-
-  els.settingsToggle.addEventListener("click", () => {
-    const isOpen = !els.settingsPanel.classList.contains("hidden");
-    if (isOpen) {
-      closeSettingsMenu();
-      return;
-    }
-    openSettingsPanel();
-  });
 
   document.addEventListener("click", (event) => {
     if (event.target.closest(".settings-menu")) return;
     closeSettingsMenu();
-  });
-
-  els.saveVillageName.addEventListener("click", () => {
-    if (!isVillageNamingUnlocked()) return;
-    saveVillageName(els.settingsVillageNameInput.value);
-    renderVillageName();
-    renderSettingsPanel();
-    showSettingsDetailView();
-  });
-
-  els.editVillageNameToggle?.addEventListener("click", () => {
-    if (!isVillageNamingUnlocked()) return;
-    els.villageNameEditFields?.classList.toggle("hidden");
-  });
-
-  els.changeProfilePassword.addEventListener("click", () => {
-    const profile = getCurrentProfile();
-    if (!profile) return;
-    const nextPassword = window.prompt(`New password for ${getVillageDisplayName(profile)}`);
-    if (nextPassword === null) return;
-    const normalizedPassword = nextPassword.trim();
-    if (!normalizedPassword) {
-      window.alert("Password was not changed.");
-      return;
-    }
-    profile.password = normalizedPassword;
-    saveProfileStore();
-    renderSettingsPanel();
   });
 
   els.resetLocalTestData?.addEventListener("click", () => {
@@ -7199,8 +7267,8 @@ function bindEvents() {
 }
 
 function closeSettingsMenu() {
-  els.settingsPanel.classList.add("hidden");
-  els.settingsToggle.setAttribute("aria-expanded", "false");
+  els.settingsPanel?.classList.add("hidden");
+  els.settingsToggle?.setAttribute("aria-expanded", "false");
   showSettingsMenuView();
 }
 
