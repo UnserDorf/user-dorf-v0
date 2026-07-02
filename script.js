@@ -665,10 +665,6 @@ const els = {
   villageNameEditFields: document.querySelector("#villageNameEditFields"),
   saveVillageName: document.querySelector("#saveVillageName"),
   settingsProfileName: document.querySelector("#settingsProfileName"),
-  settingsProfileNameInput: document.querySelector("#settingsProfileNameInput"),
-  editProfileNameToggle: document.querySelector("#editProfileNameToggle"),
-  profileNameEditFields: document.querySelector("#profileNameEditFields"),
-  saveProfileName: document.querySelector("#saveProfileName"),
   settingsChangeDisplayName: document.querySelector("#settingsChangeDisplayName"),
   accountDisplayNameFields: document.querySelector("#accountDisplayNameFields"),
   accountDisplayNameInput: document.querySelector("#accountDisplayNameInput"),
@@ -4158,15 +4154,11 @@ function renderSettingsPanel() {
   }
   els.villageRenameLockNote?.classList.toggle("hidden", villageNamingUnlocked);
   els.villageNameEditFields?.classList.add("hidden");
-  els.profileNameEditFields?.classList.add("hidden");
   if (els.saveVillageName) {
     els.saveVillageName.disabled = !villageNamingUnlocked;
   }
   if (els.settingsProfileName) {
     els.settingsProfileName.textContent = profile ? getVillageDisplayName(profile) : "No profile";
-  }
-  if (els.settingsProfileNameInput) {
-    els.settingsProfileNameInput.value = profile ? getVillageDisplayName(profile) : "";
   }
   if (els.accountDisplayNameInput) {
     els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
@@ -6814,9 +6806,27 @@ function lockSharedPasswordScreen() {
   showLandingScreen();
 }
 
+function warnMissingOptionalElement(key, selector) {
+  if (els[key]) return;
+  console.warn(`Optional UI element ${selector} is missing. Related optional controls will be skipped.`);
+}
+
+function warnMissingSettingsElements() {
+  [
+    ["settingsChangeDisplayName", "#settingsChangeDisplayName"],
+    ["accountDisplayNameFields", "#accountDisplayNameFields"],
+    ["accountDisplayNameInput", "#accountDisplayNameInput"],
+    ["saveAccountDisplayName", "#saveAccountDisplayName"],
+    ["accountDisplayNameStatus", "#accountDisplayNameStatus"],
+    ["deleteAccountButton", "#deleteAccountButton"],
+    ["deleteAccountForm", "#deleteAccountForm"]
+  ].forEach(([key, selector]) => warnMissingOptionalElement(key, selector));
+}
+
 function bindEvents() {
   if (els.appShell.dataset.bound === "true") return;
   els.appShell.dataset.bound = "true";
+  warnMissingSettingsElements();
   els.villageNameForm.addEventListener("submit", handleVillageNameSubmit);
   els.displayNameForm?.addEventListener("submit", handleDisplayNameSubmit);
   els.firebaseAuthForm?.addEventListener("submit", (event) => {
@@ -7120,19 +7130,9 @@ function bindEvents() {
     showSettingsDetailView();
   });
 
-  els.saveProfileName?.addEventListener("click", () => {
-    renameCurrentProfile(els.settingsProfileNameInput.value);
-    renderSettingsPanel();
-    showSettingsDetailView();
-  });
-
   els.editVillageNameToggle?.addEventListener("click", () => {
     if (!isVillageNamingUnlocked()) return;
     els.villageNameEditFields?.classList.toggle("hidden");
-  });
-
-  els.editProfileNameToggle?.addEventListener("click", () => {
-    els.profileNameEditFields?.classList.toggle("hidden");
   });
 
   els.changeProfilePassword.addEventListener("click", () => {
