@@ -591,6 +591,10 @@
   color: #a2362e;
 }
 
+.settings-account-section .danger-button {
+  margin-top: 6px;
+}
+
 .settings-edit-fields {
   display: grid;
   gap: 8px;

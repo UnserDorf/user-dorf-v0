@@ -658,12 +658,8 @@ const els = {
   settingsDetail: document.querySelector("#settingsDetail"),
   settingsMenuBack: document.querySelector("#settingsMenuBack"),
   settingsVillageName: document.querySelector("#settingsVillageName"),
-  settingsVillageNameInput: document.querySelector("#settingsVillageNameInput"),
   villageSettingsSection: document.querySelector("#villageSettingsSection"),
-  editVillageNameToggle: document.querySelector("#editVillageNameToggle"),
   villageRenameLockNote: document.querySelector("#villageRenameLockNote"),
-  villageNameEditFields: document.querySelector("#villageNameEditFields"),
-  saveVillageName: document.querySelector("#saveVillageName"),
   settingsProfileName: document.querySelector("#settingsProfileName"),
   settingsChangeDisplayName: document.querySelector("#settingsChangeDisplayName"),
   accountDisplayNameFields: document.querySelector("#accountDisplayNameFields"),
@@ -678,7 +674,6 @@ const els = {
   deleteAccountStatus: document.querySelector("#deleteAccountStatus"),
   cancelDeleteAccount: document.querySelector("#cancelDeleteAccount"),
   confirmDeleteAccount: document.querySelector("#confirmDeleteAccount"),
-  changeProfilePassword: document.querySelector("#changeProfilePassword"),
   resetLocalTestData: document.querySelector("#resetLocalTestData"),
   settingsBackDashboard: document.querySelector("#settingsBackDashboard"),
   statWordsLearned: document.querySelector("#statWordsLearned"),
@@ -4175,25 +4170,8 @@ function createRewardPreviewMetric(label, value) {
 function renderSettingsPanel() {
   renderVillageName();
   const profile = getCurrentProfile();
-  const villageHasName = hasVillageName();
-  const villageNamingUnlocked = isVillageNamingUnlocked();
   if (els.settingsVillageName) {
     els.settingsVillageName.textContent = getVillageName();
-  }
-  if (els.settingsVillageNameInput) {
-    els.settingsVillageNameInput.value = villageHasName ? getVillageName() : "";
-    els.settingsVillageNameInput.placeholder = villageHasName
-      ? getVillageName()
-      : villageNamingUnlocked ? "Enter your village name" : "Village renaming is not available in v0";
-    els.settingsVillageNameInput.disabled = !villageNamingUnlocked;
-  }
-  if (els.editVillageNameToggle) {
-    els.editVillageNameToggle.disabled = !villageNamingUnlocked;
-  }
-  els.villageRenameLockNote?.classList.toggle("hidden", villageNamingUnlocked);
-  els.villageNameEditFields?.classList.add("hidden");
-  if (els.saveVillageName) {
-    els.saveVillageName.disabled = !villageNamingUnlocked;
   }
   if (els.settingsProfileName) {
     els.settingsProfileName.textContent = profile ? getVillageDisplayName(profile) : "No profile";
@@ -6911,32 +6889,6 @@ function bindSettingsEvents() {
       return;
     }
     openSettingsPanel();
-  });
-  bindOptionalEvent(els.saveVillageName, "#saveVillageName", "click", () => {
-    if (!isVillageNamingUnlocked()) return;
-    saveVillageName(els.settingsVillageNameInput?.value || "");
-    renderVillageName();
-    renderSettingsPanel();
-    showSettingsDetailView();
-  });
-  bindOptionalEvent(els.editVillageNameToggle, "#editVillageNameToggle", "click", () => {
-    if (!isVillageNamingUnlocked()) return;
-    els.villageNameEditFields?.classList.toggle("hidden");
-  });
-  bindOptionalEvent(els.changeProfilePassword, "#changeProfilePassword", "click", () => {
-    const profile = getCurrentProfile();
-    if (!profile) return;
-    const nextPassword = window.prompt(`New password for ${getVillageDisplayName(profile)}`);
-    if (nextPassword === null) return;
-    const normalizedPassword = nextPassword.trim();
-    if (!normalizedPassword) {
-      window.alert("Password was not changed.");
-      return;
-    }
-    profile.password = normalizedPassword;
-    saveProfileStore();
-    renderSettingsPanel();
-    showSettingsDetailView();
   });
 }
 

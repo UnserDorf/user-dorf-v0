@@ -266,25 +266,9 @@
                   <button type="button" id="settingsMenuBack">← Menu</button>
                   <h3>Settings</h3>
                 </section>
-                <section class="settings-section" id="villageSettingsSection" aria-label="Village settings">
-                  <h3>Village Settings</h3>
-                  <p>Village Name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
-                  <button type="button" id="editVillageNameToggle">Rename Village</button>
-                  <p class="settings-lock-note" id="villageRenameLockNote">Village renaming is not available in v0.</p>
-                  <div class="settings-edit-fields hidden" id="villageNameEditFields">
-                    <label>
-                      <span>Village Name</span>
-                      <input id="settingsVillageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
-                    </label>
-                    <button type="button" id="saveVillageName">Save Village Name</button>
-                  </div>
-                </section>
                 <section class="settings-section" aria-label="Profile settings">
-                  <h3>Profile Settings</h3>
+                  <h3>Profile</h3>
                   <p>Display Name<br><strong id="settingsProfileName">No profile</strong></p>
-                </section>
-                <section class="settings-section" aria-label="Account settings">
-                  <h3>Account</h3>
                   <button type="button" id="settingsChangeDisplayName">Change Display Name</button>
                   <div class="settings-edit-fields account-display-name-fields hidden" id="accountDisplayNameFields">
                     <div>
@@ -298,12 +282,16 @@
                     <button type="button" id="saveAccountDisplayName">Save</button>
                     <p class="settings-inline-status hidden" id="accountDisplayNameStatus"></p>
                   </div>
+                </section>
+                <section class="settings-section" id="villageSettingsSection" aria-label="Village settings">
+                  <h3>Village</h3>
+                  <p>Village Name<br><strong id="settingsVillageName">Unser Dorf</strong></p>
+                  <p class="settings-lock-note" id="villageRenameLockNote">Village renaming is not available in v0.</p>
+                </section>
+                <section class="settings-section settings-account-section" aria-label="Account settings">
+                  <h3>Account</h3>
                   <button type="button" id="settingsResetPassword">Reset Password</button>
                   <button class="danger-button" type="button" id="deleteAccountButton">Delete Account</button>
-                </section>
-                <section class="settings-section" aria-label="Security settings">
-                  <h3>Security</h3>
-                  <button type="button" id="changeProfilePassword">Change Password</button>
                 </section>
               </div>
             </div>
