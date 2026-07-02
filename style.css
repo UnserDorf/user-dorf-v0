@@ -596,6 +596,33 @@
   gap: 8px;
 }
 
+.account-display-name-fields h4 {
+  margin: 0;
+  color: var(--green);
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.account-display-name-fields p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.settings-inline-status {
+  margin: 0;
+  color: var(--green);
+  font-size: 0.84rem;
+  font-weight: 820;
+  text-align: center;
+}
+
+.settings-inline-status.is-error {
+  color: var(--red);
+}
+
 .settings-section button:disabled {
   cursor: not-allowed;
   opacity: 0.62;

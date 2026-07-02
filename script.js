@@ -668,6 +668,11 @@ const els = {
   editProfileNameToggle: document.querySelector("#editProfileNameToggle"),
   profileNameEditFields: document.querySelector("#profileNameEditFields"),
   saveProfileName: document.querySelector("#saveProfileName"),
+  settingsChangeDisplayName: document.querySelector("#settingsChangeDisplayName"),
+  accountDisplayNameFields: document.querySelector("#accountDisplayNameFields"),
+  accountDisplayNameInput: document.querySelector("#accountDisplayNameInput"),
+  saveAccountDisplayName: document.querySelector("#saveAccountDisplayName"),
+  accountDisplayNameStatus: document.querySelector("#accountDisplayNameStatus"),
   settingsResetPassword: document.querySelector("#settingsResetPassword"),
   deleteAccountButton: document.querySelector("#deleteAccountButton"),
   deleteAccountModal: document.querySelector("#deleteAccountModal"),
@@ -4087,6 +4092,11 @@ function renderSettingsPanel() {
   if (els.settingsProfileNameInput) {
     els.settingsProfileNameInput.value = profile?.name || "";
   }
+  if (els.accountDisplayNameInput) {
+    els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
+  }
+  els.accountDisplayNameFields?.classList.add("hidden");
+  updateAccountDisplayNameStatus("");
 }
 
 function showSettingsMenuView() {
@@ -4111,6 +4121,48 @@ function openSettingsPanel() {
   }
   renderSettingsPanel();
   showSettingsMenuView();
+}
+
+function showAccountDisplayNameEditor() {
+  const profile = getCurrentProfile();
+  if (els.accountDisplayNameInput) {
+    els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
+  }
+  updateAccountDisplayNameStatus("");
+  els.accountDisplayNameFields?.classList.remove("hidden");
+  els.accountDisplayNameInput?.focus();
+}
+
+function updateAccountDisplayNameStatus(message = "", isError = false) {
+  if (!els.accountDisplayNameStatus) return;
+  els.accountDisplayNameStatus.textContent = message;
+  els.accountDisplayNameStatus.classList.toggle("hidden", !message);
+  els.accountDisplayNameStatus.classList.toggle("is-error", Boolean(message && isError));
+}
+
+async function saveAccountDisplayName() {
+  const profile = getCurrentProfile();
+  const displayName = String(els.accountDisplayNameInput?.value || "").trim();
+  if (!profile || !displayName) {
+    updateAccountDisplayNameStatus("Enter a display name.", true);
+    els.accountDisplayNameInput?.focus();
+    return;
+  }
+  profile.displayName = displayName;
+  profile.villageDisplayName = displayName;
+  profile.name = displayName;
+  profile.ownerUid = profile.ownerUid || firebaseAuthUser?.uid || "";
+  profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
+  saveProfileStore();
+  await saveProfileStoreToCloudNow();
+  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
+  if (els.currentUserLabel) els.currentUserLabel.textContent = getVillageDisplayName(profile);
+  renderProfileCards();
+  if (currentView === "dashboard") renderDashboard();
+  if (currentView === "village-members") renderVillageMembersPage();
+  renderSettingsPanel();
+  els.accountDisplayNameFields?.classList.remove("hidden");
+  updateAccountDisplayNameStatus("Display name updated.");
 }
 
 function renderHouseholdMembers() {
@@ -6703,6 +6755,8 @@ function bindEvents() {
   });
   els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
+  els.settingsChangeDisplayName?.addEventListener("click", showAccountDisplayNameEditor);
+  els.saveAccountDisplayName?.addEventListener("click", saveAccountDisplayName);
   els.settingsResetPassword?.addEventListener("click", () => {
     closeSettingsMenu();
     showResetPasswordScreen();

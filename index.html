@@ -293,7 +293,19 @@
                 </section>
                 <section class="settings-section" aria-label="Account settings">
                   <h3>Account</h3>
-                  <button type="button" disabled>Change Display Name <span class="settings-button-note">Future</span></button>
+                  <button type="button" id="settingsChangeDisplayName">Change Display Name</button>
+                  <div class="settings-edit-fields account-display-name-fields hidden" id="accountDisplayNameFields">
+                    <div>
+                      <h4>Change display name</h4>
+                      <p>This is the name other village members will see.</p>
+                    </div>
+                    <label>
+                      <span>DISPLAY NAME</span>
+                      <input id="accountDisplayNameInput" type="text" autocomplete="nickname" placeholder="Enter your display name">
+                    </label>
+                    <button type="button" id="saveAccountDisplayName">Save</button>
+                    <p class="settings-inline-status hidden" id="accountDisplayNameStatus"></p>
+                  </div>
                   <button type="button" id="settingsResetPassword">Reset Password</button>
                   <button class="danger-button" type="button" id="deleteAccountButton">Delete Account</button>
                 </section>
