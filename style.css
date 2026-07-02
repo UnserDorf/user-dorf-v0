@@ -11565,3 +11565,71 @@ body:has(#villageMembersScreen:not(.hidden)) {
     min-height: 48px;
   }
 }
+
+/* Mobile header polish: stronger brand presence with a comfortable menu target. */
+@media (max-width: 767px) {
+  .topbar {
+    min-height: 64px;
+    padding: 8px 14px;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .topbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .topbar-logo {
+    width: clamp(104px, 34vw, 128px);
+    max-height: 44px;
+    object-fit: contain;
+  }
+
+  .top-actions {
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  .settings-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+  }
+
+  .settings-toggle-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 14px;
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    padding-inline: 10px;
+    gap: 10px;
+  }
+
+  .topbar-logo {
+    width: clamp(96px, 32vw, 112px);
+    max-height: 40px;
+  }
+
+  .settings-menu,
+  .settings-toggle-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
