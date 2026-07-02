@@ -1781,11 +1781,20 @@ function getPersonalAchievementIds(profile) {
 }
 
 function normalizeProfileData(data, profile) {
+  const displayName = String(
+    data?.villageDisplayName
+      || data?.displayName
+      || profile.villageDisplayName
+      || profile.displayName
+      || data?.name
+      || profile.name
+      || "Learner"
+  ).trim() || "Learner";
   return {
     id: profile.id,
-    name: data?.name || profile.name,
-    displayName: data?.displayName || profile.displayName || "",
-    villageDisplayName: data?.villageDisplayName || data?.displayName || profile.villageDisplayName || "",
+    name: displayName,
+    displayName,
+    villageDisplayName: displayName,
     emoji: profile.emoji,
     avatar: data?.avatar || profile.avatar,
     password: data?.password || profile.password || "",
@@ -2858,7 +2867,7 @@ function handleDisplayNameSubmit(event) {
   }
   profile.displayName = displayName;
   profile.villageDisplayName = displayName;
-  if (!profile.name || profile.name === "Learner") profile.name = displayName;
+  profile.name = displayName;
   profile.ownerUid = profile.ownerUid || firebaseAuthUser?.uid || "";
   profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
   profileStore.currentProfile = profileId;
@@ -3411,7 +3420,7 @@ function showProfileLogin(profileId) {
   pendingProfileId = profileId;
   hideProfileOnboardingPanels();
   els.profileLoginForm.querySelector(".eyebrow").textContent = "Welcome back";
-  els.profileLoginTitle.textContent = `${profile.emoji || "⭐"} ${profile.name}`;
+  els.profileLoginTitle.textContent = `${profile.emoji || "⭐"} ${getVillageDisplayName(profile)}`;
   els.profileLoginPassword.value = "";
   els.profileLoginError.classList.add("hidden");
   els.profileLoginForm.classList.remove("hidden");
@@ -4087,7 +4096,7 @@ function renderSettingsPanel() {
     els.saveVillageName.disabled = !villageNamingUnlocked;
   }
   if (els.settingsProfileName) {
-    els.settingsProfileName.textContent = profile?.name || "No profile";
+    els.settingsProfileName.textContent = profile ? getVillageDisplayName(profile) : "No profile";
   }
   if (els.settingsProfileNameInput) {
     els.settingsProfileNameInput.value = profile?.name || "";
@@ -5186,7 +5195,7 @@ function createRewardDebugCurrentProgressSection() {
       ["Metric", "Current value"],
       [
         ["Current village", getCurrentGroup()?.name || "None"],
-        ["Current profile", profile?.name || "None"],
+        ["Current profile", profile ? getVillageDisplayName(profile) : "None"],
         ["Flashcards reviewed", `${getFlashcardsReviewedCount(profile)}`],
         ["Vocabulary quiz correct", `${getDebugVocabularyCorrectCount(profile)}`],
         ["Article quiz correct", `${getDebugArticleCorrectCount(profile)}`],
@@ -5584,7 +5593,7 @@ function renderAchievementDebugPanel() {
     : [];
   const familyAchievements = getFamilyAchievementIds(profileStore);
 
-  els.debugCurrentProfile.textContent = profile?.name || "None";
+  els.debugCurrentProfile.textContent = profile ? getVillageDisplayName(profile) : "None";
   els.debugPersonalAchievements.textContent = formatDebugAchievementList(personalAchievements);
   els.debugFamilyAchievements.textContent = formatDebugAchievementList(familyAchievements);
   els.debugAchievementSource.textContent = hasCloudSyncConfig()
@@ -5618,7 +5627,7 @@ function createLeaderboardProfile(profile, level) {
   const container = document.createElement("span");
   container.className = "leaderboard-profile";
   container.append(
-    createTextElement("span", "leaderboard-name", profile.name),
+    createTextElement("span", "leaderboard-name", getVillageDisplayName(profile)),
     createTextElement("span", "leaderboard-level", `${level.icon} ${level.name}`)
   );
   return container;
@@ -6434,7 +6443,7 @@ function resetSavedPosition(key = getPositionKey()) {
 function confirmAndResetSavedPosition(key) {
   const profile = getCurrentProfile();
   const label = key === "article" ? "article" : "vocabulary";
-  if (!window.confirm(`Restart ${profile.name}'s ${label} position from the beginning? This will not erase progress or coins.`)) return false;
+  if (!window.confirm(`Restart ${getVillageDisplayName(profile)}'s ${label} position from the beginning? This will not erase progress or coins.`)) return false;
   resetSavedPosition(key);
   return true;
 }
@@ -6479,7 +6488,7 @@ function renderProfileCards() {
     button.addEventListener("click", () => selectProfile(profile.id));
     button.replaceChildren(
       createTextElement("span", "profile-card-avatar", profile.emoji || "⭐"),
-      createTextElement("span", "profile-name", profile.name),
+      createTextElement("span", "profile-name", getVillageDisplayName(profile)),
       createTextElement("span", "profile-signin-note", "Enter password")
     );
     return button;
@@ -6501,7 +6510,7 @@ function getProfileList() {
     .filter((profile) => groupMemberIds.has(profile.id))
     .map((profile) => ({
       id: profile.id,
-      name: profile.name,
+      name: getVillageDisplayName(profile),
       emoji: profile.emoji || "",
       avatar: profile.avatar || "",
       password: profile.password || ""
@@ -7044,7 +7053,7 @@ function bindEvents() {
     showSettingsDetailView();
   });
 
-  els.saveProfileName.addEventListener("click", () => {
+  els.saveProfileName?.addEventListener("click", () => {
     renameCurrentProfile(els.settingsProfileNameInput.value);
     renderSettingsPanel();
     showSettingsDetailView();
@@ -7062,7 +7071,7 @@ function bindEvents() {
   els.changeProfilePassword.addEventListener("click", () => {
     const profile = getCurrentProfile();
     if (!profile) return;
-    const nextPassword = window.prompt(`New password for ${profile.name}`);
+    const nextPassword = window.prompt(`New password for ${getVillageDisplayName(profile)}`);
     if (nextPassword === null) return;
     const normalizedPassword = nextPassword.trim();
     if (!normalizedPassword) {
@@ -7078,7 +7087,7 @@ function bindEvents() {
     closeSettingsMenu();
     const profile = getCurrentProfile();
     if (!profile) return;
-    if (!window.confirm(`Reset local test data for ${profile.name}? This keeps profiles and the village name.`)) return;
+    if (!window.confirm(`Reset local test data for ${getVillageDisplayName(profile)}? This keeps profiles and the village name.`)) return;
     resetCurrentProfileTestData();
   });
 
