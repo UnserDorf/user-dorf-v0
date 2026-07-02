@@ -1622,7 +1622,7 @@ function renderVillageCards() {
     const villageName = normalizeVillageName(group.villageName);
     button.replaceChildren(
       createTextElement("strong", "", group.name),
-      createTextElement("span", "", villageName ? `Village Name: ${villageName}` : group.description || "Learning village")
+      createTextElement("span", "", villageName || group.description || "Learning village")
     );
     return button;
   });
