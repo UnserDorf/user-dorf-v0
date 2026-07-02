@@ -4099,7 +4099,7 @@ function renderSettingsPanel() {
     els.settingsProfileName.textContent = profile ? getVillageDisplayName(profile) : "No profile";
   }
   if (els.settingsProfileNameInput) {
-    els.settingsProfileNameInput.value = profile?.name || "";
+    els.settingsProfileNameInput.value = profile ? getVillageDisplayName(profile) : "";
   }
   if (els.accountDisplayNameInput) {
     els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
@@ -6616,7 +6616,7 @@ function renameCurrentProfile(nextName) {
   const profile = getCurrentProfile();
   const normalizedName = String(nextName || "").trim();
   if (!profile || !normalizedName) {
-    window.alert("Profile name was not changed.");
+    window.alert("Display name was not changed.");
     return false;
   }
   const nameExists = getCurrentGroupProfiles()
