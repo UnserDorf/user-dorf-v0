@@ -463,6 +463,73 @@
   backdrop-filter: blur(14px);
 }
 
+.delete-account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: rgba(38, 31, 24, 0.34);
+  backdrop-filter: blur(10px);
+}
+
+.delete-account-card {
+  width: min(430px, 100%);
+  display: grid;
+  gap: 16px;
+  border: 1px solid rgba(190, 177, 153, 0.32);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 26px 80px rgba(31, 38, 35, 0.28);
+  padding: clamp(22px, 5vw, 30px);
+}
+
+.delete-account-card h2 {
+  margin: 0;
+  color: #a2362e;
+  font-size: clamp(1.55rem, 5vw, 2rem);
+  line-height: 1.08;
+}
+
+.delete-account-card p {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.delete-account-card label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.delete-account-card input {
+  min-height: 48px;
+  border: 1px solid rgba(190, 177, 153, 0.42);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: 1rem;
+}
+
+.delete-account-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.delete-account-actions button {
+  min-height: 48px;
+  border-radius: 8px;
+}
+
 .settings-main-menu {
   gap: 8px;
   border: 0;
@@ -508,6 +575,20 @@
   color: #8a7963;
   font-size: 0.84rem;
   font-weight: 720;
+}
+
+.settings-button-note {
+  margin-left: auto;
+  color: #8a7963;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.settings-section > .danger-button {
+  justify-content: center;
+  border-color: rgba(176, 58, 46, 0.34);
+  background: rgba(176, 58, 46, 0.08);
+  color: #a2362e;
 }
 
 .settings-edit-fields {
@@ -4948,6 +5029,19 @@ select,
 .primary-button {
   background: var(--green);
   color: white;
+}
+
+.danger-button {
+  border: 1px solid rgba(176, 58, 46, 0.4);
+  background: #b83a2f;
+  color: white;
+  font-weight: 850;
+}
+
+.danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  filter: grayscale(0.2);
 }
 
 .dashboard-screen .primary-button {

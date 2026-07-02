@@ -291,6 +291,12 @@
                     <button type="button" id="saveProfileName">Save Profile Name</button>
                   </div>
                 </section>
+                <section class="settings-section" aria-label="Account settings">
+                  <h3>Account</h3>
+                  <button type="button" disabled>Change Display Name <span class="settings-button-note">Future</span></button>
+                  <button type="button" id="settingsResetPassword">Reset Password</button>
+                  <button class="danger-button" type="button" id="deleteAccountButton">Delete Account</button>
+                </section>
                 <section class="settings-section" aria-label="Security settings">
                   <h3>Security</h3>
                   <button type="button" id="changeProfilePassword">Change Password</button>
@@ -300,6 +306,24 @@
           </div>
         </div>
       </header>
+
+      <section class="delete-account-modal hidden" id="deleteAccountModal" aria-label="Delete account confirmation" role="dialog" aria-modal="true">
+        <form class="delete-account-card" id="deleteAccountForm">
+          <div>
+            <h2>Delete Account</h2>
+            <p>This will permanently delete your account, learning progress, coins, collections, and profile information. This action cannot be undone.</p>
+          </div>
+          <label>
+            <span>Type DELETE to confirm</span>
+            <input id="deleteAccountConfirmInput" type="text" autocomplete="off" inputmode="text">
+          </label>
+          <p class="lock-error hidden" id="deleteAccountStatus"></p>
+          <div class="delete-account-actions">
+            <button class="ghost-button" id="cancelDeleteAccount" type="button">Cancel</button>
+            <button class="danger-button" id="confirmDeleteAccount" type="submit" disabled>Delete Account</button>
+          </div>
+        </form>
+      </section>
 
       <section class="landing-screen hidden" id="landingScreen" aria-label="Welcome to Unser Dorf">
         <article class="landing-card">

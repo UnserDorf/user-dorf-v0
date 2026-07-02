@@ -668,6 +668,14 @@ const els = {
   editProfileNameToggle: document.querySelector("#editProfileNameToggle"),
   profileNameEditFields: document.querySelector("#profileNameEditFields"),
   saveProfileName: document.querySelector("#saveProfileName"),
+  settingsResetPassword: document.querySelector("#settingsResetPassword"),
+  deleteAccountButton: document.querySelector("#deleteAccountButton"),
+  deleteAccountModal: document.querySelector("#deleteAccountModal"),
+  deleteAccountForm: document.querySelector("#deleteAccountForm"),
+  deleteAccountConfirmInput: document.querySelector("#deleteAccountConfirmInput"),
+  deleteAccountStatus: document.querySelector("#deleteAccountStatus"),
+  cancelDeleteAccount: document.querySelector("#cancelDeleteAccount"),
+  confirmDeleteAccount: document.querySelector("#confirmDeleteAccount"),
   changeProfilePassword: document.querySelector("#changeProfilePassword"),
   resetLocalTestData: document.querySelector("#resetLocalTestData"),
   settingsBackDashboard: document.querySelector("#settingsBackDashboard"),
@@ -2419,6 +2427,7 @@ async function initializeFirebaseSyncApi() {
     docRef: firestoreModule.doc(db, ...documentPathParts),
     doc: firestoreModule.doc,
     getDoc: firestoreModule.getDoc,
+    deleteDoc: firestoreModule.deleteDoc,
     setDoc: firestoreModule.setDoc,
     serverTimestamp: firestoreModule.serverTimestamp
   };
@@ -3061,7 +3070,7 @@ function showResetPasswordScreen() {
   els.resetPasswordBack?.classList.remove("hidden");
   els.resetPasswordSuccess?.classList.add("hidden");
   updateResetPasswordStatus("");
-  const currentEmail = els.firebaseAuthEmail?.value.trim() || getRememberedEmail();
+  const currentEmail = els.firebaseAuthEmail?.value.trim() || firebaseAuthUser?.email || getRememberedEmail();
   if (els.resetPasswordEmail) {
     els.resetPasswordEmail.value = currentEmail;
   }
@@ -3190,6 +3199,134 @@ function getFriendlyPasswordResetError(error) {
   if (code.includes("auth/network-request-failed")) return "We could not connect. Check your internet connection and try again.";
   if (code.includes("auth/too-many-requests")) return "Too many attempts. Please wait a moment and try again.";
   return "We could not send the reset email. Please try again.";
+}
+
+function openDeleteAccountConfirmation() {
+  closeSettingsMenu();
+  if (els.deleteAccountConfirmInput) els.deleteAccountConfirmInput.value = "";
+  updateDeleteAccountStatus("");
+  updateDeleteAccountButtonState();
+  els.deleteAccountModal?.classList.remove("hidden");
+  els.deleteAccountConfirmInput?.focus();
+}
+
+function closeDeleteAccountConfirmation() {
+  els.deleteAccountModal?.classList.add("hidden");
+  updateDeleteAccountStatus("");
+  if (els.deleteAccountConfirmInput) els.deleteAccountConfirmInput.value = "";
+  updateDeleteAccountButtonState();
+}
+
+function updateDeleteAccountButtonState() {
+  if (!els.confirmDeleteAccount) return;
+  els.confirmDeleteAccount.disabled = els.deleteAccountConfirmInput?.value !== "DELETE";
+}
+
+function updateDeleteAccountStatus(message = "", isError = false) {
+  if (!els.deleteAccountStatus) return;
+  els.deleteAccountStatus.textContent = message;
+  els.deleteAccountStatus.classList.toggle("hidden", !message);
+  els.deleteAccountStatus.classList.toggle("firebase-auth-status-ok", Boolean(message && !isError));
+}
+
+function isFirebaseAuthRecent(user = firebaseAuthUser) {
+  const lastSignInTime = Date.parse(user?.metadata?.lastSignInTime || "");
+  if (!lastSignInTime) return true;
+  return Date.now() - lastSignInTime < 5 * 60 * 1000;
+}
+
+async function handleDeleteAccountSubmit(event) {
+  event.preventDefault();
+  if (els.deleteAccountConfirmInput?.value !== "DELETE") {
+    updateDeleteAccountStatus("Type DELETE to confirm.", true);
+    return;
+  }
+  if (firebaseAuthUser && !isFirebaseAuthRecent(firebaseAuthUser)) {
+    updateDeleteAccountStatus("For your security, please sign in again before deleting your account.", true);
+    return;
+  }
+  if (els.confirmDeleteAccount) els.confirmDeleteAccount.disabled = true;
+  updateDeleteAccountStatus("Deleting account...");
+  try {
+    const user = firebaseAuthUser;
+    if (user) {
+      const firebase = await getFirebaseSyncApi();
+      await deleteFirebaseUserData(firebase, user);
+      await firebase.authModule.deleteUser(user);
+    }
+    clearLocalAccountState();
+    closeDeleteAccountConfirmation();
+    showLandingScreen();
+  } catch (error) {
+    if (String(error?.code || "").includes("auth/requires-recent-login")) {
+      updateDeleteAccountStatus("For your security, please sign in again before deleting your account.", true);
+      updateDeleteAccountButtonState();
+      return;
+    }
+    updateDeleteAccountStatus("We could not delete the account. Please try again.", true);
+    updateDeleteAccountButtonState();
+    console.warn("Account deletion failed.", error);
+  }
+}
+
+async function deleteFirebaseUserData(firebase, user) {
+  const ownedProfileIds = getFirebaseOwnedProfileIdsForUser(user);
+  const savedAt = new Date().toISOString();
+  await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
+    const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
+    const snapshot = await firebase.getDoc(villageRef);
+    const data = snapshot.exists() ? snapshot.data() : {};
+    const group = sanitizeGroupForSync(data.group || profileStore?.groups?.[groupInfo.id] || createGroupData(groupInfo));
+    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !ownedProfileIds.includes(profileId)));
+    const profiles = { ...(data.profiles || {}) };
+    ownedProfileIds.forEach((profileId) => {
+      delete profiles[profileId];
+    });
+    await firebase.setDoc(villageRef, {
+      group,
+      profiles,
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: savedAt
+    });
+  }));
+  await firebase.deleteDoc(getFirebaseUserDocRef(firebase, user.uid));
+}
+
+function getFirebaseOwnedProfileIdsForUser(user = firebaseAuthUser) {
+  const canonicalId = getFirebaseProfileId(user);
+  const email = String(user?.email || "").toLowerCase();
+  return [...new Set([
+    canonicalId,
+    ...Object.entries(profileStore?.profiles || {})
+    .filter(([profileId, profile]) => {
+      const ownerEmail = String(profile?.ownerEmail || "").toLowerCase();
+      return profileId === canonicalId
+        || profile?.ownerUid === user?.uid
+        || Boolean(email && ownerEmail && ownerEmail === email);
+    })
+    .map(([profileId]) => profileId)
+  ].filter(Boolean))];
+}
+
+function clearLocalAccountState() {
+  window.clearTimeout(cloudSaveTimer);
+  window.clearInterval(cloudPullTimer);
+  localStorage.clear();
+  firebaseAuthUser = null;
+  firebaseAuthReady = true;
+  firebaseAuthSkipped = false;
+  syncEnabled = false;
+  currentProfileId = "";
+  pendingProfileId = "";
+  currentGroupId = DEFAULT_GROUP_ID;
+  profileStore = createProfileStore();
+  progress = {};
+  vocabularyProgress = {};
+  articleProgress = {};
+  nounVerbProgress = {};
+  meaningMatchProgress = {};
+  prepositionProgress = {};
+  closeSettingsMenu();
 }
 
 function refreshVisibleProfileState() {
@@ -6568,6 +6705,14 @@ function bindEvents() {
   });
   els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
+  els.settingsResetPassword?.addEventListener("click", () => {
+    closeSettingsMenu();
+    showResetPasswordScreen();
+  });
+  els.deleteAccountButton?.addEventListener("click", openDeleteAccountConfirmation);
+  els.cancelDeleteAccount?.addEventListener("click", closeDeleteAccountConfirmation);
+  els.deleteAccountConfirmInput?.addEventListener("input", updateDeleteAccountButtonState);
+  els.deleteAccountForm?.addEventListener("submit", handleDeleteAccountSubmit);
   els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
   els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
   els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
