@@ -3109,10 +3109,7 @@ async function handlePasswordResetSubmit() {
     await firebase.authModule.sendPasswordResetEmail(firebase.auth, email);
     showResetPasswordSuccess();
   } catch (error) {
-    if (String(error?.code || "").includes("auth/user-not-found")) {
-      showResetPasswordSuccess();
-      return;
-    }
+    console.warn("Password reset email failed.", error);
     updateResetPasswordStatus(getFriendlyPasswordResetError(error), true);
   }
 }
@@ -3196,6 +3193,7 @@ function getFriendlyFirebaseAuthError(error) {
 function getFriendlyPasswordResetError(error) {
   const code = String(error?.code || "");
   if (code.includes("auth/invalid-email")) return "Enter a valid email address.";
+  if (code.includes("auth/user-not-found")) return "No account was found for that email.";
   if (code.includes("auth/network-request-failed")) return "We could not connect. Check your internet connection and try again.";
   if (code.includes("auth/too-many-requests")) return "Too many attempts. Please wait a moment and try again.";
   return "We could not send the reset email. Please try again.";
