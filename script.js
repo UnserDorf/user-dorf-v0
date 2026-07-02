@@ -115,6 +115,7 @@ const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.
 const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
+const DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS = 4 * 60 * 1000;
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -3213,6 +3214,20 @@ function getFriendlyPasswordResetError(error) {
   return "We could not send the reset email. Please try again.";
 }
 
+function getFriendlyDeleteAccountError(error) {
+  const code = String(error?.code || "");
+  if (code.includes("auth/requires-recent-login")) {
+    return "For your security, please sign in again before deleting your account.";
+  }
+  if (code.includes("auth/network-request-failed") || code.includes("unavailable")) {
+    return "We could not connect. Check your internet connection and try again.";
+  }
+  if (code.includes("permission-denied")) {
+    return "We could not delete your saved data because the account does not have permission. Please sign in again and try once more.";
+  }
+  return "We could not delete the account. Please try again.";
+}
+
 function openDeleteAccountConfirmation() {
   closeSettingsMenu();
   if (els.deleteAccountConfirmInput) els.deleteAccountConfirmInput.value = "";
@@ -3241,10 +3256,14 @@ function updateDeleteAccountStatus(message = "", isError = false) {
   els.deleteAccountStatus.classList.toggle("firebase-auth-status-ok", Boolean(message && !isError));
 }
 
-function isFirebaseAuthRecent(user = firebaseAuthUser) {
+function getFirebaseAuthAgeMs(user = firebaseAuthUser) {
   const lastSignInTime = Date.parse(user?.metadata?.lastSignInTime || "");
-  if (!lastSignInTime) return true;
-  return Date.now() - lastSignInTime < 5 * 60 * 1000;
+  if (!lastSignInTime) return Number.POSITIVE_INFINITY;
+  return Date.now() - lastSignInTime;
+}
+
+function isFirebaseAuthRecent(user = firebaseAuthUser) {
+  return getFirebaseAuthAgeMs(user) <= DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS;
 }
 
 async function handleDeleteAccountSubmit(event) {
@@ -3253,7 +3272,18 @@ async function handleDeleteAccountSubmit(event) {
     updateDeleteAccountStatus("Type DELETE to confirm.", true);
     return;
   }
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    const message = "We could not connect. Check your internet connection and try again.";
+    console.warn("Account deletion blocked because the browser is offline.");
+    updateDeleteAccountStatus(message, true);
+    return;
+  }
   if (firebaseAuthUser && !isFirebaseAuthRecent(firebaseAuthUser)) {
+    console.warn("Account deletion blocked because Firebase requires a recent sign-in.", {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email,
+      authAgeMs: getFirebaseAuthAgeMs(firebaseAuthUser)
+    });
     updateDeleteAccountStatus("For your security, please sign in again before deleting your account.", true);
     return;
   }
@@ -3263,6 +3293,11 @@ async function handleDeleteAccountSubmit(event) {
     const user = firebaseAuthUser;
     if (user) {
       const firebase = await getFirebaseSyncApi();
+      console.info("Deleting Unser Dorf account data.", {
+        uid: user.uid,
+        email: user.email,
+        userDocPath: [...firebase.rootPathParts, "users", user.uid].join("/")
+      });
       await deleteFirebaseUserData(firebase, user);
       await firebase.authModule.deleteUser(user);
     }
@@ -3270,20 +3305,19 @@ async function handleDeleteAccountSubmit(event) {
     closeDeleteAccountConfirmation();
     showLandingScreen();
   } catch (error) {
-    if (String(error?.code || "").includes("auth/requires-recent-login")) {
-      updateDeleteAccountStatus("For your security, please sign in again before deleting your account.", true);
-      updateDeleteAccountButtonState();
-      return;
-    }
-    updateDeleteAccountStatus("We could not delete the account. Please try again.", true);
+    console.error("Account deletion failed.", error);
+    updateDeleteAccountStatus(getFriendlyDeleteAccountError(error), true);
     updateDeleteAccountButtonState();
-    console.warn("Account deletion failed.", error);
   }
 }
 
 async function deleteFirebaseUserData(firebase, user) {
-  const ownedProfileIds = getFirebaseOwnedProfileIdsForUser(user);
+  const ownedProfileIds = await getFirebaseOwnedProfileIdsForDeletion(firebase, user);
   const savedAt = new Date().toISOString();
+  console.info("Cleaning Firestore account data before Auth deletion.", {
+    uid: user.uid,
+    ownedProfileIds
+  });
   await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
     const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
     const snapshot = await firebase.getDoc(villageRef);
@@ -3301,7 +3335,40 @@ async function deleteFirebaseUserData(firebase, user) {
       updatedAtIso: savedAt
     });
   }));
+  await deleteLegacySharedProfileStoreReferences(firebase, ownedProfileIds, savedAt);
   await firebase.deleteDoc(getFirebaseUserDocRef(firebase, user.uid));
+}
+
+async function getFirebaseOwnedProfileIdsForDeletion(firebase, user) {
+  const ownedProfileIds = new Set(getFirebaseOwnedProfileIdsForUser(user));
+  const userSnapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, user.uid));
+  if (userSnapshot.exists()) {
+    const userData = userSnapshot.data() || {};
+    Object.keys(userData.profiles || {}).forEach((profileId) => ownedProfileIds.add(profileId));
+    if (userData.currentProfile) ownedProfileIds.add(String(userData.currentProfile));
+  }
+  return [...ownedProfileIds].filter(Boolean);
+}
+
+async function deleteLegacySharedProfileStoreReferences(firebase, ownedProfileIds, savedAt) {
+  const snapshot = await firebase.getDoc(firebase.docRef);
+  if (!snapshot.exists()) return;
+  const data = snapshot.data() || {};
+  const legacyStore = data.profileStore || data.profile_store;
+  if (!legacyStore?.profiles) return;
+  const cleanedStore = sanitizeProfileStoreForSync(legacyStore);
+  ownedProfileIds.forEach((profileId) => {
+    delete cleanedStore.profiles[profileId];
+  });
+  Object.values(cleanedStore.groups || {}).forEach((group) => {
+    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !ownedProfileIds.includes(profileId)));
+  });
+  if (ownedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
+  await firebase.setDoc(firebase.docRef, {
+    profileStore: cleanedStore,
+    updatedAt: firebase.serverTimestamp(),
+    updatedAtIso: savedAt
+  }, { merge: true });
 }
 
 function getFirebaseOwnedProfileIdsForUser(user = firebaseAuthUser) {
