@@ -7663,7 +7663,7 @@ button:active {
 
 @media (max-width: 520px) {
   .landing-card {
-    gap: 18px;
+    gap: 16px;
   }
 
   .landing-hero {
@@ -7676,13 +7676,16 @@ button:active {
   }
 
   .landing-card h2 {
-    font-size: clamp(1.62rem, 8vw, 2.08rem);
-    line-height: 1.2;
+    font-size: clamp(1.48rem, 7.1vw, 1.9rem);
+    line-height: 1.14;
+    text-wrap: balance;
   }
 
   .landing-card p {
-    max-width: 86%;
-    font-size: 0.92rem;
+    max-width: min(100%, 21rem);
+    font-size: 0.9rem;
+    line-height: 1.42;
+    text-wrap: balance;
   }
 
   .landing-benefits div {
