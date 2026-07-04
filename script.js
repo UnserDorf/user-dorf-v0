@@ -797,6 +797,8 @@ let rewardDebugLastResult = "";
 let currentProfileId = "";
 let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
+let pendingVillageJoinId = "";
+let verifiedVillageJoinId = "";
 let selectedAvatar = PROFILE_AVATARS[0];
 let searchResults = [];
 let randomSessionKey = "";
@@ -998,10 +1000,10 @@ function getUserProfileCheck(profileId, profile) {
   const userDocumentExists = Boolean(cloudSyncDebug.userDocLoaded);
   const firestoreProfileExists = Boolean(cloudSyncDebug.firestoreProfileExists);
   const villageId = profile?.villageId || profileStore?.currentGroup || "";
-  const displayName = String(profile?.villageDisplayName || profile?.displayName || profile?.name || "").trim();
+  const displayName = String(profile?.villageDisplayName || profile?.displayName || "").trim();
   const villageName = getVillageNameFromStore(profileStore, villageId);
   const shouldShowOnboarding = firebaseAuthUser
-    ? Boolean(lastIdentityProfileWasCreated && !hasVillageDisplayName(profile))
+    ? Boolean(profileId && !hasVillageDisplayName(profile))
     : Boolean(profileId && !hasVillageDisplayName(profile));
   let reason = "Existing profile found.";
   if (!profileId || !profile) {
@@ -1011,7 +1013,7 @@ function getUserProfileCheck(profileId, profile) {
   } else if (!firebaseAuthUser && !hasVillageDisplayName(profile)) {
     reason = "Local-only profile has no display name yet.";
   } else if (firebaseAuthUser && !lastIdentityProfileWasCreated && !hasVillageDisplayName(profile)) {
-    reason = "Existing Firebase profile found; display-name onboarding is skipped even though the new displayName field is empty.";
+    reason = "Existing Firebase profile has no confirmed display name yet.";
   }
   return {
     userDocumentExists,
@@ -1621,14 +1623,15 @@ function renderVillageCards() {
 
 function selectVillage(groupId) {
   if (!profileStore?.groups?.[groupId]) return;
-  currentGroupId = groupId;
-  profileStore.currentGroup = groupId;
-  enterSelectedVillage();
+  pendingVillageJoinId = groupId;
+  showVillagePassword(groupId);
 }
 
 function showVillageSelection() {
   villageSelectionMode = "choose";
   pendingProfileId = "";
+  pendingVillageJoinId = "";
+  verifiedVillageJoinId = "";
   els.profileScreen.classList.add("village-landing-mode");
   els.profileScreen.classList.remove("first-use");
   els.appShell.classList.remove("landing-mode");
@@ -1661,6 +1664,8 @@ function showVillageSelection() {
 
 function showJoinVillageOptions() {
   villageSelectionMode = "join";
+  pendingVillageJoinId = "";
+  verifiedVillageJoinId = "";
   if (els.villageSelectionTitle) els.villageSelectionTitle.textContent = "Join a Village";
   if (els.villageSelectionSubtitle) els.villageSelectionSubtitle.textContent = "Select the village you would like to join.";
   if (els.villageSelectionBack) {
@@ -1696,36 +1701,55 @@ function enterSelectedVillage() {
   const profileId = ensureIdentityProfile();
   const group = getCurrentGroup();
   if (!profileId || !group) return;
+  const isExistingMember = group.memberIds?.includes(profileId);
+  if (!isExistingMember && verifiedVillageJoinId !== group.id) {
+    pendingVillageJoinId = group.id;
+    showVillagePassword(group.id);
+    return;
+  }
   keepProfileInOnlyOneGroup(profileStore, profileId, group.id);
   profileStore.currentGroup = group.id;
   profileStore.currentProfile = profileId;
   profileStore.profiles[profileId].villageId = group.id;
+  verifiedVillageJoinId = "";
+  pendingVillageJoinId = "";
   saveProfileStore();
   completeProfileLogin(profileId);
 }
 
-function showVillagePassword() {
-  const group = getCurrentGroup();
+function showVillagePassword(groupId = pendingVillageJoinId || currentGroupId) {
+  const group = profileStore?.groups?.[groupId];
   if (!group) return;
+  pendingVillageJoinId = group.id;
   els.profileScreen.classList.remove("village-landing-mode");
   hideProfileOnboardingPanels();
-  els.villagePasswordTitle.textContent = group.name;
-  els.villagePasswordInput.value = "";
-  els.villagePasswordError.classList.add("hidden");
-  els.villagePasswordForm.classList.remove("hidden");
+  if (els.villagePasswordTitle) els.villagePasswordTitle.textContent = group.name;
+  if (els.villagePasswordInput) els.villagePasswordInput.value = "";
+  if (els.villagePasswordError) {
+    els.villagePasswordError.textContent = "That village password does not look right. Please try again.";
+    els.villagePasswordError.classList.add("hidden");
+  }
+  els.villagePasswordForm?.classList.remove("hidden");
   scrollPageToTop(els.profileScreen);
-  els.villagePasswordInput.focus();
+  els.villagePasswordInput?.focus();
 }
 
 function handleVillagePassword(event) {
   event.preventDefault();
-  const group = getCurrentGroup();
-  if (!group || els.villagePasswordInput.value.trim() !== group.password) {
-    els.villagePasswordError.classList.remove("hidden");
-    els.villagePasswordInput.select();
+  const group = profileStore?.groups?.[pendingVillageJoinId];
+  const enteredPassword = String(els.villagePasswordInput?.value || "").trim();
+  if (!group || enteredPassword !== String(group.password || "").trim()) {
+    if (els.villagePasswordError) {
+      els.villagePasswordError.textContent = "That village password does not look right. Please try again.";
+      els.villagePasswordError.classList.remove("hidden");
+    }
+    els.villagePasswordInput?.select();
     return;
   }
-  showVillageEntry();
+  currentGroupId = group.id;
+  profileStore.currentGroup = group.id;
+  verifiedVillageJoinId = group.id;
+  enterSelectedVillage();
 }
 
 function showVillageEntry() {
@@ -1769,20 +1793,23 @@ function getPersonalAchievementIds(profile) {
 }
 
 function normalizeProfileData(data, profile) {
-  const displayName = String(
+  const confirmedDisplayName = String(
     data?.villageDisplayName
       || data?.displayName
       || profile.villageDisplayName
       || profile.displayName
-      || data?.name
-      || profile.name
-      || "Learner"
-  ).trim() || "Learner";
+      || ""
+  ).trim();
+  const fallbackName = String(data?.name || profile.name || confirmedDisplayName || "Learner").trim() || "Learner";
+  const displayNameConfirmed = data?.displayNameConfirmed === undefined && profile?.displayNameConfirmed === undefined
+    ? Boolean(confirmedDisplayName)
+    : Boolean(data?.displayNameConfirmed ?? profile?.displayNameConfirmed);
   return {
     id: profile.id,
-    name: displayName,
-    displayName,
-    villageDisplayName: displayName,
+    name: confirmedDisplayName || fallbackName,
+    displayName: confirmedDisplayName,
+    villageDisplayName: confirmedDisplayName,
+    displayNameConfirmed,
     emoji: profile.emoji,
     avatar: data?.avatar || profile.avatar,
     password: data?.password || profile.password || "",
@@ -2345,6 +2372,9 @@ function consolidateFirebaseIdentityProfiles(store = profileStore, options = {})
       {
         id: canonicalId,
         name: identityName,
+        displayName: "",
+        villageDisplayName: "",
+        displayNameConfirmed: false,
         password: "",
         emoji: "🌿",
         avatar: "",
@@ -2590,6 +2620,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
       ownerUid: identitySource.ownerUid || fallbackIdentitySource.ownerUid || "",
       ownerEmail: identitySource.ownerEmail || fallbackIdentitySource.ownerEmail || "",
       displayName: identitySource.displayName || fallbackIdentitySource.displayName || "",
+      displayNameConfirmed: Boolean(identitySource.displayNameConfirmed || fallbackIdentitySource.displayNameConfirmed),
       villageDisplayName: identitySource.villageDisplayName
         || identitySource.displayName
         || fallbackIdentitySource.villageDisplayName
@@ -2814,6 +2845,9 @@ function ensureIdentityProfile() {
       {
         id: profileId,
         name: identityName,
+        displayName: "",
+        villageDisplayName: "",
+        displayNameConfirmed: false,
         password: "",
         emoji: "🌿",
         avatar: "",
@@ -2842,7 +2876,8 @@ function getIdentityDisplayName() {
 }
 
 function hasVillageDisplayName(profile) {
-  return Boolean(String(profile?.villageDisplayName || profile?.displayName || "").trim());
+  const displayName = String(profile?.villageDisplayName || profile?.displayName || "").trim();
+  return Boolean(displayName && profile?.displayNameConfirmed !== false);
 }
 
 function getVillageDisplayName(profile) {
@@ -2859,7 +2894,7 @@ function showDisplayNameSetup(profileId = currentProfileId || profileStore?.curr
   els.profileScreen?.classList.remove("village-landing-mode", "first-use");
   hideProfileOnboardingPanels();
   if (els.displayNameInput) {
-    els.displayNameInput.value = hasVillageDisplayName(profile) ? getVillageDisplayName(profile) : profile?.name || "";
+    els.displayNameInput.value = hasVillageDisplayName(profile) ? getVillageDisplayName(profile) : "";
   }
   els.displayNameError?.classList.add("hidden");
   els.displayNameForm?.classList.remove("hidden");
@@ -2879,6 +2914,7 @@ function handleDisplayNameSubmit(event) {
   }
   profile.displayName = displayName;
   profile.villageDisplayName = displayName;
+  profile.displayNameConfirmed = true;
   profile.name = displayName;
   profile.ownerUid = profile.ownerUid || firebaseAuthUser?.uid || "";
   profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
@@ -4241,6 +4277,7 @@ async function saveAccountDisplayName() {
   }
   profile.displayName = displayName;
   profile.villageDisplayName = displayName;
+  profile.displayNameConfirmed = true;
   profile.name = displayName;
   profile.ownerUid = profile.ownerUid || firebaseAuthUser?.uid || "";
   profile.ownerEmail = profile.ownerEmail || firebaseAuthUser?.email || "";
@@ -6668,6 +6705,7 @@ function createCustomProfile(name, password, emoji = selectedAvatar) {
       name,
       displayName: name,
       villageDisplayName: name,
+      displayNameConfirmed: true,
       password,
       emoji,
       avatar: "",
@@ -6710,6 +6748,7 @@ function renameCurrentProfile(nextName) {
   profile.name = normalizedName;
   profile.displayName = normalizedName;
   profile.villageDisplayName = normalizedName;
+  profile.displayNameConfirmed = true;
   saveProfileStore();
   els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderProfileCards();
@@ -6733,6 +6772,7 @@ function handleCreateProfile(event) {
     profile.name = name;
     profile.displayName = name;
     profile.villageDisplayName = name;
+    profile.displayNameConfirmed = true;
     profile.ownerUid = firebaseAuthUser.uid;
     profile.ownerEmail = firebaseAuthUser.email || "";
     saveProfileStore();
