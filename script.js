@@ -3504,7 +3504,15 @@ function hideAdminCleanupPage() {
 }
 
 async function showAdminCleanupPage() {
+  discardIncompleteChallengeSession();
   currentView = "admin-cleanup";
+  els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.remove("landing-mode");
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  setChallengeBackButtons(false, false);
   hideAuthenticatedAppViews();
   hideProfileOnboardingPanels();
   hideRewardDebugPage();
@@ -3512,6 +3520,19 @@ async function showAdminCleanupPage() {
   els.profileScreen?.classList.add("hidden");
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
+  els.coinChallengesScreen?.classList.add("hidden");
+  els.challengeReadyScreen?.classList.add("hidden");
+  els.levelSelectionScreen?.classList.add("hidden");
+  els.challengeResultsScreen?.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen?.classList.add("hidden");
+  els.learningFlashcardsScreen?.classList.add("hidden");
+  els.controlPanel?.classList.add("hidden");
+  els.searchPanel?.classList.add("hidden");
+  els.statsGrid?.classList.add("hidden");
+  els.studyStage?.classList.add("hidden");
+  els.nounVerbStage?.classList.add("hidden");
+  els.actionBar?.classList.add("hidden");
   els.adminCleanupScreen?.classList.remove("hidden");
   els.appShell.classList.remove("landing-mode", "onboarding-mode", "locked");
   scrollPageToTop(els.adminCleanupScreen);
@@ -3547,7 +3568,7 @@ async function refreshAdminCleanupPanel() {
   try {
     adminCleanupRows = await fetchFamilyZAdminCleanupRows();
     renderAdminCleanupRows(adminCleanupRows);
-    updateAdminCleanupStatus(`${adminCleanupRows.length} Family Z ${adminCleanupRows.length === 1 ? "profile" : "profiles"} loaded. Auth deletion is manual in Firebase Console.`);
+    updateAdminCleanupStatus(`${adminCleanupRows.length} Family Z ${adminCleanupRows.length === 1 ? "profile" : "profiles"} loaded. Private user documents and Auth deletion are manual in Firebase Console.`);
   } catch (error) {
     console.error("Admin cleanup profile list failed.", error);
     updateAdminCleanupStatus(`Could not load admin cleanup data: ${getErrorMessage(error)}`, true);
@@ -3560,27 +3581,12 @@ async function fetchFamilyZAdminCleanupRows() {
   const familyData = familySnapshot.exists() ? familySnapshot.data() || {} : {};
   const familyProfiles = familyData.profiles || {};
   const familyMemberIds = new Set(familyData.group?.memberIds || Object.keys(familyProfiles));
-  const usersSnapshot = await firebase.getDocs(firebase.collection(firebase.db, ...firebase.rootPathParts, "users"));
-  const userLookup = new Map();
-  usersSnapshot.forEach((docSnapshot) => {
-    const data = docSnapshot.data() || {};
-    Object.entries(data.profiles || {}).forEach(([profileId, profile]) => {
-      userLookup.set(profileId, {
-        uid: data.uid || docSnapshot.id,
-        email: data.email || profile?.ownerEmail || "",
-        userDocId: docSnapshot.id,
-        currentProfile: data.currentProfile || "",
-        currentGroup: data.currentGroup || ""
-      });
-    });
-  });
 
   return Object.entries(familyProfiles)
     .filter(([profileId]) => familyMemberIds.has(profileId))
     .map(([profileId, profile]) => {
-      const userInfo = userLookup.get(profileId) || {};
-      const uid = profile?.ownerUid || userInfo.uid || "";
-      const email = profile?.ownerEmail || userInfo.email || "";
+      const uid = profile?.ownerUid || "";
+      const email = profile?.ownerEmail || "";
       const displayName = getVillageDisplayName(profile);
       return {
         key: profileId,
@@ -3590,7 +3596,7 @@ async function fetchFamilyZAdminCleanupRows() {
         displayName,
         groupId: DEFAULT_GROUP_ID,
         villageId: profile?.villageId || DEFAULT_GROUP_ID,
-        userDocId: userInfo.userDocId || uid,
+        userDocId: "",
         isCurrentAdmin: Boolean(uid && firebaseAuthUser?.uid === uid) || profileId === (currentProfileId || profileStore?.currentProfile),
         profile,
         summary: getAdminCleanupProgressSummary(profile)
@@ -3651,7 +3657,7 @@ function createAdminCleanupProfileCard(row) {
   deleteButton.disabled = row.isCurrentAdmin || isProtectedAdminCleanupRow(row) || !isCleanupTarget;
   deleteButton.addEventListener("click", () => handleAdminCleanupDelete(row.profileId));
 
-  const authNote = createTextElement("p", "admin-cleanup-note", "Firebase Authentication deletion: manual in Firebase Console.");
+  const authNote = createTextElement("p", "admin-cleanup-note", "Private user document and Firebase Authentication deletion: manual in Firebase Console.");
   card.replaceChildren(
     createTextElement("h3", "", row.displayName || "Unnamed profile"),
     details,
@@ -3691,13 +3697,13 @@ async function handleAdminCleanupDelete(profileId) {
     `UID: ${row.uid || "No UID"}`,
     `Profile ID: ${row.profileId}`,
     "",
-    "This removes Firestore profile/progress/coins/collection data and village references. Firebase Auth deletion remains manual."
+    "This removes this profile from Family Z and shared app records. Private user document and Firebase Auth deletion remain manual."
   ].join("\n"));
   if (!confirmed) return;
   updateAdminCleanupStatus(`Deleting ${row.displayName || row.profileId}...`);
   try {
     await deleteAdminCleanupFirestoreProfile(row);
-    updateAdminCleanupStatus(`${row.displayName || row.profileId} was removed from Firestore app data. Delete the Auth user manually if needed.`);
+    updateAdminCleanupStatus(`${row.displayName || row.profileId} was removed from Family Z app data. Delete the private user document/Auth user manually if needed.`);
     await refreshAdminCleanupPanel();
   } catch (error) {
     console.error("Admin cleanup deletion failed.", error);
@@ -3729,29 +3735,6 @@ async function deleteAdminCleanupFirestoreProfile(row) {
       updatedAtIso: savedAt
     });
   }));
-
-  if (row.userDocId) {
-    const userRef = getFirebaseUserDocRef(firebase, row.userDocId);
-    const userSnapshot = await firebase.getDoc(userRef);
-    if (userSnapshot.exists()) {
-      const userData = userSnapshot.data() || {};
-      const profiles = { ...(userData.profiles || {}) };
-      targetProfileIds.forEach((profileId) => {
-        delete profiles[profileId];
-      });
-      if (Object.keys(profiles).length) {
-        await firebase.setDoc(userRef, {
-          ...userData,
-          profiles,
-          currentProfile: targetProfileIds.has(userData.currentProfile) ? "" : userData.currentProfile || "",
-          updatedAt: firebase.serverTimestamp(),
-          updatedAtIso: savedAt
-        });
-      } else {
-        await firebase.deleteDoc(userRef);
-      }
-    }
-  }
 
   await deleteAdminCleanupLegacySharedProfileReferences(firebase, [...targetProfileIds], savedAt);
   removeAdminCleanupProfileFromLocalStore(row.profileId);
