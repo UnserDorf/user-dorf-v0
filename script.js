@@ -3527,7 +3527,10 @@ async function showAdminCleanupPage() {
 }
 
 function renderAdminCleanupBlocked(message) {
-  updateAdminCleanupStatus(message, true);
+  const detail = firebaseAuthUser
+    ? `Signed in as: ${firebaseAuthUser.email || "No email"} • UID: ${firebaseAuthUser.uid || "No UID"}`
+    : "No Firebase user is signed in. Local device mode cannot use this admin tool.";
+  updateAdminCleanupStatus(`${message} ${detail}`, true);
   els.adminCleanupRefresh?.classList.add("hidden");
   els.adminCleanupList?.replaceChildren();
 }
