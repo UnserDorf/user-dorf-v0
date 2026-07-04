@@ -116,7 +116,7 @@ const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/fir
 const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
 const DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS = 4 * 60 * 1000;
-const TEMP_ADMIN_EMAILS = ["minekoakishige@gmail.com"];
+const TEMP_ADMIN_EMAILS = ["minekoakishige@gmail.com", "minekoa-z@gmail.com"];
 const TEMP_ADMIN_CLEANUP_TARGET_NAMES = new Set(["samiland", "samizaghrout"]);
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
