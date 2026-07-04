@@ -1,52 +1,25 @@
-# Unser Dorf v0 Roadmap
+# Unser Dorf Roadmap
 
-Unser Dorf v0 is the imported working prototype. This phase preserves the current application as-is so the learning flow, progress tracking, coins, achievements, and Firebase sync can continue working while the product direction becomes clearer.
+This duplicate keeps the current app functionality unchanged. Future phases can build on this foundation without changing the copied app behavior for the initial release.
 
-## v0: Imported Working Prototype
+## Future Phases
 
-- Keep the existing working study app intact.
-- Preserve the current vocabulary review, articles, meaning match, noun-verb builder, preposition master, coins, achievements, progress tracking, and Firebase sync.
-- Use the current Unser Dorf branding without changing gameplay.
-- Treat this version as the stable baseline for future product phases.
+1. Village terminology
+   - Rename learning and progress language around the village concept.
+   - Keep existing study modes familiar while introducing village-themed labels.
 
-## v1: Kindergarten-Readiness Vocabulary
+2. Group codes
+   - Add shared access codes for families, classes, or study groups.
+   - Support joining the correct village from a simple code entry flow.
 
-- Add vocabulary designed around kindergarten-readiness needs.
-- Focus on practical words and phrases for family routines, school readiness, emotions, basic needs, and everyday communication.
-- Keep the learning experience simple enough for parent-child use at home.
-- Build new learning modules from carefully reviewed bilingual content.
+3. Village dashboard
+   - Create an overview of group progress, coins, achievements, and active learners.
+   - Make village status easy to scan for learners and organizers.
 
-## Parent and Child Profiles
+4. Houses
+   - Organize learners into houses inside a village.
+   - Track house-level progress and friendly competition.
 
-- Support separate parent and child profile experiences.
-- Let children focus on learning activities and progress.
-- Let parents manage setup, language support, and review progress without disrupting the child's flow.
-- Preserve family-level progress while still showing individual learner growth.
-
-## Family Coins and Family Plot Growth
-
-- Expand the family coins system into visible family plot growth.
-- Let completed learning work contribute to a shared family space.
-- Use family progress to unlock plot improvements, visual growth, or household milestones.
-- Keep rewards encouraging and cooperative rather than competitive.
-
-## Bilingual Parent Dashboard
-
-- Create a parent dashboard that supports German, English, and Arabic.
-- Show child progress, active vocabulary areas, coins, achievements, and suggested next steps.
-- Make dashboard language clear for multilingual families.
-- Keep parent-facing explanations practical and easy to act on.
-
-## Future Teacher and Social Worker Onboarding
-
-- Add onboarding flows for teachers, social workers, and support staff.
-- Help trusted adults invite or support families without needing technical setup.
-- Provide simple guidance for using Unser Dorf with children and caregivers.
-- Explore privacy-aware ways to support multiple families or groups.
-
-## Future Village and Community Expansion
-
-- Grow the family plot concept into a wider village/community model.
-- Support group codes, shared villages, houses, and community dashboards.
-- Let families, educators, and support workers participate in appropriate roles.
-- Keep the core goal centered on child readiness, family confidence, and accessible multilingual learning.
+5. Village Memories
+   - Add a place for saved milestones, achievements, and learning moments.
+   - Preserve memorable progress snapshots for the village over time.
