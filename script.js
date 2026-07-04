@@ -116,9 +116,6 @@ const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/fir
 const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
 const DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS = 4 * 60 * 1000;
-const TEMP_ADMIN_EMAILS = ["minekoakishige@gmail.com", "minekoa-z@gmail.com"];
-const TEMP_ADMIN_UIDS = ["UbqthKJVRIM2lqSMS2UiaO9MveR2"];
-const TEMP_ADMIN_CLEANUP_TARGET_NAMES = new Set(["samiland", "samizaghrout"]);
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
 const LEADERBOARD_PROFILE_IDS = [];
@@ -567,11 +564,6 @@ const els = {
   villageMembersTitle: document.querySelector("#villageMembersTitle"),
   villageMembersSummary: document.querySelector("#villageMembersSummary"),
   villageMembersList: document.querySelector("#villageMembersList"),
-  adminCleanupScreen: document.querySelector("#adminCleanupScreen"),
-  adminCleanupBack: document.querySelector("#adminCleanupBack"),
-  adminCleanupRefresh: document.querySelector("#adminCleanupRefresh"),
-  adminCleanupStatus: document.querySelector("#adminCleanupStatus"),
-  adminCleanupList: document.querySelector("#adminCleanupList"),
   challengeHubVillageName: document.querySelector("#challengeHubVillageName"),
   currentGroupLabel: document.querySelector("#currentGroupLabel"),
   currentUserLabel: document.querySelector("#currentUserLabel"),
@@ -676,8 +668,6 @@ const els = {
   accountDisplayNameStatus: document.querySelector("#accountDisplayNameStatus"),
   settingsResetPassword: document.querySelector("#settingsResetPassword"),
   deleteAccountButton: document.querySelector("#deleteAccountButton"),
-  adminCleanupSettingsSection: document.querySelector("#adminCleanupSettingsSection"),
-  settingsAdminCleanup: document.querySelector("#settingsAdminCleanup"),
   deleteAccountModal: document.querySelector("#deleteAccountModal"),
   deleteAccountForm: document.querySelector("#deleteAccountForm"),
   deleteAccountConfirmInput: document.querySelector("#deleteAccountConfirmInput"),
@@ -825,7 +815,6 @@ let villageSelectionMode = "choose";
 let demoPageIndex = 0;
 let demoFinalScreenActive = false;
 let applyingRemoteStore = false;
-let adminCleanupRows = [];
 let firebaseSyncApi = null;
 let firebaseSyncPromise = null;
 let cloudSaveTimer = 0;
@@ -1192,7 +1181,6 @@ async function unlockApp() {
   })));
   routeAfterStartup();
   maybeShowRewardDebugPage();
-  maybeShowAdminCleanupPage();
 }
 
 function isDeviceOnboardingComplete() {
@@ -2486,8 +2474,6 @@ async function initializeFirebaseSyncApi() {
     rootPathParts,
     docRef: firestoreModule.doc(db, ...documentPathParts),
     doc: firestoreModule.doc,
-    collection: firestoreModule.collection,
-    getDocs: firestoreModule.getDocs,
     getDoc: firestoreModule.getDoc,
     deleteDoc: firestoreModule.deleteDoc,
     setDoc: firestoreModule.setDoc,
@@ -3475,303 +3461,6 @@ function getFirebaseOwnedProfileIdsForUser(user = firebaseAuthUser) {
   ].filter(Boolean))];
 }
 
-function shouldShowAdminCleanupPage() {
-  return window.location.hash === "#admin-cleanup" || window.location.pathname.endsWith("/admin-cleanup");
-}
-
-function isAdminCleanupUser(user = firebaseAuthUser) {
-  if (!user) return false;
-  const syncConfig = getFirebaseSyncConfig();
-  const allowedUids = new Set([...TEMP_ADMIN_UIDS, ...syncConfig.adminUids]);
-  const allowedEmails = new Set([...TEMP_ADMIN_EMAILS, ...syncConfig.adminEmails].map((email) => String(email).toLowerCase()));
-  return allowedUids.has(user.uid) || allowedEmails.has(String(user.email || "").toLowerCase());
-}
-
-function maybeShowAdminCleanupPage() {
-  if (!shouldShowAdminCleanupPage()) return;
-  showAdminCleanupPage();
-}
-
-function updateAdminCleanupStatus(message = "", isError = false) {
-  if (!els.adminCleanupStatus) return;
-  els.adminCleanupStatus.textContent = message;
-  els.adminCleanupStatus.classList.toggle("hidden", !message);
-  els.adminCleanupStatus.classList.toggle("is-error", Boolean(message && isError));
-}
-
-function hideAdminCleanupPage() {
-  els.adminCleanupScreen?.classList.add("hidden");
-}
-
-async function showAdminCleanupPage() {
-  discardIncompleteChallengeSession();
-  currentView = "admin-cleanup";
-  els.appShell.classList.remove("onboarding-mode");
-  els.appShell.classList.remove("landing-mode");
-  els.appShell.classList.remove("clean-article-practice");
-  els.appShell.classList.remove("clean-quiz-mode");
-  els.appShell.classList.remove("article-quiz-mode");
-  els.appShell.classList.remove("meaning-match-mode");
-  setChallengeBackButtons(false, false);
-  hideAuthenticatedAppViews();
-  hideProfileOnboardingPanels();
-  hideRewardDebugPage();
-  closeSettingsMenu();
-  els.profileScreen?.classList.add("hidden");
-  els.landingScreen?.classList.add("hidden");
-  els.demoScreen?.classList.add("hidden");
-  els.coinChallengesScreen?.classList.add("hidden");
-  els.challengeReadyScreen?.classList.add("hidden");
-  els.levelSelectionScreen?.classList.add("hidden");
-  els.challengeResultsScreen?.classList.add("hidden");
-  els.flashcardResumeScreen?.classList.add("hidden");
-  els.flashcardSetupScreen?.classList.add("hidden");
-  els.learningFlashcardsScreen?.classList.add("hidden");
-  els.controlPanel?.classList.add("hidden");
-  els.searchPanel?.classList.add("hidden");
-  els.statsGrid?.classList.add("hidden");
-  els.studyStage?.classList.add("hidden");
-  els.nounVerbStage?.classList.add("hidden");
-  els.actionBar?.classList.add("hidden");
-  els.adminCleanupScreen?.classList.remove("hidden");
-  els.appShell.classList.remove("landing-mode", "onboarding-mode", "locked");
-  scrollPageToTop(els.adminCleanupScreen);
-
-  if (!firebaseAuthUser) {
-    renderAdminCleanupBlocked("Admin access only. Sign in with Mineko's admin account to use this temporary testing tool.");
-    return;
-  }
-  if (!isAdminCleanupUser(firebaseAuthUser)) {
-    renderAdminCleanupBlocked("Admin access only.");
-    return;
-  }
-  await refreshAdminCleanupPanel();
-}
-
-function renderAdminCleanupBlocked(message) {
-  const detail = firebaseAuthUser
-    ? `Signed in as: ${firebaseAuthUser.email || "No email"} • UID: ${firebaseAuthUser.uid || "No UID"}`
-    : "No Firebase user is signed in. Local device mode cannot use this admin tool.";
-  updateAdminCleanupStatus(`${message} ${detail}`, true);
-  els.adminCleanupRefresh?.classList.add("hidden");
-  els.adminCleanupList?.replaceChildren();
-}
-
-async function refreshAdminCleanupPanel() {
-  if (!isAdminCleanupUser()) {
-    renderAdminCleanupBlocked(firebaseAuthUser ? "Admin access only." : "Admin access only. Sign in with Mineko's admin account.");
-    return;
-  }
-  els.adminCleanupRefresh?.classList.remove("hidden");
-  updateAdminCleanupStatus("Loading Family Z profiles...");
-  els.adminCleanupList?.replaceChildren();
-  try {
-    adminCleanupRows = await fetchFamilyZAdminCleanupRows();
-    renderAdminCleanupRows(adminCleanupRows);
-    updateAdminCleanupStatus(`${adminCleanupRows.length} Family Z ${adminCleanupRows.length === 1 ? "profile" : "profiles"} loaded. Private user documents and Auth deletion are manual in Firebase Console.`);
-  } catch (error) {
-    console.error("Admin cleanup profile list failed.", error);
-    updateAdminCleanupStatus(`Could not load admin cleanup data: ${getErrorMessage(error)}`, true);
-  }
-}
-
-async function fetchFamilyZAdminCleanupRows() {
-  const firebase = await getFirebaseSyncApi();
-  const familySnapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID));
-  const familyData = familySnapshot.exists() ? familySnapshot.data() || {} : {};
-  const familyProfiles = familyData.profiles || {};
-  const familyMemberIds = new Set(familyData.group?.memberIds || Object.keys(familyProfiles));
-
-  return Object.entries(familyProfiles)
-    .filter(([profileId]) => familyMemberIds.has(profileId))
-    .map(([profileId, profile]) => {
-      const uid = profile?.ownerUid || "";
-      const email = profile?.ownerEmail || "";
-      const displayName = getVillageDisplayName(profile);
-      return {
-        key: profileId,
-        profileId,
-        uid,
-        email,
-        displayName,
-        groupId: DEFAULT_GROUP_ID,
-        villageId: profile?.villageId || DEFAULT_GROUP_ID,
-        userDocId: "",
-        isCurrentAdmin: Boolean(uid && firebaseAuthUser?.uid === uid) || profileId === (currentProfileId || profileStore?.currentProfile),
-        profile,
-        summary: getAdminCleanupProgressSummary(profile)
-      };
-    })
-    .sort((first, second) => first.displayName.localeCompare(second.displayName));
-}
-
-function getAdminCleanupProgressSummary(profile) {
-  return {
-    coins: normalizeCoinCount(profile?.coins),
-    contributionCoins: normalizeCoinCount(profile?.contributionCoins),
-    flashcardsReviewed: getFlashcardsReviewedCount(profile),
-    vocabularyCorrect: getDebugVocabularyCorrectCount(profile),
-    articleCorrect: getDebugArticleCorrectCount(profile),
-    challengesCompleted: normalizeCounter(profile?.challengeSessionsCompleted),
-    austriaAlbum: getAustriaAlbumUnlockedRewardIds(profile, true).length,
-    villageMemoriesSeen: normalizeVillageAlbumSeenRewardIds(profile?.villageAlbumSeenRewards).length
-  };
-}
-
-function renderAdminCleanupRows(rows) {
-  if (!els.adminCleanupList) return;
-  if (!rows.length) {
-    els.adminCleanupList.replaceChildren(createTextElement("p", "admin-cleanup-empty", "No Family Z profiles found."));
-    return;
-  }
-  els.adminCleanupList.replaceChildren(...rows.map(createAdminCleanupProfileCard));
-}
-
-function createAdminCleanupProfileCard(row) {
-  const card = document.createElement("article");
-  card.className = "admin-cleanup-card";
-  const summary = row.summary || {};
-  const details = document.createElement("dl");
-  details.className = "admin-cleanup-details";
-  [
-    ["Email", row.email || "No email"],
-    ["UID", row.uid || "No UID"],
-    ["Profile ID", row.profileId],
-    ["Village", row.groupId],
-    ["Coins", `${summary.coins} personal / ${summary.contributionCoins} contributed`],
-    ["Progress", `${summary.flashcardsReviewed} flashcards, ${summary.vocabularyCorrect} vocab correct, ${summary.articleCorrect} article correct`],
-    ["Collections", `${summary.austriaAlbum} Austria Album items, ${summary.villageMemoriesSeen} village memories seen`]
-  ].forEach(([label, value]) => {
-    details.append(createTextElement("dt", "", label), createTextElement("dd", "", value));
-  });
-
-  const deleteButton = document.createElement("button");
-  deleteButton.type = "button";
-  deleteButton.className = "danger-button";
-  const isCleanupTarget = isAdminCleanupTargetRow(row);
-  deleteButton.textContent = row.isCurrentAdmin
-    ? "Cannot delete current admin"
-    : isCleanupTarget
-      ? "Delete test profile"
-      : "Protected";
-  deleteButton.disabled = row.isCurrentAdmin || isProtectedAdminCleanupRow(row) || !isCleanupTarget;
-  deleteButton.addEventListener("click", () => handleAdminCleanupDelete(row.profileId));
-
-  const authNote = createTextElement("p", "admin-cleanup-note", "Private user document and Firebase Authentication deletion: manual in Firebase Console.");
-  card.replaceChildren(
-    createTextElement("h3", "", row.displayName || "Unnamed profile"),
-    details,
-    authNote,
-    deleteButton
-  );
-  return card;
-}
-
-function isProtectedAdminCleanupRow(row) {
-  const text = `${row.email || ""} ${row.displayName || ""}`.toLowerCase();
-  return text.includes("mineko") || Boolean(row.uid && firebaseAuthUser?.uid === row.uid);
-}
-
-function isAdminCleanupTargetRow(row) {
-  return TEMP_ADMIN_CLEANUP_TARGET_NAMES.has(String(row.displayName || "").trim().toLowerCase());
-}
-
-async function handleAdminCleanupDelete(profileId) {
-  const row = adminCleanupRows.find((item) => item.profileId === profileId);
-  if (!row) return;
-  if (!isAdminCleanupUser()) {
-    updateAdminCleanupStatus("Admin access only.", true);
-    return;
-  }
-  if (row.isCurrentAdmin || isProtectedAdminCleanupRow(row)) {
-    updateAdminCleanupStatus("Mineko's current admin account cannot be deleted from this panel.", true);
-    return;
-  }
-  if (!isAdminCleanupTargetRow(row)) {
-    updateAdminCleanupStatus("Only Sami duplicate test profiles can be deleted with this temporary tool.", true);
-    return;
-  }
-  const confirmed = window.confirm([
-    `Delete test profile: ${row.displayName || "Unnamed profile"}`,
-    `Email: ${row.email || "No email"}`,
-    `UID: ${row.uid || "No UID"}`,
-    `Profile ID: ${row.profileId}`,
-    "",
-    "This removes this profile from Family Z and shared app records. Private user document and Firebase Auth deletion remain manual."
-  ].join("\n"));
-  if (!confirmed) return;
-  updateAdminCleanupStatus(`Deleting ${row.displayName || row.profileId}...`);
-  try {
-    await deleteAdminCleanupFirestoreProfile(row);
-    updateAdminCleanupStatus(`${row.displayName || row.profileId} was removed from Family Z app data. Delete the private user document/Auth user manually if needed.`);
-    await refreshAdminCleanupPanel();
-  } catch (error) {
-    console.error("Admin cleanup deletion failed.", error);
-    updateAdminCleanupStatus(`Could not delete ${row.displayName || row.profileId}: ${getErrorMessage(error)}`, true);
-  }
-}
-
-async function deleteAdminCleanupFirestoreProfile(row) {
-  const firebase = await getFirebaseSyncApi();
-  const targetProfileIds = new Set([row.profileId]);
-  const savedAt = new Date().toISOString();
-
-  await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
-    const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
-    const snapshot = await firebase.getDoc(villageRef);
-    if (!snapshot.exists()) return;
-    const data = snapshot.data() || {};
-    const group = sanitizeGroupForSync(data.group || createGroupData(groupInfo));
-    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((memberId) => !targetProfileIds.has(memberId)));
-    const profiles = { ...(data.profiles || {}) };
-    targetProfileIds.forEach((profileId) => {
-      delete profiles[profileId];
-    });
-    await firebase.setDoc(villageRef, {
-      ...data,
-      group,
-      profiles,
-      updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: savedAt
-    });
-  }));
-
-  await deleteAdminCleanupLegacySharedProfileReferences(firebase, [...targetProfileIds], savedAt);
-  removeAdminCleanupProfileFromLocalStore(row.profileId);
-}
-
-async function deleteAdminCleanupLegacySharedProfileReferences(firebase, targetProfileIds, savedAt) {
-  const snapshot = await firebase.getDoc(firebase.docRef);
-  if (!snapshot.exists()) return;
-  const data = snapshot.data() || {};
-  const legacyStore = data.profileStore || data.profile_store;
-  if (!legacyStore?.profiles) return;
-  const cleanedStore = sanitizeProfileStoreForSync(legacyStore);
-  targetProfileIds.forEach((profileId) => {
-    delete cleanedStore.profiles[profileId];
-  });
-  Object.values(cleanedStore.groups || {}).forEach((group) => {
-    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((memberId) => !targetProfileIds.includes(memberId)));
-  });
-  if (targetProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
-  if (!cleanedStore.groups?.[cleanedStore.currentGroup]) cleanedStore.currentGroup = DEFAULT_GROUP_ID;
-  await firebase.setDoc(firebase.docRef, {
-    profileStore: cleanedStore,
-    updatedAt: firebase.serverTimestamp(),
-    updatedAtIso: savedAt
-  }, { merge: true });
-}
-
-function removeAdminCleanupProfileFromLocalStore(profileId) {
-  if (!profileStore?.profiles?.[profileId]) return;
-  delete profileStore.profiles[profileId];
-  Object.values(profileStore.groups || {}).forEach((group) => {
-    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((memberId) => memberId !== profileId));
-  });
-  if (profileStore.currentProfile === profileId) profileStore.currentProfile = "";
-  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
-}
-
 function clearLocalAccountState() {
   window.clearTimeout(cloudSaveTimer);
   window.clearInterval(cloudPullTimer);
@@ -3957,7 +3646,6 @@ function showDashboard() {
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   renderDashboard();
-  hideAdminCleanupPage();
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
   els.dashboardScreen.classList.remove("hidden");
@@ -3999,14 +3687,12 @@ function showLandingScreen() {
   closeSettingsMenu();
   hideRewardDetail();
   hideRewardDebugPage();
-  hideAdminCleanupPage();
   resetLoggedOutTransientUi();
   scrollPageToTop(els.landingScreen);
 }
 
 function hideAuthenticatedAppViews() {
   els.dashboardScreen.classList.add("hidden");
-  hideAdminCleanupPage();
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -4538,7 +4224,6 @@ function renderSettingsPanel() {
   if (els.accountDisplayNameInput) {
     els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
   }
-  els.adminCleanupSettingsSection?.classList.toggle("hidden", !isAdminCleanupUser());
   els.accountDisplayNameFields?.classList.add("hidden");
   updateAccountDisplayNameStatus("");
 }
@@ -7258,21 +6943,6 @@ function bindSettingsEvents() {
   bindOptionalEvent(els.deleteAccountConfirmInput, "#deleteAccountConfirmInput", "input", updateDeleteAccountButtonState);
   bindOptionalEvent(els.deleteAccountForm, "#deleteAccountForm", "submit", handleDeleteAccountSubmit);
   bindOptionalEvent(els.mobileMenuSettingsButton, "#mobileMenuSettingsButton", "click", showSettingsDetailView);
-  bindOptionalEvent(els.settingsAdminCleanup, "#settingsAdminCleanup", "click", () => {
-    closeSettingsMenu();
-    window.location.hash = "admin-cleanup";
-    showAdminCleanupPage();
-  });
-  bindOptionalEvent(els.adminCleanupBack, "#adminCleanupBack", "click", () => {
-    if (firebaseAuthUser || hasLocalIdentity()) {
-      window.location.hash = "";
-      showDashboard();
-      return;
-    }
-    window.location.hash = "";
-    showLandingScreen();
-  });
-  bindOptionalEvent(els.adminCleanupRefresh, "#adminCleanupRefresh", "click", refreshAdminCleanupPanel);
   bindOptionalEvent(els.settingsMenuBack, "#settingsMenuBack", "click", showSettingsMenuView);
   bindOptionalEvent(els.settingsToggle, "#settingsToggle", "click", () => {
     if (!els.settingsPanel) {
@@ -7597,10 +7267,7 @@ function bindEvents() {
   els.rewardDebugScreen?.addEventListener("click", (event) => {
     if (event.target === els.rewardDebugScreen) hideRewardDebugPage();
   });
-  window.addEventListener("hashchange", () => {
-    maybeShowRewardDebugPage();
-    maybeShowAdminCleanupPage();
-  });
+  window.addEventListener("hashchange", maybeShowRewardDebugPage);
 
   els.levelCelebrationViewAlbum?.addEventListener("click", () => {
     const page = els.levelCelebrationViewAlbum.dataset.rewardPage || "austria-album";

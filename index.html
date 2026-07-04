@@ -293,11 +293,6 @@
                   <button type="button" id="settingsResetPassword">Reset Password</button>
                   <button class="danger-button" type="button" id="deleteAccountButton">Delete Account</button>
                 </section>
-                <section class="settings-section hidden" id="adminCleanupSettingsSection" aria-label="Testing admin tools">
-                  <h3>Testing</h3>
-                  <p class="settings-lock-note">Temporary testing admin tool. Remove before production.</p>
-                  <button type="button" id="settingsAdminCleanup">Admin Cleanup</button>
-                </section>
               </div>
             </div>
           </div>
@@ -509,25 +504,6 @@
         <article class="village-members-page-card">
           <div class="village-members-grid" id="villageMembersList"></div>
         </article>
-      </section>
-
-      <section class="admin-cleanup-screen hidden" id="adminCleanupScreen" aria-label="Admin cleanup">
-        <div class="admin-cleanup-shell">
-          <div class="admin-warning-banner">Temporary testing admin tool. Remove before production.</div>
-          <div class="admin-cleanup-heading">
-            <button type="button" class="small-link-button" id="adminCleanupBack">← Back</button>
-            <div>
-              <p class="eyebrow">Admin Cleanup</p>
-              <h2>Family Z Test Profiles</h2>
-              <p>Delete duplicate test profiles from Firestore village data. Firebase Authentication users must be deleted manually.</p>
-            </div>
-          </div>
-          <p class="lock-error hidden" id="adminCleanupStatus"></p>
-          <div class="admin-cleanup-actions">
-            <button type="button" class="primary-button" id="adminCleanupRefresh">Refresh Family Z Profiles</button>
-          </div>
-          <div class="admin-cleanup-list" id="adminCleanupList"></div>
-        </div>
       </section>
 
       <section class="level-selection-screen hidden" id="levelSelectionScreen" aria-label="Choose level">
@@ -1026,6 +1002,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=203"></script>
+    <script type="module" src="script.js?v=205"></script>
   </body>
 </html>
