@@ -117,6 +117,7 @@ const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
 const DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS = 4 * 60 * 1000;
 const TEMP_ADMIN_EMAILS = ["minekoakishige@gmail.com", "minekoa-z@gmail.com"];
+const TEMP_ADMIN_UIDS = ["UbqthKJVRIM2lqSMS2UiaO9MveR2"];
 const TEMP_ADMIN_CLEANUP_TARGET_NAMES = new Set(["samiland", "samizaghrout"]);
 
 const LEGACY_PROFILE_IDS = new Set(["anna", "omar", "leila", "david", "mineko", "sami", "mai", "ziad"]);
@@ -3481,7 +3482,7 @@ function shouldShowAdminCleanupPage() {
 function isAdminCleanupUser(user = firebaseAuthUser) {
   if (!user) return false;
   const syncConfig = getFirebaseSyncConfig();
-  const allowedUids = new Set(syncConfig.adminUids);
+  const allowedUids = new Set([...TEMP_ADMIN_UIDS, ...syncConfig.adminUids]);
   const allowedEmails = new Set([...TEMP_ADMIN_EMAILS, ...syncConfig.adminEmails].map((email) => String(email).toLowerCase()));
   return allowedUids.has(user.uid) || allowedEmails.has(String(user.email || "").toLowerCase());
 }
