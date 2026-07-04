@@ -675,6 +675,8 @@ const els = {
   accountDisplayNameStatus: document.querySelector("#accountDisplayNameStatus"),
   settingsResetPassword: document.querySelector("#settingsResetPassword"),
   deleteAccountButton: document.querySelector("#deleteAccountButton"),
+  adminCleanupSettingsSection: document.querySelector("#adminCleanupSettingsSection"),
+  settingsAdminCleanup: document.querySelector("#settingsAdminCleanup"),
   deleteAccountModal: document.querySelector("#deleteAccountModal"),
   deleteAccountForm: document.querySelector("#deleteAccountForm"),
   deleteAccountConfirmInput: document.querySelector("#deleteAccountConfirmInput"),
@@ -4549,6 +4551,7 @@ function renderSettingsPanel() {
   if (els.accountDisplayNameInput) {
     els.accountDisplayNameInput.value = profile ? getVillageDisplayName(profile) : "";
   }
+  els.adminCleanupSettingsSection?.classList.toggle("hidden", !isAdminCleanupUser());
   els.accountDisplayNameFields?.classList.add("hidden");
   updateAccountDisplayNameStatus("");
 }
@@ -7268,6 +7271,11 @@ function bindSettingsEvents() {
   bindOptionalEvent(els.deleteAccountConfirmInput, "#deleteAccountConfirmInput", "input", updateDeleteAccountButtonState);
   bindOptionalEvent(els.deleteAccountForm, "#deleteAccountForm", "submit", handleDeleteAccountSubmit);
   bindOptionalEvent(els.mobileMenuSettingsButton, "#mobileMenuSettingsButton", "click", showSettingsDetailView);
+  bindOptionalEvent(els.settingsAdminCleanup, "#settingsAdminCleanup", "click", () => {
+    closeSettingsMenu();
+    window.location.hash = "admin-cleanup";
+    showAdminCleanupPage();
+  });
   bindOptionalEvent(els.adminCleanupBack, "#adminCleanupBack", "click", () => {
     if (firebaseAuthUser || hasLocalIdentity()) {
       window.location.hash = "";
