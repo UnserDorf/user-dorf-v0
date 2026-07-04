@@ -2113,6 +2113,96 @@ h1 {
   background: var(--green-soft);
 }
 
+.admin-cleanup-screen {
+  width: min(1080px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 40px) 0 56px;
+}
+
+.admin-cleanup-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-warning-banner {
+  border: 1px solid rgba(176, 58, 46, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 239, 235, 0.92);
+  color: #913126;
+  padding: 12px 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.admin-cleanup-heading {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.94);
+  box-shadow: var(--shadow);
+  padding: clamp(18px, 3vw, 26px);
+  display: grid;
+  gap: 14px;
+}
+
+.admin-cleanup-heading h2 {
+  margin: 0;
+  color: var(--green);
+}
+
+.admin-cleanup-heading p {
+  margin: 0;
+}
+
+.admin-cleanup-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-cleanup-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-cleanup-card {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.96);
+  box-shadow: var(--shadow);
+  padding: clamp(16px, 3vw, 22px);
+  display: grid;
+  gap: 14px;
+}
+
+.admin-cleanup-card h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.admin-cleanup-details {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 8px 14px;
+  font-size: 0.92rem;
+}
+
+.admin-cleanup-details dt {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.admin-cleanup-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-cleanup-note,
+.admin-cleanup-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .dashboard-summary,
 .dashboard-progress-grid {
   display: grid;
