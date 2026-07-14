@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=229">
+    <link rel="stylesheet" href="style.css?v=230">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -397,9 +397,37 @@
           <button class="small-link-button" id="learnGermanBack" type="button">← Dashboard</button>
           <h2>📚 Learn German</h2>
           <p>Learn new words with flashcards, then practise their meanings and articles. Every activity helps your village grow.</p>
+          <button class="small-link-button learn-how-link" id="learnHowItWorks" type="button">How it works</button>
         </div>
 
-        <section class="learn-recommendation-panel" aria-label="Learning journey">
+        <section class="learn-intro-panel hidden" id="learnIntroPanel" aria-label="How learning works">
+          <button class="small-link-button" id="learnIntroBack" type="button">← Back</button>
+          <article class="learn-intro-card">
+            <div class="learn-intro-heading">
+              <p class="eyebrow">How Learning Works</p>
+              <h3>Learn German. Help your village grow.</h3>
+            </div>
+            <div class="learn-intro-loop" aria-label="Learn Review Earn Build">
+              <div><span>📚</span><strong>Learn</strong></div>
+              <span class="learn-intro-arrow">→</span>
+              <div><span>✅</span><strong>Review</strong></div>
+              <span class="learn-intro-arrow">→</span>
+              <div><span>🪙</span><strong>Earn</strong></div>
+              <span class="learn-intro-arrow">→</span>
+              <div><span>🏡</span><strong>Build</strong></div>
+            </div>
+            <ol class="learn-intro-steps">
+              <li><strong>Step 1 — Learn words</strong><span>Choose a level and study words with flashcards.</span></li>
+              <li><strong>Step 2 — Review what you learned</strong><span>Practise meanings and articles in short quizzes.</span></li>
+              <li><strong>Step 3 — Earn coins</strong><span>Correct quiz answers earn coins.</span></li>
+              <li><strong>Step 4 — Build the village together</strong><span>Your coins are added to your village total. Together, you restore places and unlock shared village memories.</span></li>
+            </ol>
+            <p class="learn-intro-note">Flashcards help you learn. Reviews earn coins.</p>
+            <button class="primary-button" id="learnIntroChooseLevel" type="button">Choose Your Level</button>
+          </article>
+        </section>
+
+        <section class="learn-recommendation-panel" id="learnRecommendationPanel" aria-label="Learning journey">
           <article class="learn-recommendation-card" id="learnRecommendationCard">
             <p class="eyebrow" id="learnRecommendationEyebrow">Today's Goal</p>
             <h3 id="learnRecommendationTitle">Learn 20 new words</h3>
@@ -418,7 +446,7 @@
           </article>
         </section>
 
-        <section class="learn-shortcut-panel" aria-label="Learning shortcuts">
+        <section class="learn-shortcut-panel" id="learnShortcutPanel" aria-label="Learning shortcuts">
           <p>Or jump to:</p>
           <div class="learn-shortcut-grid">
             <button class="ghost-button" type="button" data-learn-action="flashcards">📇 Flashcards</button>
@@ -969,6 +997,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=229"></script>
+    <script type="module" src="script.js?v=230"></script>
   </body>
 </html>
