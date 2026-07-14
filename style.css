@@ -11415,7 +11415,24 @@ body:has(#villageMembersScreen:not(.hidden)) {
   width: min(var(--dashboard-width), 100%);
   display: grid;
   gap: clamp(14px, 2vw, 22px);
+  grid-row: 2 / 6;
   justify-self: center;
+  align-content: start;
+  min-height: 0;
+  overflow: visible;
+  padding-bottom: max(72px, calc(32px + env(safe-area-inset-bottom)));
+}
+
+body:has(#developerToolsScreen:not(.hidden)) {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.app-shell:has(#developerToolsScreen:not(.hidden)) {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+  grid-template-rows: auto auto auto auto auto auto;
 }
 
 .developer-tools-warning {
