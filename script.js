@@ -4610,6 +4610,11 @@ function returnToCoinChallenges(event) {
   event?.preventDefault();
   saveCurrentPosition();
   closeSettingsMenu();
+  if (isManualReviewPath()) {
+    discardIncompleteChallengeSession();
+    showLevelSelection(selectedLearningPath);
+    return;
+  }
   showCoinChallenges();
 }
 
@@ -7100,6 +7105,7 @@ function renderCoinChallenges() {
 }
 
 function getChallengeVocabularyDeck(level = selectedLearningLevel, category = selectedChallengeCategory) {
+  if (!category || category === "all") return getVocabularyChallengeCards(level);
   return getVocabularyChallengeCards(level)
     .filter((card) => getFlashcardCategory(card) === category);
 }
@@ -8582,12 +8588,20 @@ function handleLearnGermanAction(action, options = {}) {
   }
   if (action === "vocabulary-review") {
     learnGermanReturnActive = true;
+    if (!options.guided) {
+      showLevelSelection("vocabulary-review");
+      return;
+    }
     prepareStudySetReviewContext("vocabulary");
     showDirectChallenge("vocabulary-review");
     return;
   }
   if (action === "article-review") {
     learnGermanReturnActive = true;
+    if (!options.guided) {
+      showLevelSelection("article-review");
+      return;
+    }
     prepareStudySetReviewContext("articles");
     showDirectChallenge("articles");
   }
@@ -8599,6 +8613,20 @@ function returnToLearnGermanOrDashboard() {
     return;
   }
   showDashboard();
+}
+
+function isManualReviewPath(path = selectedLearningPath) {
+  return path === "vocabulary-review" || path === "article-review";
+}
+
+function returnToManualLevelSelectionOrLearnGerman(event) {
+  event?.preventDefault();
+  if (isManualReviewPath()) {
+    discardIncompleteChallengeSession();
+    showLevelSelection(selectedLearningPath);
+    return;
+  }
+  returnToLearnGermanOrDashboard();
 }
 
 function prepareStudySetReviewContext(type) {
@@ -8634,8 +8662,8 @@ function markActiveStudySetReviewCompleted(type) {
   saveActiveStudySetToCloudNow(profile.activeStudySet);
 }
 
-function showDirectChallenge(action) {
-  selectedLearningPath = "challenges";
+function showDirectChallenge(action, options = {}) {
+  if (!options.keepLearningPath) selectedLearningPath = "challenges";
   showChallengeReady(action);
 }
 
@@ -8736,7 +8764,13 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
 function showLevelSelection(path) {
   if (path === "challenges") discardIncompleteChallengeSession();
   selectedLearningPath = path;
-  els.levelSelectionContext.textContent = path === "challenges" ? "Reviews" : "Flashcards";
+  const contextLabels = {
+    flashcards: "FLASHCARDS",
+    "vocabulary-review": "VOCABULARY REVIEW",
+    "article-review": "ARTICLE REVIEW",
+    challenges: "REVIEWS"
+  };
+  els.levelSelectionContext.textContent = contextLabels[path] || "FLASHCARDS";
   currentView = "level-selection";
   setChallengeBackButtons(false, false);
   els.dashboardScreen.classList.add("hidden");
@@ -8766,9 +8800,27 @@ function chooseLearningLevel(level) {
     showFlashcardSetup();
     return;
   }
+  if (selectedLearningPath === "vocabulary-review") {
+    startManualReviewForSelectedLevel("vocabulary-review");
+    return;
+  }
+  if (selectedLearningPath === "article-review") {
+    startManualReviewForSelectedLevel("articles");
+    return;
+  }
   if (selectedLearningPath === "challenges") {
     showCoinChallenges();
   }
+}
+
+function startManualReviewForSelectedLevel(action) {
+  if (!["vocabulary-review", "articles"].includes(action)) return;
+  guidedLearningActive = false;
+  learnGermanReturnActive = true;
+  if (action === "vocabulary-review") {
+    selectedChallengeCategory = "all";
+  }
+  showDirectChallenge(action, { keepLearningPath: true });
 }
 
 function showFlashcardSetup() {
@@ -8823,6 +8875,7 @@ function getFlashcardCategory(card) {
 }
 
 function getFlashcardCategoryLabel(category) {
+  if (category === "all") return "All Words";
   if (category === "nouns") return "Nouns";
   if (category === "verbs") return "Verbs";
   return "Other Words";
@@ -9340,7 +9393,7 @@ function isStudySetWordEligibleForQuiz(word, options = {}) {
   if (!word?.wordId) return false;
   if (options.level && word.level && word.level !== options.level) return false;
   if (options.type === "articles") return word.category === "nouns" || Boolean(word.article);
-  if (options.type === "vocabulary" && options.category) return word.category === options.category;
+  if (options.type === "vocabulary" && options.category && options.category !== "all") return word.category === options.category;
   return true;
 }
 
@@ -9997,7 +10050,7 @@ function bindEvents() {
   });
   els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
-  els.challengeReadyBack.addEventListener("click", returnToLearnGermanOrDashboard);
+  els.challengeReadyBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
   els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
   els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
@@ -10011,7 +10064,7 @@ function bindEvents() {
     openFlashcardDeck(flashcardStudyLevel, flashcardStudyCategory, { forceNew: true });
   });
   els.flashcardReturnDashboard.addEventListener("click", returnToLearnGermanOrDashboard);
-  els.challengeResultsBack.addEventListener("click", returnToLearnGermanOrDashboard);
+  els.challengeResultsBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
   els.flashcardSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     startLearningFlashcards();
