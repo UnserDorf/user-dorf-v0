@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=234">
+    <link rel="stylesheet" href="style.css?v=235">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -444,6 +444,18 @@
               <button class="primary-button" id="learnRecommendationPrimary" type="button">▶ Start Learning</button>
             </div>
           </article>
+        </section>
+
+        <section class="learn-difficult-panel" id="learnDifficultPanel" aria-label="Review difficult words">
+          <div>
+            <p class="eyebrow">Focused Review</p>
+            <h3>Review Difficult Words</h3>
+            <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
+          </div>
+          <div class="learn-difficult-actions" id="learnDifficultActions">
+            <button class="ghost-button" id="learnDifficultVocabulary" type="button">Start Review</button>
+            <button class="small-link-button hidden" id="learnDifficultArticles" type="button">Review difficult noun articles</button>
+          </div>
         </section>
 
         <section class="learn-shortcut-panel" id="learnShortcutPanel" aria-label="Learning shortcuts">
@@ -1001,6 +1013,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=234"></script>
+    <script type="module" src="script.js?v=235"></script>
   </body>
 </html>

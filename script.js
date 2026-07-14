@@ -21,6 +21,9 @@ const UNLOCK_STORAGE_KEY = "goethe-b1-flashcards-unlocked-v1";
 const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const CHALLENGE_QUESTION_COUNT = 10;
+const FOCUSED_REVIEW_MIN_COUNT = 10;
+const FOCUSED_REVIEW_MAX_COUNT = 20;
+const FOCUSED_REVIEW_CLEAR_STREAK = 3;
 const FLASHCARD_SESSION_SIZE = 25;
 const LEARN_GERMAN_GOAL_STORAGE_KEY = "unserDorfLearnGermanWordGoal";
 const LEARN_GERMAN_LEVEL_STORAGE_KEY = "unserDorfLearnGermanLevel";
@@ -498,6 +501,11 @@ const els = {
   learnGoalNote: document.querySelector("#learnGoalNote"),
   learnEstimate: document.querySelector("#learnEstimate"),
   learnProgressList: document.querySelector("#learnProgressList"),
+  learnDifficultPanel: document.querySelector("#learnDifficultPanel"),
+  learnDifficultSummary: document.querySelector("#learnDifficultSummary"),
+  learnDifficultActions: document.querySelector("#learnDifficultActions"),
+  learnDifficultVocabulary: document.querySelector("#learnDifficultVocabulary"),
+  learnDifficultArticles: document.querySelector("#learnDifficultArticles"),
   learnShortcutPanel: document.querySelector("#learnShortcutPanel"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
@@ -805,6 +813,7 @@ let meaningMatchGeneratedItems = new Map();
 let progress = {};
 let vocabularyProgress = {};
 let articleProgress = {};
+let difficultWords = {};
 let nounVerbProgress = {};
 let meaningMatchProgress = {};
 let prepositionProgress = {};
@@ -1928,6 +1937,7 @@ function normalizeProfileData(data, profile) {
     progress: normalizeMeaningProgress(data?.progress || {}),
     vocabularyProgress: normalizeVocabularyProgress(data?.vocabularyProgress || {}),
     articleProgress: normalizeArticleProgress(data?.articleProgress || {}),
+    difficultWords: normalizeDifficultWords(data?.difficultWords || {}),
     nounVerbProgress: normalizeNounVerbProgress(data?.nounVerbProgress || {}),
     meaningMatchProgress: normalizeNounVerbProgress(data?.meaningMatchProgress || {}),
     prepositionProgress: normalizeNounVerbProgress(data?.prepositionProgress || {}),
@@ -2071,6 +2081,28 @@ function normalizeVocabularyProgress(savedProgress) {
         }
       ];
     })
+  );
+}
+
+function normalizeDifficultWords(savedProgress = {}) {
+  if (!savedProgress || typeof savedProgress !== "object" || Array.isArray(savedProgress)) return {};
+  return Object.fromEntries(
+    Object.entries(savedProgress).map(([wordId, entry]) => {
+      const id = String(entry?.wordId || wordId || "").trim();
+      return [
+        id,
+        {
+          wordId: id,
+          vocabularyCorrectStreak: normalizeCounter(entry?.vocabularyCorrectStreak),
+          articleCorrectStreak: normalizeCounter(entry?.articleCorrectStreak),
+          lastFocusedReviewAt: typeof entry?.lastFocusedReviewAt === "string" ? entry.lastFocusedReviewAt : "",
+          lastVocabularyFocusedAt: typeof entry?.lastVocabularyFocusedAt === "string" ? entry.lastVocabularyFocusedAt : "",
+          lastArticleFocusedAt: typeof entry?.lastArticleFocusedAt === "string" ? entry.lastArticleFocusedAt : "",
+          lastIncorrectAt: typeof entry?.lastIncorrectAt === "string" ? entry.lastIncorrectAt : "",
+          lastCorrectAt: typeof entry?.lastCorrectAt === "string" ? entry.lastCorrectAt : ""
+        }
+      ];
+    }).filter(([wordId]) => Boolean(wordId))
   );
 }
 
@@ -2356,6 +2388,7 @@ async function saveProfileStoreToCloudNow() {
       currentGroup: currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
       currentProfile: currentProfileId || profileStore.currentProfile || "",
       activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
+      difficultWords: normalizeDifficultWords(activeProfile?.difficultWords),
       profiles: ownedProfiles,
       lastLoginAtIso: new Date().toISOString(),
       updatedAt: firebase.serverTimestamp(),
@@ -2494,6 +2527,25 @@ async function saveActiveStudySetToCloudNow(studySet) {
   } catch (error) {
     updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore activeStudySet save failed");
     console.warn("Could not sync active flashcard study set to Firebase. Local study set is still saved.", error);
+  }
+}
+
+async function saveDifficultWordsToCloudNow(words = difficultWords) {
+  if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await firebase.setDoc(
+      getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
+      { difficultWords: normalizeDifficultWords(words) },
+      { merge: true }
+    );
+    updateCloudSyncDebug({
+      lastCloudSaveTime: new Date().toISOString(),
+      lastCloudSaveError: ""
+    }, "Firestore difficultWords save complete");
+  } catch (error) {
+    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore difficultWords save failed");
+    console.warn("Could not sync difficult words to Firebase. Local difficult-word data is still saved.", error);
   }
 }
 
@@ -2847,6 +2899,7 @@ function applyRemoteProfileStore(remoteStore) {
     progress = profileStore.profiles[currentProfileId].progress;
     vocabularyProgress = profileStore.profiles[currentProfileId].vocabularyProgress;
     articleProgress = profileStore.profiles[currentProfileId].articleProgress;
+    difficultWords = profileStore.profiles[currentProfileId].difficultWords;
     nounVerbProgress = profileStore.profiles[currentProfileId].nounVerbProgress;
     meaningMatchProgress = profileStore.profiles[currentProfileId].meaningMatchProgress;
     prepositionProgress = profileStore.profiles[currentProfileId].prepositionProgress;
@@ -2953,6 +3006,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
       progress: mergeProgressEntries(local.progress, remote.progress),
       vocabularyProgress: mergeProgressEntries(local.vocabularyProgress, remote.vocabularyProgress),
       articleProgress: mergeProgressEntries(local.articleProgress, remote.articleProgress),
+      difficultWords: mergeDifficultWords(local.difficultWords, remote.difficultWords),
       nounVerbProgress: mergeProgressEntries(local.nounVerbProgress, remote.nounVerbProgress),
       meaningMatchProgress: mergeProgressEntries(local.meaningMatchProgress, remote.meaningMatchProgress),
       prepositionProgress: mergeProgressEntries(local.prepositionProgress, remote.prepositionProgress),
@@ -3057,6 +3111,30 @@ function mergeProgressEntries(localEntries = {}, remoteEntries = {}) {
       : remoteEntry;
   });
   return merged;
+}
+
+function mergeDifficultWords(localEntries = {}, remoteEntries = {}) {
+  const local = normalizeDifficultWords(localEntries);
+  const remote = normalizeDifficultWords(remoteEntries);
+  const merged = { ...local };
+  Object.entries(remote).forEach(([wordId, remoteEntry]) => {
+    const localEntry = merged[wordId];
+    if (!localEntry) {
+      merged[wordId] = remoteEntry;
+      return;
+    }
+    merged[wordId] = {
+      wordId,
+      vocabularyCorrectStreak: Math.max(localEntry.vocabularyCorrectStreak, remoteEntry.vocabularyCorrectStreak),
+      articleCorrectStreak: Math.max(localEntry.articleCorrectStreak, remoteEntry.articleCorrectStreak),
+      lastFocusedReviewAt: latestString(localEntry.lastFocusedReviewAt, remoteEntry.lastFocusedReviewAt),
+      lastVocabularyFocusedAt: latestString(localEntry.lastVocabularyFocusedAt, remoteEntry.lastVocabularyFocusedAt),
+      lastArticleFocusedAt: latestString(localEntry.lastArticleFocusedAt, remoteEntry.lastArticleFocusedAt),
+      lastIncorrectAt: latestString(localEntry.lastIncorrectAt, remoteEntry.lastIncorrectAt),
+      lastCorrectAt: latestString(localEntry.lastCorrectAt, remoteEntry.lastCorrectAt)
+    };
+  });
+  return normalizeDifficultWords(merged);
 }
 
 function mergeRecentItemLists(localItems = [], remoteItems = [], limit = 60) {
@@ -4084,6 +4162,7 @@ function completeProfileLogin(profileId) {
   progress = profile.progress;
   vocabularyProgress = profile.vocabularyProgress;
   articleProgress = profile.articleProgress;
+  difficultWords = profile.difficultWords;
   nounVerbProgress = profile.nounVerbProgress;
   meaningMatchProgress = profile.meaningMatchProgress;
   prepositionProgress = profile.prepositionProgress;
@@ -5319,6 +5398,8 @@ function createDeveloperDiagnosticsSection(data) {
   const currentProfile = getCurrentProfile() || {};
   const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
   const currentVillageId = currentUser?.villageId || currentProfile.villageId || currentGroupId || "";
+  const difficultDiagnostics = getDifficultWordDiagnostics();
+  const difficultNouns = difficultDiagnostics.filter((candidate) => candidate.isNoun);
   const diagnostics = {
     build: INTERNAL_BUILD_ID,
     firebaseProjectId: firebaseConfig.projectId || "Not configured",
@@ -5328,6 +5409,8 @@ function createDeveloperDiagnosticsSection(data) {
     firestoreRole: formatDeveloperRole(currentUser?.role || currentProfile.role),
     protectedAccount: String(Boolean(currentProfile.protectedAccount || currentUser?.role === "developer")),
     currentVillagePath: currentVillageId ? `unserDorf/v0Testing/villages/${currentVillageId}` : "No village",
+    difficultVocabularyWords: `${difficultDiagnostics.length}`,
+    difficultNouns: `${difficultNouns.length}`,
     lastFirestoreError: developerToolsLastError
       ? `${developerToolsLastError.operation || "operation"} ${developerToolsLastError.path || ""} ${developerToolsLastError.code || ""} ${developerToolsLastError.message || ""}`.trim()
       : "None",
@@ -5341,9 +5424,29 @@ function createDeveloperDiagnosticsSection(data) {
   section.replaceChildren(
     createTextElement("h3", "", "Diagnostics"),
     createDeveloperDefinitionList(Object.entries(diagnostics).map(([key, value]) => [formatDeveloperDiagnosticLabel(key), value])),
+    createDifficultWordsDiagnosticsDetails(difficultDiagnostics),
     copyButton
   );
   return section;
+}
+
+function createDifficultWordsDiagnosticsDetails(candidates) {
+  const details = document.createElement("details");
+  details.className = "developer-technical-details";
+  const summary = createTextElement("summary", "", "Difficult-word details");
+  const list = document.createElement("div");
+  list.className = "developer-technical-list";
+  if (!candidates.length) {
+    list.append(createTextElement("p", "", "No difficult words are currently eligible."));
+  } else {
+    candidates.forEach((candidate) => {
+      const item = document.createElement("p");
+      item.textContent = `${candidate.word} · ${candidate.level} · priority ${candidate.priority} · ${candidate.reasons.join("; ")} · vocabulary streak ${candidate.vocabularyCorrectStreak} · article streak ${candidate.articleCorrectStreak} · last reviewed ${candidate.lastReviewedAt || "never"}`;
+      list.append(item);
+    });
+  }
+  details.replaceChildren(summary, list);
+  return details;
 }
 
 function formatDeveloperDiagnosticLabel(key) {
@@ -6738,6 +6841,7 @@ function resetProfileProgressData(profile) {
       progress: {},
       vocabularyProgress: {},
       articleProgress: {},
+      difficultWords: {},
       nounVerbProgress: {},
       meaningMatchProgress: {},
       prepositionProgress: {},
@@ -8148,12 +8252,14 @@ function resetRewardDebugProgress() {
   progress = {};
   vocabularyProgress = {};
   articleProgress = {};
+  difficultWords = {};
   nounVerbProgress = {};
   meaningMatchProgress = {};
   prepositionProgress = {};
   profile.progress = progress;
   profile.vocabularyProgress = vocabularyProgress;
   profile.articleProgress = articleProgress;
+  profile.difficultWords = difficultWords;
   profile.nounVerbProgress = nounVerbProgress;
   profile.meaningMatchProgress = meaningMatchProgress;
   profile.prepositionProgress = prepositionProgress;
@@ -8513,6 +8619,7 @@ function renderLearnGermanPage() {
   els.learnGoalNote?.classList.toggle("hidden", !recommendation.showGoal);
   els.learnEstimate?.classList.toggle("hidden", !recommendation.showGoal);
   renderLearnGermanProgress(recommendation);
+  renderDifficultWordsPanel();
   if (!els.learnRecommendationActions) return;
 
   if (recommendation.action === "complete") {
@@ -9379,10 +9486,13 @@ function createEmptyChallengeSession() {
     level: "",
     category: "",
     questionIds: [],
+    questionCount: CHALLENGE_QUESTION_COUNT,
     answered: 0,
     correct: 0,
     coinsEarned: 0,
     complete: false,
+    focusedReview: false,
+    focusedReviewKind: "",
     studySetUsed: false,
     studySetReviewedCount: 0,
     studySetQuestionCount: 0
@@ -9404,6 +9514,7 @@ function startChallengeSession(type, level = selectedLearningLevel) {
     level,
     category: type === "vocabulary" ? selectedChallengeCategory : "",
     questionIds: selection.cards.map((card) => card.id),
+    questionCount: CHALLENGE_QUESTION_COUNT,
     studySetUsed: selection.studySetUsed,
     studySetReviewedCount: selection.studySetReviewedCount,
     studySetQuestionCount: selection.studySetQuestionCount
@@ -9553,6 +9664,205 @@ function getStudySetQuizWeight(card, studyWord, type) {
   return ratingWeight + (wrongAt ? 3 : 0) + Math.random();
 }
 
+function getAllLearningReviewCards() {
+  const byId = new Map();
+  [
+    ...cards,
+    ...LEARNING_LEVELS.flatMap((level) => levelDatasets[level]?.vocabulary || []),
+    ...LEARNING_LEVELS.flatMap((level) => levelDatasets[level]?.articles || [])
+  ].forEach((card) => {
+    if (card?.id && !byId.has(card.id)) byId.set(card.id, card);
+  });
+  return [...byId.values()];
+}
+
+function getLatestMs(...values) {
+  return Math.max(0, ...values.map((value) => {
+    const parsed = Date.parse(value || "");
+    return Number.isFinite(parsed) ? parsed : 0;
+  }));
+}
+
+function wasMostRecentVocabularyAnswerIncorrect(card) {
+  const entry = getVocabularyProgressEntry(card);
+  const wrong = Date.parse(entry.lastWrongAt || "");
+  const answered = Date.parse(entry.lastAnsweredAt || "");
+  return Number.isFinite(wrong) && (!Number.isFinite(answered) || wrong >= answered);
+}
+
+function wasMostRecentArticleAnswerIncorrect(card) {
+  const entry = getArticleProgressEntry(card);
+  const wrong = Date.parse(entry.articleLastWrongAt || "");
+  const answered = Date.parse(entry.articleLastAnsweredAt || "");
+  return Number.isFinite(wrong) && (!Number.isFinite(answered) || wrong >= answered);
+}
+
+function getDifficultWordDiagnostics() {
+  return getAllLearningReviewCards()
+    .map((card) => getDifficultWordCandidate(card))
+    .filter((candidate) => candidate.eligible);
+}
+
+function getDifficultWordCandidate(card) {
+  const stored = normalizeDifficultWords(difficultWords)[card.id] || {
+    wordId: card.id,
+    vocabularyCorrectStreak: 0,
+    articleCorrectStreak: 0,
+    lastFocusedReviewAt: "",
+    lastVocabularyFocusedAt: "",
+    lastArticleFocusedAt: "",
+    lastIncorrectAt: "",
+    lastCorrectAt: ""
+  };
+  const meaningStatus = getMeaningStatus(card);
+  const vocabularyIncorrect = wasMostRecentVocabularyAnswerIncorrect(card);
+  const articleIncorrect = card.isNoun && wasMostRecentArticleAnswerIncorrect(card);
+  const vocabularyPreviouslyDifficult = Boolean(stored.lastIncorrectAt && stored.vocabularyCorrectStreak < FOCUSED_REVIEW_CLEAR_STREAK);
+  const articlePreviouslyDifficult = Boolean(card.isNoun && stored.lastIncorrectAt && stored.articleCorrectStreak < FOCUSED_REVIEW_CLEAR_STREAK);
+  const reasons = [];
+  let priority = 0;
+
+  if (vocabularyIncorrect) {
+    reasons.push("Recent Vocabulary Review answer was incorrect");
+    priority = Math.max(priority, 100);
+  }
+  if (articleIncorrect) {
+    reasons.push("Recent Article Review answer was incorrect");
+    priority = Math.max(priority, 100);
+  }
+  if (meaningStatus === "unknown") {
+    reasons.push("Flashcard marked Don’t Know");
+    priority = Math.max(priority, 70);
+  }
+  if (meaningStatus === "unsure") {
+    reasons.push("Flashcard marked Unsure");
+    priority = Math.max(priority, 45);
+  }
+  if (!vocabularyIncorrect && !articleIncorrect && (vocabularyPreviouslyDifficult || articlePreviouslyDifficult)) {
+    reasons.push("Previously difficult, recently answered correctly");
+    priority = Math.max(priority, 30 - Math.max(stored.vocabularyCorrectStreak, stored.articleCorrectStreak) * 6);
+  }
+
+  const eligible = Boolean(reasons.length && priority > 0);
+  return {
+    card,
+    wordId: card.id,
+    word: card.word || "",
+    level: getFlashcardLevel(card),
+    isNoun: Boolean(card.isNoun || normalizeArticleValue(card.article)),
+    eligible,
+    reasons,
+    priority,
+    vocabularyCorrectStreak: stored.vocabularyCorrectStreak,
+    articleCorrectStreak: stored.articleCorrectStreak,
+    lastReviewedAt: stored.lastFocusedReviewAt,
+    lastActivityMs: getLatestMs(
+      stored.lastFocusedReviewAt,
+      stored.lastIncorrectAt,
+      getVocabularyProgressEntry(card).lastWrongAt,
+      getArticleProgressEntry(card).articleLastWrongAt
+    )
+  };
+}
+
+function getFocusedReviewCandidates(type = "vocabulary") {
+  const candidates = getDifficultWordDiagnostics()
+    .filter((candidate) => type !== "articles" || candidate.isNoun)
+    .sort((first, second) => (
+      second.priority - first.priority
+      || getLatestMs(first.lastReviewedAt) - getLatestMs(second.lastReviewedAt)
+      || second.lastActivityMs - first.lastActivityMs
+      || compareCardsByGerman(first.card, second.card)
+    ));
+  if (candidates.length <= FOCUSED_REVIEW_MIN_COUNT) return candidates;
+  return candidates.slice(0, FOCUSED_REVIEW_MAX_COUNT);
+}
+
+function renderDifficultWordsPanel() {
+  if (!els.learnDifficultPanel || !els.learnDifficultSummary) return;
+  const vocabularyCandidates = getFocusedReviewCandidates("vocabulary");
+  const articleCandidates = getFocusedReviewCandidates("articles");
+  const count = vocabularyCandidates.length;
+  const nounCount = articleCandidates.length;
+  els.learnDifficultPanel.classList.toggle("is-empty", count === 0);
+  if (!count) {
+    els.learnDifficultSummary.textContent = "Nothing needs extra review right now.";
+    els.learnDifficultVocabulary?.classList.add("hidden");
+    els.learnDifficultArticles?.classList.add("hidden");
+    return;
+  }
+  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word needs" : "words need"} attention`;
+  els.learnDifficultVocabulary?.classList.remove("hidden");
+  els.learnDifficultVocabulary.textContent = "Start Review";
+  els.learnDifficultArticles?.classList.toggle("hidden", nounCount === 0);
+  if (els.learnDifficultArticles) {
+    els.learnDifficultArticles.textContent = nounCount
+      ? `Review ${nounCount} difficult ${nounCount === 1 ? "noun article" : "noun articles"}`
+      : "No difficult nouns right now";
+  }
+}
+
+function startFocusedDifficultReview(type = "vocabulary") {
+  const candidates = getFocusedReviewCandidates(type);
+  if (!candidates.length) {
+    renderDifficultWordsPanel();
+    return;
+  }
+  const questionIds = candidates.map((candidate) => candidate.card.id);
+  challengeSession = {
+    ...createEmptyChallengeSession(),
+    type: type === "articles" ? "articles" : "vocabulary",
+    level: "Focused",
+    category: "",
+    questionIds,
+    questionCount: questionIds.length,
+    focusedReview: true,
+    focusedReviewKind: type === "articles" ? "articles" : "vocabulary"
+  };
+  guidedLearningActive = false;
+  learnGermanReturnActive = true;
+  if (type === "articles") {
+    selectedLearningPath = "";
+    openStudyRoute({ mode: "article-quiz", filter: "smartArticle", resume: false });
+    return;
+  }
+  selectedLearningPath = "";
+  showVocabularyReviewQuiz();
+}
+
+function updateFocusedDifficultyProgress(card, type, isCorrect) {
+  if (!card?.id) return;
+  difficultWords = normalizeDifficultWords(difficultWords);
+  const previous = difficultWords[card.id] || { wordId: card.id };
+  const now = new Date().toISOString();
+  const patch = {
+    ...previous,
+    wordId: card.id,
+    lastFocusedReviewAt: now
+  };
+  if (type === "articles") {
+    patch.lastArticleFocusedAt = now;
+    patch.articleCorrectStreak = isCorrect ? normalizeCounter(previous.articleCorrectStreak) + 1 : 0;
+  } else {
+    patch.lastVocabularyFocusedAt = now;
+    patch.vocabularyCorrectStreak = isCorrect ? normalizeCounter(previous.vocabularyCorrectStreak) + 1 : 0;
+  }
+  if (isCorrect) {
+    patch.lastCorrectAt = now;
+  } else {
+    patch.lastIncorrectAt = now;
+  }
+  difficultWords[card.id] = patch;
+  saveDifficultWordsProgress();
+}
+
+function shouldAwardFocusedReviewCoin(card, type) {
+  if (!challengeSession.focusedReview) return true;
+  const entry = normalizeDifficultWords(difficultWords)[card?.id] || {};
+  const reviewedAt = type === "articles" ? entry.lastArticleFocusedAt : entry.lastVocabularyFocusedAt;
+  return !reviewedAt || reviewedAt.slice(0, 10) !== getTodayKey();
+}
+
 function renderStudySetNotice(element, session = challengeSession) {
   if (!element) return;
   const shouldShow = Boolean(session?.studySetUsed && session?.studySetReviewedCount);
@@ -9569,7 +9879,8 @@ function renderStudySetNotice(element, session = challengeSession) {
 
 function recordChallengeSessionAnswer(type, isCorrect) {
   if (challengeSession.type !== type || challengeSession.complete) return;
-  challengeSession.answered = Math.min(challengeSession.answered + 1, CHALLENGE_QUESTION_COUNT);
+  const questionCount = getChallengeSessionQuestionCount();
+  challengeSession.answered = Math.min(challengeSession.answered + 1, questionCount);
   if (isCorrect) {
     challengeSession.correct += 1;
     challengeSession.coinsEarned += 1;
@@ -9581,7 +9892,7 @@ function advanceChallengeSession(type, moveNext) {
     moveNext();
     return;
   }
-  if (challengeSession.answered >= CHALLENGE_QUESTION_COUNT) {
+  if (challengeSession.answered >= getChallengeSessionQuestionCount()) {
     showChallengeResults();
     return;
   }
@@ -9601,12 +9912,13 @@ function showChallengeResults() {
       markActiveStudySetReviewCompleted(challengeSession.type);
     }
   }
-  const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
-  const accuracy = Math.round((correct / CHALLENGE_QUESTION_COUNT) * 100);
+  const questionCount = getChallengeSessionQuestionCount();
+  const correct = clamp(challengeSession.correct, 0, questionCount);
+  const accuracy = Math.round((correct / questionCount) * 100);
   const challengeName = challengeSession.type === "articles" ? "Article Review" : "Vocabulary Review";
   els.challengeResultsType.textContent = `${challengeSession.level || selectedLearningLevel} ${challengeName}`;
   els.challengeResultAccuracy.textContent = `${accuracy}%`;
-  els.challengeResultCorrect.textContent = `${correct} / ${CHALLENGE_QUESTION_COUNT}`;
+  els.challengeResultCorrect.textContent = `${correct} / ${questionCount}`;
   els.challengeResultCoins.textContent = `+${challengeSession.coinsEarned}`;
   if (els.challengeResultsContinue) {
     els.challengeResultsContinue.textContent = guidedLearningActive
@@ -9630,6 +9942,10 @@ function showChallengeResults() {
   els.actionBar.classList.add("hidden");
   els.challengeResultsScreen.classList.remove("hidden");
   scrollPageToTop(els.challengeResultsScreen);
+}
+
+function getChallengeSessionQuestionCount(session = challengeSession) {
+  return Math.max(1, normalizeCounter(session?.questionCount) || CHALLENGE_QUESTION_COUNT);
 }
 
 function openStudyRoute(route) {
@@ -9726,8 +10042,10 @@ function resetCurrentProfileTestData() {
   meaningMatchProgress = {};
   prepositionProgress = {};
   vocabularyProgress = {};
+  difficultWords = {};
   profile.progress = progress;
   profile.articleProgress = articleProgress;
+  profile.difficultWords = difficultWords;
   profile.nounVerbProgress = nounVerbProgress;
   profile.meaningMatchProgress = meaningMatchProgress;
   profile.prepositionProgress = prepositionProgress;
@@ -9945,6 +10263,8 @@ function bindEvents() {
   els.learnGoalIncrease?.addEventListener("click", () => {
     setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
   });
+  els.learnDifficultVocabulary?.addEventListener("click", () => startFocusedDifficultReview("vocabulary"));
+  els.learnDifficultArticles?.addEventListener("click", () => startFocusedDifficultReview("articles"));
   els.learnGermanScreen?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-learn-action]");
     if (!button) return;
@@ -10512,15 +10832,23 @@ function applyModeAndFilter() {
   const startLetter = els.startSelect.value;
   const order = els.orderSelect.value;
 
-  const sourceCards = mode === "article-quiz" && challengeSession.type === "articles"
+  const sourceCards = mode === "article-quiz" && challengeSession.type === "articles" && challengeSession.focusedReview
+    ? getAllLearningReviewCards()
+    : mode === "article-quiz" && challengeSession.type === "articles"
     ? getArticleChallengeCards(challengeSession.level)
     : cards;
   const challengeQuestionIds = new Set(challengeSession.questionIds || []);
   const filteredCards = sourceCards.filter((card) => {
     if (mode === "article-quiz"
       && challengeSession.type === "articles"
+      && !challengeSession.focusedReview
       && (getFlashcardLevel(card) !== challengeSession.level
         || (challengeQuestionIds.size && !challengeQuestionIds.has(card.id)))) return false;
+    if (mode === "article-quiz"
+      && challengeSession.type === "articles"
+      && challengeSession.focusedReview
+      && challengeQuestionIds.size
+      && !challengeQuestionIds.has(card.id)) return false;
     const meaningStatus = getMeaningStatus(card);
     const articleStatus = getArticleStatus(card);
     if (mode === "article-quiz" || mode === "article") {
@@ -10540,7 +10868,7 @@ function applyModeAndFilter() {
 
   const startedCards = applyStartLetter(filteredCards, startLetter);
   visibleCards = (mode === "article-quiz" || mode === "article") && filter === "smartArticle"
-    ? applySmartArticleOrder(startedCards)
+    ? challengeSession.focusedReview ? startedCards : applySmartArticleOrder(startedCards)
     : applyStudyOrder(startedCards, order);
   currentIndex = clamp(currentIndex, 0, Math.max(visibleCards.length - 1, 0));
   answerShown = false;
@@ -10671,7 +10999,7 @@ function renderCard() {
   const articleChallengeActive = isArticleQuiz && challengeSession.type === "articles";
   els.cardCounter.textContent = visibleCards.length
     ? articleChallengeActive
-      ? `Question ${Math.min(challengeSession.answered + (articleQuizAnswered ? 0 : 1), CHALLENGE_QUESTION_COUNT)} of ${CHALLENGE_QUESTION_COUNT}`
+      ? `Question ${Math.min(challengeSession.answered + (articleQuizAnswered ? 0 : 1), getChallengeSessionQuestionCount())} of ${getChallengeSessionQuestionCount()}`
       : `${isArticleQuiz ? "Question" : "Card"} ${currentIndex + 1} of ${visibleCards.length}`
     : `${isArticleQuiz ? "Question" : "Card"} 0 of 0`;
   els.emptyState.classList.toggle("hidden", Boolean(card));
@@ -10882,8 +11210,11 @@ function answerArticleQuiz(article) {
     correctArticle: card.article,
     isCorrect
   });
-  if (isCorrect) {
+  if (isCorrect && shouldAwardFocusedReviewCoin(card, "articles")) {
     awardCoins(1);
+  }
+  if (challengeSession.focusedReview) {
+    updateFocusedDifficultyProgress(card, "articles", isCorrect);
   }
   recordDailyActivity("article", { isCorrect });
   recordStudyHistory("article-quiz", card, isCorrect ? "correct" : "wrong");
@@ -11592,6 +11923,10 @@ function resetVocabularyReviewQuizState() {
 }
 
 function getVocabularyReviewCards() {
+  if (challengeSession.type === "vocabulary" && challengeSession.focusedReview) {
+    const cardsById = new Map(getAllLearningReviewCards().map((card) => [card.id, card]));
+    return (challengeSession.questionIds || []).map((wordId) => cardsById.get(wordId)).filter(Boolean);
+  }
   if (challengeSession.type !== "vocabulary") return cards;
   const questionIds = new Set(challengeSession.questionIds || []);
   return getChallengeVocabularyDeck(challengeSession.level, challengeSession.category || selectedChallengeCategory)
@@ -11621,6 +11956,7 @@ function applyVocabularyReviewOrder() {
 }
 
 function applyVocabularyReviewPriorityOrder(cardList) {
+  if (challengeSession.focusedReview) return cardList;
   const recentWordKeys = new Set(recentVocabularyWords);
   const freshCards = cardList.filter((card) => !recentWordKeys.has(getVocabularyReviewWordKey(card)));
   const repeatCards = cardList.filter((card) => recentWordKeys.has(getVocabularyReviewWordKey(card)));
@@ -11682,7 +12018,7 @@ function renderVocabularyReviewQuiz() {
   const vocabularyChallengeActive = challengeSession.type === "vocabulary";
   els.nounVerbCounter.textContent = hasCard
     ? vocabularyChallengeActive
-      ? `Question ${Math.min(challengeSession.answered + (vocabularyReviewQuizState.hasAnswered ? 0 : 1), CHALLENGE_QUESTION_COUNT)} of ${CHALLENGE_QUESTION_COUNT}`
+      ? `Question ${Math.min(challengeSession.answered + (vocabularyReviewQuizState.hasAnswered ? 0 : 1), getChallengeSessionQuestionCount())} of ${getChallengeSessionQuestionCount()}`
       : `Card ${vocabularyReviewCurrentIndex + 1} of ${visibleVocabularyReviewCards.length}`
     : "0 / 0";
   if (!card) {
@@ -11714,7 +12050,9 @@ function renderVocabularyReviewQuiz() {
 }
 
 function buildVocabularyReviewChoices(card) {
-  const answerSource = challengeSession.type === "vocabulary"
+  const answerSource = challengeSession.type === "vocabulary" && challengeSession.focusedReview
+    ? getAllLearningReviewCards()
+    : challengeSession.type === "vocabulary"
     ? getChallengeVocabularyDeck(challengeSession.level || selectedLearningLevel, challengeSession.category || selectedChallengeCategory)
     : getVocabularyChallengeCards(challengeSession.level || selectedLearningLevel);
   const wrongChoices = shuffleCards(
@@ -11733,10 +12071,13 @@ function answerVocabularyReviewQuiz(selectedAnswer) {
   vocabularyReviewQuizState.selectedAnswer = selectedAnswer;
   vocabularyReviewQuizState.hasAnswered = true;
   updateVocabularyReviewStats(isCorrect);
-  if (isCorrect) {
+  if (isCorrect && shouldAwardFocusedReviewCoin(card, "vocabulary")) {
     awardCoins(1);
   }
   updateVocabularyMasteryProgress(card, isCorrect);
+  if (challengeSession.focusedReview) {
+    updateFocusedDifficultyProgress(card, "vocabulary", isCorrect);
+  }
   recordStudyHistory("vocabulary-review", card, isCorrect ? "correct" : "wrong");
   recordDailyActivity("vocabulary");
   saveVocabularyProgress();
@@ -13166,6 +13507,14 @@ function saveArticleProgress() {
   if (!currentProfileId) return;
   getCurrentProfile().articleProgress = articleProgress;
   saveProfileStore();
+}
+
+function saveDifficultWordsProgress() {
+  if (!currentProfileId) return;
+  difficultWords = normalizeDifficultWords(difficultWords);
+  getCurrentProfile().difficultWords = difficultWords;
+  saveProfileStore({ localOnly: true });
+  saveDifficultWordsToCloudNow(difficultWords);
 }
 
 function loadNounVerbProgress() {

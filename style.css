@@ -12201,6 +12201,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-recommendation-panel,
+.learn-difficult-panel,
 .learn-shortcut-panel {
   border: 1px solid rgba(190, 177, 153, 0.22);
   border-radius: 18px;
@@ -12322,12 +12323,54 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-recommendation-panel .eyebrow,
+.learn-difficult-panel .eyebrow,
 .learn-shortcut-panel p {
   margin: 0;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 820;
   letter-spacing: 0;
+}
+
+.learn-difficult-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.learn-difficult-panel h3,
+.learn-difficult-panel p {
+  margin: 0;
+}
+
+.learn-difficult-panel h3 {
+  color: var(--green);
+  font-size: 1.02rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.learn-difficult-panel p:not(.eyebrow) {
+  color: #665f54;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.learn-difficult-panel.is-empty {
+  background: rgba(255, 253, 248, 0.48);
+}
+
+.learn-difficult-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.learn-difficult-actions .ghost-button {
+  min-height: 42px;
+  border-color: rgba(77, 130, 94, 0.22);
+  background: rgba(255, 253, 248, 0.72);
 }
 
 .learn-recommendation-card {
@@ -12512,6 +12555,20 @@ body:has(#developerToolsScreen:not(.hidden)) {
 @media (max-width: 720px) {
   .learn-shortcut-grid {
     grid-template-columns: 1fr;
+  }
+
+  .learn-difficult-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .learn-difficult-actions {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .learn-difficult-actions .ghost-button,
+  .learn-difficult-actions .small-link-button {
+    width: 100%;
   }
 
   .learn-recommendation-actions {
