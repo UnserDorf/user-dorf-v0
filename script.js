@@ -2417,6 +2417,9 @@ async function syncCurrentProfileToVillageDoc(firebase, savedAt, options = {}) {
     group: nextGroup,
     profiles: serverProfiles,
     memberProfiles: serverMemberProfiles,
+    rosterVersion: getNextVillageRosterVersion(villageData),
+    rosterUpdatedAt: firebase.serverTimestamp(),
+    rosterUpdatedAtIso: savedAt,
     updatedAt: firebase.serverTimestamp(),
     updatedAtIso: savedAt
   };
@@ -2512,7 +2515,7 @@ async function fetchProfileStoreFromCloud() {
 	      firestoreProfileExists = getFirebaseIdentityProfileIds({
         profiles: userData.profiles || {}
       }, firebaseAuthUser).length > 0;
-      const userIdentityProfiles = getFirebaseIdentityProfilesFromMap(userData.profiles || {}, firebaseAuthUser, userData.currentProfile);
+      const userIdentityProfiles = getFirebaseIdentityProfilesFromMap(userData.profiles || {}, firebaseAuthUser);
       mergeRemoteProfilesIntoStore(remoteStore, userIdentityProfiles, { preferIncomingIdentity: true });
       const userRole = sanitizeUserRole(userData.role);
       if (userRole !== "member") {
@@ -2589,7 +2592,7 @@ function getFirebaseIdentityProfileIds(store = profileStore, user = firebaseAuth
     .map(([profileId]) => profileId);
 }
 
-function getFirebaseIdentityProfilesFromMap(profiles = {}, user = firebaseAuthUser, preferredProfileId = "") {
+function getFirebaseIdentityProfilesFromMap(profiles = {}, user = firebaseAuthUser) {
   if (!profiles || !user?.uid) return {};
   const canonicalId = getFirebaseProfileId(user);
   const email = String(user.email || "").toLowerCase();
@@ -2597,7 +2600,6 @@ function getFirebaseIdentityProfilesFromMap(profiles = {}, user = firebaseAuthUs
     if (!profile || LEGACY_PROFILE_IDS.has(profileId)) return false;
     const ownerEmail = String(profile.ownerEmail || profile.email || "").toLowerCase();
     return profileId === canonicalId
-      || profileId === preferredProfileId
       || profile.ownerUid === user.uid
       || Boolean(email && ownerEmail && ownerEmail === email);
   }));
@@ -2786,7 +2788,10 @@ async function initializeFirebaseSyncApi() {
 
 function applyRemoteProfileStore(remoteStore) {
   if (!remoteStore?.profiles) return;
+  const localProfileIdsBeforeHydration = Object.keys(profileStore?.profiles || {}).filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId));
   const mergedStore = mergeProfileStores(profileStore, remoteStore);
+  const remoteProfileIds = new Set(Object.keys(remoteStore.profiles || {}));
+  const discardedLocalProfileIds = localProfileIdsBeforeHydration.filter((profileId) => !remoteProfileIds.has(profileId));
   applyingRemoteStore = true;
   profileStore = mergedStore;
   consolidateFirebaseIdentityProfiles(profileStore, {
@@ -2809,6 +2814,12 @@ function applyRemoteProfileStore(remoteStore) {
   applyingRemoteStore = false;
   promoteFamilyAchievements(profileStore);
   logCloudIdentityDebug("Remote profile store applied", { remoteStore });
+  console.info("[Unser Dorf authenticated local cache cleanup]", {
+    discardedLocalProfileIds,
+    serverProfileIds: [...remoteProfileIds],
+    localStorageKey: PROFILE_STORAGE_KEY,
+    action: "local roster cache replaced by Firestore hydration"
+  });
   refreshVisibleProfileState();
   renderAchievementDebugPanel();
 }
@@ -3139,6 +3150,10 @@ function traceVillageWrite(functionName, reason, villageId, payload = {}, source
     source,
     stack: new Error("Village write trace").stack
   });
+}
+
+function getNextVillageRosterVersion(villageData = {}) {
+  return normalizeCounter(villageData.rosterVersion) + 1;
 }
 
 async function verifySignInFamilyZRoster(firebase) {
@@ -3777,12 +3792,15 @@ async function deleteFirebaseUserData(firebase, user) {
       ...group.memberIds.filter((profileId) => profiles[profileId]),
       ...Object.keys(profiles)
     ]);
-    const villagePayload = {
-      group,
-      profiles,
-      updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: savedAt
-    };
+	    const villagePayload = {
+	      group,
+	      profiles,
+	      rosterVersion: getNextVillageRosterVersion(data),
+	      rosterUpdatedAt: firebase.serverTimestamp(),
+	      rosterUpdatedAtIso: savedAt,
+	      updatedAt: firebase.serverTimestamp(),
+	      updatedAtIso: savedAt
+	    };
     traceVillageWrite("deleteFirebaseUserData", "account deletion cleanup", groupInfo.id, villagePayload, {
       currentFirestoreVillageDocument: true,
       currentUserDocument: true,
@@ -5896,13 +5914,16 @@ async function removeDeveloperTargetFromVillageDocs(firebase, target, villageIds
       ...Object.keys(profiles)
     ]);
     group.memberIds = cleanedMemberIds;
-    const update = {
-      group,
-      profiles,
-      memberProfiles,
-      updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: savedAt
-    };
+	    const update = {
+	      group,
+	      profiles,
+	      memberProfiles,
+	      rosterVersion: getNextVillageRosterVersion(data),
+	      rosterUpdatedAt: firebase.serverTimestamp(),
+	      rosterUpdatedAtIso: savedAt,
+	      updatedAt: firebase.serverTimestamp(),
+	      updatedAtIso: savedAt
+	    };
 	    if (target.uid && (data.creatorUid === target.uid || data.adminUid === target.uid)) {
 	      update.creatorUid = "";
 	      update.adminUid = "";
@@ -6165,6 +6186,7 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
     path: villagePath,
     data: beforeCleanupSnapshot.exists() ? beforeCleanupSnapshot.data() : null
   });
+  const beforeCleanupData = beforeCleanupSnapshot.exists() ? beforeCleanupSnapshot.data() || {} : {};
   const familyZInfo = DEFAULT_GROUPS.find((group) => group.id === DEFAULT_GROUP_ID);
   const group = createGroupData(familyZInfo, {
     ...(familyZ || {}),
@@ -6176,21 +6198,24 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
     profiles: {
       [preview.keepProfileId]: sanitizeProfileStoreForSync(keepProfile)
     },
-	    memberProfiles: {
-	      [preview.keepProfileId]: sanitizeProfileStoreForSync(keepProfile)
-	    },
-	    memberIds: [preview.keepProfileId],
-	    legacyRosterMigrationVersion: 1,
-	    updatedAt: firebase.serverTimestamp(),
-	    updatedAtIso: savedAt
-	  };
-	  console.info("[Unser Dorf Family Z cleanup] Writing cleaned Family Z payload.", {
-	    path: villagePath,
-	    payload: {
-	      ...cleanedVillagePayload,
-	      updatedAt: "[serverTimestamp]"
-	    }
-	  });
+    memberProfiles: {
+      [preview.keepProfileId]: sanitizeProfileStoreForSync(keepProfile)
+    },
+    memberIds: [preview.keepProfileId],
+    legacyRosterMigrationVersion: 1,
+    rosterVersion: getNextVillageRosterVersion(beforeCleanupData),
+    rosterUpdatedAt: firebase.serverTimestamp(),
+    rosterUpdatedAtIso: savedAt,
+    updatedAt: firebase.serverTimestamp(),
+    updatedAtIso: savedAt
+  };
+  console.info("[Unser Dorf Family Z cleanup] Writing cleaned Family Z payload.", {
+    path: villagePath,
+    payload: {
+      ...cleanedVillagePayload,
+      updatedAt: "[serverTimestamp]"
+    }
+  });
 	  traceVillageWrite("cleanupFamilyZKeepOnlyCurrentUser", "developer Family Z keep-current cleanup", DEFAULT_GROUP_ID, cleanedVillagePayload, {
 	    currentFirestoreVillageDocument: true,
 	    currentUserDocument: true,
@@ -6207,9 +6232,9 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
     uid: firebaseAuthUser.uid,
     email: firebaseAuthUser.email || "",
     displayName: getVillageDisplayName(keepProfile),
-    villageId: DEFAULT_GROUP_ID,
-    villageName: familyZInfo?.name || "Family Z",
-    role: "developer",
+	    villageId: DEFAULT_GROUP_ID,
+	    villageName: familyZInfo?.name || "Family Z",
+	    role: "developer",
 	    protectedAccount: true,
 	    legacyRosterMigrationVersion: 1,
 	    currentGroup: DEFAULT_GROUP_ID,
@@ -6517,12 +6542,15 @@ async function removeProfileIdsFromVillageDocs(firebase, profileIds, villageIds,
       ...(group.memberIds || []).filter((profileId) => !profileIdSet.has(profileId) && profiles[profileId]),
       ...Object.keys(profiles)
     ]);
-    const villagePayload = {
-      group,
-      profiles,
-      updatedAt: firebase.serverTimestamp(),
-      updatedAtIso: savedAt
-    };
+	    const villagePayload = {
+	      group,
+	      profiles,
+	      rosterVersion: getNextVillageRosterVersion(data),
+	      rosterUpdatedAt: firebase.serverTimestamp(),
+	      rosterUpdatedAtIso: savedAt,
+	      updatedAt: firebase.serverTimestamp(),
+	      updatedAtIso: savedAt
+	    };
     traceVillageWrite("removeProfileIdsFromVillageDocs", "developer remove profile ids from village", villageId, villagePayload, {
       currentFirestoreVillageDocument: true,
       currentUserDocument: false,
