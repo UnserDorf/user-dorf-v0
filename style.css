@@ -12148,11 +12148,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-recommendation-card {
   border: 0;
-  border-radius: 14px;
-  background: rgba(255, 253, 248, 0.62);
-  padding: clamp(14px, 2.2vw, 20px);
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .learn-recommendation-card h3,
@@ -12162,14 +12162,14 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-recommendation-card h3 {
   color: var(--ink);
-  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  font-size: clamp(1.08rem, 2vw, 1.28rem);
   font-weight: 830;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .learn-recommendation-card p {
   color: #665f54;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   font-weight: 650;
   line-height: 1.35;
 }
@@ -12225,33 +12225,66 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-progress-list {
-  display: grid;
-  gap: 0;
-  max-width: 520px;
-  margin-top: 2px;
+  margin: 2px 0 0;
 }
 
-.learn-progress-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
+.learn-path {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  border-bottom: 1px solid rgba(190, 177, 153, 0.22);
-  padding: 7px 0;
+  gap: 8px;
 }
 
-.learn-progress-row span {
-  min-width: 0;
-  color: #756e62;
-  font-size: 0.88rem;
-  font-weight: 680;
-}
-
-.learn-progress-row strong {
-  color: var(--ink);
-  font-size: 0.9rem;
+.learn-path-step {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(190, 177, 153, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.6);
+  color: #7b7468;
+  padding: 7px 10px;
+  font-size: 0.84rem;
   font-weight: 760;
-  text-align: right;
+  line-height: 1.15;
+}
+
+.learn-path-step.complete {
+  border-color: rgba(77, 130, 94, 0.18);
+  background: rgba(235, 246, 231, 0.62);
+  color: var(--green);
+}
+
+.learn-path-step.current {
+  border-color: rgba(77, 130, 94, 0.4);
+  background: rgba(235, 246, 231, 0.95);
+  color: var(--green);
+  box-shadow: 0 8px 18px rgba(77, 130, 94, 0.1);
+}
+
+.learn-path-step.future {
+  opacity: 0.62;
+}
+
+.learn-path-label {
+  white-space: nowrap;
+}
+
+.learn-path-next {
+  border-radius: 999px;
+  background: var(--green);
+  color: #fffdf8;
+  padding: 2px 6px;
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.learn-path-arrow {
+  color: rgba(102, 95, 84, 0.52);
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .learn-recommendation-actions {
@@ -12323,8 +12356,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   }
 
   .learn-recommendation-card {
-    border-radius: 14px;
-    padding: 14px;
+    padding: 0;
   }
 
   .learn-goal-controls {
@@ -12341,12 +12373,18 @@ body:has(#developerToolsScreen:not(.hidden)) {
     min-width: 0;
   }
 
-  .learn-progress-row {
-    grid-template-columns: 1fr;
-    gap: 2px;
+  .learn-path {
+    align-items: stretch;
+    gap: 6px;
   }
 
-  .learn-progress-row strong {
-    text-align: left;
+  .learn-path-step {
+    flex: 1 1 100%;
+    justify-content: space-between;
+    border-radius: 12px;
+  }
+
+  .learn-path-arrow {
+    display: none;
   }
 }
