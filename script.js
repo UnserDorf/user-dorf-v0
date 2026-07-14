@@ -2854,12 +2854,24 @@ function getFirebaseUserDocRef(firebase, uid) {
   return firebase.doc(firebase.db, ...firebase.rootPathParts, "users", uid);
 }
 
+function getFirebaseUserDocPath(firebase, uid) {
+  return [...firebase.rootPathParts, "users", uid].join("/");
+}
+
 function getFirebaseUsersCollectionRef(firebase) {
   return firebase.collection(firebase.db, ...firebase.rootPathParts, "users");
 }
 
+function getFirebaseUsersCollectionPath(firebase) {
+  return [...firebase.rootPathParts, "users"].join("/");
+}
+
 function getFirebaseVillageDocRef(firebase, groupId) {
   return firebase.doc(firebase.db, ...firebase.rootPathParts, "villages", groupId);
+}
+
+function getFirebaseVillageDocPath(firebase, groupId) {
+  return [...firebase.rootPathParts, "villages", groupId].join("/");
 }
 
 function getFirebaseOwnedProfileIds() {
@@ -4383,6 +4395,27 @@ function showDeveloperTools() {
   renderDeveloperToolsPage();
 }
 
+async function readFirestoreWithDebug(readAction, details) {
+  try {
+    console.info("[Unser Dorf Firestore read]", {
+      ...details,
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || ""
+    });
+    return await readAction();
+  } catch (error) {
+    console.error("[Unser Dorf Firestore read failed]", {
+      ...details,
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || "",
+      code: error?.code || "",
+      message: error?.message || String(error),
+      error
+    });
+    throw error;
+  }
+}
+
 async function renderDeveloperToolsPage() {
   if (!els.developerToolsContent) return;
   if (!(await isCurrentUserDeveloperFromFirestore())) {
@@ -4397,42 +4430,98 @@ async function renderDeveloperToolsPage() {
   els.developerToolsContent.replaceChildren();
   try {
     const data = await loadDeveloperToolsData();
-    setDeveloperToolsStatus(`Loaded ${data.users.length} users and ${data.villages.length} villages. Auth accounts must be deleted manually or via Cloud Function.`);
+    setDeveloperToolsStatus("Developer data loaded. Auth accounts must be deleted manually or via Cloud Function.");
     els.developerToolsContent.replaceChildren(
+      createDeveloperSystemStatusCard(data),
       createDeveloperCleanupSection(data),
       createDeveloperUsersSection(data.users),
       createDeveloperVillagesSection(data.villages)
     );
   } catch (error) {
     console.error("Developer Tools failed to load.", error);
-    setDeveloperToolsStatus(`Could not load Developer Tools data: ${getErrorMessage(error)}`, true);
+    const permissionHint = String(error?.code || "").includes("permission-denied")
+      ? " Firestore rules are blocking one of the Developer Tools reads. Check the browser console for the exact path."
+      : "";
+    setDeveloperToolsStatus(`Could not load Developer Tools data: ${getErrorMessage(error)}.${permissionHint}`, true);
   }
 }
 
 async function isCurrentUserDeveloperFromFirestore() {
-  if (!firebaseAuthUser || !hasCloudSyncConfig()) return false;
+  if (!firebaseAuthUser || !hasCloudSyncConfig()) {
+    console.warn("[Unser Dorf Developer Tools auth] Developer access check skipped.", {
+      hasFirebaseUser: Boolean(firebaseAuthUser),
+      hasCloudSyncConfig: hasCloudSyncConfig()
+    });
+    return false;
+  }
   try {
     const firebase = await getFirebaseSyncApi();
-    const snapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
-    const role = sanitizeUserRole(snapshot.exists() ? snapshot.data()?.role : "");
+    const userDocPath = getFirebaseUserDocPath(firebase, firebaseAuthUser.uid);
+    console.info("[Unser Dorf Developer Tools auth] Checking current developer account.", {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email || "",
+      provider: firebaseAuthUser.providerData?.map((provider) => provider.providerId).join(", ") || "password",
+      userDocPath
+    });
+    const snapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid)),
+      {
+        operation: "get current developer user document",
+        path: userDocPath
+      }
+    );
+    const data = snapshot.exists() ? snapshot.data() || {} : {};
+    const role = sanitizeUserRole(data.role);
+    const protectedAccount = Boolean(data.protectedAccount);
     const profile = getCurrentProfile() || profileStore?.profiles?.[getFirebaseProfileId(firebaseAuthUser)];
     if (profile && role !== profile.role) profile.role = role;
+    if (profile && protectedAccount) profile.protectedAccount = true;
+    console.info("[Unser Dorf Developer Tools auth] Current user profile check.", {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email || "",
+      userDocPath,
+      documentExists: snapshot.exists(),
+      role,
+      protectedAccount,
+      allowed: role === "developer"
+    });
     return role === "developer";
   } catch (error) {
-    console.error("Could not verify developer role from Firestore.", error);
+    console.error("[Unser Dorf Developer Tools auth] Could not verify developer role from Firestore.", {
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || "",
+      error
+    });
     return false;
   }
 }
 
 async function loadDeveloperToolsData() {
   const firebase = await getFirebaseSyncApi();
-  const [userSnapshot, villageSnapshots] = await Promise.all([
-    firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
-    Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
-      const snapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
-      return { groupInfo, snapshot };
-    }))
-  ]);
+  console.info("[Unser Dorf Developer Tools] Loading developer data.", {
+    uid: firebaseAuthUser?.uid || "",
+    email: firebaseAuthUser?.email || "",
+    usersPath: getFirebaseUsersCollectionPath(firebase),
+    villagePaths: DEFAULT_GROUPS.map((groupInfo) => getFirebaseVillageDocPath(firebase, groupInfo.id))
+  });
+  const userSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
+    {
+      operation: "list developer users collection",
+      path: getFirebaseUsersCollectionPath(firebase)
+    }
+  );
+  const villageSnapshots = [];
+  for (const groupInfo of DEFAULT_GROUPS) {
+    const snapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id)),
+      {
+        operation: "get developer village document",
+        path: getFirebaseVillageDocPath(firebase, groupInfo.id)
+      }
+    );
+    villageSnapshots.push({ groupInfo, snapshot });
+  }
   const userDocs = userSnapshot.docs.map((docSnapshot) => ({
     id: docSnapshot.id,
     data: docSnapshot.data() || {}
@@ -4604,6 +4693,28 @@ function getDeveloperVillageName(villages, villageId) {
   return villages.find((village) => village.id === villageId)?.name || villageId || "No village";
 }
 
+function createDeveloperSystemStatusCard(data) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card developer-system-status-card";
+  const projectId = getFirebaseSyncConfig().firebaseConfig.projectId || "Not configured";
+  const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
+  const currentProfile = getCurrentProfile() || profileStore?.profiles?.[getFirebaseProfileId(firebaseAuthUser || {})] || {};
+  const currentName = currentUser?.displayName || getVillageDisplayName(currentProfile) || getIdentityDisplayName() || "Not available";
+  const currentRole = sanitizeUserRole(currentUser?.role || currentProfile.role);
+  section.replaceChildren(
+    createTextElement("h3", "", "System Status"),
+    createDeveloperDefinitionList([
+      ["Users", `${data.users.length}`],
+      ["Villages", `${data.villages.length}`],
+      ["Current account", currentName],
+      ["Role", currentRole === "developer" ? "Developer" : currentRole],
+      ["Firebase UID", firebaseAuthUser?.uid || "Not signed in"],
+      ["Project", projectId]
+    ])
+  );
+  return section;
+}
+
 function createDeveloperCleanupSection(data) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
@@ -4615,35 +4726,14 @@ function createDeveloperCleanupSection(data) {
   ];
   section.append(createTextElement("h3", "", "Family Z membership cleanup"));
   if (keepOnlyPreview.keepProfileId) {
-    section.append(createTextElement(
-      "p",
-      "developer-tools-empty",
-      `Current Mineko account to keep: ${keepOnlyPreview.keepDisplayName} • UID: ${keepOnlyPreview.keepUid}`
-    ));
+    section.append(createDeveloperCleanupPreview(keepOnlyPreview));
     if (keepOnlyPreview.removedMembers.length) {
-      const keepOnlyList = document.createElement("div");
-      keepOnlyList.className = "developer-user-grid";
-      keepOnlyPreview.removedMembers.forEach((member) => {
-        const card = document.createElement("article");
-        card.className = "developer-user-card";
-        card.replaceChildren(
-          createTextElement("h4", "", member.displayName || member.profileId || "Unknown member"),
-          createDeveloperDefinitionList([
-            ["Will remove", "Yes"],
-            ["UID", member.uid || "No UID stored"],
-            ["Profile ID", member.profileId],
-            ["Reason", member.reason]
-          ])
-        );
-        keepOnlyList.append(card);
-      });
       section.append(
         createTextElement(
           "p",
           "developer-tools-empty",
           `${keepOnlyPreview.removedMembers.length} Family Z member${keepOnlyPreview.removedMembers.length === 1 ? "" : "s"} will be removed.`
         ),
-        keepOnlyList,
         createDeveloperActionButton("Remove all stale Family Z members", cleanupFamilyZKeepOnlyCurrentUser, true)
       );
     } else {
@@ -4687,10 +4777,60 @@ function createDeveloperCleanupSection(data) {
   return section;
 }
 
+function createDeveloperCleanupPreview(preview) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-cleanup-preview";
+  wrapper.replaceChildren(
+    createDeveloperCleanupGroup("KEEP", [preview.keepMember], true),
+    createDeveloperCleanupGroup("REMOVE", preview.removedMembers, false)
+  );
+  return wrapper;
+}
+
+function createDeveloperCleanupGroup(title, members, isKeepGroup = false) {
+  const group = document.createElement("section");
+  group.className = "developer-cleanup-group";
+  const heading = createTextElement("h4", "", title);
+  group.append(heading);
+  if (!members.length) {
+    group.append(createTextElement("p", "developer-tools-empty", isKeepGroup ? "No current account found." : "No members will be removed."));
+    return group;
+  }
+  const list = document.createElement("div");
+  list.className = "developer-cleanup-list";
+  members.forEach((member) => list.append(createDeveloperCleanupAccountCard(member, isKeepGroup)));
+  group.append(list);
+  return group;
+}
+
+function createDeveloperCleanupAccountCard(member, isKeepCard = false) {
+  const card = document.createElement("article");
+  card.className = `developer-cleanup-account${isKeepCard ? " is-current" : ""}`;
+  const titleRow = document.createElement("div");
+  titleRow.className = "developer-cleanup-title-row";
+  titleRow.append(createTextElement("h5", "", `✓ ${member.displayName || member.profileId || "Unknown member"}`));
+  if (isKeepCard) {
+    const badge = createTextElement("span", "developer-current-badge", "CURRENT ACCOUNT");
+    titleRow.append(badge);
+  }
+  card.replaceChildren(
+    titleRow,
+    createDeveloperDefinitionList([
+      ["Display name", member.displayName || "Not available"],
+      ["Email", member.email || "Not available"],
+      ["UID", member.uid || "No UID stored"],
+      ["Village", member.villageName || member.villageId || "Family Z"],
+      ["Reason", member.reason || (isKeepCard ? "Current developer account" : "Cleanup candidate")]
+    ])
+  );
+  return card;
+}
+
 function getFamilyZKeepCurrentUserPreview(familyZ) {
   const keepUid = firebaseAuthUser?.uid || "";
   const keepProfileId = keepUid ? getFirebaseProfileId(firebaseAuthUser) : "";
   const currentProfile = profileStore?.profiles?.[keepProfileId] || familyZ?.profiles?.[keepProfileId] || {};
+  const villageName = familyZ?.name || "Family Z";
   const allProfileIds = normalizeProfileIdList([
     ...(familyZ?.rawMemberIds || []),
     ...(familyZ?.memberIds || []),
@@ -4704,14 +4844,30 @@ function getFamilyZKeepCurrentUserPreview(familyZ) {
       return {
         profileId,
         uid,
+        email: profile.ownerEmail || "",
         displayName: getVillageDisplayName(profile),
-        reason: uid === keepUid ? "Duplicate current UID entry" : "Not the current Mineko account"
+        villageId: DEFAULT_GROUP_ID,
+        villageName,
+        reason: uid === keepUid
+          ? "Duplicate current developer UID entry"
+          : uid
+            ? "Old Family Z test account, not the current developer account"
+            : "No Firebase UID stored on this village member record"
       };
     });
   return {
     keepUid,
     keepProfileId,
     keepDisplayName: getVillageDisplayName(currentProfile),
+    keepMember: {
+      profileId: keepProfileId,
+      uid: keepUid,
+      email: firebaseAuthUser?.email || currentProfile.ownerEmail || "",
+      displayName: getVillageDisplayName(currentProfile) || getIdentityDisplayName() || "Mineko",
+      villageId: DEFAULT_GROUP_ID,
+      villageName,
+      reason: "Current developer account"
+    },
     removedMembers
   };
 }
@@ -4828,11 +4984,13 @@ async function deleteDeveloperUser(user) {
 async function cleanupFamilyZOrphanedMembers() {
   const data = await loadDeveloperToolsData();
   const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
-  const cleanupProfileIds = normalizeProfileIdList(familyZ?.cleanupProfileIds || []);
+  const currentProfileId = firebaseAuthUser?.uid ? getFirebaseProfileId(firebaseAuthUser) : "";
+  const cleanupProfileIds = normalizeProfileIdList(familyZ?.cleanupProfileIds || [])
+    .filter((profileId) => profileId !== currentProfileId);
   const cleanupRows = [
     ...(familyZ?.orphanedMembers || []),
     ...(familyZ?.duplicateMembers || [])
-  ];
+  ].filter((member) => member.profileId !== currentProfileId);
   if (!cleanupProfileIds.length) {
     setDeveloperToolsStatus("Family Z has no orphaned or duplicate member records to clean.");
     return;
@@ -4851,6 +5009,7 @@ async function cleanupFamilyZOrphanedMembers() {
   removeProfileIdsFromLocalStore(cleanupProfileIds);
   setDeveloperToolsStatus(`Cleaned ${cleanupProfileIds.length} stale Family Z member record${cleanupProfileIds.length === 1 ? "" : "s"}.`);
   await renderDeveloperToolsPage();
+  refreshVillageMembershipUi();
 }
 
 async function cleanupFamilyZKeepOnlyCurrentUser() {
@@ -4880,7 +5039,7 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
       reason: member.reason
     }))
   ]);
-  const confirmed = window.confirm(`Remove ${removeCount} stale member${removeCount === 1 ? "" : "s"} and keep Mineko?`);
+  const confirmed = await confirmFamilyZCleanup(removeCount);
   if (!confirmed) return;
 
   const firebase = await getFirebaseSyncApi();
@@ -4964,9 +5123,133 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
   currentGroupId = DEFAULT_GROUP_ID;
   currentProfileId = preview.keepProfileId;
   saveProfileStore();
-  setDeveloperToolsStatus(`Removed ${removeCount} stale Family Z member${removeCount === 1 ? "" : "s"}. Mineko is now the only Family Z member.`);
+
+  const verification = await verifyFamilyZCleanupResult(firebase, preview.keepProfileId, preview.keepUid);
   await renderDeveloperToolsPage();
-  if (currentView === "dashboard") renderDashboard();
+  refreshVillageMembershipUi();
+  if (!verification.ok) {
+    setDeveloperToolsStatus(
+      `Family Z cleanup warning: ${verification.warnings.join(" ")} Refresh Developer Tools before continuing.`,
+      true
+    );
+  } else {
+    setDeveloperToolsStatus(
+      `✓ Family Z cleanup complete.\n\nRemoved:\n${removeCount} stale member${removeCount === 1 ? "" : "s"}\n\nRemaining:\n${verification.memberCount} member${verification.memberCount === 1 ? "" : "s"}\n\nCurrent Mineko account preserved.`
+    );
+  }
+}
+
+async function verifyFamilyZCleanupResult(firebase, keepProfileId, keepUid) {
+  const warnings = [];
+  const [userSnapshot, villageSnapshot] = await Promise.all([
+    readFirestoreWithDebug(
+      () => firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
+      {
+        operation: "verify developer users collection after Family Z cleanup",
+        path: getFirebaseUsersCollectionPath(firebase)
+      }
+    ),
+    readFirestoreWithDebug(
+      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID)),
+      {
+        operation: "verify Family Z village document after cleanup",
+        path: getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID)
+      }
+    )
+  ]);
+  const validUserIndex = createValidUserIndex(userSnapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    data: docSnapshot.data() || {}
+  })));
+  const villageData = villageSnapshot.exists() ? villageSnapshot.data() || {} : {};
+  const group = createGroupData(DEFAULT_GROUPS.find((item) => item.id === DEFAULT_GROUP_ID), villageData.group || {});
+  const profiles = villageData.profiles || {};
+  const memberIds = normalizeProfileIdList(group.memberIds || []);
+  const profileIds = normalizeProfileIdList(Object.keys(profiles));
+  const combinedMemberIds = normalizeProfileIdList([...memberIds, ...profileIds]);
+  const ownerUids = combinedMemberIds
+    .map((profileId) => String(profiles[profileId]?.ownerUid || "").trim())
+    .filter(Boolean);
+  const duplicateUidCount = ownerUids.length - new Set(ownerUids).size;
+  const invalidMembers = combinedMemberIds.filter((profileId) => {
+    const profile = profiles[profileId];
+    const ownerUid = String(profile?.ownerUid || "").trim();
+    return !profile
+      || !validUserIndex.validProfileIds.has(profileId)
+      || !ownerUid
+      || !validUserIndex.validUids.has(ownerUid);
+  });
+
+  if (!villageSnapshot.exists()) warnings.push("Family Z village document was not found.");
+  if (memberIds.length !== 1 || memberIds[0] !== keepProfileId) warnings.push("memberIds does not contain only the current Mineko profile.");
+  if (profileIds.length !== 1 || profileIds[0] !== keepProfileId) warnings.push("Village profiles does not contain only the current Mineko profile.");
+  if (!profiles[keepProfileId]) warnings.push("The current Mineko profile is missing from Family Z profiles.");
+  if (String(profiles[keepProfileId]?.ownerUid || "") !== keepUid) warnings.push("The remaining Family Z member UID does not match the current Firebase UID.");
+  if (duplicateUidCount > 0) warnings.push("Duplicate member UIDs remain in Family Z.");
+  if (invalidMembers.length) warnings.push(`Invalid member references remain: ${invalidMembers.join(", ")}.`);
+
+  return {
+    ok: warnings.length === 0,
+    warnings,
+    memberCount: combinedMemberIds.length
+  };
+}
+
+function refreshVillageMembershipUi() {
+  renderVillageMembersPreview();
+  renderVillageMembersPage();
+  renderDashboard();
+}
+
+function confirmFamilyZCleanup(removeCount) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Confirm Family Z cleanup");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card";
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const cleanButton = document.createElement("button");
+    cleanButton.type = "button";
+    cleanButton.className = "danger-button";
+    cleanButton.textContent = "Clean Family Z";
+    actions.replaceChildren(cancelButton, cleanButton);
+    card.replaceChildren(
+      createTextElement("h3", "", `Remove ${removeCount} Family Z member${removeCount === 1 ? "" : "s"}?`),
+      createTextElement("p", "", "The current Mineko developer account will be kept."),
+      createTextElement("p", "", "This action removes old village membership records only."),
+      createTextElement("p", "", "Firebase Authentication accounts are NOT deleted."),
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve(confirmed);
+    };
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    cleanButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") {
+        finish(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeydown);
+    cleanButton.focus();
+  });
 }
 
 async function removeDeveloperUserFromVillage(user) {
