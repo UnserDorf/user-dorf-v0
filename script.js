@@ -2866,6 +2866,18 @@ function getFirebaseUsersCollectionPath(firebase) {
   return [...firebase.rootPathParts, "users"].join("/");
 }
 
+function getFirebaseProfileStoresCollectionRef(firebase) {
+  return firebase.collection(firebase.db, ...firebase.rootPathParts, "profileStores");
+}
+
+function getFirebaseProfileStoresCollectionPath(firebase) {
+  return [...firebase.rootPathParts, "profileStores"].join("/");
+}
+
+function getFirebaseProfileStoreDocPath(firebase, docId) {
+  return [...firebase.rootPathParts, "profileStores", docId].join("/");
+}
+
 function getFirebaseVillageDocRef(firebase, groupId) {
   return firebase.doc(firebase.db, ...firebase.rootPathParts, "villages", groupId);
 }
@@ -4404,7 +4416,34 @@ async function readFirestoreWithDebug(readAction, details) {
     });
     return await readAction();
   } catch (error) {
+    error.firestorePath = details?.path || "";
+    error.firestoreOperation = details?.operation || "";
     console.error("[Unser Dorf Firestore read failed]", {
+      ...details,
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || "",
+      code: error?.code || "",
+      message: error?.message || String(error),
+      error
+    });
+    throw error;
+  }
+}
+
+async function writeFirestoreWithDebug(writeAction, details) {
+  try {
+    console.info("[Unser Dorf Firestore write]", {
+      ...details,
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || ""
+    });
+    const result = await writeAction();
+    console.info("[Unser Dorf Firestore write success]", details);
+    return result;
+  } catch (error) {
+    error.firestorePath = details?.path || "";
+    error.firestoreOperation = details?.operation || "";
+    console.error("[Unser Dorf Firestore write failed]", {
       ...details,
       uid: firebaseAuthUser?.uid || "",
       email: firebaseAuthUser?.email || "",
@@ -4739,6 +4778,13 @@ function createDeveloperCleanupSection(data) {
     } else {
       section.append(createTextElement("p", "developer-tools-empty", "Family Z already contains only the current Mineko account."));
     }
+    const oldUserCount = data.users.filter((user) => user.uid !== firebaseAuthUser?.uid).length;
+    if (oldUserCount) {
+      section.append(
+        createTextElement("p", "developer-tools-empty", `${oldUserCount} old Firestore profile${oldUserCount === 1 ? "" : "s"} can be deleted after reviewing the user list.`),
+        createDeveloperActionButton("Delete all old Firestore profiles", () => deleteAllOldFirestoreProfiles(data), true)
+      );
+    }
   } else {
     section.append(createTextElement("p", "developer-tools-empty", "Sign in as Mineko before using the keep-current-account cleanup."));
   }
@@ -4895,7 +4941,7 @@ function createDeveloperUserCard(user) {
   actions.replaceChildren(
     createDeveloperActionButton("Reset progress", () => resetDeveloperUserProgress(user)),
     createDeveloperActionButton("Remove from village", () => removeDeveloperUserFromVillage(user)),
-    createDeveloperActionButton("Delete test profile", () => deleteDeveloperUser(user), true)
+    createDeveloperActionButton("Delete Firestore profile", () => deleteDeveloperUser(user), true)
   );
   card.replaceChildren(
     createTextElement("h4", "", user.displayName || "Unnamed user"),
@@ -4968,17 +5014,436 @@ async function deleteDeveloperUser(user) {
     setDeveloperToolsStatus("You cannot delete the currently signed-in developer account.", true);
     return;
   }
-  const confirmed = window.confirm(`Delete Firestore profile data for ${user.displayName || user.email || user.profileId}?\n\nEmail: ${user.email || "Not available"}\nUID: ${user.uid || "No Auth UID found"}\n\nFirebase Authentication users must still be deleted manually or via Cloud Function.`);
+  const target = createDeveloperDeleteTarget(user);
+  const confirmed = await confirmDeleteFirestoreProfile(target);
   if (!confirmed) return;
+  try {
+    const result = await deleteFirestoreProfileTarget(target);
+    if (!result.verification.ok) {
+      setDeveloperToolsStatus(`Could not verify profile deletion. ${result.verification.failures.join(" ")}`, true);
+      return;
+    }
+    await renderDeveloperToolsPage();
+    refreshVillageMembershipUi();
+    setDeveloperToolsStatus("Profile deleted successfully.");
+  } catch (error) {
+    console.error("[Unser Dorf Developer Tools] Delete Firestore profile failed.", {
+      target,
+      code: error?.code || "",
+      path: error?.firestorePath || "",
+      operation: error?.firestoreOperation || "",
+      message: error?.message || String(error),
+      error
+    });
+    const pathHint = error?.firestorePath ? ` Path: ${error.firestorePath}.` : "";
+    const codeHint = error?.code ? ` Code: ${error.code}.` : "";
+    setDeveloperToolsStatus(`Could not delete Firestore profile: ${getErrorMessage(error)}.${codeHint}${pathHint}`, true);
+  }
+}
+
+function createDeveloperDeleteTarget(user) {
+  return {
+    uid: String(user.uid || "").trim(),
+    email: String(user.email || "").trim(),
+    displayName: user.displayName || "Unnamed user",
+    profileIds: getDeveloperTargetProfileIds(user),
+    villageId: user.villageId || "",
+    villageName: user.villageName || user.villageId || "No village"
+  };
+}
+
+function confirmDeleteFirestoreProfile(target) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Delete Firestore profile");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card";
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger-button";
+    deleteButton.textContent = "Delete Profile";
+    actions.replaceChildren(cancelButton, deleteButton);
+    card.replaceChildren(
+      createTextElement("h3", "", "Delete Firestore profile?"),
+      createDeveloperDefinitionList([
+        ["Name", target.displayName || "Not available"],
+        ["Email", target.email || "Not available"],
+        ["UID", target.uid || "No Auth UID found"]
+      ]),
+      createTextElement("p", "", "This will permanently remove the Firestore profile, learning progress, and village references."),
+      createTextElement("p", "", "The Firebase Authentication account, if one still exists, must be deleted separately."),
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve(confirmed);
+    };
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    deleteButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+    };
+    document.addEventListener("keydown", handleKeydown);
+    deleteButton.focus();
+  });
+}
+
+async function deleteFirestoreProfileTarget(target) {
+  if (target.uid && target.uid === firebaseAuthUser?.uid) {
+    throw new Error("The current developer account cannot be deleted.");
+  }
   const firebase = await getFirebaseSyncApi();
-  const profileIds = getDeveloperTargetProfileIds(user);
   const savedAt = new Date().toISOString();
-  await removeProfileIdsFromVillageDocs(firebase, profileIds, DEFAULT_GROUPS.map((group) => group.id), savedAt);
-  await deleteLegacySharedProfileStoreReferences(firebase, profileIds, savedAt);
-  if (user.uid) await firebase.deleteDoc(getFirebaseUserDocRef(firebase, user.uid));
-  removeProfileIdsFromLocalStore(profileIds);
-  setDeveloperToolsStatus(`Deleted Firestore data for ${user.displayName}. Auth account must be deleted manually or via Cloud Function.`);
+  console.info("[Unser Dorf Developer Tools] Deleting Firestore profile target.", target);
+  await removeDeveloperTargetFromVillageDocs(firebase, target, DEFAULT_GROUPS.map((group) => group.id), savedAt);
+  await deleteLegacyProfileStoreReferencesForTarget(firebase, target, savedAt);
+  if (target.uid) {
+    const userPath = getFirebaseUserDocPath(firebase, target.uid);
+    await writeFirestoreWithDebug(
+      () => firebase.deleteDoc(getFirebaseUserDocRef(firebase, target.uid)),
+      {
+        operation: "delete developer user document",
+        path: userPath,
+        targetUid: target.uid
+      }
+    );
+  }
+  removeProfileIdsFromLocalStore(target.profileIds);
+  removeDeveloperTargetFromLocalVillages(target);
+  const verification = await verifyDeveloperProfileDeleted(firebase, target);
+  return { verification };
+}
+
+async function deleteAllOldFirestoreProfiles(data) {
+  const currentUid = firebaseAuthUser?.uid || "";
+  const targets = dedupeDeveloperDeleteTargets(
+    data.users
+      .filter((user) => !user.uid || user.uid !== currentUid)
+      .map((user) => createDeveloperDeleteTarget(user))
+  );
+  if (!targets.length) {
+    setDeveloperToolsStatus("No old Firestore profiles found to delete.");
+    return;
+  }
+  const confirmed = await confirmDeleteOldFirestoreProfiles(targets);
+  if (!confirmed) return;
+  const results = [];
+  for (const target of targets) {
+    try {
+      const result = await deleteFirestoreProfileTarget(target);
+      results.push({ target, ok: result.verification.ok, failures: result.verification.failures });
+    } catch (error) {
+      console.error("[Unser Dorf Developer Tools] Bulk profile delete failed for target.", {
+        target,
+        code: error?.code || "",
+        message: error?.message || String(error),
+        error
+      });
+      results.push({
+        target,
+        ok: false,
+        failures: [`${target.displayName || target.uid || "Unknown profile"} failed: ${error?.code || getErrorMessage(error)}`]
+      });
+    }
+  }
   await renderDeveloperToolsPage();
+  refreshVillageMembershipUi();
+  const failures = results.flatMap((result) => result.failures || []);
+  const deletedCount = results.filter((result) => result.ok).length;
+  if (failures.length) {
+    setDeveloperToolsStatus(`Deleted ${deletedCount} old Firestore profile${deletedCount === 1 ? "" : "s"}, but verification found problems: ${failures.join(" ")}`, true);
+    return;
+  }
+  setDeveloperToolsStatus(`Deleted ${deletedCount} old Firestore profile${deletedCount === 1 ? "" : "s"}. Current Mineko account preserved.`);
+}
+
+function dedupeDeveloperDeleteTargets(targets) {
+  const seen = new Set();
+  return targets.filter((target) => {
+    const key = target.uid || target.profileIds.join("|") || target.email;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function confirmDeleteOldFirestoreProfiles(targets) {
+  return new Promise((resolve) => {
+    const requiredText = `DELETE ${targets.length} PROFILE${targets.length === 1 ? "" : "S"}`;
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Delete all old Firestore profiles");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card developer-bulk-delete-card";
+    const list = document.createElement("div");
+    list.className = "developer-bulk-delete-list";
+    targets.forEach((target) => {
+      list.append(createDeveloperCleanupAccountCard({
+        displayName: target.displayName,
+        email: target.email,
+        uid: target.uid,
+        villageName: target.villageName,
+        reason: "Old Firestore profile; not the current Mineko developer account"
+      }));
+    });
+    const label = document.createElement("label");
+    label.className = "developer-confirmation-input";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.autocomplete = "off";
+    input.placeholder = requiredText;
+    label.append(createTextElement("span", "", `Type ${requiredText} to confirm`), input);
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger-button";
+    deleteButton.textContent = "Delete Profiles";
+    deleteButton.disabled = true;
+    actions.replaceChildren(cancelButton, deleteButton);
+    card.replaceChildren(
+      createTextElement("h3", "", `Delete ${targets.length} old Firestore profile${targets.length === 1 ? "" : "s"}?`),
+      createTextElement("p", "", "The current Mineko developer account will be kept."),
+      list,
+      label,
+      createTextElement("p", "", "Firebase Authentication accounts are NOT deleted by this browser tool."),
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    input.addEventListener("input", () => {
+      deleteButton.disabled = input.value.trim() !== requiredText;
+    });
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve(confirmed);
+    };
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    deleteButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+    };
+    document.addEventListener("keydown", handleKeydown);
+    input.focus();
+  });
+}
+
+async function removeDeveloperTargetFromVillageDocs(firebase, target, villageIds, savedAt) {
+  const profileIdSet = new Set(target.profileIds || []);
+  await Promise.all(villageIds.map(async (villageId) => {
+    const villageRef = getFirebaseVillageDocRef(firebase, villageId);
+    const villagePath = getFirebaseVillageDocPath(firebase, villageId);
+    const snapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(villageRef),
+      {
+        operation: "read village before deleting developer profile",
+        path: villagePath,
+        targetUid: target.uid || ""
+      }
+    );
+    if (!snapshot.exists()) return;
+    const data = snapshot.data() || {};
+    const groupInfo = DEFAULT_GROUPS.find((group) => group.id === villageId) || { id: villageId, name: villageId };
+    const group = createGroupData(groupInfo, data.group || {});
+    const profiles = { ...(data.profiles || {}) };
+    const memberProfiles = { ...(data.memberProfiles || {}) };
+    Object.entries(profiles).forEach(([profileId, profile]) => {
+      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) {
+        delete profiles[profileId];
+        profileIdSet.add(profileId);
+      }
+    });
+    Object.entries(memberProfiles).forEach(([profileId, profile]) => {
+      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) {
+        delete memberProfiles[profileId];
+        profileIdSet.add(profileId);
+      }
+    });
+    const cleanedMemberIds = normalizeGroupMemberIds([
+      ...(group.memberIds || []).filter((profileId) => profiles[profileId] && !profileIdSet.has(profileId)),
+      ...Object.keys(profiles)
+    ]);
+    group.memberIds = cleanedMemberIds;
+    const update = {
+      group,
+      profiles,
+      memberProfiles,
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: savedAt
+    };
+    if (target.uid && (data.creatorUid === target.uid || data.adminUid === target.uid)) {
+      update.creatorUid = "";
+      update.adminUid = "";
+    }
+    await writeFirestoreWithDebug(
+      () => firebase.setDoc(villageRef, update, { merge: true }),
+      {
+        operation: "remove developer profile from village document",
+        path: villagePath,
+        targetUid: target.uid || "",
+        removedProfileIds: Array.from(profileIdSet)
+      }
+    );
+  }));
+}
+
+async function deleteLegacyProfileStoreReferencesForTarget(firebase, target, savedAt) {
+  const collectionPath = getFirebaseProfileStoresCollectionPath(firebase);
+  const snapshot = await readFirestoreWithDebug(
+    () => firebase.getDocs(getFirebaseProfileStoresCollectionRef(firebase)),
+    {
+      operation: "list legacy profileStores before deleting developer profile",
+      path: collectionPath,
+      targetUid: target.uid || ""
+    }
+  );
+  await Promise.all(snapshot.docs.map(async (docSnapshot) => {
+    const data = docSnapshot.data() || {};
+    const legacyStore = data.profileStore || data.profile_store;
+    if (!legacyStore?.profiles) return;
+    const cleanedStore = sanitizeProfileStoreForSync(legacyStore);
+    const removedProfileIds = [];
+    Object.entries(cleanedStore.profiles || {}).forEach(([profileId, profile]) => {
+      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) {
+        delete cleanedStore.profiles[profileId];
+        removedProfileIds.push(profileId);
+      }
+    });
+    if (!removedProfileIds.length) return;
+    Object.values(cleanedStore.groups || {}).forEach((group) => {
+      group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !removedProfileIds.includes(profileId)));
+    });
+    if (removedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
+    const docPath = getFirebaseProfileStoreDocPath(firebase, docSnapshot.id);
+    await writeFirestoreWithDebug(
+      () => firebase.setDoc(firebase.doc(firebase.db, ...firebase.rootPathParts, "profileStores", docSnapshot.id), {
+        profileStore: cleanedStore,
+        updatedAt: firebase.serverTimestamp(),
+        updatedAtIso: savedAt
+      }, { merge: true }),
+      {
+        operation: "remove developer profile from legacy profileStore document",
+        path: docPath,
+        targetUid: target.uid || "",
+        removedProfileIds
+      }
+    );
+  }));
+}
+
+function doesDeveloperTargetMatchProfile(target, profileId, profile = {}) {
+  const targetProfileIds = new Set(target.profileIds || []);
+  const targetEmail = String(target.email || "").toLowerCase();
+  const ownerEmail = String(profile.ownerEmail || profile.email || "").toLowerCase();
+  return targetProfileIds.has(profileId)
+    || Boolean(target.uid && profile.ownerUid === target.uid)
+    || Boolean(targetEmail && ownerEmail && targetEmail === ownerEmail);
+}
+
+async function verifyDeveloperProfileDeleted(firebase, target) {
+  const failures = [];
+  if (target.uid) {
+    const userPath = getFirebaseUserDocPath(firebase, target.uid);
+    const userSnapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(getFirebaseUserDocRef(firebase, target.uid)),
+      {
+        operation: "verify developer user document deleted",
+        path: userPath,
+        targetUid: target.uid
+      }
+    );
+    if (userSnapshot.exists()) failures.push(`${userPath} still exists.`);
+  }
+
+  for (const groupInfo of DEFAULT_GROUPS) {
+    const villagePath = getFirebaseVillageDocPath(firebase, groupInfo.id);
+    const villageSnapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id)),
+      {
+        operation: "verify village has no deleted developer profile references",
+        path: villagePath,
+        targetUid: target.uid || ""
+      }
+    );
+    if (!villageSnapshot.exists()) continue;
+    const data = villageSnapshot.data() || {};
+    const group = createGroupData(groupInfo, data.group || {});
+    const profiles = data.profiles || {};
+    const memberProfiles = data.memberProfiles || {};
+    const matchingProfileIds = Object.entries(profiles)
+      .filter(([profileId, profile]) => doesDeveloperTargetMatchProfile(target, profileId, profile))
+      .map(([profileId]) => profileId);
+    const matchingMemberProfileIds = Object.entries(memberProfiles)
+      .filter(([profileId, profile]) => doesDeveloperTargetMatchProfile(target, profileId, profile))
+      .map(([profileId]) => profileId);
+    const matchingMemberIds = normalizeProfileIdList(group.memberIds || [])
+      .filter((profileId) => (target.profileIds || []).includes(profileId) || matchingProfileIds.includes(profileId) || matchingMemberProfileIds.includes(profileId));
+    if (matchingProfileIds.length) failures.push(`${villagePath} profiles still references ${matchingProfileIds.join(", ")}.`);
+    if (matchingMemberProfileIds.length) failures.push(`${villagePath} memberProfiles still references ${matchingMemberProfileIds.join(", ")}.`);
+    if (matchingMemberIds.length) failures.push(`${villagePath} memberIds still references ${matchingMemberIds.join(", ")}.`);
+    if (target.uid && (data.creatorUid === target.uid || data.adminUid === target.uid)) failures.push(`${villagePath} still has creator/admin reference to ${target.uid}.`);
+  }
+
+  const legacySnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocs(getFirebaseProfileStoresCollectionRef(firebase)),
+    {
+      operation: "verify legacy profileStores have no deleted developer profile references",
+      path: getFirebaseProfileStoresCollectionPath(firebase),
+      targetUid: target.uid || ""
+    }
+  );
+  legacySnapshot.docs.forEach((docSnapshot) => {
+    const data = docSnapshot.data() || {};
+    const legacyStore = data.profileStore || data.profile_store;
+    if (!legacyStore?.profiles) return;
+    const matches = Object.entries(legacyStore.profiles)
+      .filter(([profileId, profile]) => doesDeveloperTargetMatchProfile(target, profileId, profile))
+      .map(([profileId]) => profileId);
+    if (matches.length) failures.push(`${getFirebaseProfileStoreDocPath(firebase, docSnapshot.id)} still references ${matches.join(", ")}.`);
+  });
+  console.info("[Unser Dorf Developer Tools] Delete profile verification result.", {
+    target,
+    ok: failures.length === 0,
+    failures
+  });
+  return { ok: failures.length === 0, failures };
+}
+
+function removeDeveloperTargetFromLocalVillages(target) {
+  const targetProfileIds = new Set(target.profileIds || []);
+  Object.values(profileStore?.groups || {}).forEach((group) => {
+    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !targetProfileIds.has(profileId)));
+  });
+  saveProfileStore();
 }
 
 async function cleanupFamilyZOrphanedMembers() {

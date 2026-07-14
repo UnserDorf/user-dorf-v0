@@ -11626,6 +11626,8 @@ body:has(#developerToolsScreen:not(.hidden)) {
   background: rgba(255, 250, 241, 0.96);
   box-shadow: 0 24px 70px rgba(31, 38, 35, 0.24);
   padding: clamp(18px, 4vw, 24px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
 }
 
 .developer-confirmation-card h3 {
@@ -11646,6 +11648,37 @@ body:has(#developerToolsScreen:not(.hidden)) {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 4px;
+}
+
+.developer-bulk-delete-card {
+  width: min(760px, 100%);
+}
+
+.developer-bulk-delete-list {
+  display: grid;
+  gap: 10px;
+  max-height: min(44dvh, 420px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.developer-confirmation-input {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.developer-confirmation-input input {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: 0.95rem;
+  font-weight: 760;
 }
 
 @media (max-width: 520px) {
