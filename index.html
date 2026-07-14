@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=224">
+    <link rel="stylesheet" href="style.css?v=225">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -405,13 +405,21 @@
           <p>Study new words, review what you've learned, and help your village grow.</p>
         </div>
 
-        <section class="learn-recommendation-panel" aria-label="Recommended next step">
-          <p class="eyebrow">Recommended Next Step</p>
+        <section class="learn-recommendation-panel" aria-label="Learning journey">
           <article class="learn-recommendation-card" id="learnRecommendationCard">
+            <p class="eyebrow" id="learnRecommendationEyebrow">Today's Goal</p>
             <h3 id="learnRecommendationTitle">Learn 20 new words</h3>
             <p id="learnRecommendationMeta">Start with flashcards.</p>
+            <div class="learn-goal-controls" id="learnGoalControls" aria-label="Choose today's word goal">
+              <button class="learn-goal-stepper" id="learnGoalDecrease" type="button" aria-label="Study fewer words">−</button>
+              <strong><span id="learnGoalValue">20</span> words</strong>
+              <button class="learn-goal-stepper" id="learnGoalIncrease" type="button" aria-label="Study more words">+</button>
+            </div>
+            <p class="learn-goal-note" id="learnGoalNote">Maximum: 50 words</p>
+            <p class="learn-estimate" id="learnEstimate">Estimated time: 4–5 minutes</p>
+            <div class="learn-progress-list hidden" id="learnProgressList"></div>
             <div class="learn-recommendation-actions" id="learnRecommendationActions">
-              <button class="primary-button" id="learnRecommendationPrimary" type="button">▶ Start Flashcards</button>
+              <button class="primary-button" id="learnRecommendationPrimary" type="button">▶ Start Learning</button>
             </div>
           </article>
         </section>
@@ -967,6 +975,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=224"></script>
+    <script type="module" src="script.js?v=225"></script>
   </body>
 </html>

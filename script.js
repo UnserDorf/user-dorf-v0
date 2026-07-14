@@ -22,6 +22,11 @@ const STORAGE_KEY = "goethe-b1-flashcards-progress-v1";
 const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const CHALLENGE_QUESTION_COUNT = 10;
 const FLASHCARD_SESSION_SIZE = 25;
+const LEARN_GERMAN_GOAL_STORAGE_KEY = "unserDorfLearnGermanWordGoal";
+const LEARN_GERMAN_DEFAULT_GOAL = 20;
+const LEARN_GERMAN_MIN_GOAL = 5;
+const LEARN_GERMAN_MAX_GOAL = 50;
+const LEARN_GERMAN_GOAL_STEP = 5;
 const CHALLENGE_BANNER_ROTATION_QUESTIONS = 75;
 const CHALLENGE_BANNERS = [
   "assets/town-center-stage-1.png",
@@ -474,10 +479,18 @@ const els = {
   learnGermanScreen: document.querySelector("#learnGermanScreen"),
   learnGermanBack: document.querySelector("#learnGermanBack"),
   learnRecommendationCard: document.querySelector("#learnRecommendationCard"),
+  learnRecommendationEyebrow: document.querySelector("#learnRecommendationEyebrow"),
   learnRecommendationTitle: document.querySelector("#learnRecommendationTitle"),
   learnRecommendationMeta: document.querySelector("#learnRecommendationMeta"),
   learnRecommendationActions: document.querySelector("#learnRecommendationActions"),
   learnRecommendationPrimary: document.querySelector("#learnRecommendationPrimary"),
+  learnGoalControls: document.querySelector("#learnGoalControls"),
+  learnGoalDecrease: document.querySelector("#learnGoalDecrease"),
+  learnGoalIncrease: document.querySelector("#learnGoalIncrease"),
+  learnGoalValue: document.querySelector("#learnGoalValue"),
+  learnGoalNote: document.querySelector("#learnGoalNote"),
+  learnEstimate: document.querySelector("#learnEstimate"),
+  learnProgressList: document.querySelector("#learnProgressList"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
@@ -2989,7 +3002,7 @@ function mergeFlashcardSessions(localSessions = {}, remoteSessions = {}) {
       index: normalizePosition(newest.index),
       studiedIds: sameStudyDate
         ? Array.from(new Set([...(localSession.studiedIds || []), ...(remoteSession.studiedIds || [])]))
-        : normalizeRecentItemList(newest.studiedIds || [], FLASHCARD_SESSION_SIZE),
+        : normalizeRecentItemList(newest.studiedIds || [], Math.max(FLASHCARD_SESSION_SIZE, LEARN_GERMAN_MAX_GOAL)),
       ratings: {
         ...normalizeFlashcardRatings(localSession.ratings),
         ...normalizeFlashcardRatings(remoteSession.ratings)
@@ -8382,10 +8395,46 @@ function continueGuidedLearning() {
   handleLearnGermanAction(getLearnGermanRecommendation().action, { guided: true });
 }
 
+function getLearnGermanGoal() {
+  const saved = Number(localStorage.getItem(LEARN_GERMAN_GOAL_STORAGE_KEY));
+  if (!Number.isFinite(saved)) return LEARN_GERMAN_DEFAULT_GOAL;
+  return clamp(Math.round(saved / LEARN_GERMAN_GOAL_STEP) * LEARN_GERMAN_GOAL_STEP, LEARN_GERMAN_MIN_GOAL, LEARN_GERMAN_MAX_GOAL);
+}
+
+function setLearnGermanGoal(value) {
+  const numericValue = Number(value);
+  const safeValue = Number.isFinite(numericValue) ? numericValue : LEARN_GERMAN_DEFAULT_GOAL;
+  const nextGoal = clamp(
+    Math.round(safeValue / LEARN_GERMAN_GOAL_STEP) * LEARN_GERMAN_GOAL_STEP,
+    LEARN_GERMAN_MIN_GOAL,
+    LEARN_GERMAN_MAX_GOAL
+  );
+  localStorage.setItem(LEARN_GERMAN_GOAL_STORAGE_KEY, String(nextGoal));
+  renderLearnGermanPage();
+}
+
+function getLearnGermanTimeEstimate(wordCount = getLearnGermanGoal()) {
+  const minMinutes = Math.max(1, Math.floor(wordCount / 5));
+  const maxMinutes = Math.max(minMinutes + 1, Math.ceil(wordCount / 4));
+  return `${minMinutes}–${maxMinutes} minutes`;
+}
+
 function renderLearnGermanPage() {
   const recommendation = getLearnGermanRecommendation();
+  const goal = getLearnGermanGoal();
+  els.learnRecommendationCard?.classList.toggle("complete", recommendation.action === "complete");
+  els.learnRecommendationCard?.classList.toggle("has-study-set", recommendation.hasStudySet);
+  if (els.learnRecommendationEyebrow) els.learnRecommendationEyebrow.textContent = recommendation.eyebrow;
   if (els.learnRecommendationTitle) els.learnRecommendationTitle.textContent = recommendation.title;
   if (els.learnRecommendationMeta) els.learnRecommendationMeta.textContent = recommendation.meta;
+  if (els.learnGoalValue) els.learnGoalValue.textContent = String(goal);
+  if (els.learnEstimate) els.learnEstimate.textContent = `Estimated time: ${getLearnGermanTimeEstimate(goal)}`;
+  if (els.learnGoalDecrease) els.learnGoalDecrease.disabled = goal <= LEARN_GERMAN_MIN_GOAL;
+  if (els.learnGoalIncrease) els.learnGoalIncrease.disabled = goal >= LEARN_GERMAN_MAX_GOAL;
+  els.learnGoalControls?.classList.toggle("hidden", !recommendation.showGoal);
+  els.learnGoalNote?.classList.toggle("hidden", !recommendation.showGoal);
+  els.learnEstimate?.classList.toggle("hidden", !recommendation.showGoal);
+  renderLearnGermanProgress(recommendation);
   if (!els.learnRecommendationActions) return;
 
   if (recommendation.action === "complete") {
@@ -8409,38 +8458,93 @@ function renderLearnGermanPage() {
   }
 }
 
+function renderLearnGermanProgress(recommendation) {
+  if (!els.learnProgressList) return;
+  els.learnProgressList.classList.toggle("hidden", !recommendation.progressItems?.length);
+  if (!recommendation.progressItems?.length) {
+    els.learnProgressList.replaceChildren();
+    return;
+  }
+  els.learnProgressList.replaceChildren(
+    ...recommendation.progressItems.map((item) => {
+      const row = document.createElement("div");
+      row.className = "learn-progress-row";
+      row.append(
+        createTextElement("span", "", item.label),
+        createTextElement("strong", "", item.value)
+      );
+      return row;
+    })
+  );
+}
+
 function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   const state = getGuidedLearningState(profile);
   if (!state.studySet.wordIds.length) {
+    const goal = getLearnGermanGoal();
     return {
       action: "flashcards",
-      title: "Learn 20 new words",
-      meta: "Start with flashcards.",
-      buttonLabel: "▶ Start Flashcards"
+      eyebrow: "Today's Goal",
+      title: "Choose today's goal",
+      meta: "Study new words, then review them to earn coins and help your village grow.",
+      buttonLabel: "▶ Start Learning",
+      showGoal: true,
+      hasStudySet: false,
+      progressItems: [
+        { label: "Today", value: `${goal} words` },
+        { label: "Time", value: getLearnGermanTimeEstimate(goal) }
+      ]
     };
   }
   if (!state.vocabularyComplete) {
     return {
       action: "vocabulary-review",
+      eyebrow: "Current Study Set",
       title: "Review your recent study set",
-      meta: `${state.studySet.wordIds.length} ${state.studySet.wordIds.length === 1 ? "word" : "words"} ready`,
-      buttonLabel: "▶ Start Vocabulary Review"
+      meta: "Next step: Vocabulary Review",
+      buttonLabel: "▶ Continue Learning",
+      showGoal: false,
+      hasStudySet: true,
+      progressItems: getLearnGermanStudySetProgressItems(state)
     };
   }
   if (state.nounCount > 0 && !state.articleComplete) {
     return {
       action: "article-review",
+      eyebrow: "Current Study Set",
       title: "Review noun articles",
-      meta: `${state.nounCount} ${state.nounCount === 1 ? "noun" : "nouns"} available`,
-      buttonLabel: "▶ Start Article Review"
+      meta: "Next step: Article Review",
+      buttonLabel: "▶ Continue Learning",
+      showGoal: false,
+      hasStudySet: true,
+      progressItems: getLearnGermanStudySetProgressItems(state)
     };
   }
   return {
     action: "complete",
+    eyebrow: "Current Study Set",
     title: "Nice work!",
     meta: "You've studied and reviewed your current words.",
-    buttonLabel: "Continue Studying"
+    buttonLabel: "Continue Studying",
+    showGoal: false,
+    hasStudySet: true,
+    progressItems: getLearnGermanStudySetProgressItems(state)
   };
+}
+
+function getLearnGermanStudySetProgressItems(state) {
+  const wordLabel = state.studySet.wordIds.length === 1 ? "word studied" : "words studied";
+  const items = [
+    { label: "✓ Flashcards", value: `${state.studySet.wordIds.length} ${wordLabel}` },
+    { label: state.vocabularyComplete ? "✓ Vocabulary Review" : "Next step", value: state.vocabularyComplete ? "Complete" : "Vocabulary Review" }
+  ];
+  if (state.nounCount > 0) {
+    items.push({
+      label: state.articleComplete ? "✓ Article Review" : "Articles",
+      value: state.articleComplete ? "Complete" : `${state.nounCount} ${state.nounCount === 1 ? "noun" : "nouns"} ready`
+    });
+  }
+  return items;
 }
 
 function getGuidedLearningState(profile = getCurrentProfile()) {
@@ -8696,7 +8800,7 @@ function showFlashcardSetup() {
 
 function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
-  openFlashcardDeck(selectedLearningLevel, categoryInput?.value || "nouns");
+  openFlashcardDeck(selectedLearningLevel, categoryInput?.value || "nouns", { forceNew: true });
 }
 
 function getFlashcardLevel(card) {
@@ -8762,9 +8866,10 @@ function toggleLearningDeckSelector() {
 }
 
 function buildLearningFlashcardOrder(cardList) {
+  const sessionSize = getLearnGermanGoal();
   const candidates = cardList.map((card) => ({ card, weight: getFlashcardReviewWeight(card) }));
   const selected = [];
-  while (candidates.length && selected.length < FLASHCARD_SESSION_SIZE) {
+  while (candidates.length && selected.length < sessionSize) {
     const totalWeight = candidates.reduce((total, item) => total + item.weight, 0);
     let target = Math.random() * totalWeight;
     let selectedIndex = 0;
@@ -9658,6 +9763,12 @@ function bindEvents() {
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
   els.villageMembersBack?.addEventListener("click", showDashboard);
   els.learnGermanBack?.addEventListener("click", showDashboard);
+  els.learnGoalDecrease?.addEventListener("click", () => {
+    setLearnGermanGoal(getLearnGermanGoal() - LEARN_GERMAN_GOAL_STEP);
+  });
+  els.learnGoalIncrease?.addEventListener("click", () => {
+    setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
+  });
   els.learnGermanScreen?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-learn-action]");
     if (!button) return;
