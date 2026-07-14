@@ -1518,6 +1518,7 @@ function normalizeProfileIdList(value) {
 }
 
 function mergeGroupData(localStore, remoteStore, baseStore) {
+  const preferRemoteMembership = Boolean(firebaseAuthUser && remoteStore?.groups);
   const localGroups = normalizeGroups(localStore?.groups, {
     ...(localStore || {}),
     profiles: baseStore.profiles
@@ -1561,10 +1562,12 @@ function mergeGroupData(localStore, remoteStore, baseStore) {
         ...normalizeRewardIdList(localGroup?.austriaAlbumSeenRewards),
         ...normalizeRewardIdList(remoteGroup?.austriaAlbumSeenRewards)
       ],
-      memberIds: [
-        ...normalizeGroupMemberIds(localGroup?.memberIds),
-        ...normalizeGroupMemberIds(remoteGroup?.memberIds)
-      ]
+      memberIds: preferRemoteMembership
+        ? normalizeGroupMemberIds(remoteGroup?.memberIds)
+        : [
+          ...normalizeGroupMemberIds(localGroup?.memberIds),
+          ...normalizeGroupMemberIds(remoteGroup?.memberIds)
+        ]
     });
   });
   return normalizeGroups(groups, baseStore);
@@ -1772,6 +1775,11 @@ function enterSelectedVillage() {
   verifiedVillageJoinId = "";
   pendingVillageJoinId = "";
   saveProfileStore();
+  if (!isExistingMember) {
+    saveCurrentVillageMembershipToCloudNow("village join").catch((error) => {
+      console.warn("Could not persist new village membership immediately.", error);
+    });
+  }
   completeProfileLogin(profileId);
 }
 
@@ -2310,29 +2318,10 @@ async function saveProfileStoreToCloudNow() {
       updatedAtIso: savedAt
     }, { merge: true });
 
-    await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
-      const group = profileStore.groups?.[groupInfo.id];
-      if (!group) return;
-      const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
-      const groupProfiles = getProfilesForGroupSync(group);
-      const groupForSync = sanitizeGroupForSync(group);
-      groupForSync.memberIds = normalizeGroupMemberIds(Object.keys(groupProfiles));
-      if (!Object.keys(groupProfiles).length) {
-        await firebase.setDoc(villageRef, {
-          group: groupForSync,
-          profiles: {},
-          updatedAt: firebase.serverTimestamp(),
-          updatedAtIso: savedAt
-        });
-        return;
-      }
-      await firebase.setDoc(getFirebaseVillageDocRef(firebase, groupInfo.id), {
-        group: groupForSync,
-        profiles: groupProfiles,
-        updatedAt: firebase.serverTimestamp(),
-        updatedAtIso: savedAt
-      });
-    }));
+    await syncCurrentProfileToVillageDoc(firebase, savedAt, {
+      allowCreateMembership: false,
+      reason: "profile save"
+    });
     updateCloudSyncDebug({
       lastCloudSaveTime: savedAt,
       lastCloudSaveError: "",
@@ -2348,6 +2337,90 @@ async function saveProfileStoreToCloudNow() {
       saveProfileStoreToCloudNow();
     }
   }
+}
+
+async function saveCurrentVillageMembershipToCloudNow(reason = "village membership change") {
+  if (!profileStore || !hasCloudSyncConfig() || !firebaseAuthUser) return;
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await syncCurrentProfileToVillageDoc(firebase, new Date().toISOString(), {
+      allowCreateMembership: true,
+      reason
+    });
+  } catch (error) {
+    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore village membership save failed");
+    console.warn("Could not sync village membership to Firebase.", error);
+  }
+}
+
+async function syncCurrentProfileToVillageDoc(firebase, savedAt, options = {}) {
+  const profileId = currentProfileId || profileStore.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+  const activeProfile = profileId ? profileStore.profiles?.[profileId] : null;
+  const groupId = normalizeGroupId(activeProfile?.villageId || currentGroupId || profileStore.currentGroup, profileStore.groups);
+  const groupInfo = DEFAULT_GROUPS.find((group) => group.id === groupId);
+  if (!profileId || !activeProfile || !groupInfo) {
+    console.info("[Unser Dorf village sync] Skipped village profile sync because no active Firebase profile is ready.", {
+      reason: options.reason || "",
+      profileId,
+      groupId
+    });
+    return;
+  }
+
+  const villageRef = getFirebaseVillageDocRef(firebase, groupId);
+  const villagePath = getFirebaseVillageDocPath(firebase, groupId);
+  const villageSnapshot = await firebase.getDocFromServer(villageRef);
+  const villageData = villageSnapshot.exists() ? villageSnapshot.data() || {} : {};
+  const serverProfiles = { ...(villageData.profiles || {}) };
+  const serverMemberProfiles = { ...(villageData.memberProfiles || {}) };
+  const serverGroup = createGroupData(groupInfo, villageData.group || {});
+  const serverMemberIds = normalizeGroupMemberIds([
+    ...normalizeProfileIdList(serverGroup.memberIds || []),
+    ...Object.keys(serverProfiles)
+  ]);
+  const alreadyMember = serverMemberIds.includes(profileId) || Boolean(serverProfiles[profileId]);
+  if (!alreadyMember && !options.allowCreateMembership) {
+    console.info("[Unser Dorf village sync] Skipped village membership write because Firestore does not list this profile as a village member.", {
+      reason: options.reason || "",
+      path: villagePath,
+      profileId,
+      groupId,
+      serverMemberIds
+    });
+    return;
+  }
+
+  const sanitizedProfile = sanitizeProfileStoreForSync({
+    ...activeProfile,
+    id: profileId,
+    ownerUid: activeProfile.ownerUid || firebaseAuthUser.uid,
+    ownerEmail: activeProfile.ownerEmail || firebaseAuthUser.email || "",
+    villageId: groupId
+  });
+  const nextMemberIds = normalizeGroupMemberIds([...serverMemberIds, profileId]);
+  const nextGroup = createGroupData(groupInfo, {
+    ...serverGroup,
+    memberIds: nextMemberIds
+  });
+  serverProfiles[profileId] = sanitizedProfile;
+  serverMemberProfiles[profileId] = sanitizedProfile;
+
+  console.info("[Unser Dorf village sync] Writing current profile to village document.", {
+    reason: options.reason || "",
+    path: villagePath,
+    profileId,
+    allowCreateMembership: Boolean(options.allowCreateMembership),
+    memberIdsBefore: serverMemberIds,
+    memberIdsAfter: nextMemberIds
+  });
+
+  await firebase.setDoc(villageRef, {
+    group: nextGroup,
+    profiles: serverProfiles,
+    memberProfiles: serverMemberProfiles,
+    updatedAt: firebase.serverTimestamp(),
+    updatedAtIso: savedAt
+  }, { merge: true });
 }
 
 async function saveActiveStudySetToCloudNow(studySet) {
@@ -2378,13 +2451,18 @@ async function fetchProfileStoreFromCloud() {
     const remoteStore = createProfileStore();
     let hasRemoteData = false;
 
-    const legacySnapshot = await firebase.getDoc(firebase.docRef);
-    if (legacySnapshot.exists()) {
-      const legacyData = legacySnapshot.data() || {};
-      const legacyStore = legacyData.profileStore || legacyData.profile_store;
-      if (legacyStore?.profiles) {
-        mergeRemoteProfilesIntoStore(remoteStore, legacyStore.profiles);
-        remoteStore.groups = mergeGroupData(remoteStore, legacyStore, {
+	    const legacySnapshot = await firebase.getDoc(firebase.docRef);
+	    if (legacySnapshot.exists()) {
+	      const legacyData = legacySnapshot.data() || {};
+	      const legacyStore = legacyData.profileStore || legacyData.profile_store;
+	      if (legacyStore?.profiles) {
+	        console.info("[Unser Dorf village lifecycle] Loaded legacy profile store.", {
+	          path: getFirebaseProfileStoreDocPath(firebase, "shared"),
+	          profileIds: Object.keys(legacyStore.profiles || {}),
+	          familyZMemberIds: normalizeGroupMemberIds(legacyStore.groups?.[DEFAULT_GROUP_ID]?.memberIds || [])
+	        });
+	        mergeRemoteProfilesIntoStore(remoteStore, legacyStore.profiles);
+	        remoteStore.groups = mergeGroupData(remoteStore, legacyStore, {
           ...remoteStore,
           profiles: { ...remoteStore.profiles, ...(legacyStore.profiles || {}) }
         });
@@ -2396,8 +2474,16 @@ async function fetchProfileStoreFromCloud() {
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
       const villageSnapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
       if (!villageSnapshot.exists()) return;
-      const villageData = villageSnapshot.data() || {};
-      mergeRemoteProfilesIntoStore(remoteStore, villageData.profiles || {});
+	      const villageData = villageSnapshot.data() || {};
+	      console.info("[Unser Dorf village lifecycle] Loaded village document.", {
+	        path: getFirebaseVillageDocPath(firebase, groupInfo.id),
+	        groupId: groupInfo.id,
+	        memberIds: normalizeGroupMemberIds(villageData.group?.memberIds || []),
+	        topLevelMemberIds: normalizeGroupMemberIds(villageData.memberIds || []),
+	        profileIds: Object.keys(villageData.profiles || {}),
+	        memberProfileIds: Object.keys(villageData.memberProfiles || {})
+	      });
+	      mergeRemoteProfilesIntoStore(remoteStore, villageData.profiles || {});
       remoteStore.groups[groupInfo.id] = createGroupData(groupInfo, villageData.group || {});
       remoteStore.groups[groupInfo.id].memberIds = normalizeGroupMemberIds([
         ...remoteStore.groups[groupInfo.id].memberIds,
@@ -2411,8 +2497,15 @@ async function fetchProfileStoreFromCloud() {
     const userDocLoaded = userSnapshot.exists();
     let firestoreProfileExists = false;
     if (userSnapshot.exists()) {
-      const userData = userSnapshot.data() || {};
-      firestoreProfileExists = getFirebaseIdentityProfileIds({
+	      const userData = userSnapshot.data() || {};
+	      console.info("[Unser Dorf village lifecycle] Loaded user document.", {
+	        path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid),
+	        uid: firebaseAuthUser.uid,
+	        currentGroup: userData.currentGroup || "",
+	        currentProfile: userData.currentProfile || "",
+	        profileIds: Object.keys(userData.profiles || {})
+	      });
+	      firestoreProfileExists = getFirebaseIdentityProfileIds({
         profiles: userData.profiles || {}
       }, firebaseAuthUser).length > 0;
       mergeRemoteProfilesIntoStore(remoteStore, userData.profiles || {}, { preferIncomingIdentity: true });
@@ -2662,9 +2755,11 @@ async function initializeFirebaseSyncApi() {
     docRef: firestoreModule.doc(db, ...documentPathParts),
     collection: firestoreModule.collection,
     doc: firestoreModule.doc,
-    getDoc: firestoreModule.getDoc,
-    getDocs: firestoreModule.getDocs,
-    deleteDoc: firestoreModule.deleteDoc,
+	    getDoc: firestoreModule.getDoc,
+	    getDocs: firestoreModule.getDocs,
+	    getDocFromServer: firestoreModule.getDocFromServer || firestoreModule.getDoc,
+	    getDocsFromServer: firestoreModule.getDocsFromServer || firestoreModule.getDocs,
+	    deleteDoc: firestoreModule.deleteDoc,
     setDoc: firestoreModule.setDoc,
     serverTimestamp: firestoreModule.serverTimestamp
   };
@@ -3630,25 +3725,95 @@ async function getFirebaseOwnedProfileIdsForDeletion(firebase, user) {
 }
 
 async function deleteLegacySharedProfileStoreReferences(firebase, ownedProfileIds, savedAt) {
-  const snapshot = await firebase.getDoc(firebase.docRef);
-  if (!snapshot.exists()) return;
-  const data = snapshot.data() || {};
-  const legacyStore = data.profileStore || data.profile_store;
-  if (!legacyStore?.profiles) return;
+  const profileIds = normalizeProfileIdList(ownedProfileIds);
+  if (!profileIds.length) return;
+  const collectionSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocsFromServer(getFirebaseProfileStoresCollectionRef(firebase)),
+    {
+      operation: "list legacy profileStores before removing profile references",
+      path: getFirebaseProfileStoresCollectionPath(firebase),
+      removedProfileIds: profileIds
+    }
+  );
+  await Promise.all(collectionSnapshot.docs.map(async (docSnapshot) => {
+    const data = docSnapshot.data() || {};
+    const legacyStore = data.profileStore || data.profile_store;
+    if (!legacyStore?.profiles) return;
+    const { cleanedStore, changed } = removeProfileIdsFromLegacyStore(legacyStore, profileIds);
+    if (!changed) return;
+    const docPath = getFirebaseProfileStoreDocPath(firebase, docSnapshot.id);
+    await writeFirestoreWithDebug(
+      () => firebase.setDoc(firebase.doc(firebase.db, ...firebase.rootPathParts, "profileStores", docSnapshot.id), {
+        profileStore: cleanedStore,
+        updatedAt: firebase.serverTimestamp(),
+        updatedAtIso: savedAt
+      }, { merge: true }),
+      {
+        operation: "remove profile references from legacy profileStore document",
+        path: docPath,
+        removedProfileIds: profileIds
+      }
+    );
+  }));
+}
+
+function removeProfileIdsFromLegacyStore(legacyStore, profileIds) {
+  const removedProfileIds = new Set(normalizeProfileIdList(profileIds));
   const cleanedStore = sanitizeProfileStoreForSync(legacyStore);
-  ownedProfileIds.forEach((profileId) => {
-    delete cleanedStore.profiles[profileId];
+  let changed = false;
+  removedProfileIds.forEach((profileId) => {
+    if (cleanedStore.profiles?.[profileId]) {
+      delete cleanedStore.profiles[profileId];
+      changed = true;
+    }
+    if (cleanedStore.memberProfiles?.[profileId]) {
+      delete cleanedStore.memberProfiles[profileId];
+      changed = true;
+    }
   });
+  if (Array.isArray(cleanedStore.memberIds)) {
+    const nextMemberIds = normalizeGroupMemberIds(cleanedStore.memberIds.filter((profileId) => !removedProfileIds.has(profileId)));
+    changed = changed || nextMemberIds.length !== cleanedStore.memberIds.length;
+    cleanedStore.memberIds = nextMemberIds;
+  }
+  if (Array.isArray(cleanedStore.members)) {
+    const nextMembers = cleanedStore.members.filter((member) => {
+      const memberId = String(member?.profileId || member?.id || member || "");
+      return !removedProfileIds.has(memberId);
+    });
+    changed = changed || nextMembers.length !== cleanedStore.members.length;
+    cleanedStore.members = nextMembers;
+  }
   Object.values(cleanedStore.groups || {}).forEach((group) => {
-    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !ownedProfileIds.includes(profileId)));
+    const currentMemberIds = normalizeGroupMemberIds(group.memberIds || []);
+    const nextMemberIds = currentMemberIds.filter((profileId) => !removedProfileIds.has(profileId));
+    if (nextMemberIds.length !== currentMemberIds.length) changed = true;
+    group.memberIds = normalizeGroupMemberIds(nextMemberIds);
+    removedProfileIds.forEach((profileId) => {
+      if (group.profiles?.[profileId]) {
+        delete group.profiles[profileId];
+        changed = true;
+      }
+      if (group.memberProfiles?.[profileId]) {
+        delete group.memberProfiles[profileId];
+        changed = true;
+      }
+    });
+    if (Array.isArray(group.members)) {
+      const nextMembers = group.members.filter((member) => {
+        const memberId = String(member?.profileId || member?.id || member || "");
+        return !removedProfileIds.has(memberId);
+      });
+      changed = changed || nextMembers.length !== group.members.length;
+      group.members = nextMembers;
+    }
   });
-  if (ownedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
+  if (removedProfileIds.has(cleanedStore.currentProfile)) {
+    cleanedStore.currentProfile = "";
+    changed = true;
+  }
   if (!cleanedStore.groups?.[cleanedStore.currentGroup]) cleanedStore.currentGroup = DEFAULT_GROUP_ID;
-  await firebase.setDoc(firebase.docRef, {
-    profileStore: cleanedStore,
-    updatedAt: firebase.serverTimestamp(),
-    updatedAtIso: savedAt
-  }, { merge: true });
+  return { cleanedStore, changed };
 }
 
 function getFirebaseOwnedProfileIdsForUser(user = firebaseAuthUser) {
@@ -5679,25 +5844,20 @@ async function deleteLegacyProfileStoreReferencesForTarget(firebase, target, sav
       targetUid: target.uid || ""
     }
   );
-  await Promise.all(snapshot.docs.map(async (docSnapshot) => {
-    const data = docSnapshot.data() || {};
-    const legacyStore = data.profileStore || data.profile_store;
-    if (!legacyStore?.profiles) return;
-    const cleanedStore = sanitizeProfileStoreForSync(legacyStore);
-    const removedProfileIds = [];
-    Object.entries(cleanedStore.profiles || {}).forEach(([profileId, profile]) => {
-      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) {
-        delete cleanedStore.profiles[profileId];
-        removedProfileIds.push(profileId);
-      }
-    });
-    if (!removedProfileIds.length) return;
-    Object.values(cleanedStore.groups || {}).forEach((group) => {
-      group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !removedProfileIds.includes(profileId)));
-    });
-    if (removedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
-    const docPath = getFirebaseProfileStoreDocPath(firebase, docSnapshot.id);
-    await writeFirestoreWithDebug(
+	  await Promise.all(snapshot.docs.map(async (docSnapshot) => {
+	    const data = docSnapshot.data() || {};
+	    const legacyStore = data.profileStore || data.profile_store;
+	    if (!legacyStore?.profiles) return;
+	    const removedProfileIds = [];
+	    Object.entries(legacyStore.profiles || {}).forEach(([profileId, profile]) => {
+	      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) {
+	        removedProfileIds.push(profileId);
+	      }
+	    });
+	    if (!removedProfileIds.length) return;
+	    const { cleanedStore } = removeProfileIdsFromLegacyStore(legacyStore, removedProfileIds);
+	    const docPath = getFirebaseProfileStoreDocPath(firebase, docSnapshot.id);
+	    await writeFirestoreWithDebug(
       () => firebase.setDoc(firebase.doc(firebase.db, ...firebase.rootPathParts, "profileStores", docSnapshot.id), {
         profileStore: cleanedStore,
         updatedAt: firebase.serverTimestamp(),
@@ -5774,15 +5934,17 @@ async function verifyDeveloperProfileDeleted(firebase, target) {
       targetUid: target.uid || ""
     }
   );
-  legacySnapshot.docs.forEach((docSnapshot) => {
-    const data = docSnapshot.data() || {};
-    const legacyStore = data.profileStore || data.profile_store;
-    if (!legacyStore?.profiles) return;
-    const matches = Object.entries(legacyStore.profiles)
-      .filter(([profileId, profile]) => doesDeveloperTargetMatchProfile(target, profileId, profile))
-      .map(([profileId]) => profileId);
-    if (matches.length) failures.push(`${getFirebaseProfileStoreDocPath(firebase, docSnapshot.id)} still references ${matches.join(", ")}.`);
-  });
+	  legacySnapshot.docs.forEach((docSnapshot) => {
+	    const data = docSnapshot.data() || {};
+	    const legacyStore = data.profileStore || data.profile_store;
+	    if (!legacyStore?.profiles) return;
+	    const targetProfileIds = new Set(target.profileIds || []);
+	    Object.entries(legacyStore.profiles || {}).forEach(([profileId, profile]) => {
+	      if (doesDeveloperTargetMatchProfile(target, profileId, profile)) targetProfileIds.add(profileId);
+	    });
+	    const matches = findProfileIdsInLegacyStore(legacyStore, targetProfileIds);
+	    if (matches.length) failures.push(`${getFirebaseProfileStoreDocPath(firebase, docSnapshot.id)} still references ${matches.join(", ")}.`);
+	  });
   console.info("[Unser Dorf Developer Tools] Delete profile verification result.", {
     target,
     ok: failures.length === 0,
@@ -5895,20 +6057,46 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
   keepProfile.protectedAccount = true;
 
   const villageRef = getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID);
+  const villagePath = getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID);
+  const beforeCleanupSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(villageRef),
+    {
+      operation: "read Family Z before keep-current cleanup",
+      path: villagePath,
+      keepProfileId: preview.keepProfileId,
+      removedProfileIds: preview.removedMembers.map((member) => member.profileId)
+    }
+  );
+  console.info("[Unser Dorf Family Z cleanup] Village document before cleanup.", {
+    path: villagePath,
+    data: beforeCleanupSnapshot.exists() ? beforeCleanupSnapshot.data() : null
+  });
   const familyZInfo = DEFAULT_GROUPS.find((group) => group.id === DEFAULT_GROUP_ID);
   const group = createGroupData(familyZInfo, {
     ...(familyZ || {}),
     memberIds: [preview.keepProfileId]
   });
   group.memberIds = [preview.keepProfileId];
-  await firebase.setDoc(villageRef, {
+  const cleanedVillagePayload = {
     group,
     profiles: {
       [preview.keepProfileId]: sanitizeProfileStoreForSync(keepProfile)
     },
+    memberProfiles: {
+      [preview.keepProfileId]: sanitizeProfileStoreForSync(keepProfile)
+    },
+    memberIds: [preview.keepProfileId],
     updatedAt: firebase.serverTimestamp(),
     updatedAtIso: savedAt
+  };
+  console.info("[Unser Dorf Family Z cleanup] Writing cleaned Family Z payload.", {
+    path: villagePath,
+    payload: {
+      ...cleanedVillagePayload,
+      updatedAt: "[serverTimestamp]"
+    }
   });
+  await firebase.setDoc(villageRef, cleanedVillagePayload);
 
   userProfiles[preview.keepProfileId] = keepProfile;
   await firebase.setDoc(userRef, {
@@ -5942,7 +6130,25 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
   currentProfileId = preview.keepProfileId;
   saveProfileStore();
 
-  const verification = await verifyFamilyZCleanupResult(firebase, preview.keepProfileId, preview.keepUid);
+  const afterCleanupSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(villageRef),
+    {
+      operation: "read Family Z immediately after keep-current cleanup",
+      path: villagePath,
+      keepProfileId: preview.keepProfileId
+    }
+  );
+  console.info("[Unser Dorf Family Z cleanup] Village document after cleanup write.", {
+    path: villagePath,
+    data: afterCleanupSnapshot.exists() ? afterCleanupSnapshot.data() : null
+  });
+
+  const verification = await verifyFamilyZCleanupResult(
+    firebase,
+    preview.keepProfileId,
+    preview.keepUid,
+    preview.removedMembers.map((member) => member.profileId)
+  );
   await renderDeveloperToolsPage();
   refreshVillageMembershipUi();
   if (!verification.ok) {
@@ -5957,18 +6163,18 @@ async function cleanupFamilyZKeepOnlyCurrentUser() {
   }
 }
 
-async function verifyFamilyZCleanupResult(firebase, keepProfileId, keepUid) {
+async function verifyFamilyZCleanupResult(firebase, keepProfileId, keepUid, removedProfileIds = []) {
   const warnings = [];
   const [userSnapshot, villageSnapshot] = await Promise.all([
     readFirestoreWithDebug(
-      () => firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
+      () => firebase.getDocsFromServer(getFirebaseUsersCollectionRef(firebase)),
       {
         operation: "verify developer users collection after Family Z cleanup",
         path: getFirebaseUsersCollectionPath(firebase)
       }
     ),
     readFirestoreWithDebug(
-      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID)),
+      () => firebase.getDocFromServer(getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID)),
       {
         operation: "verify Family Z village document after cleanup",
         path: getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID)
@@ -5982,15 +6188,18 @@ async function verifyFamilyZCleanupResult(firebase, keepProfileId, keepUid) {
   const villageData = villageSnapshot.exists() ? villageSnapshot.data() || {} : {};
   const group = createGroupData(DEFAULT_GROUPS.find((item) => item.id === DEFAULT_GROUP_ID), villageData.group || {});
   const profiles = villageData.profiles || {};
+  const memberProfiles = villageData.memberProfiles || {};
   const memberIds = normalizeProfileIdList(group.memberIds || []);
+  const topLevelMemberIds = normalizeProfileIdList(villageData.memberIds || []);
   const profileIds = normalizeProfileIdList(Object.keys(profiles));
-  const combinedMemberIds = normalizeProfileIdList([...memberIds, ...profileIds]);
+  const memberProfileIds = normalizeProfileIdList(Object.keys(memberProfiles));
+  const combinedMemberIds = normalizeProfileIdList([...memberIds, ...topLevelMemberIds, ...profileIds, ...memberProfileIds]);
   const ownerUids = combinedMemberIds
-    .map((profileId) => String(profiles[profileId]?.ownerUid || "").trim())
+    .map((profileId) => String((profiles[profileId] || memberProfiles[profileId])?.ownerUid || "").trim())
     .filter(Boolean);
   const duplicateUidCount = ownerUids.length - new Set(ownerUids).size;
   const invalidMembers = combinedMemberIds.filter((profileId) => {
-    const profile = profiles[profileId];
+    const profile = profiles[profileId] || memberProfiles[profileId];
     const ownerUid = String(profile?.ownerUid || "").trim();
     return !profile
       || !validUserIndex.validProfileIds.has(profileId)
@@ -6000,17 +6209,78 @@ async function verifyFamilyZCleanupResult(firebase, keepProfileId, keepUid) {
 
   if (!villageSnapshot.exists()) warnings.push("Family Z village document was not found.");
   if (memberIds.length !== 1 || memberIds[0] !== keepProfileId) warnings.push("memberIds does not contain only the current Mineko profile.");
+  if (topLevelMemberIds.length && (topLevelMemberIds.length !== 1 || topLevelMemberIds[0] !== keepProfileId)) warnings.push("Top-level memberIds does not contain only the current Mineko profile.");
   if (profileIds.length !== 1 || profileIds[0] !== keepProfileId) warnings.push("Village profiles does not contain only the current Mineko profile.");
+  if (memberProfileIds.length && (memberProfileIds.length !== 1 || memberProfileIds[0] !== keepProfileId)) warnings.push("Village memberProfiles does not contain only the current Mineko profile.");
   if (!profiles[keepProfileId]) warnings.push("The current Mineko profile is missing from Family Z profiles.");
   if (String(profiles[keepProfileId]?.ownerUid || "") !== keepUid) warnings.push("The remaining Family Z member UID does not match the current Firebase UID.");
   if (duplicateUidCount > 0) warnings.push("Duplicate member UIDs remain in Family Z.");
   if (invalidMembers.length) warnings.push(`Invalid member references remain: ${invalidMembers.join(", ")}.`);
 
+  const removedSet = new Set(normalizeProfileIdList(removedProfileIds));
+  const removedStillInVillage = combinedMemberIds.filter((profileId) => removedSet.has(profileId));
+  if (removedStillInVillage.length) warnings.push(`Removed members still appear in Family Z: ${removedStillInVillage.join(", ")}.`);
+
+  const legacySnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocsFromServer(getFirebaseProfileStoresCollectionRef(firebase)),
+    {
+      operation: "verify legacy profileStores after Family Z cleanup",
+      path: getFirebaseProfileStoresCollectionPath(firebase),
+      removedProfileIds: [...removedSet]
+    }
+  );
+  legacySnapshot.docs.forEach((docSnapshot) => {
+    const data = docSnapshot.data() || {};
+    const legacyStore = data.profileStore || data.profile_store;
+    if (!legacyStore?.profiles) return;
+    const staleReferences = findProfileIdsInLegacyStore(legacyStore, removedSet);
+    if (staleReferences.length) {
+      warnings.push(`${getFirebaseProfileStoreDocPath(firebase, docSnapshot.id)} still references ${staleReferences.join(", ")}.`);
+    }
+  });
+
+  console.info("[Unser Dorf Family Z cleanup] Verification result.", {
+    path: getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID),
+    serverMemberCount: combinedMemberIds.length,
+    renderedMemberCount: getCurrentGroupProfiles(profileStore).length,
+    memberIds,
+    topLevelMemberIds,
+    profileIds,
+    memberProfileIds,
+    removedProfileIds: [...removedSet],
+    warnings
+  });
   return {
     ok: warnings.length === 0,
     warnings,
     memberCount: combinedMemberIds.length
   };
+}
+
+function findProfileIdsInLegacyStore(legacyStore, profileIdSet) {
+  const matches = new Set();
+  if (!profileIdSet?.size) return [];
+  Object.keys(legacyStore.profiles || {}).forEach((profileId) => {
+    if (profileIdSet.has(profileId)) matches.add(profileId);
+  });
+  Object.keys(legacyStore.memberProfiles || {}).forEach((profileId) => {
+    if (profileIdSet.has(profileId)) matches.add(profileId);
+  });
+  normalizeProfileIdList(legacyStore.memberIds || []).forEach((profileId) => {
+    if (profileIdSet.has(profileId)) matches.add(profileId);
+  });
+  Object.values(legacyStore.groups || {}).forEach((group) => {
+    Object.keys(group.profiles || {}).forEach((profileId) => {
+      if (profileIdSet.has(profileId)) matches.add(profileId);
+    });
+    Object.keys(group.memberProfiles || {}).forEach((profileId) => {
+      if (profileIdSet.has(profileId)) matches.add(profileId);
+    });
+    normalizeProfileIdList(group.memberIds || []).forEach((profileId) => {
+      if (profileIdSet.has(profileId)) matches.add(profileId);
+    });
+  });
+  return [...matches];
 }
 
 function refreshVillageMembershipUi() {
