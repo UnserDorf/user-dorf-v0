@@ -5340,7 +5340,8 @@ function confirmDeleteFirestoreProfile(target) {
       createDeveloperDefinitionList([
         ["Name", target.displayName || "Not available"],
         ["Email", target.email || "Not available"],
-        ["UID", target.uid || "No Auth UID found"]
+        ["UID", target.uid || "No Auth UID found"],
+        ["Village", target.villageName || target.villageId || "No village"]
       ]),
       createTextElement("p", "", "This will permanently remove the Firestore profile, learning progress, and village references."),
       createTextElement("p", "", "The Firebase Authentication account, if one still exists, must be deleted separately."),
