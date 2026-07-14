@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=221">
+    <link rel="stylesheet" href="style.css?v=223">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -334,25 +334,21 @@
           </button>
         </div>
 
-        <section class="dashboard-section dashboard-learning-panel" aria-label="Continue Learning">
-          <div class="section-heading simple">
-            <h3>Continue Learning</h3>
-          </div>
-          <div class="dashboard-learning-grid">
-            <article class="dashboard-learning-card">
-              <div>
-                <h3>📇 Flashcards</h3>
-                <p>Learn new words at your own pace.</p>
-              </div>
-              <button class="primary-button" type="button" data-dashboard-action="flashcards">Start Studying</button>
-            </article>
-            <article class="dashboard-learning-card">
-              <div>
-                <h3>🏆 Challenges</h3>
-                <p>Test your knowledge to earn coins and unlock rewards.</p>
-              </div>
-              <button class="primary-button" type="button" data-dashboard-action="challenges">Earn Coins</button>
-            </article>
+        <section class="dashboard-section dashboard-learning-panel" aria-label="Learn German">
+          <article class="dashboard-learning-journey">
+            <div class="dashboard-learning-copy">
+              <h3>📚 Learn German</h3>
+              <p>Study new words, practise what you've learned, and help your village grow.</p>
+            </div>
+            <button class="primary-button dashboard-continue-button" type="button" data-dashboard-action="continue-learning">▶ Continue Learning</button>
+          </article>
+          <div class="dashboard-learning-shortcuts" aria-label="Learning shortcuts">
+            <p>Or jump to:</p>
+            <div>
+              <button class="ghost-button" type="button" data-dashboard-action="flashcards">📇 Flashcards</button>
+              <button class="ghost-button" type="button" data-dashboard-action="vocabulary-quiz">📝 Vocabulary Quiz</button>
+              <button class="ghost-button" type="button" data-dashboard-action="article-quiz">🔤 Article Quiz</button>
+            </div>
           </div>
         </section>
 
@@ -951,6 +947,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=222"></script>
+    <script type="module" src="script.js?v=223"></script>
   </body>
 </html>

@@ -763,6 +763,7 @@ let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
 let selectedChallengeCategory = "nouns";
 let pendingChallengeAction = "";
+let guidedLearningActive = false;
 let pendingFlashcardResumeKey = "";
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
@@ -8233,12 +8234,28 @@ function handleDashboardAction(action) {
     showDashboard();
     return;
   }
+  if (action === "continue-learning") {
+    continueGuidedLearning();
+    return;
+  }
   if (action === "flashcards") {
+    guidedLearningActive = false;
     showFlashcardsEntry();
     return;
   }
   if (action === "challenges") {
+    guidedLearningActive = false;
     showChallengesEntry();
+    return;
+  }
+  if (action === "vocabulary-quiz") {
+    guidedLearningActive = false;
+    showDirectChallenge("vocabulary-review");
+    return;
+  }
+  if (action === "article-quiz") {
+    guidedLearningActive = false;
+    showDirectChallenge("articles");
     return;
   }
   if (action === "village-members") {
@@ -8281,7 +8298,47 @@ function handleDashboardAction(action) {
   openStudyRoute(route);
 }
 
+function continueGuidedLearning() {
+  guidedLearningActive = true;
+  const nextStep = getNextGuidedLearningStep();
+  if (nextStep === "flashcards") {
+    showFlashcardsEntry();
+    return;
+  }
+  if (nextStep === "vocabulary") {
+    showDirectChallenge("vocabulary-review");
+    return;
+  }
+  if (nextStep === "articles") {
+    showDirectChallenge("articles");
+    return;
+  }
+  guidedLearningActive = false;
+  showDashboard();
+}
+
+function getNextGuidedLearningStep(profile = getCurrentProfile()) {
+  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
+  const flashcardSessions = Object.values(normalizeFlashcardSessions(profile?.flashcardSessions));
+  const hasCompletedFlashcards = flashcardSessions.some((session) => session.completed);
+  const hasActiveFlashcards = activeStudySet.wordIds.length
+    || flashcardSessions.some((session) => session.deckIds.length && !session.completed);
+  const hasVocabularyPractice = Object.keys(normalizeVocabularyProgress(profile?.vocabularyProgress)).length > 0;
+  const hasArticlePractice = Object.keys(normalizeArticleProgress(profile?.articleProgress)).length > 0;
+  if (hasActiveFlashcards && !hasCompletedFlashcards) return "flashcards";
+  if (!hasCompletedFlashcards) return "flashcards";
+  if (!hasVocabularyPractice) return "vocabulary";
+  if (!hasArticlePractice) return "articles";
+  return "dashboard";
+}
+
+function showDirectChallenge(action) {
+  selectedLearningPath = "challenges";
+  showChallengeReady(action);
+}
+
 function showChallengesEntry() {
+  guidedLearningActive = false;
   showLevelSelection("challenges");
 }
 
@@ -8772,6 +8829,11 @@ function showFlashcardCompletion() {
   const profile = getFlashcardSessionProfile();
   const session = profile?.flashcardSessions?.[getFlashcardSessionKey()];
   els.flashcardCompletionCount.textContent = normalizeCounter(session?.studiedIds?.length);
+  if (els.flashcardContinueStudying) {
+    els.flashcardContinueStudying.textContent = guidedLearningActive
+      ? "Continue to Vocabulary Quiz"
+      : "Continue";
+  }
   currentView = "flashcard-complete";
   els.learningFlashcard.classList.add("hidden");
   els.flashcardCompletionCard.classList.remove("hidden");
@@ -9066,6 +9128,11 @@ function showChallengeResults() {
   els.challengeResultAccuracy.textContent = `${accuracy}%`;
   els.challengeResultCorrect.textContent = `${correct} / ${CHALLENGE_QUESTION_COUNT}`;
   els.challengeResultCoins.textContent = `+${challengeSession.coinsEarned}`;
+  if (els.challengeResultsContinue) {
+    els.challengeResultsContinue.textContent = guidedLearningActive && challengeSession.type === "vocabulary"
+      ? "Continue to Article Quiz"
+      : "Continue";
+  }
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -9583,7 +9650,14 @@ function bindEvents() {
     moveNounVerbCard(1);
   });
   els.challengeResultsContinue.addEventListener("click", () => {
+    const completedType = challengeSession.type;
     challengeSession = createEmptyChallengeSession();
+    if (guidedLearningActive && completedType === "vocabulary") {
+      showDirectChallenge("articles");
+      showNextPendingCelebration();
+      return;
+    }
+    guidedLearningActive = false;
     showDashboard();
     showNextPendingCelebration();
   });
@@ -9605,6 +9679,10 @@ function bindEvents() {
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
+    if (guidedLearningActive) {
+      showDirectChallenge("vocabulary-review");
+      return;
+    }
     openFlashcardDeck(flashcardStudyLevel, flashcardStudyCategory, { forceNew: true });
   });
   els.flashcardReturnDashboard.addEventListener("click", showDashboard);
