@@ -4486,17 +4486,27 @@ select,
   -webkit-overflow-scrolling: touch;
 }
 
+.clean-quiz-mode .noun-verb-card {
+  position: relative;
+  isolation: isolate;
+  background: #fffdf8;
+  border-color: rgba(190, 177, 153, 0.42);
+}
+
 .challenge-village-banner {
   display: none;
 }
 
 .clean-quiz-mode .challenge-village-banner {
-  min-height: clamp(78px, 15vh, 126px);
+  min-height: clamp(64px, 12vh, 104px);
+  max-height: 118px;
   border: 1px solid rgba(103, 153, 153, 0.24);
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(223, 240, 235, 0.82), rgba(255, 250, 241, 0.72));
   overflow: hidden;
   display: block;
+  position: relative;
+  z-index: 0;
 }
 
 .clean-quiz-mode .challenge-village-banner img {
@@ -4553,6 +4563,12 @@ select,
 .clean-quiz-mode .question-area {
   align-self: center;
   gap: 8px;
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.96);
+  border: 1px solid rgba(190, 177, 153, 0.22);
+  padding: clamp(14px, 2.4vw, 22px);
+  position: relative;
+  z-index: 1;
 }
 
 .clean-article-practice #promptLabel,
@@ -4576,6 +4592,8 @@ select,
   max-width: 620px;
   width: 100%;
   justify-self: center;
+  position: relative;
+  z-index: 1;
 }
 
 .clean-article-practice .article-guess button,
@@ -4600,12 +4618,16 @@ select,
 .clean-quiz-mode .article-quiz-result.success {
   border-color: rgba(40, 111, 115, 0.24);
   background: rgba(222, 240, 235, 0.72);
+  position: relative;
+  z-index: 1;
 }
 
 .clean-quiz-mode .noun-verb-result.error,
 .clean-quiz-mode .article-quiz-result.error {
   border-color: rgba(173, 111, 82, 0.24);
   background: rgba(250, 232, 220, 0.72);
+  position: relative;
+  z-index: 1;
 }
 
 .flashcard,
@@ -11295,6 +11317,42 @@ body:has(#learnGermanScreen:not(.hidden)) {
   min-height: min(620px, calc(100vh - 72px));
 }
 
+/* Vocabulary/Article Review readability: keep artwork as a banner, not behind the answers. */
+.clean-quiz-mode .noun-verb-card {
+  overflow-y: auto;
+  background: #fffdf8;
+  isolation: isolate;
+}
+
+.clean-quiz-mode .noun-verb-card .challenge-village-banner {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: clamp(64px, 12vh, 104px);
+  max-height: 118px;
+  border: 1px solid rgba(103, 153, 153, 0.24);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(223, 240, 235, 0.82), rgba(255, 250, 241, 0.72));
+  opacity: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.clean-quiz-mode .noun-verb-card .challenge-village-banner::after {
+  background: rgba(255, 250, 241, 0.16);
+}
+
+.clean-quiz-mode .noun-verb-card .challenge-village-banner img {
+  height: 100%;
+  opacity: 0.78;
+  object-fit: cover;
+}
+
+.clean-quiz-mode .noun-verb-card .question-area {
+  width: min(100%, 620px);
+  background: rgba(255, 253, 248, 0.98);
+}
+
 .article-quiz-mode .article-quiz-card {
   isolation: isolate;
 }
@@ -12402,6 +12460,13 @@ body:has(#developerToolsScreen:not(.hidden)) {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
+}
+
+.learn-complete-title {
+  flex-basis: 100%;
+  color: var(--green);
+  font-size: 1rem;
+  font-weight: 850;
 }
 
 .learn-recommendation-actions .primary-button,

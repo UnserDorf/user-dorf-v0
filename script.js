@@ -23,6 +23,8 @@ const ARTICLE_STORAGE_KEY = "goethe-b1-article-quiz-progress-v1";
 const CHALLENGE_QUESTION_COUNT = 10;
 const FLASHCARD_SESSION_SIZE = 25;
 const LEARN_GERMAN_GOAL_STORAGE_KEY = "unserDorfLearnGermanWordGoal";
+const LEARN_GERMAN_LEVEL_STORAGE_KEY = "unserDorfLearnGermanLevel";
+const LEARN_GERMAN_CATEGORY_STORAGE_KEY = "unserDorfLearnGermanCategory";
 const LEARN_GERMAN_DEFAULT_GOAL = 20;
 const LEARN_GERMAN_MIN_GOAL = 5;
 const LEARN_GERMAN_MAX_GOAL = 50;
@@ -502,6 +504,7 @@ const els = {
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
   levelSelectionBack: document.querySelector("#levelSelectionBack"),
   levelSelectionContext: document.querySelector("#levelSelectionContext"),
+  flashcardSetupGoal: document.querySelector("#flashcardSetupGoal"),
   flashcardResumeScreen: document.querySelector("#flashcardResumeScreen"),
   flashcardResumeBack: document.querySelector("#flashcardResumeBack"),
   flashcardResumeDeck: document.querySelector("#flashcardResumeDeck"),
@@ -8451,7 +8454,22 @@ function chooseLevelFromLearningIntro() {
   markLearningIntroSeen();
   learnGermanReturnActive = true;
   guidedLearningActive = true;
-  showFlashcardsEntry();
+  showFlashcardsEntry({ guided: false });
+}
+
+function getStoredLearnGermanLevel() {
+  const level = localStorage.getItem(LEARN_GERMAN_LEVEL_STORAGE_KEY);
+  return LEARNING_LEVELS.includes(level) ? level : "";
+}
+
+function getStoredLearnGermanCategory() {
+  const category = localStorage.getItem(LEARN_GERMAN_CATEGORY_STORAGE_KEY);
+  return ["nouns", "verbs", "other"].includes(category) ? category : "";
+}
+
+function rememberLearnGermanChoices(level = selectedLearningLevel, category = flashcardStudyCategory) {
+  if (LEARNING_LEVELS.includes(level)) localStorage.setItem(LEARN_GERMAN_LEVEL_STORAGE_KEY, level);
+  if (["nouns", "verbs", "other"].includes(category)) localStorage.setItem(LEARN_GERMAN_CATEGORY_STORAGE_KEY, category);
 }
 
 function getLearnGermanGoal() {
@@ -8497,6 +8515,7 @@ function renderLearnGermanPage() {
   if (!els.learnRecommendationActions) return;
 
   if (recommendation.action === "complete") {
+    const completeTitle = createTextElement("strong", "learn-complete-title", "🎉 Study set complete!");
     const newSetButton = createTextElement("button", "ghost-button", "Start a New Study Set");
     newSetButton.type = "button";
     newSetButton.dataset.learnAction = "new-flashcards";
@@ -8504,7 +8523,7 @@ function renderLearnGermanPage() {
     dashboardButton.type = "button";
     dashboardButton.dataset.learnAction = "dashboard";
     newSetButton.className = "primary-button";
-    els.learnRecommendationActions.replaceChildren(newSetButton, dashboardButton);
+    els.learnRecommendationActions.replaceChildren(completeTitle, newSetButton, dashboardButton);
     return;
   }
 
@@ -8527,7 +8546,8 @@ function renderLearnGermanProgress(recommendation) {
   recommendation.pathSteps.forEach((step, index) => {
     const item = document.createElement("div");
     item.className = `learn-path-step ${step.status}`;
-    const label = createTextElement("span", "learn-path-label", `${step.label}${step.status === "complete" ? " ✓" : ""}`);
+    const marker = step.status === "complete" ? "✓ " : step.status === "future" ? "○ " : "";
+    const label = createTextElement("span", "learn-path-label", `${marker}${step.label}`);
     item.append(label);
     if (step.status === "current") {
       item.append(createTextElement("strong", "learn-path-next", "NEXT"));
@@ -8546,10 +8566,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
     const goal = getLearnGermanGoal();
     return {
       action: "flashcards",
-      eyebrow: "YOUR LEARNING PATH",
+      eyebrow: "Today's Progress",
       title: getLearnGermanContextLine(state, goal),
       meta: "Choose a level and start a new set of words.",
-      buttonLabel: "▶ Start Flashcards",
+      buttonLabel: "▶ Start Learning",
       showGoal: true,
       hasStudySet: false,
       pathSteps: getLearnGermanPathSteps("flashcards", state)
@@ -8558,7 +8578,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   if (!state.vocabularyComplete) {
     return {
       action: "vocabulary-review",
-      eyebrow: "YOUR LEARNING PATH",
+      eyebrow: "Today's Progress",
       title: getLearnGermanContextLine(state),
       meta: `You studied ${state.studySet.wordIds.length} ${state.studySet.wordIds.length === 1 ? "word" : "words"}. Now check what you remember.`,
       buttonLabel: "▶ Continue to Vocabulary Review",
@@ -8567,10 +8587,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
       pathSteps: getLearnGermanPathSteps("vocabulary-review", state)
     };
   }
-  if (state.nounCount > 0 && !state.articleComplete) {
+  if (!state.articleComplete) {
     return {
       action: "article-review",
-      eyebrow: "YOUR LEARNING PATH",
+      eyebrow: "Today's Progress",
       title: getLearnGermanContextLine(state),
       meta: "Now practise der, die, and das for the nouns in your study set.",
       buttonLabel: "▶ Continue to Article Review",
@@ -8581,7 +8601,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   }
   return {
     action: "complete",
-    eyebrow: "YOUR LEARNING PATH",
+    eyebrow: "Today's Progress",
     title: getLearnGermanContextLine(state),
     meta: "You completed this study set. Ready to learn more words?",
     buttonLabel: "Start a New Study Set",
@@ -8654,7 +8674,7 @@ function handleLearnGermanAction(action, options = {}) {
       return;
     }
     if (options.guided) markLearningIntroSeen();
-    showFlashcardsEntry();
+    showFlashcardsEntry({ guided: Boolean(options.guided) });
     return;
   }
   if (action === "vocabulary-review") {
@@ -8743,12 +8763,20 @@ function showChallengesEntry() {
   showLevelSelection("challenges");
 }
 
-function showFlashcardsEntry() {
+function showFlashcardsEntry(options = {}) {
   const resumable = getMostRecentFlashcardSession();
   if (resumable) {
     selectedLearningLevel = resumable.level;
     flashcardStudyLevel = resumable.level;
     flashcardStudyCategory = resumable.category;
+  } else {
+    selectedLearningLevel = getStoredLearnGermanLevel() || selectedLearningLevel;
+    flashcardStudyLevel = selectedLearningLevel;
+    flashcardStudyCategory = getStoredLearnGermanCategory() || flashcardStudyCategory;
+  }
+  if (options.guided && !shouldShowLearningIntro()) {
+    showFlashcardSetup();
+    return;
   }
   showLevelSelection("flashcards");
 }
@@ -8779,6 +8807,7 @@ function getMostRecentFlashcardSession(level = "") {
 
 function getPreferredFlashcardCategoryForLevel(level) {
   return getMostRecentFlashcardSession(level)?.category
+    || getStoredLearnGermanCategory()
     || (flashcardStudyLevel === level ? flashcardStudyCategory : "")
     || "nouns";
 }
@@ -8867,6 +8896,7 @@ function showLevelSelection(path) {
 function chooseLearningLevel(level) {
   if (!["A1", "A2", "B1"].includes(level)) return;
   selectedLearningLevel = level;
+  rememberLearnGermanChoices(selectedLearningLevel, getStoredLearnGermanCategory() || flashcardStudyCategory);
   if (selectedLearningPath === "flashcards") {
     showFlashcardSetup();
     return;
@@ -8915,6 +8945,7 @@ function showFlashcardSetup() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   els.flashcardSetupLevel.textContent = selectedLearningLevel;
+  if (els.flashcardSetupGoal) els.flashcardSetupGoal.textContent = `Today's goal: ${getLearnGermanGoal()} words`;
   els.flashcardSetupForm.querySelectorAll('input[name="flashcardCategory"]').forEach((input) => {
     input.checked = input.value === flashcardStudyCategory;
   });
@@ -8923,7 +8954,9 @@ function showFlashcardSetup() {
 
 function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
-  openFlashcardDeck(selectedLearningLevel, categoryInput?.value || "nouns", { forceNew: true });
+  const category = categoryInput?.value || "nouns";
+  rememberLearnGermanChoices(selectedLearningLevel, category);
+  openFlashcardDeck(selectedLearningLevel, category, { forceNew: true });
 }
 
 function getFlashcardLevel(card) {
