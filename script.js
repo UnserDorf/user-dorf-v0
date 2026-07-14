@@ -107,6 +107,7 @@ const ONBOARDING_PAGES = [
 ];
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
+const INTERNAL_BUILD_ID = "admin-profile-cleanup-2026-07-14";
 const FIREBASE_SYNC_DEFAULT_ROOT_PATH = "unserDorf/v0Testing";
 const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/shared";
 const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -3718,6 +3719,25 @@ function saveSettings() {
   saveProfileStore();
 }
 
+function isLegacyStudyViewActive() {
+  return ["study", "noun-verb", "meaning-match", "prepositions", "vocabulary-review"].includes(currentView);
+}
+
+function hideLegacyStudyUi() {
+  els.controlPanel?.classList.add("hidden");
+  els.searchPanel?.classList.add("hidden");
+  els.statsGrid?.classList.add("hidden");
+  els.studyStage?.classList.add("hidden");
+  els.nounVerbStage?.classList.add("hidden");
+  els.actionBar?.classList.add("hidden");
+  els.answerPanel?.classList.add("hidden");
+  els.ratingButtons?.classList.add("hidden");
+  els.articleGuess?.classList.add("hidden");
+  els.articleQuiz?.classList.add("hidden");
+  els.articleQuizResult?.classList.add("hidden");
+  els.articleQuizNext?.classList.add("hidden");
+}
+
 function showDashboard() {
   discardIncompleteChallengeSession();
   currentView = "dashboard";
@@ -3742,12 +3762,7 @@ function showDashboard() {
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
-  els.controlPanel.classList.add("hidden");
-  els.searchPanel.classList.add("hidden");
-  els.statsGrid.classList.add("hidden");
-  els.studyStage.classList.add("hidden");
-  els.nounVerbStage.classList.add("hidden");
-  els.actionBar.classList.add("hidden");
+  hideLegacyStudyUi();
   scrollPageToTop(els.dashboardScreen);
 }
 
@@ -3787,16 +3802,7 @@ function hideAuthenticatedAppViews() {
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
-  els.controlPanel.classList.add("hidden");
-  els.searchPanel.classList.add("hidden");
-  els.statsGrid.classList.add("hidden");
-  els.studyStage.classList.add("hidden");
-  els.nounVerbStage.classList.add("hidden");
-  els.actionBar.classList.add("hidden");
-  els.answerPanel?.classList.add("hidden");
-  els.showAnswer?.classList.add("hidden");
-  els.previousCard?.classList.add("hidden");
-  els.nextCard?.classList.add("hidden");
+  hideLegacyStudyUi();
 }
 
 function resetLoggedOutTransientUi() {
@@ -4408,6 +4414,7 @@ function showDeveloperTools() {
   currentView = "developer-tools";
   closeSettingsMenu();
   hideAuthenticatedAppViews();
+  hideLegacyStudyUi();
   els.profileScreen?.classList.add("hidden");
   els.appShell?.classList.remove("locked", "landing-mode", "onboarding-mode", "clean-article-practice", "clean-quiz-mode", "article-quiz-mode", "meaning-match-mode");
   els.developerToolsScreen?.classList.remove("hidden");
@@ -4859,6 +4866,7 @@ function createDeveloperDiagnosticsSection(data) {
   const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
   const currentVillageId = currentUser?.villageId || currentProfile.villageId || currentGroupId || "";
   const diagnostics = {
+    build: INTERNAL_BUILD_ID,
     firebaseProjectId: firebaseConfig.projectId || "Not configured",
     currentUid: firebaseAuthUser?.uid || "Not signed in",
     email: firebaseAuthUser?.email || "Not available",
@@ -8714,9 +8722,19 @@ function bindEvents() {
     openSearchResult(button.dataset.cardId);
   });
 
-  els.showAnswer.addEventListener("click", revealAnswer);
+  els.showAnswer.addEventListener("click", () => {
+    if (!isLegacyStudyViewActive()) {
+      hideLegacyStudyUi();
+      return;
+    }
+    revealAnswer();
+  });
 
   els.previousCard.addEventListener("click", () => {
+    if (!isLegacyStudyViewActive()) {
+      hideLegacyStudyUi();
+      return;
+    }
     if (currentView === "noun-verb") {
       moveNounVerbCard(-1);
       return;
@@ -8736,6 +8754,10 @@ function bindEvents() {
     moveCard(-1);
   });
   els.nextCard.addEventListener("click", () => {
+    if (!isLegacyStudyViewActive()) {
+      hideLegacyStudyUi();
+      return;
+    }
     if (currentView === "noun-verb") {
       moveNounVerbCard(1);
       return;
@@ -9328,6 +9350,10 @@ function escapeRegExp(value) {
 }
 
 function renderCard() {
+  if (!isLegacyStudyViewActive()) {
+    hideLegacyStudyUi();
+    return;
+  }
   const card = visibleCards[currentIndex];
   const mode = els.modeSelect.value;
   const modeText = getModeText(mode);
