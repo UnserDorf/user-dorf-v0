@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=232">
+    <link rel="stylesheet" href="style.css?v=233">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -555,6 +555,9 @@
             <strong>Flashcards</strong>
             <span id="learningFlashcardCounter">Card 1 of 25</span>
           </div>
+          <div class="learning-flashcard-progress" aria-hidden="true">
+            <span id="learningFlashcardProgressBar"></span>
+          </div>
           <div class="learning-flashcard-content">
             <button class="eyebrow learning-deck-selector-button" id="learningFlashcardSelection" type="button" aria-expanded="false" aria-label="Choose study deck">A1 • Nouns ▼</button>
             <div class="learning-deck-selector-panel hidden" id="learningDeckSelectorPanel" aria-label="Choose study deck"></div>
@@ -998,6 +1001,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=232"></script>
+    <script type="module" src="script.js?v=233"></script>
   </body>
 </html>

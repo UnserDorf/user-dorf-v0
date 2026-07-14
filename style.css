@@ -2468,7 +2468,7 @@ h1 {
 .learning-flashcard {
   min-height: min(720px, calc(100dvh - 130px));
   display: grid;
-  grid-template-rows: auto minmax(320px, 1fr) auto auto auto;
+  grid-template-rows: auto auto minmax(320px, 1fr) auto auto auto;
   gap: clamp(14px, 2.2vw, 22px);
 }
 
@@ -2490,6 +2490,22 @@ h1 {
 .learning-flashcard-meta span {
   justify-self: end;
   font-size: 0.86rem;
+}
+
+.learning-flashcard-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(222, 213, 196, 0.58);
+}
+
+.learning-flashcard-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+  transition: width 180ms ease;
 }
 
 .learning-flashcard-content {

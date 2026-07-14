@@ -519,6 +519,7 @@ const els = {
   learningFlashcard: document.querySelector("#learningFlashcard"),
   learningFlashcardsBack: document.querySelector("#learningFlashcardsBack"),
   learningFlashcardCounter: document.querySelector("#learningFlashcardCounter"),
+  learningFlashcardProgressBar: document.querySelector("#learningFlashcardProgressBar"),
   learningFlashcardSelection: document.querySelector("#learningFlashcardSelection"),
   learningDeckSelectorPanel: document.querySelector("#learningDeckSelectorPanel"),
   learningFlashcardGerman: document.querySelector("#learningFlashcardGerman"),
@@ -9081,7 +9082,8 @@ function loadOrCreateFlashcardSession(forceNew = false) {
   const key = getFlashcardSessionKey();
   const saved = profile?.flashcardSessions?.[key];
   const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
-  const canResume = !forceNew && savedCards.length && !saved.completed;
+  const goalSize = Math.min(getLearnGermanGoal(), availableCards.length);
+  const canResume = !forceNew && savedCards.length === goalSize && !saved.completed;
 
   if (canResume) {
     flashcardStudyCards = savedCards;
@@ -9191,6 +9193,12 @@ function renderLearningFlashcard() {
   els.learningFlashcardCounter.textContent = hasCard
     ? `Card ${flashcardStudyIndex + 1} of ${flashcardStudyCards.length}`
     : "No cards";
+  if (els.learningFlashcardProgressBar) {
+    const progressPercent = hasCard && flashcardStudyCards.length
+      ? ((flashcardStudyIndex + 1) / flashcardStudyCards.length) * 100
+      : 0;
+    els.learningFlashcardProgressBar.style.width = `${Math.min(Math.max(progressPercent, 0), 100)}%`;
+  }
   if (!card) {
     closeLearningDeckSelector();
     return;
@@ -9294,9 +9302,7 @@ function showFlashcardCompletion() {
   const session = profile?.flashcardSessions?.[getFlashcardSessionKey()];
   els.flashcardCompletionCount.textContent = normalizeCounter(session?.studiedIds?.length);
   if (els.flashcardContinueStudying) {
-    els.flashcardContinueStudying.textContent = guidedLearningActive
-      ? "Continue to Learn German"
-      : "Continue";
+    els.flashcardContinueStudying.textContent = "▶ Continue to Vocabulary Review";
   }
   currentView = "flashcard-complete";
   els.learningFlashcard.classList.add("hidden");
@@ -10168,11 +10174,10 @@ function bindEvents() {
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
-    if (guidedLearningActive) {
-      showLearnGermanPage();
-      return;
-    }
-    openFlashcardDeck(flashcardStudyLevel, flashcardStudyCategory, { forceNew: true });
+    guidedLearningActive = true;
+    learnGermanReturnActive = true;
+    prepareStudySetReviewContext("vocabulary");
+    showDirectChallenge("vocabulary-review");
   });
   els.flashcardReturnDashboard.addEventListener("click", returnToLearnGermanOrDashboard);
   els.challengeResultsBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
