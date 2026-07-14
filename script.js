@@ -533,6 +533,7 @@ const els = {
   challengeReadyLevel: document.querySelector("#challengeReadyLevel"),
   challengeReadyTitle: document.querySelector("#challengeReadyTitle"),
   challengeReadyDescription: document.querySelector("#challengeReadyDescription"),
+  challengeReadyStudySetNotice: document.querySelector("#challengeReadyStudySetNotice"),
   challengeReadyStart: document.querySelector("#challengeReadyStart"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
@@ -677,6 +678,7 @@ const els = {
   cardCounter: document.querySelector("#cardCounter"),
   flashcard: document.querySelector("#flashcard"),
   cardMode: document.querySelector("#cardMode"),
+  articleQuizStudySetNotice: document.querySelector("#articleQuizStudySetNotice"),
   promptLabel: document.querySelector("#promptLabel"),
   questionText: document.querySelector("#questionText"),
   questionTranslation: document.querySelector("#questionTranslation"),
@@ -703,7 +705,8 @@ const els = {
   previousCard: document.querySelector("#previousCard"),
   nextCard: document.querySelector("#nextCard"),
   showAnswer: document.querySelector("#showAnswer"),
-  ratingButtons: document.querySelector("#ratingButtons")
+  ratingButtons: document.querySelector("#ratingButtons"),
+  vocabularyReviewStudySetNotice: document.querySelector("#vocabularyReviewStudySetNotice")
 };
 
 let cards = [];
@@ -1889,6 +1892,7 @@ function normalizeProfileData(data, profile) {
     vocabularyReviewStats: normalizeVocabularyReviewStats(data?.vocabularyReviewStats),
     challengeSessionsCompleted: normalizeCounter(data?.challengeSessionsCompleted),
     flashcardSessions: normalizeFlashcardSessions(data?.flashcardSessions),
+    activeStudySet: normalizeActiveStudySet(data?.activeStudySet),
     positions: normalizePositions(data?.positions),
     settings: {
       mode: data?.settings?.mode || "de-en",
@@ -1921,12 +1925,51 @@ function normalizeFlashcardSessions(value) {
           ? Array.from(new Set(session.studiedIds.map(String).filter(Boolean)))
           : [],
         ratings: normalizeFlashcardRatings(session?.ratings),
+        sessionId: typeof session?.sessionId === "string" ? session.sessionId : "",
         studyDate: typeof session?.studyDate === "string" ? session.studyDate : "",
         completed: Boolean(session?.completed),
         updatedAt: typeof session?.updatedAt === "string" ? session.updatedAt : ""
       }
     ])
   );
+}
+
+function normalizeActiveStudySet(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { sessionId: "", reviewedAt: "", wordIds: [], words: {} };
+  }
+  const words = {};
+  Object.entries(value.words || {}).forEach(([wordId, word]) => {
+    const id = String(word?.wordId || wordId || "").trim();
+    if (!id) return;
+    words[id] = {
+      wordId: id,
+      german: String(word?.german || "").trim(),
+      level: String(word?.level || "").trim().toUpperCase(),
+      category: normalizeStudySetCategory(word?.category),
+      article: normalizeArticleValue(word?.article),
+      rating: normalizeMeaningStatus(word?.rating),
+      reviewedAt: typeof word?.reviewedAt === "string" ? word.reviewedAt : "",
+      sessionId: typeof word?.sessionId === "string" ? word.sessionId : ""
+    };
+  });
+  const wordIds = Array.isArray(value.wordIds)
+    ? value.wordIds.map(String).filter((wordId) => Boolean(words[wordId]))
+    : Object.keys(words);
+  return {
+    sessionId: typeof value.sessionId === "string" ? value.sessionId : "",
+    reviewedAt: typeof value.reviewedAt === "string" ? value.reviewedAt : "",
+    wordIds: Array.from(new Set(wordIds)),
+    words
+  };
+}
+
+function normalizeStudySetCategory(value) {
+  const category = String(value || "").trim().toLowerCase();
+  if (["noun", "nouns"].includes(category)) return "nouns";
+  if (["verb", "verbs"].includes(category)) return "verbs";
+  if (["other", "others", "other words"].includes(category)) return "other";
+  return "";
 }
 
 function normalizeFlashcardRatings(value) {
@@ -2723,6 +2766,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
       flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
+      activeStudySet: mergeActiveStudySets(local.activeStudySet, remote.activeStudySet),
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -2782,6 +2826,14 @@ function mergeFlashcardSessions(localSessions = {}, remoteSessions = {}) {
     };
   });
   return normalizeFlashcardSessions(merged);
+}
+
+function mergeActiveStudySets(localStudySet, remoteStudySet) {
+  const local = normalizeActiveStudySet(localStudySet);
+  const remote = normalizeActiveStudySet(remoteStudySet);
+  if (!local.wordIds.length) return remote;
+  if (!remote.wordIds.length) return local;
+  return latestString(local.reviewedAt, remote.reviewedAt) === local.reviewedAt ? local : remote;
 }
 
 function mergeProgressEntries(localEntries = {}, remoteEntries = {}) {
@@ -8029,6 +8081,10 @@ function getFlashcardSessionKey() {
   return `${flashcardStudyLevel}-${flashcardStudyCategory}`;
 }
 
+function createFlashcardSessionId(key = getFlashcardSessionKey()) {
+  return `${key}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function getFlashcardSessionProfile() {
   const profile = getCurrentProfile();
   if (!profile) return null;
@@ -8064,6 +8120,7 @@ function loadOrCreateFlashcardSession(forceNew = false) {
   flashcardStudyIndex = 0;
   if (!profile) return;
   profile.flashcardSessions[key] = {
+    sessionId: createFlashcardSessionId(key),
     deckIds: flashcardStudyCards.map((card) => card.id),
     index: 0,
     studiedIds: [],
@@ -8084,6 +8141,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
   const studiedIds = new Set(existing.studyDate === today ? existing.studiedIds || [] : []);
   if (studiedCard?.id) studiedIds.add(studiedCard.id);
   profile.flashcardSessions[key] = {
+    sessionId: existing.sessionId || createFlashcardSessionId(key),
     deckIds: flashcardStudyCards.map((card) => card.id),
     index: flashcardStudyIndex,
     studiedIds: Array.from(studiedIds),
@@ -8092,7 +8150,53 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     completed,
     updatedAt: new Date().toISOString()
   };
+  updateActiveStudySetFromFlashcardSession(profile, key);
   saveProfileStore();
+}
+
+function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey()) {
+  if (!profile?.flashcardSessions?.[key]) return;
+  const session = profile.flashcardSessions[key];
+  const ratings = normalizeFlashcardRatings(session.ratings);
+  const studiedIds = Array.from(new Set((session.studiedIds || []).map(String).filter(Boolean)));
+  if (!studiedIds.length) return;
+  const deckCards = getFlashcardCardsForDeck();
+  const cardsById = new Map(deckCards.map((card) => [card.id, card]));
+  const now = new Date().toISOString();
+  const words = {};
+
+  studiedIds.forEach((wordId) => {
+    const card = cardsById.get(wordId) || flashcardStudyCards.find((item) => item.id === wordId);
+    if (!card) return;
+    const existing = words[wordId];
+    const rating = getCautiousStudySetRating(existing?.rating, ratings[wordId] || "unknown");
+    words[wordId] = {
+      wordId,
+      german: card.word || "",
+      level: getFlashcardLevel(card) || flashcardStudyLevel,
+      category: getFlashcardCategory(card),
+      article: normalizeArticleValue(card.article),
+      rating,
+      reviewedAt: now,
+      sessionId: session.sessionId || key
+    };
+  });
+
+  const wordIds = Object.keys(words);
+  if (!wordIds.length) return;
+  profile.activeStudySet = normalizeActiveStudySet({
+    sessionId: session.sessionId || key,
+    reviewedAt: now,
+    wordIds,
+    words
+  });
+}
+
+function getCautiousStudySetRating(firstRating, secondRating) {
+  const priority = { unknown: 3, unsure: 2, known: 1 };
+  const first = normalizeMeaningStatus(firstRating);
+  const second = normalizeMeaningStatus(secondRating);
+  return (priority[first] || 0) >= (priority[second] || 0) ? first : second;
 }
 
 function renderLearningFlashcard() {
@@ -8229,6 +8333,7 @@ function showChallengeReady(action) {
   pendingChallengeAction = action;
   currentView = "challenge-ready";
   const isVocabulary = action === "vocabulary-review";
+  const studySetPreview = getStudySetPreviewForChallengeAction(action);
   els.challengeReadyLevel.textContent = isVocabulary
     ? `${selectedLearningLevel} • ${getFlashcardCategoryLabel(selectedChallengeCategory)} Challenge`
     : `${selectedLearningLevel} Challenge`;
@@ -8236,6 +8341,10 @@ function showChallengeReady(action) {
   els.challengeReadyDescription.textContent = isVocabulary
     ? "Review German vocabulary."
     : "Practice der, die, das.";
+  renderStudySetNotice(els.challengeReadyStudySetNotice, {
+    studySetUsed: studySetPreview.count > 0,
+    studySetReviewedCount: studySetPreview.reviewedCount
+  });
   els.dashboardScreen.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -8280,7 +8389,10 @@ function createEmptyChallengeSession() {
     answered: 0,
     correct: 0,
     coinsEarned: 0,
-    complete: false
+    complete: false,
+    studySetUsed: false,
+    studySetReviewedCount: 0,
+    studySetQuestionCount: 0
   };
 }
 
@@ -8292,16 +8404,174 @@ function discardIncompleteChallengeSession() {
 }
 
 function startChallengeSession(type, level = selectedLearningLevel) {
-  const questionCards = type === "articles"
-    ? getArticleChallengeCards(level)
-    : getChallengeVocabularyDeck(level, selectedChallengeCategory);
+  const selection = buildChallengeQuestionSelection(type, level);
   challengeSession = {
     ...createEmptyChallengeSession(),
     type,
     level,
     category: type === "vocabulary" ? selectedChallengeCategory : "",
-    questionIds: shuffleCards(questionCards).slice(0, CHALLENGE_QUESTION_COUNT).map((card) => card.id)
+    questionIds: selection.cards.map((card) => card.id),
+    studySetUsed: selection.studySetUsed,
+    studySetReviewedCount: selection.studySetReviewedCount,
+    studySetQuestionCount: selection.studySetQuestionCount
   };
+}
+
+function buildChallengeQuestionSelection(type, level = selectedLearningLevel) {
+  const defaultCards = type === "articles"
+    ? getArticleChallengeCards(level)
+    : getChallengeVocabularyDeck(level, selectedChallengeCategory);
+  const fallbackCards = shuffleCards(defaultCards).slice(0, CHALLENGE_QUESTION_COUNT);
+  const studySet = getActiveStudySet();
+  if (!studySet.wordIds.length || !defaultCards.length) {
+    return createChallengeQuestionSelection(fallbackCards, studySet, 0);
+  }
+
+  const studyMatches = getStudySetQuizMatches(studySet, defaultCards, {
+    type,
+    level,
+    category: type === "vocabulary" ? selectedChallengeCategory : ""
+  });
+  if (!studyMatches.length) {
+    return createChallengeQuestionSelection(fallbackCards, studySet, 0);
+  }
+
+  const targetStudyCount = type === "articles"
+    ? Math.min(studyMatches.length, CHALLENGE_QUESTION_COUNT)
+    : Math.min(studyMatches.length, Math.ceil(CHALLENGE_QUESTION_COUNT * 0.8));
+  const studyCards = pickWeightedStudySetCards(studyMatches, targetStudyCount, type);
+  const selectedIds = new Set(studyCards.map((card) => card.id));
+  const defaultFill = shuffleCards(defaultCards)
+    .filter((card) => !selectedIds.has(card.id))
+    .slice(0, Math.max(CHALLENGE_QUESTION_COUNT - studyCards.length, 0));
+  return createChallengeQuestionSelection([...studyCards, ...defaultFill], studySet, studyCards.length);
+}
+
+function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuestionCount) {
+  const uniqueCards = [];
+  const seen = new Set();
+  const seenWords = new Set();
+  cardsForQuiz.forEach((card) => {
+    const wordKey = getStudySetCardMatchKey(card);
+    if (!card?.id || seen.has(card.id) || seenWords.has(wordKey) || uniqueCards.length >= CHALLENGE_QUESTION_COUNT) return;
+    seen.add(card.id);
+    seenWords.add(wordKey);
+    uniqueCards.push(card);
+  });
+  return {
+    cards: uniqueCards,
+    studySetUsed: studySetQuestionCount > 0,
+    studySetReviewedCount: studySet?.wordIds?.length || 0,
+    studySetQuestionCount
+  };
+}
+
+function getActiveStudySet() {
+  return normalizeActiveStudySet(getCurrentProfile()?.activeStudySet);
+}
+
+function getStudySetPreviewForChallengeAction(action) {
+  const type = action === "articles" ? "articles" : "vocabulary";
+  const defaultCards = type === "articles"
+    ? getArticleChallengeCards(selectedLearningLevel)
+    : getChallengeVocabularyDeck(selectedLearningLevel, selectedChallengeCategory);
+  const studySet = getActiveStudySet();
+  const matches = getStudySetQuizMatches(studySet, defaultCards, {
+    type,
+    level: selectedLearningLevel,
+    category: type === "vocabulary" ? selectedChallengeCategory : ""
+  });
+  return {
+    count: matches.length,
+    reviewedCount: studySet.wordIds.length
+  };
+}
+
+function getStudySetQuizMatches(studySet, defaultCards, options = {}) {
+  const normalizedStudySet = normalizeActiveStudySet(studySet);
+  if (!normalizedStudySet.wordIds.length || !defaultCards.length) return [];
+  const byId = new Map(defaultCards.map((card) => [card.id, card]));
+  const byWordArticle = new Map(defaultCards.map((card) => [getStudySetCardMatchKey(card), card]));
+  const byWord = new Map(defaultCards.map((card) => [normalizeDatasetWord(card.word), card]));
+  const seen = new Set();
+  return normalizedStudySet.wordIds
+    .map((wordId) => normalizedStudySet.words[wordId])
+    .filter(Boolean)
+    .filter((word) => isStudySetWordEligibleForQuiz(word, options))
+    .map((word) => {
+      const card = byId.get(word.wordId)
+        || byWordArticle.get(getStudySetWordMatchKey(word))
+        || byWord.get(normalizeDatasetWord(word.german));
+      return card ? { card, studyWord: word } : null;
+    })
+    .filter(Boolean)
+    .filter(({ card }) => {
+      if (seen.has(card.id)) return false;
+      seen.add(card.id);
+      return true;
+    });
+}
+
+function isStudySetWordEligibleForQuiz(word, options = {}) {
+  if (!word?.wordId) return false;
+  if (options.level && word.level && word.level !== options.level) return false;
+  if (options.type === "articles") return word.category === "nouns" || Boolean(word.article);
+  if (options.type === "vocabulary" && options.category) return word.category === options.category;
+  return true;
+}
+
+function getStudySetCardMatchKey(card) {
+  return `${normalizeArticleValue(card?.article)}:${normalizeDatasetWord(card?.word)}`;
+}
+
+function getStudySetWordMatchKey(word) {
+  return `${normalizeArticleValue(word?.article)}:${normalizeDatasetWord(word?.german)}`;
+}
+
+function pickWeightedStudySetCards(matches, count, type) {
+  const candidates = matches.map(({ card, studyWord }) => ({
+    card,
+    weight: getStudySetQuizWeight(card, studyWord, type)
+  }));
+  const selected = [];
+  while (candidates.length && selected.length < count) {
+    const totalWeight = candidates.reduce((total, item) => total + item.weight, 0);
+    let target = Math.random() * totalWeight;
+    let selectedIndex = 0;
+    for (let index = 0; index < candidates.length; index += 1) {
+      target -= candidates[index].weight;
+      if (target <= 0) {
+        selectedIndex = index;
+        break;
+      }
+    }
+    selected.push(candidates.splice(selectedIndex, 1)[0].card);
+  }
+  return selected;
+}
+
+function getStudySetQuizWeight(card, studyWord, type) {
+  const rating = normalizeMeaningStatus(studyWord?.rating);
+  const ratingWeight = rating === "unknown" ? 7 : rating === "unsure" ? 4 : 2;
+  const progressEntry = type === "articles"
+    ? getArticleProgressEntry(card)
+    : getVocabularyProgressEntry(card);
+  const wrongAt = type === "articles" ? progressEntry.articleLastWrongAt : progressEntry.lastWrongAt;
+  return ratingWeight + (wrongAt ? 3 : 0) + Math.random();
+}
+
+function renderStudySetNotice(element, session = challengeSession) {
+  if (!element) return;
+  const shouldShow = Boolean(session?.studySetUsed && session?.studySetReviewedCount);
+  element.classList.toggle("hidden", !shouldShow);
+  if (!shouldShow) {
+    element.replaceChildren();
+    return;
+  }
+  element.replaceChildren(
+    createTextElement("strong", "", "Practising words from your recent flashcards"),
+    createTextElement("span", "", `${normalizeCounter(session.studySetReviewedCount)} words reviewed`)
+  );
 }
 
 function recordChallengeSessionAnswer(type, isCorrect) {
@@ -9358,6 +9628,10 @@ function renderCard() {
   const mode = els.modeSelect.value;
   const modeText = getModeText(mode);
   const isArticleQuiz = mode === "article-quiz";
+  renderStudySetNotice(
+    els.articleQuizStudySetNotice,
+    isArticleQuiz && challengeSession.type === "articles" ? challengeSession : null
+  );
 
   els.cardMode.textContent = isArticleQuiz && challengeSession.type === "articles"
     ? "Article Practice"
@@ -10352,6 +10626,10 @@ function generateVocabularyReviewQuestion(reason, targetIndex = vocabularyReview
 function renderVocabularyReviewQuiz() {
   const card = getCurrentVocabularyReviewCard();
   const hasCard = Boolean(card);
+  renderStudySetNotice(
+    els.vocabularyReviewStudySetNotice,
+    challengeSession.type === "vocabulary" ? challengeSession : null
+  );
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }

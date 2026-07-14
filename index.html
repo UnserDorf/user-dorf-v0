@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=220">
+    <link rel="stylesheet" href="style.css?v=221">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -652,6 +652,7 @@
           <p class="eyebrow" id="challengeReadyLevel">A1 Challenge</p>
           <h2 id="challengeReadyTitle">Vocabulary</h2>
           <p id="challengeReadyDescription">Review German vocabulary.</p>
+          <p class="study-set-notice hidden" id="challengeReadyStudySetNotice"></p>
           <strong>10 Questions</strong>
           <p>Ready to begin?</p>
           <button class="primary-button" id="challengeReadyStart" type="button">Start</button>
@@ -847,6 +848,7 @@
             <span id="cardCounter">0 / 0</span>
             <span id="cardMode">German -> English</span>
           </div>
+          <p class="study-set-notice hidden" id="articleQuizStudySetNotice"></p>
 
           <div class="question-area">
             <p class="eyebrow" id="promptLabel">German</p>
@@ -904,6 +906,7 @@
             <span id="nounVerbCounter">0 / 0</span>
             <span id="nounVerbTitle">Noun-Verb Pairs</span>
           </div>
+          <p class="study-set-notice hidden" id="vocabularyReviewStudySetNotice"></p>
           <div class="question-area">
             <p class="eyebrow" id="nounVerbInstruction">Choose the verb</p>
             <h2 id="nounVerbPrompt">Loading</h2>
@@ -948,6 +951,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=218"></script>
+    <script type="module" src="script.js?v=219"></script>
   </body>
 </html>
