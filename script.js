@@ -2253,6 +2253,7 @@ function saveProfileStore(options = {}) {
   }
   promoteFamilyAchievements(profileStore);
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
+  if (options.localOnly) return;
   scheduleCloudSave(options);
 }
 
@@ -2302,11 +2303,12 @@ async function saveProfileStoreToCloudNow() {
       protectedAccount: Boolean(activeProfile?.protectedAccount),
       currentGroup: currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
       currentProfile: currentProfileId || profileStore.currentProfile || "",
+      activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
       profiles: ownedProfiles,
       lastLoginAtIso: new Date().toISOString(),
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
-    });
+    }, { merge: true });
 
     await Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
       const group = profileStore.groups?.[groupInfo.id];
@@ -2345,6 +2347,27 @@ async function saveProfileStoreToCloudNow() {
       cloudSavePending = false;
       saveProfileStoreToCloudNow();
     }
+  }
+}
+
+async function saveActiveStudySetToCloudNow(studySet) {
+  if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
+  const normalizedStudySet = normalizeActiveStudySet(studySet);
+  if (!normalizedStudySet.wordIds.length) return;
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await firebase.setDoc(
+      getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
+      { activeStudySet: normalizedStudySet },
+      { merge: true }
+    );
+    updateCloudSyncDebug({
+      lastCloudSaveTime: new Date().toISOString(),
+      lastCloudSaveError: ""
+    }, "Firestore activeStudySet save complete");
+  } catch (error) {
+    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore activeStudySet save failed");
+    console.warn("Could not sync active flashcard study set to Firebase. Local study set is still saved.", error);
   }
 }
 
@@ -2397,6 +2420,12 @@ async function fetchProfileStoreFromCloud() {
       if (userRole !== "member") {
         getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
           if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].role = userRole;
+        });
+      }
+      const remoteActiveStudySet = normalizeActiveStudySet(userData.activeStudySet);
+      if (remoteActiveStudySet.wordIds.length) {
+        getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
+          if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].activeStudySet = remoteActiveStudySet;
         });
       }
       remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
@@ -8151,7 +8180,8 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     updatedAt: new Date().toISOString()
   };
   updateActiveStudySetFromFlashcardSession(profile, key);
-  saveProfileStore();
+  saveProfileStore({ localOnly: true });
+  saveActiveStudySetToCloudNow(profile.activeStudySet);
 }
 
 function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey()) {
