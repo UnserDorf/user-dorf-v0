@@ -9125,23 +9125,28 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     completed,
     updatedAt: new Date().toISOString()
   };
-  updateActiveStudySetFromFlashcardSession(profile, key);
+  const activeStudySetUpdated = completed ? updateActiveStudySetFromFlashcardSession(profile, key) : false;
   saveProfileStore({ localOnly: true });
-  saveActiveStudySetToCloudNow(profile.activeStudySet);
+  if (activeStudySetUpdated) {
+    saveActiveStudySetToCloudNow(profile.activeStudySet);
+  }
 }
 
 function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey()) {
-  if (!profile?.flashcardSessions?.[key]) return;
+  if (!profile?.flashcardSessions?.[key]) return false;
   const session = profile.flashcardSessions[key];
+  if (!session.completed) return false;
   const ratings = normalizeFlashcardRatings(session.ratings);
-  const studiedIds = Array.from(new Set((session.studiedIds || []).map(String).filter(Boolean)));
-  if (!studiedIds.length) return;
+  const deckIds = Array.from(new Set((session.deckIds || []).map(String).filter(Boolean)));
+  const studiedSet = new Set((session.studiedIds || []).map(String).filter(Boolean));
+  const completedIds = deckIds.filter((wordId) => studiedSet.has(wordId));
+  if (!deckIds.length || completedIds.length !== deckIds.length) return false;
   const deckCards = getFlashcardCardsForDeck();
   const cardsById = new Map(deckCards.map((card) => [card.id, card]));
   const now = new Date().toISOString();
   const words = {};
 
-  studiedIds.forEach((wordId) => {
+  completedIds.forEach((wordId) => {
     const card = cardsById.get(wordId) || flashcardStudyCards.find((item) => item.id === wordId);
     if (!card) return;
     const existing = words[wordId];
@@ -9158,8 +9163,8 @@ function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSes
     };
   });
 
-  const wordIds = Object.keys(words);
-  if (!wordIds.length) return;
+  const wordIds = completedIds.filter((wordId) => Boolean(words[wordId]));
+  if (!wordIds.length || wordIds.length !== completedIds.length) return false;
   profile.activeStudySet = normalizeActiveStudySet({
     sessionId: session.sessionId || key,
     reviewedAt: now,
@@ -9167,6 +9172,7 @@ function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSes
     words,
     reviewStatus: normalizeStudySetReviewStatus()
   });
+  return true;
 }
 
 function getCautiousStudySetRating(firstRating, secondRating) {
