@@ -471,6 +471,13 @@ const els = {
   demoSignIn: document.querySelector("#demoSignIn"),
   demoNext: document.querySelector("#demoNext"),
   dashboardScreen: document.querySelector("#dashboardScreen"),
+  learnGermanScreen: document.querySelector("#learnGermanScreen"),
+  learnGermanBack: document.querySelector("#learnGermanBack"),
+  learnRecommendationCard: document.querySelector("#learnRecommendationCard"),
+  learnRecommendationTitle: document.querySelector("#learnRecommendationTitle"),
+  learnRecommendationMeta: document.querySelector("#learnRecommendationMeta"),
+  learnRecommendationActions: document.querySelector("#learnRecommendationActions"),
+  learnRecommendationPrimary: document.querySelector("#learnRecommendationPrimary"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
@@ -764,6 +771,7 @@ let selectedLearningLevel = "A1";
 let selectedChallengeCategory = "nouns";
 let pendingChallengeAction = "";
 let guidedLearningActive = false;
+let learnGermanReturnActive = false;
 let pendingFlashcardResumeKey = "";
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
@@ -1948,7 +1956,7 @@ function normalizeFlashcardSessions(value) {
 
 function normalizeActiveStudySet(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return { sessionId: "", reviewedAt: "", wordIds: [], words: {} };
+    return { sessionId: "", reviewedAt: "", wordIds: [], words: {}, reviewStatus: normalizeStudySetReviewStatus() };
   }
   const words = {};
   Object.entries(value.words || {}).forEach(([wordId, word]) => {
@@ -1972,7 +1980,15 @@ function normalizeActiveStudySet(value) {
     sessionId: typeof value.sessionId === "string" ? value.sessionId : "",
     reviewedAt: typeof value.reviewedAt === "string" ? value.reviewedAt : "",
     wordIds: Array.from(new Set(wordIds)),
-    words
+    words,
+    reviewStatus: normalizeStudySetReviewStatus(value.reviewStatus)
+  };
+}
+
+function normalizeStudySetReviewStatus(value = {}) {
+  return {
+    vocabularyCompletedAt: typeof value?.vocabularyCompletedAt === "string" ? value.vocabularyCompletedAt : "",
+    articleCompletedAt: typeof value?.articleCompletedAt === "string" ? value.articleCompletedAt : ""
   };
 }
 
@@ -2990,6 +3006,21 @@ function mergeActiveStudySets(localStudySet, remoteStudySet) {
   const remote = normalizeActiveStudySet(remoteStudySet);
   if (!local.wordIds.length) return remote;
   if (!remote.wordIds.length) return local;
+  if (local.sessionId && local.sessionId === remote.sessionId) {
+    return normalizeActiveStudySet({
+      ...local,
+      reviewStatus: {
+        vocabularyCompletedAt: latestString(
+          local.reviewStatus?.vocabularyCompletedAt,
+          remote.reviewStatus?.vocabularyCompletedAt
+        ),
+        articleCompletedAt: latestString(
+          local.reviewStatus?.articleCompletedAt,
+          remote.reviewStatus?.articleCompletedAt
+        )
+      }
+    });
+  }
   return latestString(local.reviewedAt, remote.reviewedAt) === local.reviewedAt ? local : remote;
 }
 
@@ -4090,6 +4121,8 @@ function hideLegacyStudyUi() {
 
 function showDashboard() {
   discardIncompleteChallengeSession();
+  guidedLearningActive = false;
+  learnGermanReturnActive = false;
   currentView = "dashboard";
   els.appShell.classList.remove("onboarding-mode");
   els.appShell.classList.remove("landing-mode");
@@ -4102,6 +4135,7 @@ function showDashboard() {
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
   els.dashboardScreen.classList.remove("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -4114,6 +4148,37 @@ function showDashboard() {
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLegacyStudyUi();
   scrollPageToTop(els.dashboardScreen);
+}
+
+function showLearnGermanPage() {
+  discardIncompleteChallengeSession();
+  guidedLearningActive = false;
+  learnGermanReturnActive = false;
+  currentView = "learn-german";
+  els.appShell.classList.remove("onboarding-mode");
+  els.appShell.classList.remove("landing-mode");
+  els.appShell.classList.remove("clean-article-practice");
+  els.appShell.classList.remove("clean-quiz-mode");
+  els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("meaning-match-mode");
+  setChallengeBackButtons(false, false);
+  renderLearnGermanPage();
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.remove("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
+  els.developerToolsScreen?.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  hideLegacyStudyUi();
+  scrollPageToTop(els.learnGermanScreen);
 }
 
 function showLandingScreen() {
@@ -4142,6 +4207,7 @@ function showLandingScreen() {
 
 function hideAuthenticatedAppViews() {
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -4183,6 +4249,7 @@ function showDemoScreen() {
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.remove("hidden");
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -4313,6 +4380,7 @@ function showCoinChallenges() {
   els.appShell.classList.remove("meaning-match-mode");
   setChallengeBackButtons(false, false);
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -4350,6 +4418,7 @@ function showAchievementCollection(page = "austria-album") {
   setChallengeBackButtons(false, false);
   renderAchievementCollection(page);
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.remove("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -4378,6 +4447,7 @@ function showStudyView(options = {}) {
     false
   );
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -4415,6 +4485,7 @@ function showNounVerbQuiz() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -4442,6 +4513,7 @@ function showVocabularyReviewQuiz() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -4470,6 +4542,7 @@ function showMeaningMatchQuiz() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.add("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -4496,6 +4569,7 @@ function showPrepositionQuiz() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -6711,6 +6785,7 @@ function showVillageMembers() {
   setChallengeBackButtons(false, false);
   renderVillageMembersPage();
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.remove("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -6978,7 +7053,7 @@ function getVillageRecentContributions(members) {
 
 function getVillageHistoryContributionText(name, entry) {
   if (entry?.type === "article-quiz") return `${name} practiced articles`;
-  if (entry?.type === "vocabulary-review") return `${name} completed a Vocabulary Challenge`;
+  if (entry?.type === "vocabulary-review") return `${name} completed a Vocabulary Review`;
   if (entry?.type === "flashcard") return `${name} reviewed flashcards`;
   if (entry?.type === "article-practice") return `${name} practiced articles`;
   return `${name} studied vocabulary`;
@@ -8235,26 +8310,30 @@ function handleDashboardAction(action) {
     return;
   }
   if (action === "continue-learning") {
-    continueGuidedLearning();
+    showLearnGermanPage();
     return;
   }
   if (action === "flashcards") {
     guidedLearningActive = false;
+    learnGermanReturnActive = false;
     showFlashcardsEntry();
     return;
   }
   if (action === "challenges") {
     guidedLearningActive = false;
+    learnGermanReturnActive = false;
     showChallengesEntry();
     return;
   }
   if (action === "vocabulary-quiz") {
     guidedLearningActive = false;
+    learnGermanReturnActive = false;
     showDirectChallenge("vocabulary-review");
     return;
   }
   if (action === "article-quiz") {
     guidedLearningActive = false;
+    learnGermanReturnActive = false;
     showDirectChallenge("articles");
     return;
   }
@@ -8300,36 +8379,155 @@ function handleDashboardAction(action) {
 
 function continueGuidedLearning() {
   guidedLearningActive = true;
-  const nextStep = getNextGuidedLearningStep();
-  if (nextStep === "flashcards") {
+  handleLearnGermanAction(getLearnGermanRecommendation().action, { guided: true });
+}
+
+function renderLearnGermanPage() {
+  const recommendation = getLearnGermanRecommendation();
+  if (els.learnRecommendationTitle) els.learnRecommendationTitle.textContent = recommendation.title;
+  if (els.learnRecommendationMeta) els.learnRecommendationMeta.textContent = recommendation.meta;
+  if (!els.learnRecommendationActions) return;
+
+  if (recommendation.action === "complete") {
+    const continueButton = createTextElement("button", "primary-button", "Continue Studying");
+    continueButton.type = "button";
+    continueButton.dataset.learnAction = "flashcards";
+    const newSetButton = createTextElement("button", "ghost-button", "Start New Study Set");
+    newSetButton.type = "button";
+    newSetButton.dataset.learnAction = "new-flashcards";
+    const dashboardButton = createTextElement("button", "small-link-button", "Back to Dashboard");
+    dashboardButton.type = "button";
+    dashboardButton.dataset.learnAction = "dashboard";
+    els.learnRecommendationActions.replaceChildren(continueButton, newSetButton, dashboardButton);
+    return;
+  }
+
+  if (els.learnRecommendationPrimary) {
+    els.learnRecommendationPrimary.textContent = recommendation.buttonLabel;
+    els.learnRecommendationPrimary.dataset.learnAction = recommendation.action;
+    els.learnRecommendationActions.replaceChildren(els.learnRecommendationPrimary);
+  }
+}
+
+function getLearnGermanRecommendation(profile = getCurrentProfile()) {
+  const state = getGuidedLearningState(profile);
+  if (!state.studySet.wordIds.length) {
+    return {
+      action: "flashcards",
+      title: "Learn 20 new words",
+      meta: "Start with flashcards.",
+      buttonLabel: "▶ Start Flashcards"
+    };
+  }
+  if (!state.vocabularyComplete) {
+    return {
+      action: "vocabulary-review",
+      title: "Review your recent study set",
+      meta: `${state.studySet.wordIds.length} ${state.studySet.wordIds.length === 1 ? "word" : "words"} ready`,
+      buttonLabel: "▶ Start Vocabulary Review"
+    };
+  }
+  if (state.nounCount > 0 && !state.articleComplete) {
+    return {
+      action: "article-review",
+      title: "Review noun articles",
+      meta: `${state.nounCount} ${state.nounCount === 1 ? "noun" : "nouns"} available`,
+      buttonLabel: "▶ Start Article Review"
+    };
+  }
+  return {
+    action: "complete",
+    title: "Nice work!",
+    meta: "You've studied and reviewed your current words.",
+    buttonLabel: "Continue Studying"
+  };
+}
+
+function getGuidedLearningState(profile = getCurrentProfile()) {
+  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
+  const reviewStatus = normalizeStudySetReviewStatus(activeStudySet.reviewStatus);
+  const studyWords = activeStudySet.wordIds
+    .map((wordId) => activeStudySet.words[wordId])
+    .filter(Boolean);
+  const nounCount = studyWords.filter((word) => isStudySetNoun(word)).length;
+  return {
+    studySet: activeStudySet,
+    nounCount,
+    vocabularyComplete: Boolean(reviewStatus.vocabularyCompletedAt),
+    articleComplete: Boolean(reviewStatus.articleCompletedAt)
+  };
+}
+
+function isStudySetNoun(word) {
+  return word?.category === "nouns" || Boolean(normalizeArticleValue(word?.article));
+}
+
+function handleLearnGermanAction(action, options = {}) {
+  if (!action) return;
+  guidedLearningActive = Boolean(options.guided);
+  if (action === "dashboard") {
+    guidedLearningActive = false;
+    learnGermanReturnActive = false;
+    showDashboard();
+    return;
+  }
+  if (action === "flashcards" || action === "new-flashcards") {
+    learnGermanReturnActive = true;
     showFlashcardsEntry();
     return;
   }
-  if (nextStep === "vocabulary") {
+  if (action === "vocabulary-review") {
+    learnGermanReturnActive = true;
+    prepareStudySetReviewContext("vocabulary");
     showDirectChallenge("vocabulary-review");
     return;
   }
-  if (nextStep === "articles") {
+  if (action === "article-review") {
+    learnGermanReturnActive = true;
+    prepareStudySetReviewContext("articles");
     showDirectChallenge("articles");
+  }
+}
+
+function returnToLearnGermanOrDashboard() {
+  if (learnGermanReturnActive || guidedLearningActive) {
+    showLearnGermanPage();
     return;
   }
-  guidedLearningActive = false;
   showDashboard();
 }
 
-function getNextGuidedLearningStep(profile = getCurrentProfile()) {
-  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
-  const flashcardSessions = Object.values(normalizeFlashcardSessions(profile?.flashcardSessions));
-  const hasCompletedFlashcards = flashcardSessions.some((session) => session.completed);
-  const hasActiveFlashcards = activeStudySet.wordIds.length
-    || flashcardSessions.some((session) => session.deckIds.length && !session.completed);
-  const hasVocabularyPractice = Object.keys(normalizeVocabularyProgress(profile?.vocabularyProgress)).length > 0;
-  const hasArticlePractice = Object.keys(normalizeArticleProgress(profile?.articleProgress)).length > 0;
-  if (hasActiveFlashcards && !hasCompletedFlashcards) return "flashcards";
-  if (!hasCompletedFlashcards) return "flashcards";
-  if (!hasVocabularyPractice) return "vocabulary";
-  if (!hasArticlePractice) return "articles";
-  return "dashboard";
+function prepareStudySetReviewContext(type) {
+  const studySet = getActiveStudySet();
+  const words = studySet.wordIds.map((wordId) => studySet.words[wordId]).filter(Boolean);
+  const firstWord = words[0];
+  if (LEARNING_LEVELS.includes(firstWord?.level)) {
+    selectedLearningLevel = firstWord.level;
+  }
+  if (type === "vocabulary") {
+    const firstCategory = words.find((word) => word.category)?.category;
+    if (["nouns", "verbs", "other"].includes(firstCategory)) {
+      selectedChallengeCategory = firstCategory;
+    }
+  }
+}
+
+function markActiveStudySetReviewCompleted(type) {
+  const profile = getCurrentProfile();
+  if (!profile?.activeStudySet?.wordIds?.length) return;
+  profile.activeStudySet = normalizeActiveStudySet(profile.activeStudySet);
+  const now = new Date().toISOString();
+  const reviewStatus = normalizeStudySetReviewStatus(profile.activeStudySet.reviewStatus);
+  if (type === "vocabulary") {
+    reviewStatus.vocabularyCompletedAt = now;
+  } else if (type === "articles") {
+    reviewStatus.articleCompletedAt = now;
+  } else {
+    return;
+  }
+  profile.activeStudySet.reviewStatus = reviewStatus;
+  saveProfileStore({ localOnly: true });
+  saveActiveStudySetToCloudNow(profile.activeStudySet);
 }
 
 function showDirectChallenge(action) {
@@ -8412,6 +8610,7 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
   currentView = "learning-flashcards";
   closeLearningDeckSelector();
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -8433,10 +8632,11 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
 function showLevelSelection(path) {
   if (path === "challenges") discardIncompleteChallengeSession();
   selectedLearningPath = path;
-  els.levelSelectionContext.textContent = path === "challenges" ? "Challenges" : "Flashcards";
+  els.levelSelectionContext.textContent = path === "challenges" ? "Reviews" : "Flashcards";
   currentView = "level-selection";
   setChallengeBackButtons(false, false);
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -8472,6 +8672,7 @@ function showFlashcardSetup() {
   setChallengeBackButtons(false, false);
   flashcardStudyCategory = getPreferredFlashcardCategoryForLevel(selectedLearningLevel);
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -8699,7 +8900,8 @@ function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSes
     sessionId: session.sessionId || key,
     reviewedAt: now,
     wordIds,
-    words
+    words,
+    reviewStatus: normalizeStudySetReviewStatus()
   });
 }
 
@@ -8831,7 +9033,7 @@ function showFlashcardCompletion() {
   els.flashcardCompletionCount.textContent = normalizeCounter(session?.studiedIds?.length);
   if (els.flashcardContinueStudying) {
     els.flashcardContinueStudying.textContent = guidedLearningActive
-      ? "Continue to Vocabulary Quiz"
+      ? "Continue to Learn German"
       : "Continue";
   }
   currentView = "flashcard-complete";
@@ -8851,9 +9053,9 @@ function showChallengeReady(action) {
   const isVocabulary = action === "vocabulary-review";
   const studySetPreview = getStudySetPreviewForChallengeAction(action);
   els.challengeReadyLevel.textContent = isVocabulary
-    ? `${selectedLearningLevel} • ${getFlashcardCategoryLabel(selectedChallengeCategory)} Challenge`
-    : `${selectedLearningLevel} Challenge`;
-  els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary" : "Articles";
+    ? `${selectedLearningLevel} • ${getFlashcardCategoryLabel(selectedChallengeCategory)} Review`
+    : `${selectedLearningLevel} Review`;
+  els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary Review" : "Article Review";
   els.challengeReadyDescription.textContent = isVocabulary
     ? "Review German vocabulary."
     : "Practice der, die, das.";
@@ -8862,6 +9064,7 @@ function showChallengeReady(action) {
     studySetReviewedCount: studySetPreview.reviewedCount
   });
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
@@ -9120,20 +9323,24 @@ function showChallengeResults() {
       profile.challengeSessionsCompleted = normalizeCounter(profile.challengeSessionsCompleted) + 1;
       saveProfileStore({ immediate: true });
     }
+    if (challengeSession.studySetUsed) {
+      markActiveStudySetReviewCompleted(challengeSession.type);
+    }
   }
   const correct = clamp(challengeSession.correct, 0, CHALLENGE_QUESTION_COUNT);
   const accuracy = Math.round((correct / CHALLENGE_QUESTION_COUNT) * 100);
-  const challengeName = challengeSession.type === "articles" ? "Articles" : "Vocabulary";
+  const challengeName = challengeSession.type === "articles" ? "Article Review" : "Vocabulary Review";
   els.challengeResultsType.textContent = `${challengeSession.level || selectedLearningLevel} ${challengeName}`;
   els.challengeResultAccuracy.textContent = `${accuracy}%`;
   els.challengeResultCorrect.textContent = `${correct} / ${CHALLENGE_QUESTION_COUNT}`;
   els.challengeResultCoins.textContent = `+${challengeSession.coinsEarned}`;
   if (els.challengeResultsContinue) {
-    els.challengeResultsContinue.textContent = guidedLearningActive && challengeSession.type === "vocabulary"
-      ? "Continue to Article Quiz"
+    els.challengeResultsContinue.textContent = guidedLearningActive
+      ? "Continue to Learn German"
       : "Continue";
   }
   els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -9450,6 +9657,14 @@ function bindEvents() {
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
   els.villageMembersBack?.addEventListener("click", showDashboard);
+  els.learnGermanBack?.addEventListener("click", showDashboard);
+  els.learnGermanScreen?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-learn-action]");
+    if (!button) return;
+    handleLearnGermanAction(button.dataset.learnAction, {
+      guided: button === els.learnRecommendationPrimary
+    });
+  });
 
   els.appShell.addEventListener("click", (event) => {
     const actionTarget = event.target.closest("[data-dashboard-action]");
@@ -9650,19 +9865,18 @@ function bindEvents() {
     moveNounVerbCard(1);
   });
   els.challengeResultsContinue.addEventListener("click", () => {
-    const completedType = challengeSession.type;
     challengeSession = createEmptyChallengeSession();
-    if (guidedLearningActive && completedType === "vocabulary") {
-      showDirectChallenge("articles");
+    if (guidedLearningActive) {
+      showLearnGermanPage();
       showNextPendingCelebration();
       return;
     }
     guidedLearningActive = false;
-    showDashboard();
+    returnToLearnGermanOrDashboard();
     showNextPendingCelebration();
   });
-  els.levelSelectionBack.addEventListener("click", showDashboard);
-  els.flashcardResumeBack?.addEventListener("click", showDashboard);
+  els.levelSelectionBack.addEventListener("click", returnToLearnGermanOrDashboard);
+  els.flashcardResumeBack?.addEventListener("click", returnToLearnGermanOrDashboard);
   els.flashcardResumeContinue?.addEventListener("click", resumePendingFlashcardSession);
   els.flashcardChooseAnotherDeck?.addEventListener("click", () => showLevelSelection("flashcards"));
   els.levelSelectionScreen.addEventListener("click", (event) => {
@@ -9672,7 +9886,7 @@ function bindEvents() {
   });
   els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
-  els.challengeReadyBack.addEventListener("click", showCoinChallenges);
+  els.challengeReadyBack.addEventListener("click", returnToLearnGermanOrDashboard);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
   els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
   els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
@@ -9680,13 +9894,13 @@ function bindEvents() {
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
     if (guidedLearningActive) {
-      showDirectChallenge("vocabulary-review");
+      showLearnGermanPage();
       return;
     }
     openFlashcardDeck(flashcardStudyLevel, flashcardStudyCategory, { forceNew: true });
   });
-  els.flashcardReturnDashboard.addEventListener("click", showDashboard);
-  els.challengeResultsBack.addEventListener("click", showCoinChallenges);
+  els.flashcardReturnDashboard.addEventListener("click", returnToLearnGermanOrDashboard);
+  els.challengeResultsBack.addEventListener("click", returnToLearnGermanOrDashboard);
   els.flashcardSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     startLearningFlashcards();
@@ -11165,7 +11379,7 @@ function renderVocabularyReviewQuiz() {
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
-  els.nounVerbTitle.textContent = challengeSession.type === "vocabulary" ? "Vocabulary Practice" : "Vocabulary Review";
+  els.nounVerbTitle.textContent = "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
   els.nounVerbInstruction.textContent = "Choose the English meaning.";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
@@ -12504,7 +12718,7 @@ function updateRatingButtonLabels(mode) {
 }
 
 function getModeText(mode) {
-  if (mode === "article-quiz") return "Article Quiz";
+  if (mode === "article-quiz") return "Article Review";
   if (mode === "article") return "Article Practice";
   if (mode === "en-de") return "English -> German";
   return "German -> English";

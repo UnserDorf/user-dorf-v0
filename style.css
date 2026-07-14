@@ -12173,3 +12173,144 @@ body:has(#developerToolsScreen:not(.hidden)) {
     min-height: 42px;
   }
 }
+
+.learn-german-screen {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(18px, 3vw, 26px);
+}
+
+.learn-german-heading {
+  display: grid;
+  gap: 10px;
+}
+
+.learn-german-heading h2,
+.learn-german-heading p {
+  margin: 0;
+}
+
+.learn-german-heading h2 {
+  color: var(--green);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.learn-german-heading p {
+  max-width: 56ch;
+  color: #5f594f;
+  font-weight: 720;
+  line-height: 1.45;
+}
+
+.learn-recommendation-panel,
+.learn-shortcut-panel {
+  border: 1px solid rgba(190, 177, 153, 0.24);
+  border-radius: 22px;
+  background: rgba(255, 250, 241, 0.72);
+  box-shadow: 0 12px 34px rgba(55, 49, 36, 0.055);
+  padding: clamp(16px, 3vw, 26px);
+  display: grid;
+  gap: 14px;
+}
+
+.learn-recommendation-panel .eyebrow,
+.learn-shortcut-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.learn-recommendation-card {
+  border: 1px solid rgba(77, 130, 94, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.76);
+  padding: clamp(16px, 3vw, 24px);
+  display: grid;
+  gap: 14px;
+}
+
+.learn-recommendation-card h3,
+.learn-recommendation-card p {
+  margin: 0;
+}
+
+.learn-recommendation-card h3 {
+  color: var(--ink);
+  font-size: clamp(1.35rem, 3.4vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.learn-recommendation-card p {
+  color: #665f54;
+  font-weight: 760;
+}
+
+.learn-recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.learn-recommendation-actions .primary-button,
+.learn-recommendation-actions .ghost-button {
+  min-height: 48px;
+}
+
+.learn-shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.learn-shortcut-grid .ghost-button {
+  min-height: 46px;
+  justify-content: center;
+  background: rgba(255, 253, 248, 0.64);
+}
+
+@media (max-width: 720px) {
+  .learn-shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .learn-recommendation-actions {
+    display: grid;
+  }
+
+  .learn-recommendation-actions .primary-button,
+  .learn-recommendation-actions .ghost-button,
+  .learn-recommendation-actions .small-link-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .learn-german-screen {
+    gap: 14px;
+  }
+
+  .learn-german-heading h2 {
+    font-size: clamp(1.5rem, 8vw, 1.9rem);
+  }
+
+  .learn-german-heading p {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .learn-recommendation-panel,
+  .learn-shortcut-panel {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .learn-recommendation-card {
+    border-radius: 16px;
+    padding: 14px;
+  }
+}
