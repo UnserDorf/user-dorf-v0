@@ -807,6 +807,10 @@ let cloudSavePending = false;
 let profileDataSource = "localStorage";
 let lastIdentityProfileWasCreated = false;
 let obsoleteLocalIdentityDataDetected = false;
+let developerToolsActiveSection = "overview";
+let developerToolsBusy = false;
+let developerToolsLastData = null;
+let developerToolsLastError = null;
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -3789,6 +3793,10 @@ function hideAuthenticatedAppViews() {
   els.studyStage.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
+  els.answerPanel?.classList.add("hidden");
+  els.showAnswer?.classList.add("hidden");
+  els.previousCard?.classList.add("hidden");
+  els.nextCard?.classList.add("hidden");
 }
 
 function resetLoggedOutTransientUi() {
@@ -4407,6 +4415,11 @@ function showDeveloperTools() {
   renderDeveloperToolsPage();
 }
 
+function returnToSettingsFromDeveloperTools() {
+  showDashboard();
+  openSettingsPanel();
+}
+
 async function readFirestoreWithDebug(readAction, details) {
   try {
     console.info("[Unser Dorf Firestore read]", {
@@ -4418,6 +4431,13 @@ async function readFirestoreWithDebug(readAction, details) {
   } catch (error) {
     error.firestorePath = details?.path || "";
     error.firestoreOperation = details?.operation || "";
+    developerToolsLastError = {
+      type: "read",
+      path: error.firestorePath,
+      operation: error.firestoreOperation,
+      code: error?.code || "",
+      message: error?.message || String(error)
+    };
     console.error("[Unser Dorf Firestore read failed]", {
       ...details,
       uid: firebaseAuthUser?.uid || "",
@@ -4443,6 +4463,13 @@ async function writeFirestoreWithDebug(writeAction, details) {
   } catch (error) {
     error.firestorePath = details?.path || "";
     error.firestoreOperation = details?.operation || "";
+    developerToolsLastError = {
+      type: "write",
+      path: error.firestorePath,
+      operation: error.firestoreOperation,
+      code: error?.code || "",
+      message: error?.message || String(error)
+    };
     console.error("[Unser Dorf Firestore write failed]", {
       ...details,
       uid: firebaseAuthUser?.uid || "",
@@ -4469,13 +4496,9 @@ async function renderDeveloperToolsPage() {
   els.developerToolsContent.replaceChildren();
   try {
     const data = await loadDeveloperToolsData();
+    developerToolsLastData = data;
     setDeveloperToolsStatus("Developer data loaded. Auth accounts must be deleted manually or via Cloud Function.");
-    els.developerToolsContent.replaceChildren(
-      createDeveloperSystemStatusCard(data),
-      createDeveloperCleanupSection(data),
-      createDeveloperUsersSection(data.users),
-      createDeveloperVillagesSection(data.villages)
-    );
+    els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(data));
   } catch (error) {
     console.error("Developer Tools failed to load.", error);
     const permissionHint = String(error?.code || "").includes("permission-denied")
@@ -4483,6 +4506,48 @@ async function renderDeveloperToolsPage() {
       : "";
     setDeveloperToolsStatus(`Could not load Developer Tools data: ${getErrorMessage(error)}.${permissionHint}`, true);
   }
+}
+
+function createDeveloperToolsLayout(data) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-tools-layout";
+  const nav = document.createElement("nav");
+  nav.className = "developer-tools-tabs";
+  nav.setAttribute("aria-label", "Developer Tools sections");
+  const sections = [
+    ["overview", "Overview"],
+    ["users", "Users"],
+    ["villages", "Villages"],
+    ["cleanup", "Cleanup"],
+    ["diagnostics", "Diagnostics"]
+  ];
+  nav.replaceChildren(...sections.map(([id, label]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.className = id === developerToolsActiveSection ? "is-active" : "";
+    button.addEventListener("click", () => {
+      developerToolsActiveSection = id;
+      if (developerToolsLastData) els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(developerToolsLastData));
+      scrollPageToTop(els.developerToolsScreen);
+    });
+    return button;
+  }));
+  const content = document.createElement("div");
+  content.className = "developer-tools-section-content";
+  if (developerToolsActiveSection === "users") {
+    content.append(createDeveloperUsersSection(data.users, data.villages));
+  } else if (developerToolsActiveSection === "villages") {
+    content.append(createDeveloperVillagesSection(data.villages));
+  } else if (developerToolsActiveSection === "cleanup") {
+    content.append(createDeveloperCleanupSection(data));
+  } else if (developerToolsActiveSection === "diagnostics") {
+    content.append(createDeveloperDiagnosticsSection(data));
+  } else {
+    content.append(createDeveloperOverviewSection(data));
+  }
+  wrapper.replaceChildren(nav, content);
+  return wrapper;
 }
 
 async function isCurrentUserDeveloperFromFirestore() {
@@ -4754,6 +4819,82 @@ function createDeveloperSystemStatusCard(data) {
   return section;
 }
 
+function createDeveloperOverviewSection(data) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card";
+  const cleanupIssueCount = data.villages.reduce((total, village) => (
+    total + (village.orphanedMembers?.length || 0) + (village.duplicateMembers?.length || 0)
+  ), 0);
+  const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
+  const currentProfile = getCurrentProfile() || {};
+  const currentVillage = currentUser?.villageName || normalizeVillageName(currentProfile.villageName) || currentProfile.villageId || "No village";
+  const cards = [
+    ["Total Firestore users", `${data.users.length}`],
+    ["Total villages", `${data.villages.length}`],
+    ["Current account", currentUser?.displayName || getVillageDisplayName(currentProfile) || "Not available"],
+    ["Current role", formatDeveloperRole(currentUser?.role || currentProfile.role)],
+    ["Current village", currentVillage],
+    ["Cleanup issues found", `${cleanupIssueCount}`]
+  ];
+  const grid = document.createElement("div");
+  grid.className = "developer-overview-grid";
+  cards.forEach(([label, value]) => {
+    const card = document.createElement("article");
+    card.className = "developer-summary-card";
+    card.replaceChildren(
+      createTextElement("span", "", label),
+      createTextElement("strong", "", value)
+    );
+    grid.append(card);
+  });
+  section.replaceChildren(createTextElement("h3", "", "Overview"), grid);
+  return section;
+}
+
+function createDeveloperDiagnosticsSection(data) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card developer-diagnostics-card";
+  const firebaseConfig = getFirebaseSyncConfig().firebaseConfig;
+  const currentProfile = getCurrentProfile() || {};
+  const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
+  const currentVillageId = currentUser?.villageId || currentProfile.villageId || currentGroupId || "";
+  const diagnostics = {
+    firebaseProjectId: firebaseConfig.projectId || "Not configured",
+    currentUid: firebaseAuthUser?.uid || "Not signed in",
+    email: firebaseAuthUser?.email || "Not available",
+    provider: firebaseAuthUser?.providerData?.map((provider) => provider.providerId).join(", ") || "password",
+    firestoreRole: formatDeveloperRole(currentUser?.role || currentProfile.role),
+    protectedAccount: String(Boolean(currentProfile.protectedAccount || currentUser?.role === "developer")),
+    currentVillagePath: currentVillageId ? `unserDorf/v0Testing/villages/${currentVillageId}` : "No village",
+    lastFirestoreError: developerToolsLastError
+      ? `${developerToolsLastError.operation || "operation"} ${developerToolsLastError.path || ""} ${developerToolsLastError.code || ""} ${developerToolsLastError.message || ""}`.trim()
+      : "None",
+    loadedDataSource: profileDataSource || "Firestore/local cache"
+  };
+  const copyButton = createDeveloperActionButton("Copy diagnostics", async () => {
+    const text = Object.entries(diagnostics).map(([key, value]) => `${key}: ${value}`).join("\n");
+    await navigator.clipboard?.writeText(text);
+    setDeveloperToolsStatus("Diagnostics copied.");
+  });
+  section.replaceChildren(
+    createTextElement("h3", "", "Diagnostics"),
+    createDeveloperDefinitionList(Object.entries(diagnostics).map(([key, value]) => [formatDeveloperDiagnosticLabel(key), value])),
+    copyButton
+  );
+  return section;
+}
+
+function formatDeveloperDiagnosticLabel(key) {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function formatDeveloperRole(role) {
+  const safeRole = sanitizeUserRole(role);
+  if (safeRole === "developer") return "Developer";
+  if (safeRole === "villageAdmin") return "Village Admin";
+  return "Member";
+}
+
 function createDeveloperCleanupSection(data) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
@@ -4918,54 +5059,148 @@ function getFamilyZKeepCurrentUserPreview(familyZ) {
   };
 }
 
-function createDeveloperUsersSection(users) {
+function createDeveloperUsersSection(users, villages = []) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
-  section.append(createTextElement("h3", "", "View all users"));
+  section.append(createTextElement("h3", "", "Users"));
   if (!users.length) {
     section.append(createTextElement("p", "developer-tools-empty", "No user profiles found."));
     return section;
   }
+  const controls = createDeveloperUserFilters(users, villages);
   const grid = document.createElement("div");
-  grid.className = "developer-user-grid";
-  users.forEach((user) => grid.append(createDeveloperUserCard(user)));
-  section.append(grid);
+  grid.className = "developer-user-list";
+  const renderRows = () => {
+    const filtered = filterDeveloperUsers(users, controls);
+    grid.replaceChildren(...filtered.map((user) => createDeveloperUserCard(user)));
+    if (!filtered.length) grid.append(createTextElement("p", "developer-tools-empty", "No users match these filters."));
+  };
+  Object.values(controls).forEach((control) => control.addEventListener("input", renderRows));
+  Object.values(controls).forEach((control) => control.addEventListener("change", renderRows));
+  renderRows();
+  section.append(controls.wrapper, grid);
   return section;
+}
+
+function createDeveloperUserFilters(users, villages) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-user-filters";
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "Search name or email";
+  search.autocomplete = "off";
+  const village = document.createElement("select");
+  village.append(new Option("All villages", ""));
+  villages.forEach((item) => village.append(new Option(item.name, item.id)));
+  const role = document.createElement("select");
+  role.append(new Option("All roles", ""));
+  ["developer", "villageAdmin", "member"].forEach((item) => role.append(new Option(formatDeveloperRole(item), item)));
+  const state = document.createElement("select");
+  state.append(
+    new Option("All profiles", ""),
+    new Option("Current account", "current"),
+    new Option("Active profiles", "active"),
+    new Option("Orphaned profiles", "orphaned"),
+    new Option("No village", "no-village")
+  );
+  wrapper.replaceChildren(search, village, role, state);
+  return { wrapper, search, village, role, state };
+}
+
+function filterDeveloperUsers(users, controls) {
+  const query = controls.search.value.trim().toLowerCase();
+  const village = controls.village.value;
+  const role = controls.role.value;
+  const state = controls.state.value;
+  return users.filter((user) => {
+    const text = `${user.displayName || ""} ${user.email || ""}`.toLowerCase();
+    if (query && !text.includes(query)) return false;
+    if (village && user.villageId !== village) return false;
+    if (role && sanitizeUserRole(user.role) !== role) return false;
+    if (state === "current" && user.uid !== firebaseAuthUser?.uid) return false;
+    if (state === "active" && (isDeveloperUserOrphaned(user) || !user.villageId)) return false;
+    if (state === "orphaned" && !isDeveloperUserOrphaned(user)) return false;
+    if (state === "no-village" && user.villageId) return false;
+    return true;
+  });
 }
 
 function createDeveloperUserCard(user) {
   const card = document.createElement("article");
-  card.className = "developer-user-card";
+  const isCurrent = Boolean(user.uid && user.uid === firebaseAuthUser?.uid);
+  card.className = `developer-user-card developer-user-row${isCurrent ? " is-current" : ""}`;
+  const summary = document.createElement("div");
+  summary.className = "developer-user-summary";
+  const title = document.createElement("div");
+  title.className = "developer-user-title";
+  title.replaceChildren(
+    createTextElement("h4", "", user.displayName || "Unnamed user"),
+    createTextElement("p", "", user.email || "No email")
+  );
+  const meta = document.createElement("div");
+  meta.className = "developer-user-meta";
+  meta.replaceChildren(
+    createTextElement("span", "", user.villageName || user.villageId || "No village"),
+    createTextElement("span", "", `${user.coins} coins`),
+    createTextElement("span", "", user.lastLoginAt || "No activity")
+  );
+  const badges = createDeveloperUserBadges(user);
+  summary.replaceChildren(title, meta, badges);
   const actions = document.createElement("div");
   actions.className = "developer-tools-actions";
-  actions.replaceChildren(
+  const actionButtons = [
     createDeveloperActionButton("Reset progress", () => resetDeveloperUserProgress(user)),
-    createDeveloperActionButton("Remove from village", () => removeDeveloperUserFromVillage(user)),
-    createDeveloperActionButton("Delete Firestore profile", () => deleteDeveloperUser(user), true)
-  );
-  card.replaceChildren(
-    createTextElement("h4", "", user.displayName || "Unnamed user"),
+    createDeveloperActionButton("Remove from village", () => removeDeveloperUserFromVillage(user))
+  ];
+  if (!isCurrent) actionButtons.push(createDeveloperActionButton("Delete Firestore profile", () => deleteDeveloperUser(user), true));
+  actions.replaceChildren(...actionButtons);
+  const details = document.createElement("details");
+  details.className = "developer-technical-details";
+  details.append(
+    createTextElement("summary", "", "Show technical details"),
     createDeveloperDefinitionList([
-      ["Email", user.email || "Not available"],
       ["UID", user.uid || "No Auth UID found"],
       ["Profile ID", user.profileId || "Not available"],
-      ["Village", user.villageName || user.villageId || "No village"],
-      ["Role", user.role],
-      ["Coins", `${user.coins}`],
-      ["Challenges", `${user.challengesCompleted}`],
+      ["All Profile IDs", (user.profileIds || []).join(", ") || "Not available"],
+      ["Source", user.source],
       ["Created", user.createdAt],
-      ["Last login/activity", user.lastLoginAt],
-      ["Source", user.source]
-    ]),
+      ["Full last activity", user.lastLoginAt],
+      ["Challenges", `${user.challengesCompleted}`]
+    ])
+  );
+  card.replaceChildren(
+    summary,
+    details,
     actions
   );
   return card;
 }
 
+function createDeveloperUserBadges(user) {
+  const badges = document.createElement("div");
+  badges.className = "developer-badges";
+  if (user.uid && user.uid === firebaseAuthUser?.uid) badges.append(createDeveloperBadge("CURRENT ACCOUNT", "current"));
+  const role = sanitizeUserRole(user.role);
+  if (role === "developer") badges.append(createDeveloperBadge("DEVELOPER", "developer"));
+  else if (role === "villageAdmin") badges.append(createDeveloperBadge("VILLAGE ADMIN", "admin"));
+  else badges.append(createDeveloperBadge("MEMBER", "member"));
+  if (isDeveloperUserOrphaned(user)) badges.append(createDeveloperBadge("ORPHANED", "orphaned"));
+  return badges;
+}
+
+function createDeveloperBadge(label, type = "") {
+  const badge = createTextElement("span", `developer-badge ${type}`.trim(), label);
+  return badge;
+}
+
+function isDeveloperUserOrphaned(user) {
+  return user.source === "Village profile" || !user.uid;
+}
+
 function createDeveloperVillagesSection(villages) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
-  section.append(createTextElement("h3", "", "View all villages"));
+  section.append(createTextElement("h3", "", "Villages"));
   const grid = document.createElement("div");
   grid.className = "developer-village-grid";
   villages.forEach((village) => {
@@ -4975,15 +5210,26 @@ function createDeveloperVillagesSection(villages) {
     const cleanupCount = (village.orphanedMembers?.length || 0) + (village.duplicateMembers?.length || 0);
     const card = document.createElement("article");
     card.className = "developer-village-card";
+    const actions = document.createElement("div");
+    actions.className = "developer-tools-actions";
+    actions.replaceChildren(
+      createDeveloperActionButton("View members", () => {
+        developerToolsActiveSection = "users";
+        if (developerToolsLastData) els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(developerToolsLastData));
+      }),
+      createDeveloperActionButton("Remove stale memberships", cleanupFamilyZOrphanedMembers),
+      createDeveloperActionButton("Reset village progress", () => setDeveloperToolsStatus("Village progress reset is not enabled yet.", true))
+    );
     card.replaceChildren(
       createTextElement("h4", "", village.name),
+      createDeveloperBadge(`${memberNames.length} member${memberNames.length === 1 ? "" : "s"}`, "member"),
       createDeveloperDefinitionList([
         ["Village ID", village.id],
         ["Creator/admin", village.creator],
-        ["Member count", `${memberNames.length}`],
-        ["Members", memberNames.join(", ") || "No members"],
-        ["Cleanup candidates", `${cleanupCount}`]
-      ])
+        ["Cleanup issues", `${cleanupCount}`],
+        ["Members", memberNames.join(", ") || "No members"]
+      ]),
+      actions
     );
     grid.append(card);
   });
@@ -5005,8 +5251,25 @@ function createDeveloperActionButton(label, handler, destructive = false) {
   button.type = "button";
   button.textContent = label;
   button.className = destructive ? "danger-button" : "ghost-button";
-  button.addEventListener("click", () => runSafely(`Developer Tools ${label}`, handler));
+  button.disabled = developerToolsBusy;
+  button.addEventListener("click", () => runSafely(`Developer Tools ${label}`, async () => {
+    if (developerToolsBusy) return;
+    setDeveloperToolsBusy(true);
+    try {
+      await handler();
+    } finally {
+      setDeveloperToolsBusy(false);
+    }
+  }));
   return button;
+}
+
+function setDeveloperToolsBusy(isBusy) {
+  developerToolsBusy = Boolean(isBusy);
+  els.developerToolsScreen?.querySelectorAll("button").forEach((button) => {
+    if (button.id === "developerToolsBack") return;
+    button.disabled = developerToolsBusy;
+  });
 }
 
 async function deleteDeveloperUser(user) {
@@ -8337,7 +8600,7 @@ function bindSettingsEvents() {
     showResetPasswordScreen();
   });
   bindOptionalEvent(els.openDeveloperTools, "#openDeveloperTools", "click", showDeveloperTools);
-  bindOptionalEvent(els.developerToolsBack, "#developerToolsBack", "click", showDashboard);
+  bindOptionalEvent(els.developerToolsBack, "#developerToolsBack", "click", returnToSettingsFromDeveloperTools);
   bindOptionalEvent(els.developerToolsRefresh, "#developerToolsRefresh", "click", renderDeveloperToolsPage);
   bindOptionalEvent(els.deleteAccountButton, "#deleteAccountButton", "click", openDeleteAccountConfirmation);
   bindOptionalEvent(els.cancelDeleteAccount, "#cancelDeleteAccount", "click", closeDeleteAccountConfirmation);
@@ -9079,6 +9342,8 @@ function renderCard() {
       : `${isArticleQuiz ? "Question" : "Card"} ${currentIndex + 1} of ${visibleCards.length}`
     : `${isArticleQuiz ? "Question" : "Card"} 0 of 0`;
   els.emptyState.classList.toggle("hidden", Boolean(card));
+  els.previousCard.classList.remove("hidden");
+  els.nextCard.classList.remove("hidden");
   els.previousCard.disabled = visibleCards.length < 2;
   els.nextCard.disabled = visibleCards.length < 2;
   els.actionBar.classList.toggle("hidden", isArticleQuiz);
