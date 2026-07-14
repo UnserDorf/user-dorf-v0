@@ -412,7 +412,6 @@ const els = {
   rememberEmailCheckbox: document.querySelector("#rememberEmailCheckbox"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   forgotPasswordLink: document.querySelector("#forgotPasswordLink"),
-  firebaseGoogleSignIn: document.querySelector("#firebaseGoogleSignIn"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
   firebaseAuthToggle: document.querySelector("#firebaseAuthToggle"),
@@ -461,7 +460,6 @@ const els = {
   landingScreen: document.querySelector("#landingScreen"),
   landingTryDemo: document.querySelector("#landingTryDemo"),
   landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
-  landingGoogleSignIn: document.querySelector("#landingGoogleSignIn"),
   landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
   demoIllustration: document.querySelector("#demoIllustration"),
@@ -1507,6 +1505,10 @@ function normalizeGroupMemberIds(value) {
   return Array.isArray(value) ? Array.from(new Set(value.map(String).filter(Boolean))).slice(0, 6) : [];
 }
 
+function normalizeProfileIdList(value) {
+  return Array.isArray(value) ? Array.from(new Set(value.map(String).filter(Boolean))) : [];
+}
+
 function mergeGroupData(localStore, remoteStore, baseStore) {
   const localGroups = normalizeGroups(localStore?.groups, {
     ...(localStore || {}),
@@ -1577,9 +1579,16 @@ function getCurrentGroup(store = profileStore) {
 
 function getCurrentGroupProfiles(store = profileStore) {
   const group = getCurrentGroup(store);
+  const seenMemberKeys = new Set();
   return (group?.memberIds || [])
     .map((profileId) => store?.profiles?.[profileId])
-    .filter(Boolean);
+    .filter((profile) => {
+      if (!profile) return false;
+      const memberKey = String(profile.ownerUid || profile.id || "").trim();
+      if (!memberKey || seenMemberKeys.has(memberKey)) return false;
+      seenMemberKeys.add(memberKey);
+      return true;
+    });
 }
 
 function normalizeVillageName(value) {
@@ -2249,13 +2258,20 @@ async function saveProfileStoreToCloudNow() {
       const group = profileStore.groups?.[groupInfo.id];
       if (!group) return;
       const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
-      if (!group.memberIds.length) {
-        await firebase.deleteDoc(villageRef);
+      const groupProfiles = getProfilesForGroupSync(group);
+      const groupForSync = sanitizeGroupForSync(group);
+      groupForSync.memberIds = normalizeGroupMemberIds(Object.keys(groupProfiles));
+      if (!Object.keys(groupProfiles).length) {
+        await firebase.setDoc(villageRef, {
+          group: groupForSync,
+          profiles: {},
+          updatedAt: firebase.serverTimestamp(),
+          updatedAtIso: savedAt
+        });
         return;
       }
-      const groupProfiles = getProfilesForGroupSync(group);
       await firebase.setDoc(getFirebaseVillageDocRef(firebase, groupInfo.id), {
-        group: sanitizeGroupForSync(group),
+        group: groupForSync,
         profiles: groupProfiles,
         updatedAt: firebase.serverTimestamp(),
         updatedAtIso: savedAt
@@ -3269,11 +3285,6 @@ async function handleFirebaseEmailAuth(mode) {
     updateFirebaseAuthStatus("Enter an email and password.", true);
     return;
   }
-  if (mode === "register" && DEVELOPER_BOOTSTRAP_EMAILS.has(email.toLowerCase())) {
-    console.warn("Blocked developer email from creating a duplicate account through normal signup.", { email });
-    updateFirebaseAuthStatus("This admin email needs recovery, not a new account. Please use Sign In or Firebase Console recovery to avoid duplicate Mineko profiles.", true);
-    return;
-  }
   updateFirebaseAuthStatus(mode === "register" ? "Creating account..." : "Signing in...");
   try {
     const firebase = await getFirebaseSyncApi();
@@ -3287,19 +3298,6 @@ async function handleFirebaseEmailAuth(mode) {
       return;
     }
     console.error("Firebase email authentication failed.", error);
-    updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
-  }
-}
-
-async function handleFirebaseGoogleSignIn() {
-  updateFirebaseAuthStatus("Opening Google sign-in...");
-  try {
-    const firebase = await getFirebaseSyncApi();
-    const provider = new firebase.authModule.GoogleAuthProvider();
-    const credential = await firebase.authModule.signInWithPopup(firebase.auth, provider);
-    await handleFirebaseSignedIn(credential.user);
-  } catch (error) {
-    console.error("Firebase Google authentication failed.", error);
     updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
   }
 }
@@ -3487,13 +3485,10 @@ async function deleteFirebaseUserData(firebase, user) {
     ownedProfileIds.forEach((profileId) => {
       delete profiles[profileId];
     });
-    if (group.memberIds.length === 0) {
-      console.info("Deleting empty village document after account deletion.", {
-        villageId: groupInfo.id
-      });
-      await firebase.deleteDoc(villageRef);
-      return;
-    }
+    group.memberIds = normalizeGroupMemberIds([
+      ...group.memberIds.filter((profileId) => profiles[profileId]),
+      ...Object.keys(profiles)
+    ]);
     await firebase.setDoc(villageRef, {
       group,
       profiles,
@@ -3528,9 +3523,6 @@ async function deleteLegacySharedProfileStoreReferences(firebase, ownedProfileId
   });
   Object.values(cleanedStore.groups || {}).forEach((group) => {
     group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !ownedProfileIds.includes(profileId)));
-  });
-  Object.entries(cleanedStore.groups || {}).forEach(([groupId, group]) => {
-    if (group?.memberIds?.length === 0) delete cleanedStore.groups[groupId];
   });
   if (ownedProfileIds.includes(cleanedStore.currentProfile)) cleanedStore.currentProfile = "";
   if (!cleanedStore.groups?.[cleanedStore.currentGroup]) cleanedStore.currentGroup = DEFAULT_GROUP_ID;
@@ -4399,6 +4391,7 @@ async function renderDeveloperToolsPage() {
     const data = await loadDeveloperToolsData();
     setDeveloperToolsStatus(`Loaded ${data.users.length} users and ${data.villages.length} villages. Auth accounts must be deleted manually or via Cloud Function.`);
     els.developerToolsContent.replaceChildren(
+      createDeveloperCleanupSection(data),
       createDeveloperUsersSection(data.users),
       createDeveloperVillagesSection(data.villages)
     );
@@ -4436,21 +4429,112 @@ async function loadDeveloperToolsData() {
     id: docSnapshot.id,
     data: docSnapshot.data() || {}
   }));
+  const validUserIndex = createValidUserIndex(userDocs);
   const villages = villageSnapshots.map(({ groupInfo, snapshot }) => {
     const data = snapshot.exists() ? snapshot.data() || {} : {};
     const group = createGroupData(groupInfo, data.group || {});
     const profiles = data.profiles || {};
+    const rawMemberIds = normalizeProfileIdList([
+      ...(group.memberIds || []),
+      ...Object.keys(profiles)
+    ]);
+    const membershipIssues = getVillageMembershipIssues({
+      id: groupInfo.id,
+      memberIds: rawMemberIds,
+      profiles
+    }, validUserIndex);
     return {
       id: groupInfo.id,
       name: normalizeVillageName(group.villageName) || normalizeVillageName(group.name) || groupInfo.name,
       creator: data.creatorUid || data.adminUid || group.creatorUid || "Not set",
-      memberIds: normalizeGroupMemberIds(group.memberIds || Object.keys(profiles)),
-      profiles
+      memberIds: membershipIssues.validMemberIds,
+      rawMemberIds,
+      profiles,
+      orphanedMembers: membershipIssues.orphanedMembers,
+      duplicateMembers: membershipIssues.duplicateMembers,
+      cleanupProfileIds: membershipIssues.cleanupProfileIds
     };
   });
   return {
     users: buildDeveloperUserRows(userDocs, villages),
-    villages
+    villages,
+    validUserIndex
+  };
+}
+
+function createValidUserIndex(userDocs) {
+  const validUids = new Set();
+  const validProfileIds = new Set();
+  userDocs.forEach(({ id: uid, data }) => {
+    if (!uid) return;
+    validUids.add(uid);
+    validProfileIds.add(getFirebaseProfileId({ uid }));
+    Object.keys(data?.profiles || {}).forEach((profileId) => validProfileIds.add(profileId));
+    if (data?.currentProfile) validProfileIds.add(String(data.currentProfile));
+  });
+  return { validUids, validProfileIds };
+}
+
+function getVillageMembershipIssues(village, validUserIndex) {
+  const validUids = validUserIndex?.validUids || new Set();
+  const validProfileIds = validUserIndex?.validProfileIds || new Set();
+  const candidateProfileIds = normalizeProfileIdList([
+    ...(village.memberIds || []),
+    ...Object.keys(village.profiles || {})
+  ]);
+  const seenMemberKeys = new Set();
+  const validMemberIds = [];
+  const orphanedMembers = [];
+  const duplicateMembers = [];
+  const cleanupProfileIds = new Set();
+
+  candidateProfileIds.forEach((profileId) => {
+    const hasVillageProfile = Boolean(village.profiles?.[profileId]);
+    const profile = village.profiles?.[profileId] || {};
+    const ownerUid = String(profile.ownerUid || "").trim();
+    const memberKey = ownerUid || profileId;
+    const hasValidUserDoc = Boolean(
+      validProfileIds.has(profileId)
+        || (ownerUid && validUids.has(ownerUid))
+        || (ownerUid && validProfileIds.has(getFirebaseProfileId({ uid: ownerUid })))
+    );
+    const summary = {
+      villageId: village.id,
+      profileId,
+      uid: ownerUid,
+      email: profile.ownerEmail || "",
+      displayName: getVillageDisplayName(profile),
+      reason: !hasVillageProfile
+        ? "Member ID has no village profile record"
+        : hasValidUserDoc
+          ? "Duplicate UID/member reference"
+          : "No matching Firestore user document"
+    };
+
+    if (!hasVillageProfile) {
+      orphanedMembers.push(summary);
+      cleanupProfileIds.add(profileId);
+      return;
+    }
+    if (!hasValidUserDoc) {
+      orphanedMembers.push(summary);
+      cleanupProfileIds.add(profileId);
+      return;
+    }
+    if (seenMemberKeys.has(memberKey)) {
+      duplicateMembers.push(summary);
+      cleanupProfileIds.add(profileId);
+      return;
+    }
+    seenMemberKeys.add(memberKey);
+    validMemberIds.push(profileId);
+  });
+
+  return {
+    validMemberIds,
+    orphanedMembers,
+    duplicateMembers,
+    cleanupProfileIds: Array.from(cleanupProfileIds)
   };
 }
 
@@ -4512,6 +4596,50 @@ function getDeveloperVillageName(villages, villageId) {
   return villages.find((village) => village.id === villageId)?.name || villageId || "No village";
 }
 
+function createDeveloperCleanupSection(data) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card";
+  const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
+  const cleanupRows = [
+    ...(familyZ?.orphanedMembers || []),
+    ...(familyZ?.duplicateMembers || [])
+  ];
+  section.append(createTextElement("h3", "", "Family Z membership cleanup"));
+  section.append(createTextElement(
+    "p",
+    "developer-tools-empty",
+    cleanupRows.length
+      ? `${cleanupRows.length} stale or duplicate member record${cleanupRows.length === 1 ? "" : "s"} found. Review before cleanup.`
+      : "No stale Family Z member records found."
+  ));
+  if (cleanupRows.length) {
+    const list = document.createElement("div");
+    list.className = "developer-user-grid";
+    cleanupRows.forEach((member) => {
+      const card = document.createElement("article");
+      card.className = "developer-user-card";
+      card.replaceChildren(
+        createTextElement("h4", "", member.displayName || member.profileId || "Unknown member"),
+        createDeveloperDefinitionList([
+          ["Reason", member.reason],
+          ["Email", member.email || "Not available"],
+          ["UID", member.uid || "No UID stored"],
+          ["Profile ID", member.profileId],
+          ["Village", member.villageId]
+        ])
+      );
+      list.append(card);
+    });
+    const cleanupButton = createDeveloperActionButton(
+      "Clean orphaned Family Z members",
+      cleanupFamilyZOrphanedMembers,
+      true
+    );
+    section.append(list, cleanupButton);
+  }
+  return section;
+}
+
 function createDeveloperUsersSection(users) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
@@ -4566,6 +4694,7 @@ function createDeveloperVillagesSection(villages) {
     const memberNames = village.memberIds
       .map((profileId) => getVillageDisplayName(village.profiles?.[profileId]))
       .filter(Boolean);
+    const cleanupCount = (village.orphanedMembers?.length || 0) + (village.duplicateMembers?.length || 0);
     const card = document.createElement("article");
     card.className = "developer-village-card";
     card.replaceChildren(
@@ -4574,7 +4703,8 @@ function createDeveloperVillagesSection(villages) {
         ["Village ID", village.id],
         ["Creator/admin", village.creator],
         ["Member count", `${memberNames.length}`],
-        ["Members", memberNames.join(", ") || "No members"]
+        ["Members", memberNames.join(", ") || "No members"],
+        ["Cleanup candidates", `${cleanupCount}`]
       ])
     );
     grid.append(card);
@@ -4616,6 +4746,34 @@ async function deleteDeveloperUser(user) {
   if (user.uid) await firebase.deleteDoc(getFirebaseUserDocRef(firebase, user.uid));
   removeProfileIdsFromLocalStore(profileIds);
   setDeveloperToolsStatus(`Deleted Firestore data for ${user.displayName}. Auth account must be deleted manually or via Cloud Function.`);
+  await renderDeveloperToolsPage();
+}
+
+async function cleanupFamilyZOrphanedMembers() {
+  const data = await loadDeveloperToolsData();
+  const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
+  const cleanupProfileIds = normalizeProfileIdList(familyZ?.cleanupProfileIds || []);
+  const cleanupRows = [
+    ...(familyZ?.orphanedMembers || []),
+    ...(familyZ?.duplicateMembers || [])
+  ];
+  if (!cleanupProfileIds.length) {
+    setDeveloperToolsStatus("Family Z has no orphaned or duplicate member records to clean.");
+    return;
+  }
+  console.table(cleanupRows);
+  const confirmed = window.confirm(
+    `Clean ${cleanupProfileIds.length} stale Family Z member record${cleanupProfileIds.length === 1 ? "" : "s"}?\n\n`
+      + cleanupRows.map((member) => `${member.displayName || member.profileId} (${member.reason})`).join("\n")
+      + "\n\nThis removes only Firestore village membership/profile references. Family Z will not be deleted."
+  );
+  if (!confirmed) return;
+  const firebase = await getFirebaseSyncApi();
+  const savedAt = new Date().toISOString();
+  await removeProfileIdsFromVillageDocs(firebase, cleanupProfileIds, [DEFAULT_GROUP_ID], savedAt);
+  await deleteLegacySharedProfileStoreReferences(firebase, cleanupProfileIds, savedAt);
+  removeProfileIdsFromLocalStore(cleanupProfileIds);
+  setDeveloperToolsStatus(`Cleaned ${cleanupProfileIds.length} stale Family Z member record${cleanupProfileIds.length === 1 ? "" : "s"}.`);
   await renderDeveloperToolsPage();
 }
 
@@ -4684,9 +4842,12 @@ async function removeProfileIdsFromVillageDocs(firebase, profileIds, villageIds,
     const data = snapshot.data() || {};
     const groupInfo = DEFAULT_GROUPS.find((group) => group.id === villageId) || { id: villageId, name: villageId };
     const group = createGroupData(groupInfo, data.group || {});
-    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !profileIdSet.has(profileId)));
     const profiles = { ...(data.profiles || {}) };
     profileIds.forEach((profileId) => delete profiles[profileId]);
+    group.memberIds = normalizeGroupMemberIds([
+      ...(group.memberIds || []).filter((profileId) => !profileIdSet.has(profileId) && profiles[profileId]),
+      ...Object.keys(profiles)
+    ]);
     await firebase.setDoc(villageRef, {
       group,
       profiles,
@@ -7134,11 +7295,12 @@ function getFamilyCoinTotal(profiles) {
 }
 
 function getGroupCoinTotal(group = getCurrentGroup()) {
-  return getFamilyCoinTotal(
-    Object.fromEntries((group?.memberIds || [])
-      .map((profileId) => [profileId, profileStore?.profiles?.[profileId]])
-      .filter(([, profile]) => Boolean(profile)))
-  );
+  const profiles = group === getCurrentGroup()
+    ? getCurrentGroupProfiles()
+    : (group?.memberIds || [])
+      .map((profileId) => profileStore?.profiles?.[profileId])
+      .filter(Boolean);
+  return getFamilyCoinTotal(Object.fromEntries(profiles.map((profile) => [profile.id, profile])));
 }
 
 function getFamilyWealthLevel(coinsValue) {
@@ -7276,7 +7438,6 @@ function bindEvents() {
   els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
-  els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
   els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);
   els.villageSelectionBack?.addEventListener("click", handleVillageSelectionBack);
@@ -7397,7 +7558,6 @@ function bindEvents() {
   });
   els.landingTryDemo?.addEventListener("click", showDemoScreen);
   els.landingGetStartedMain?.addEventListener("click", startGetStartedFlow);
-  els.landingGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoSignIn?.addEventListener("click", handleDemoSignIn);
