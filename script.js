@@ -105,7 +105,6 @@ const ONBOARDING_PAGES = [
     nextLabel: "Enter Your Village"
   }
 ];
-const PROFILE_AVATARS = ["🦊", "🌸", "⭐", "👓", "🌿", "📚"];
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const FIREBASE_SYNC_DEFAULT_ROOT_PATH = "unserDorf/v0Testing";
@@ -113,8 +112,11 @@ const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/s
 const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 const FIREBASE_FIRESTORE_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 const FIREBASE_AUTH_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-const LOCAL_IDENTITY_STORAGE_KEY = "unser-dorf-local-identity-profile-id";
 const REMEMBERED_EMAIL_STORAGE_KEY = "unserDorfRememberedEmail";
+const ARCHIVED_LOCAL_PROFILES_STORAGE_KEY = "unserDorfArchivedLocalProfilesV1";
+const OBSOLETE_LOCAL_IDENTITY_STORAGE_KEYS = [
+  "unser-dorf-local-identity-profile-id"
+];
 const DELETE_ACCOUNT_RECENT_AUTH_MAX_AGE_MS = 4 * 60 * 1000;
 const USER_ROLES = new Set(["member", "villageAdmin", "developer"]);
 const DEVELOPER_BOOTSTRAP_EMAILS = new Set(["minekoa-z@gmail.com"]);
@@ -405,15 +407,14 @@ const els = {
   firebaseAuthCard: document.querySelector("#firebaseAuthCard"),
   firebaseAuthTitle: document.querySelector("#firebaseAuthTitle"),
   firebaseAuthIntro: document.querySelector("#firebaseAuthIntro"),
-  firebaseAuthLocalLabel: document.querySelector("#firebaseAuthLocalLabel"),
   firebaseAuthForm: document.querySelector("#firebaseAuthForm"),
   firebaseAuthEmail: document.querySelector("#firebaseAuthEmail"),
   rememberEmailCheckbox: document.querySelector("#rememberEmailCheckbox"),
   firebaseAuthPassword: document.querySelector("#firebaseAuthPassword"),
   forgotPasswordLink: document.querySelector("#forgotPasswordLink"),
+  firebaseGoogleSignIn: document.querySelector("#firebaseGoogleSignIn"),
   firebaseEmailSignIn: document.querySelector("#firebaseEmailSignIn"),
   firebaseEmailRegister: document.querySelector("#firebaseEmailRegister"),
-  firebaseAuthSkip: document.querySelector("#firebaseAuthSkip"),
   firebaseAuthToggle: document.querySelector("#firebaseAuthToggle"),
   firebaseAuthTryDemo: document.querySelector("#firebaseAuthTryDemo"),
   firebaseAuthHome: document.querySelector("#firebaseAuthHome"),
@@ -427,9 +428,6 @@ const els = {
   resetPasswordStatus: document.querySelector("#resetPasswordStatus"),
   resetPasswordSuccess: document.querySelector("#resetPasswordSuccess"),
   resetPasswordSuccessBack: document.querySelector("#resetPasswordSuccessBack"),
-  localModeConfirmCard: document.querySelector("#localModeConfirmCard"),
-  localModeContinue: document.querySelector("#localModeContinue"),
-  localModeBack: document.querySelector("#localModeBack"),
   displayNameForm: document.querySelector("#displayNameForm"),
   displayNameInput: document.querySelector("#displayNameInput"),
   displayNameError: document.querySelector("#displayNameError"),
@@ -451,27 +449,7 @@ const els = {
   villagePasswordError: document.querySelector("#villagePasswordError"),
   villageNameForm: document.querySelector("#villageNameForm"),
   villageNameInput: document.querySelector("#villageNameInput"),
-  profileSignInHeading: document.querySelector("#profileSignInHeading"),
-  profileSignInEyebrow: document.querySelector("#profileSignInEyebrow"),
-  profileSignInTitle: document.querySelector("#profileSignInTitle"),
-  profileGrid: document.querySelector("#profileGrid"),
-  profileActions: document.querySelector("#profileActions"),
-  emptyProfileMessage: document.querySelector("#emptyProfileMessage"),
-  profileLoginForm: document.querySelector("#profileLoginForm"),
-  profileLoginTitle: document.querySelector("#profileLoginTitle"),
-  profileLoginPassword: document.querySelector("#profileLoginPassword"),
-  cancelProfileLogin: document.querySelector("#cancelProfileLogin"),
-  profileLoginError: document.querySelector("#profileLoginError"),
   familyWealthCard: document.querySelector("#familyWealthCard"),
-  createProfileToggle: document.querySelector("#createProfileToggle"),
-  createProfileForm: document.querySelector("#createProfileForm"),
-  createProfileTitle: document.querySelector("#createProfileTitle"),
-  createProfileIntro: document.querySelector("#createProfileIntro"),
-  createProfileName: document.querySelector("#createProfileName"),
-  createProfilePassword: document.querySelector("#createProfilePassword"),
-  avatarOptions: document.querySelector("#avatarOptions"),
-  cancelCreateProfile: document.querySelector("#cancelCreateProfile"),
-  createProfileError: document.querySelector("#createProfileError"),
   familyWealthCoins: document.querySelector("#familyWealthCoins"),
   familyWealthLevel: document.querySelector("#familyWealthLevel"),
   familyNextLevelName: document.querySelector("#familyNextLevelName"),
@@ -483,7 +461,7 @@ const els = {
   landingScreen: document.querySelector("#landingScreen"),
   landingTryDemo: document.querySelector("#landingTryDemo"),
   landingGetStartedMain: document.querySelector("#landingGetStartedMain"),
-  landingLocalButton: document.querySelector("#landingLocalButton"),
+  landingGoogleSignIn: document.querySelector("#landingGoogleSignIn"),
   landingExistingAccountMain: document.querySelector("#landingExistingAccountMain"),
   demoScreen: document.querySelector("#demoScreen"),
   demoIllustration: document.querySelector("#demoIllustration"),
@@ -808,7 +786,6 @@ let currentGroupId = DEFAULT_GROUP_ID;
 let pendingProfileId = "";
 let pendingVillageJoinId = "";
 let verifiedVillageJoinId = "";
-let selectedAvatar = PROFILE_AVATARS[0];
 let searchResults = [];
 let randomSessionKey = "";
 let randomSessionIds = [];
@@ -818,7 +795,6 @@ let firebaseSyncAvailable = false;
 let firebaseAuthUser = null;
 let firebaseAuthReady = false;
 let firebaseAuthUnsubscribe = null;
-let firebaseAuthSkipped = false;
 let firebaseAuthMode = "signup";
 let villageSelectionMode = "choose";
 let demoPageIndex = 0;
@@ -832,6 +808,7 @@ let cloudSaveInFlight = false;
 let cloudSavePending = false;
 let profileDataSource = "localStorage";
 let lastIdentityProfileWasCreated = false;
+let obsoleteLocalIdentityDataDetected = false;
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -942,6 +919,20 @@ function getFirebaseProviderLabel(user = firebaseAuthUser) {
     ? user.providerData.map((provider) => provider?.providerId).filter(Boolean)
     : [];
   return providers.length ? providers.join(", ") : "password";
+}
+
+function logAuthStateDiagnostics(label = "AUTH STATE") {
+  const profileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+  const profile = profileId ? profileStore?.profiles?.[profileId] : null;
+  console.info(`[Unser Dorf auth diagnostics] ${label}`, {
+    firebaseProjectId: getFirebaseSyncConfig().firebaseConfig.projectId || "not configured",
+    firebaseUid: firebaseAuthUser?.uid || "none",
+    email: firebaseAuthUser?.email || "none",
+    provider: firebaseAuthUser ? getFirebaseProviderLabel(firebaseAuthUser) : "none",
+    firestoreProfileUid: profileId || "none",
+    villageId: profile?.villageId || profileStore?.currentGroup || "none",
+    obsoleteLocalProfileDataDetected: obsoleteLocalIdentityDataDetected
+  });
 }
 
 function getFirebaseUserDocumentPath(uid = firebaseAuthUser?.uid || "") {
@@ -1135,6 +1126,7 @@ function installV0DebugTools() {
 async function init() {
   try {
     installV0DebugTools();
+    cleanupObsoleteLocalIdentityData();
     bindLockEvents();
     await unlockApp();
   } catch (error) {
@@ -1142,9 +1134,48 @@ async function init() {
   }
 }
 
+function cleanupObsoleteLocalIdentityData() {
+  const detectedKeys = OBSOLETE_LOCAL_IDENTITY_STORAGE_KEYS.filter((key) => localStorage.getItem(key) !== null);
+  obsoleteLocalIdentityDataDetected = detectedKeys.length > 0;
+  detectedKeys.forEach((key) => localStorage.removeItem(key));
+  console.info("[Unser Dorf auth diagnostics] Obsolete local-profile data check.", {
+    detected: obsoleteLocalIdentityDataDetected,
+    removedKeys: detectedKeys
+  });
+}
+
+function archiveObsoleteLocalOnlyProfiles(store = profileStore) {
+  if (!store?.profiles) return;
+  const localProfileIds = Object.keys(store.profiles).filter((profileId) => profileId.startsWith("local-"));
+  if (!localProfileIds.length) return;
+  const archivedProfiles = Object.fromEntries(localProfileIds.map((profileId) => [profileId, store.profiles[profileId]]));
+  const existingArchive = readStorageObject(ARCHIVED_LOCAL_PROFILES_STORAGE_KEY);
+  localStorage.setItem(ARCHIVED_LOCAL_PROFILES_STORAGE_KEY, JSON.stringify({
+    ...existingArchive,
+    archivedAt: new Date().toISOString(),
+    profiles: {
+      ...(existingArchive.profiles || {}),
+      ...archivedProfiles
+    }
+  }));
+  localProfileIds.forEach((profileId) => {
+    delete store.profiles[profileId];
+  });
+  Object.values(store.groups || {}).forEach((group) => {
+    group.memberIds = normalizeGroupMemberIds((group.memberIds || []).filter((profileId) => !localProfileIds.includes(profileId)));
+  });
+  if (localProfileIds.includes(store.currentProfile)) store.currentProfile = "";
+  obsoleteLocalIdentityDataDetected = true;
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(store));
+  console.info("[Unser Dorf auth diagnostics] Archived obsolete local-only profiles.", {
+    profileIds: localProfileIds
+  });
+}
+
 async function unlockApp() {
   els.lockScreen.classList.add("hidden");
   profileStore = loadProfileStore();
+  archiveObsoleteLocalOnlyProfiles(profileStore);
   await initializeFamilySync();
   bindEvents();
   try {
@@ -1275,7 +1306,7 @@ async function initializeFamilySync() {
     syncEnabled = false;
     firebaseSyncAvailable = false;
     updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, "Firebase sync unavailable");
-    console.warn("Firebase sync unavailable. Using this device only.", error);
+    console.error("Firebase sync unavailable. User will remain signed out until Firebase authentication works.", error);
   }
 }
 
@@ -1763,11 +1794,7 @@ function handleVillagePassword(event) {
 }
 
 function showVillageEntry() {
-  if (getProfileList().length === 0) {
-    showCreateProfileScreen();
-    return;
-  }
-  showProfileChooser();
+  showVillageSelection();
 }
 
 function promoteFamilyAchievements(store) {
@@ -2099,6 +2126,11 @@ function getCurrentUserRole() {
 
 function isCurrentUserDeveloper() {
   return Boolean(firebaseAuthUser && getCurrentUserRole() === "developer");
+}
+
+function isProtectedDeveloperAccount(user = firebaseAuthUser) {
+  if (!user) return false;
+  return shouldBootstrapDeveloperRole(user) || (user.uid === firebaseAuthUser?.uid && getCurrentUserRole() === "developer");
 }
 
 function shouldBootstrapDeveloperRole(user = firebaseAuthUser) {
@@ -2839,13 +2871,9 @@ function getProfilesForGroupSync(group) {
 }
 
 function routeAfterStartup() {
+  logAuthStateDiagnostics("startup route");
   if (firebaseAuthUser) {
     logAuthDebugBlock("AUTH DEBUG", profileStore);
-    routeAfterIdentityReady();
-    return;
-  }
-  if (hasLocalIdentity()) {
-    firebaseAuthSkipped = true;
     routeAfterIdentityReady();
     return;
   }
@@ -2855,6 +2883,7 @@ function routeAfterStartup() {
 function routeAfterIdentityReady() {
   const profileId = ensureIdentityProfile();
   const profile = profileStore?.profiles?.[profileId] || null;
+  logAuthStateDiagnostics("identity ready");
   const profileCheck = logUserProfileCheck(profileId, profile);
   if (shouldOpenDeveloperToolsFromUrl()) {
     showDeveloperTools();
@@ -2879,21 +2908,12 @@ function routeAfterIdentityReady() {
   showVillageSelection();
 }
 
-function hasLocalIdentity() {
-  const profileId = localStorage.getItem(LOCAL_IDENTITY_STORAGE_KEY) || "";
-  return Boolean(profileId && profileStore?.profiles?.[profileId]);
-}
-
 function getIdentityProfileId() {
   if (!profileStore?.profiles) return "";
   if (firebaseAuthUser) {
     return getFirebaseProfileId(firebaseAuthUser);
   }
-  const localProfileId = localStorage.getItem(LOCAL_IDENTITY_STORAGE_KEY) || "";
-  if (localProfileId) return localProfileId;
-  const generatedId = `local-${Date.now().toString(36)}`;
-  localStorage.setItem(LOCAL_IDENTITY_STORAGE_KEY, generatedId);
-  return generatedId;
+  return "";
 }
 
 function ensureIdentityProfile() {
@@ -3032,7 +3052,6 @@ async function waitForFirebaseAuthState() {
     firebaseAuthUnsubscribe = firebase.authModule.onAuthStateChanged(firebase.auth, (user) => {
       firebaseAuthUser = user || null;
       firebaseAuthReady = true;
-      if (firebaseAuthUser) firebaseAuthSkipped = false;
       updateFirebaseAuthStatus("");
       resolve(firebaseAuthUser);
     });
@@ -3040,7 +3059,7 @@ async function waitForFirebaseAuthState() {
 }
 
 function shouldShowFirebaseAuthScreen() {
-  return hasCloudSyncConfig() && firebaseSyncAvailable && !firebaseAuthUser && !firebaseAuthSkipped;
+  return hasCloudSyncConfig() && firebaseSyncAvailable && !firebaseAuthUser;
 }
 
 function hideProfileOnboardingPanels() {
@@ -3049,18 +3068,11 @@ function hideProfileOnboardingPanels() {
   }
   els.firebaseAuthCard?.classList.add("hidden");
   els.resetPasswordCard?.classList.add("hidden");
-  els.localModeConfirmCard?.classList.add("hidden");
   els.displayNameForm?.classList.add("hidden");
   els.villageSelection?.classList.add("hidden");
   els.familyWealthCard?.classList.add("hidden");
   els.villageNameForm?.classList.add("hidden");
   els.villagePasswordForm?.classList.add("hidden");
-  els.profileSignInHeading?.classList.add("hidden");
-  els.profileGrid?.classList.add("hidden");
-  els.profileActions?.classList.add("hidden");
-  els.emptyProfileMessage?.classList.add("hidden");
-  els.profileLoginForm?.classList.add("hidden");
-  els.createProfileForm?.classList.add("hidden");
 }
 
 function showFirebaseAuthScreen(mode = "signup", message = "") {
@@ -3123,8 +3135,6 @@ function renderFirebaseAuthScreen() {
     els.firebaseAuthPassword.autocomplete = isSignIn ? "current-password" : "new-password";
   }
   els.forgotPasswordLink?.classList.toggle("hidden", !isSignIn);
-  els.firebaseAuthLocalLabel?.classList.toggle("hidden", isSignIn);
-  els.firebaseAuthSkip?.classList.toggle("hidden", isSignIn);
   if (els.firebaseAuthToggle) {
     els.firebaseAuthToggle.classList.add("hidden");
   }
@@ -3159,19 +3169,6 @@ function updateRememberedEmailPreference() {
     return;
   }
   localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY);
-}
-
-function showLocalModeConfirmation() {
-  currentProfileId = "";
-  pendingProfileId = "";
-  els.appShell.classList.add("locked");
-  els.landingScreen?.classList.add("hidden");
-  els.demoScreen?.classList.add("hidden");
-  els.profileScreen.classList.remove("hidden");
-  els.profileScreen.classList.remove("village-landing-mode", "first-use");
-  hideProfileOnboardingPanels();
-  els.localModeConfirmCard?.classList.remove("hidden");
-  scrollPageToTop(els.profileScreen);
 }
 
 function toggleFirebaseAuthMode() {
@@ -3237,10 +3234,17 @@ async function handlePasswordResetSubmit() {
   updateResetPasswordStatus("Sending reset email...");
   try {
     const firebase = await getFirebaseSyncApi();
+    console.info("[Unser Dorf auth recovery] Sending password reset email.", {
+      email,
+      projectId: getFirebaseSyncConfig().firebaseConfig.projectId || "unknown"
+    });
     await firebase.authModule.sendPasswordResetEmail(firebase.auth, email);
+    console.info("[Unser Dorf auth recovery] Firebase accepted password reset request. If no email arrives, check whether the Auth user exists and whether Firebase email templates/sending are enabled.", {
+      email
+    });
     showResetPasswordSuccess();
   } catch (error) {
-    console.warn("Password reset email failed.", error);
+    console.error("Password reset email failed.", error);
     updateResetPasswordStatus(getFriendlyPasswordResetError(error), true);
   }
 }
@@ -3265,6 +3269,11 @@ async function handleFirebaseEmailAuth(mode) {
     updateFirebaseAuthStatus("Enter an email and password.", true);
     return;
   }
+  if (mode === "register" && DEVELOPER_BOOTSTRAP_EMAILS.has(email.toLowerCase())) {
+    console.warn("Blocked developer email from creating a duplicate account through normal signup.", { email });
+    updateFirebaseAuthStatus("This admin email needs recovery, not a new account. Please use Sign In or Firebase Console recovery to avoid duplicate Mineko profiles.", true);
+    return;
+  }
   updateFirebaseAuthStatus(mode === "register" ? "Creating account..." : "Signing in...");
   try {
     const firebase = await getFirebaseSyncApi();
@@ -3282,21 +3291,27 @@ async function handleFirebaseEmailAuth(mode) {
   }
 }
 
+async function handleFirebaseGoogleSignIn() {
+  updateFirebaseAuthStatus("Opening Google sign-in...");
+  try {
+    const firebase = await getFirebaseSyncApi();
+    const provider = new firebase.authModule.GoogleAuthProvider();
+    const credential = await firebase.authModule.signInWithPopup(firebase.auth, provider);
+    await handleFirebaseSignedIn(credential.user);
+  } catch (error) {
+    console.error("Firebase Google authentication failed.", error);
+    updateFirebaseAuthStatus(getFriendlyFirebaseAuthError(error), true);
+  }
+}
+
 async function handleFirebaseSignedIn(user) {
   firebaseAuthUser = user || null;
   firebaseAuthReady = true;
-  firebaseAuthSkipped = false;
   syncEnabled = false;
   updateCloudSyncDebug({ userDocLoaded: false }, "Firebase signed in");
   updateFirebaseAuthStatus("Signed in. Loading your progress...");
   await initializeFamilySync();
   logAuthDebugBlock("AUTH DEBUG", profileStore);
-  routeAfterIdentityReady();
-}
-
-function continueWithoutFirebaseAuth() {
-  firebaseAuthSkipped = true;
-  syncEnabled = false;
   routeAfterIdentityReady();
 }
 
@@ -3315,8 +3330,6 @@ async function signOutOfFirebase() {
   }
   firebaseAuthUser = null;
   syncEnabled = false;
-  firebaseAuthSkipped = false;
-  localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
   saveCurrentPosition();
   closeSettingsMenu();
   showLandingScreen();
@@ -3356,6 +3369,14 @@ function getFriendlyDeleteAccountError(error) {
 
 function openDeleteAccountConfirmation() {
   closeSettingsMenu();
+  if (isProtectedDeveloperAccount()) {
+    console.warn("Protected developer account deletion was blocked in-app.", {
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || ""
+    });
+    window.alert("Developer accounts cannot be deleted inside the app. Use the Firebase Console or a recovery/admin procedure so Mineko's access and Firestore data are not accidentally removed.");
+    return;
+  }
   if (els.deleteAccountConfirmInput) els.deleteAccountConfirmInput.value = "";
   updateDeleteAccountStatus("");
   updateDeleteAccountButtonState();
@@ -3398,6 +3419,14 @@ async function handleDeleteAccountSubmit(event) {
     updateDeleteAccountStatus("Type DELETE to confirm.", true);
     return;
   }
+  if (isProtectedDeveloperAccount()) {
+    updateDeleteAccountStatus("Developer accounts cannot be deleted inside the app. Use Firebase Console/admin recovery so Mineko's access is protected.", true);
+    console.warn("Protected developer account deletion submit was blocked.", {
+      uid: firebaseAuthUser?.uid || "",
+      email: firebaseAuthUser?.email || ""
+    });
+    return;
+  }
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
     const message = "We could not connect. Check your internet connection and try again.";
     console.warn("Account deletion blocked because the browser is offline.");
@@ -3419,13 +3448,17 @@ async function handleDeleteAccountSubmit(event) {
     const user = firebaseAuthUser;
     if (user) {
       const firebase = await getFirebaseSyncApi();
-      console.info("Deleting Unser Dorf account data.", {
+      console.info("Deleting Unser Dorf Firebase Auth account before Firestore cleanup.", {
         uid: user.uid,
         email: user.email,
         userDocPath: [...firebase.rootPathParts, "users", user.uid].join("/")
       });
-      await deleteFirebaseUserData(firebase, user);
       await firebase.authModule.deleteUser(user);
+      try {
+        await deleteFirebaseUserData(firebase, user);
+      } catch (cleanupError) {
+        console.error("Firebase Auth account was deleted, but Firestore cleanup did not finish. Use Developer Tools or a Cloud Function to remove remaining Firestore data.", cleanupError);
+      }
     }
     clearLocalAccountState();
     closeDeleteAccountConfirmation();
@@ -3530,7 +3563,6 @@ function clearLocalAccountState() {
   localStorage.clear();
   firebaseAuthUser = null;
   firebaseAuthReady = true;
-  firebaseAuthSkipped = false;
   syncEnabled = false;
   currentProfileId = "";
   pendingProfileId = "";
@@ -3548,7 +3580,7 @@ function clearLocalAccountState() {
 function refreshVisibleProfileState() {
   if (!profileStore) return;
   if (!currentProfileId) {
-    renderProfileCards();
+    showLandingScreen();
     return;
   }
   const profile = getCurrentProfile();
@@ -3582,7 +3614,7 @@ function refreshVisibleProfileState() {
 }
 
 function showProfileScreen() {
-  if (firebaseAuthUser || hasLocalIdentity()) {
+  if (firebaseAuthUser) {
     routeAfterIdentityReady();
     return;
   }
@@ -3590,13 +3622,7 @@ function showProfileScreen() {
 }
 
 function showVillageNameSetup() {
-  els.familyWealthCard.classList.add("hidden");
-  els.profileSignInHeading.classList.add("hidden");
-  els.profileGrid.classList.add("hidden");
-  els.profileActions.classList.add("hidden");
-  els.emptyProfileMessage.classList.add("hidden");
-  els.profileLoginForm.classList.add("hidden");
-  els.createProfileForm.classList.add("hidden");
+  els.familyWealthCard?.classList.add("hidden");
   els.villageNameForm.classList.remove("hidden");
   els.profileScreen.classList.add("first-use");
   els.villageNameInput.value = "";
@@ -3608,40 +3634,7 @@ function handleVillageNameSubmit(event) {
   event.preventDefault();
   saveVillageName(els.villageNameInput.value);
   renderVillageName();
-  renderProfileCards();
-  showProfileChooser();
-}
-
-function selectProfile(profileId) {
-  const profile = profileStore.profiles[profileId];
-  if (!profile) return;
-  showProfileLogin(profileId);
-}
-
-function showProfileLogin(profileId) {
-  const profile = profileStore.profiles[profileId];
-  if (!profile) return;
-  pendingProfileId = profileId;
-  hideProfileOnboardingPanels();
-  els.profileLoginForm.querySelector(".eyebrow").textContent = "Welcome back";
-  els.profileLoginTitle.textContent = `${profile.emoji || "⭐"} ${getVillageDisplayName(profile)}`;
-  els.profileLoginPassword.value = "";
-  els.profileLoginError.classList.add("hidden");
-  els.profileLoginForm.classList.remove("hidden");
-  scrollPageToTop(els.profileScreen);
-  els.profileLoginPassword.focus();
-}
-
-function handleProfileLogin(event) {
-  event.preventDefault();
-  const profile = profileStore.profiles[pendingProfileId];
-  if (!profile || els.profileLoginPassword.value !== profile.password) {
-    els.profileLoginError.textContent = "Incorrect password.";
-    els.profileLoginError.classList.remove("hidden");
-    els.profileLoginPassword.select();
-    return;
-  }
-  completeProfileLogin(pendingProfileId);
+  routeAfterIdentityReady();
 }
 
 function completeProfileLogin(profileId) {
@@ -3666,7 +3659,6 @@ function completeProfileLogin(profileId) {
   els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   renderGroupSelectors();
   els.profileScreen.classList.add("hidden");
-  els.profileLoginForm.classList.add("hidden");
   els.appShell.classList.remove("locked");
   updateFilterOptions();
   currentIndex = 0;
@@ -4359,7 +4351,6 @@ async function saveAccountDisplayName() {
   await saveProfileStoreToCloudNow();
   if (els.currentProfileLabel) els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   if (els.currentUserLabel) els.currentUserLabel.textContent = getVillageDisplayName(profile);
-  renderProfileCards();
   if (currentView === "dashboard") renderDashboard();
   if (currentView === "village-members") renderVillageMembersPage();
   renderSettingsPanel();
@@ -7110,210 +7101,6 @@ function resetCurrentProfileTestData() {
   renderDashboard();
 }
 
-function renderProfileCards() {
-  renderGroupSelectors();
-  const profileCards = getProfileList().map((profileInfo) => {
-    const profile = profileStore.profiles[profileInfo.id];
-    const button = document.createElement("button");
-    button.className = "profile-card";
-    button.type = "button";
-    button.dataset.profileId = profile.id;
-    button.addEventListener("click", () => selectProfile(profile.id));
-    button.replaceChildren(
-      createTextElement("span", "profile-card-avatar", profile.emoji || "⭐"),
-      createTextElement("span", "profile-name", getVillageDisplayName(profile)),
-      createTextElement("span", "profile-signin-note", "Enter password")
-    );
-    return button;
-  });
-  els.profileGrid.replaceChildren(
-    ...profileCards
-  );
-  els.emptyProfileMessage.classList.toggle("hidden", profileCards.length > 0);
-  els.profileSignInHeading.classList.toggle("hidden", profileCards.length === 0);
-  els.profileScreen.classList.toggle("first-use", profileCards.length === 0);
-  els.createProfileToggle.replaceChildren(
-    document.createTextNode(profileCards.length === 0 ? "Create Profile" : "Create New Profile")
-  );
-}
-
-function getProfileList() {
-  const groupMemberIds = new Set(getCurrentGroup()?.memberIds || []);
-  return Object.values(profileStore.profiles || {})
-    .filter((profile) => groupMemberIds.has(profile.id))
-    .map((profile) => ({
-      id: profile.id,
-      name: getVillageDisplayName(profile),
-      emoji: profile.emoji || "",
-      avatar: profile.avatar || "",
-      password: profile.password || ""
-    }));
-}
-
-function showProfileChooser() {
-  pendingProfileId = "";
-  const group = getCurrentGroup();
-  const hasProfiles = getProfileList().length > 0;
-  hideProfileOnboardingPanels();
-  if (els.profileSignInEyebrow) els.profileSignInEyebrow.textContent = `Welcome to ${group?.name || "your village"}`;
-  if (els.profileSignInTitle) els.profileSignInTitle.textContent = hasProfiles ? "Choose Profile" : "Create your profile";
-  els.profileSignInHeading.classList.remove("hidden");
-  els.profileGrid.classList.remove("hidden");
-  els.profileActions.classList.remove("hidden");
-  els.profileLoginForm.reset();
-  els.profileLoginError.classList.add("hidden");
-  els.profileLoginError.textContent = "Incorrect password.";
-  els.createProfileForm.reset();
-  els.createProfileError.classList.add("hidden");
-  els.createProfileError.textContent = "";
-  renderProfileCards();
-  scrollPageToTop(els.profileScreen);
-}
-
-function showCreateProfileScreen() {
-  const group = getCurrentGroup();
-  hideProfileOnboardingPanels();
-  if (els.createProfileTitle) els.createProfileTitle.textContent = `Welcome to ${group?.name || "your village"}`;
-  if (els.createProfileIntro) els.createProfileIntro.textContent = "Create your profile";
-  renderAvatarPicker();
-  els.createProfileForm.reset();
-  els.createProfileError.classList.add("hidden");
-  els.createProfileError.textContent = "";
-  els.createProfileForm.classList.remove("hidden");
-  scrollPageToTop(els.profileScreen);
-  els.createProfileName.focus();
-}
-
-function cancelCreateProfile() {
-  if (getProfileList().length === 0) {
-    showVillageSelection();
-    return;
-  }
-  showProfileChooser();
-}
-
-function renderAvatarPicker() {
-  selectedAvatar = selectedAvatar || PROFILE_AVATARS[0];
-  if (!els.avatarOptions) return;
-  const buttons = PROFILE_AVATARS.map((avatar) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "avatar-option";
-    button.textContent = avatar;
-    button.setAttribute("aria-label", `Choose ${avatar} avatar`);
-    button.classList.toggle("selected", avatar === selectedAvatar);
-    button.addEventListener("click", () => {
-      selectedAvatar = avatar;
-      renderAvatarPicker();
-    });
-    return button;
-  });
-  els.avatarOptions.replaceChildren(...buttons);
-}
-
-function createCustomProfile(name, password, emoji = selectedAvatar) {
-  const id = createCustomProfileId(name);
-  profileStore.profiles[id] = normalizeProfileData(
-    {
-      id,
-      name,
-      displayName: name,
-      villageDisplayName: name,
-      displayNameConfirmed: true,
-      password,
-      emoji,
-      avatar: "",
-      demoCompleted: false,
-      ownerUid: firebaseAuthUser?.uid || "",
-      ownerEmail: firebaseAuthUser?.email || ""
-    },
-    { id, name, password, emoji, avatar: "" }
-  );
-  const group = getCurrentGroup();
-  if (group && !group.memberIds.includes(id) && group.memberIds.length < 6) {
-    group.memberIds.push(id);
-  }
-  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileStore));
-  return id;
-}
-
-function createCustomProfileId(name) {
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    || "profile";
-  return `custom-${Date.now().toString(36)}-${slug}`;
-}
-
-function renameCurrentProfile(nextName) {
-  const profile = getCurrentProfile();
-  const normalizedName = String(nextName || "").trim();
-  if (!profile || !normalizedName) {
-    window.alert("Display name was not changed.");
-    return false;
-  }
-  const nameExists = getCurrentGroupProfiles()
-    .some((existingProfile) => existingProfile.id !== profile.id && existingProfile.name.toLowerCase() === normalizedName.toLowerCase());
-  if (nameExists) {
-    window.alert("A profile with that name already exists.");
-    return false;
-  }
-  profile.name = normalizedName;
-  profile.displayName = normalizedName;
-  profile.villageDisplayName = normalizedName;
-  profile.displayNameConfirmed = true;
-  saveProfileStore();
-  els.currentProfileLabel.textContent = getVillageDisplayName(profile);
-  renderProfileCards();
-  renderDashboard();
-  renderSettingsPanel();
-  return true;
-}
-
-function handleCreateProfile(event) {
-  event.preventDefault();
-  const name = els.createProfileName.value.trim();
-  const password = els.createProfilePassword.value;
-  if (firebaseAuthUser) {
-    const profileId = ensureIdentityProfile();
-    const profile = profileStore.profiles?.[profileId];
-    if (!profile || !name) {
-      els.createProfileError.textContent = "Enter a display name.";
-      els.createProfileError.classList.remove("hidden");
-      return;
-    }
-    profile.name = name;
-    profile.displayName = name;
-    profile.villageDisplayName = name;
-    profile.displayNameConfirmed = true;
-    profile.ownerUid = firebaseAuthUser.uid;
-    profile.ownerEmail = firebaseAuthUser.email || "";
-    saveProfileStore();
-    completeProfileLogin(profileId);
-    return;
-  }
-  if (!name || !password) {
-    els.createProfileError.textContent = "Enter a name and password.";
-    els.createProfileError.classList.remove("hidden");
-    return;
-  }
-  if ((getCurrentGroup()?.memberIds || []).length >= 6) {
-    els.createProfileError.textContent = "This group already has 6 members.";
-    els.createProfileError.classList.remove("hidden");
-    return;
-  }
-  const nameExists = getCurrentGroupProfiles()
-    .some((profile) => profile.name.toLowerCase() === name.toLowerCase());
-  if (nameExists) {
-    els.createProfileError.textContent = "A profile with that name already exists.";
-    els.createProfileError.classList.remove("hidden");
-    return;
-  }
-  const profileId = createCustomProfile(name, password, selectedAvatar);
-  completeProfileLogin(profileId);
-}
-
 function renderFamilyWealth() {
   const summary = getFamilyWealthSummary();
   els.familyWealthLevel.textContent = summary.level.name;
@@ -7396,7 +7183,6 @@ function lockSharedPasswordScreen() {
   closeSettingsMenu();
   currentProfileId = "";
   pendingProfileId = "";
-  localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
   showLandingScreen();
 }
 
@@ -7489,10 +7275,8 @@ function bindEvents() {
   });
   els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
-  els.firebaseAuthSkip?.addEventListener("click", showLocalModeConfirmation);
-  els.localModeContinue?.addEventListener("click", continueWithoutFirebaseAuth);
-  els.localModeBack?.addEventListener("click", () => showFirebaseAuthScreen("signup"));
   els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
+  els.firebaseGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
   els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);
   els.villageSelectionBack?.addEventListener("click", handleVillageSelectionBack);
@@ -7501,11 +7285,6 @@ function bindEvents() {
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
   els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
-  els.createProfileToggle.addEventListener("click", showCreateProfileScreen);
-  els.cancelCreateProfile.addEventListener("click", cancelCreateProfile);
-  els.createProfileForm.addEventListener("submit", handleCreateProfile);
-  els.cancelProfileLogin.addEventListener("click", showProfileChooser);
-  els.profileLoginForm.addEventListener("submit", handleProfileLogin);
   els.villageMembersBack?.addEventListener("click", showDashboard);
 
   els.appShell.addEventListener("click", (event) => {
@@ -7618,7 +7397,7 @@ function bindEvents() {
   });
   els.landingTryDemo?.addEventListener("click", showDemoScreen);
   els.landingGetStartedMain?.addEventListener("click", startGetStartedFlow);
-  els.landingLocalButton?.addEventListener("click", continueWithoutFirebaseAuth);
+  els.landingGoogleSignIn?.addEventListener("click", handleFirebaseGoogleSignIn);
   els.landingExistingAccountMain?.addEventListener("click", skipLandingToVillageSelection);
   els.demoBack?.addEventListener("click", handleDemoBack);
   els.demoSignIn?.addEventListener("click", handleDemoSignIn);

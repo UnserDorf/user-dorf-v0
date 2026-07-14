@@ -1135,20 +1135,6 @@ body {
   font-weight: 650;
 }
 
-.profile-signin-heading {
-  text-align: center;
-}
-
-.profile-signin-heading h2 {
-  margin: 4px 0 0;
-  font-size: clamp(1.35rem, 4vw, 1.85rem);
-}
-
-.profile-signin-heading h2 span,
-#createProfileToggle span {
-  display: block;
-}
-
 .village-selection {
   width: min(620px, 100%);
   display: grid;
@@ -1328,21 +1314,9 @@ body {
   gap: 12px;
 }
 
-.profile-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.profile-actions button {
-  line-height: 1.2;
-}
-
 .village-name-card,
 .village-password-card,
-	.create-profile-card,
-	.profile-login-card,
 	.firebase-auth-card,
-	.local-mode-card,
 	.display-name-card {
   width: min(430px, 100%);
   justify-self: center;
@@ -1356,20 +1330,15 @@ body {
 }
 
 .village-name-card h2,
-.create-profile-card h2,
 .village-password-card h2,
-	.profile-login-card h2,
 	.firebase-auth-card h2,
-	.local-mode-card h2,
 	.display-name-card h2 {
   margin: 0;
   font-size: clamp(1.45rem, 5vw, 2rem);
 }
 
 .village-name-card label,
-.create-profile-card label,
 	.village-password-card label,
-	.profile-login-card label,
 	.firebase-auth-card label,
 	.display-name-card label {
   display: grid;
@@ -1379,9 +1348,7 @@ body {
 }
 
 .village-name-card input,
-.create-profile-card input,
 	.village-password-card input,
-	.profile-login-card input,
 	.firebase-auth-card input,
 	.display-name-card input {
   min-height: 56px;
@@ -1393,57 +1360,10 @@ body {
   font-size: 1.1rem;
 }
 
-.create-profile-buttons {
+.form-button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-}
-
-.profile-card {
-  width: 100%;
-  max-width: 100%;
-  min-height: 118px;
-  border: 1px solid rgba(222, 216, 203, 0.95);
-  border-radius: 8px;
-  background: rgba(255, 253, 248, 0.92);
-  box-shadow: var(--shadow);
-  color: var(--ink);
-  padding: 20px;
-  display: grid;
-  place-content: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.profile-signin-note {
-  color: var(--muted);
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-
-.profile-card-avatar {
-  font-size: 2.1rem;
-  line-height: 1;
-}
-
-.profile-card:active {
-  transform: scale(0.99);
-}
-
-.empty-profile-message {
-  margin: 6px 0 0;
-  color: var(--ink);
-  font-size: clamp(1.1rem, 3vw, 1.45rem);
-  font-weight: 850;
-  text-align: center;
-}
-
-.empty-profile-message p {
-  margin: 0;
-}
-
-.empty-profile-message p + p {
-  margin-top: 6px;
 }
 
 .empty-profile-message p:nth-child(3) {
@@ -5200,15 +5120,6 @@ select,
     gap: 4px;
   }
 
-  .profile-grid {
-    grid-template-columns: repeat(auto-fit, minmax(170px, 220px));
-  }
-
-  .profile-card {
-    min-height: 112px;
-    padding: 14px;
-  }
-
   .dashboard-screen,
   .coin-challenges-screen,
   .achievement-collection-screen {
@@ -5648,16 +5559,6 @@ select,
     align-content: start;
   }
 
-  .profile-grid {
-    grid-template-columns: minmax(0, min(100%, 260px));
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .profile-card {
-    min-height: 108px;
-  }
-
   .dashboard-motivation {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -5767,14 +5668,6 @@ select,
     width: 38px;
     min-height: 38px;
     font-size: 1rem;
-  }
-
-  .profile-grid {
-    gap: 8px;
-  }
-
-  .profile-card {
-    min-height: 104px;
   }
 
   .dashboard-heading h2 {
@@ -6430,10 +6323,7 @@ select,
 .lock-card,
 .village-name-card,
 .village-password-card,
-.create-profile-card,
-		.profile-login-card,
 		.firebase-auth-card,
-		.local-mode-card,
 		.display-name-card {
 		  width: min(400px, 100%);
 		  border-color: rgba(190, 177, 153, 0.3);
@@ -6479,47 +6369,35 @@ select,
 }
 
 .village-password-card .eyebrow,
-.profile-login-card .eyebrow,
-	.create-profile-card .eyebrow,
 	.village-name-card .eyebrow,
 	.firebase-auth-card .eyebrow,
-	.local-mode-card .eyebrow,
 	.display-name-card .eyebrow {
   color: var(--green);
   font-size: 0.78rem;
   letter-spacing: 0;
 }
 
-	.profile-login-card,
 	.firebase-auth-card,
-	.local-mode-card,
 	.display-name-card {
 	  text-align: center;
 	}
 
-	.profile-login-card h2,
 	.firebase-auth-card h2,
-	.local-mode-card h2,
 	.display-name-card h2 {
 	  font-size: clamp(1.75rem, 5vw, 2.25rem);
 	  line-height: 1.08;
 	}
 
 .village-name-card label,
-.create-profile-card label,
 	.village-password-card label,
-	.profile-login-card label,
 	.firebase-auth-card label,
-	.local-mode-card label,
 	.display-name-card label,
 	.lock-card label {
 	  text-align: left;
 	}
 
 .village-name-card input,
-.create-profile-card input,
 .village-password-card input,
-	.profile-login-card input,
 	.firebase-auth-card input,
 		.display-name-card input,
 		.lock-card input {
@@ -6595,43 +6473,19 @@ select,
   gap: 10px;
 }
 
-.firebase-auth-local-label {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 650;
-  text-align: center;
-}
-
-.local-mode-card p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-weight: 650;
-  line-height: 1.45;
-}
-
-.local-mode-actions {
-  display: grid;
-  gap: 10px;
-}
-
-.local-mode-actions button {
-  width: 100%;
-}
-
 .firebase-auth-actions .primary-button,
 .firebase-auth-actions .ghost-button,
 .firebase-auth-actions .small-link-button {
   width: 100%;
 }
 
-.create-profile-buttons .primary-button,
+.form-button-row .primary-button,
 .lock-card .primary-button {
   border-radius: 8px;
   box-shadow: 0 8px 18px rgba(71, 115, 91, 0.16);
 }
 
-.create-profile-buttons .ghost-button {
+.form-button-row .ghost-button {
   border-color: rgba(190, 177, 153, 0.34);
   background: rgba(255, 253, 248, 0.68);
 }
@@ -6667,9 +6521,7 @@ select,
 
   .lock-card,
   .village-name-card,
-  .village-password-card,
-  .create-profile-card,
-  .profile-login-card {
+  .village-password-card {
     width: min(370px, 100%);
     padding: 22px;
   }
@@ -6684,9 +6536,6 @@ select,
     grid-template-columns: 1fr;
   }
 
-  .create-profile-buttons {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* UI/UX consistency pass: unify surfaces, controls, and page rhythm. */
@@ -6773,8 +6622,6 @@ button:active {
 .lock-card,
 .village-name-card,
 .village-password-card,
-.create-profile-card,
-.profile-login-card,
 .landing-card,
 .demo-card,
 .dashboard-screen > .dashboard-heading,
@@ -6805,8 +6652,6 @@ button:active {
 .lock-card,
 .village-name-card,
 .village-password-card,
-.create-profile-card,
-.profile-login-card,
 .landing-card,
 .demo-card,
 .dashboard-screen > .dashboard-heading,

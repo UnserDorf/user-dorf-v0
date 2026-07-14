@@ -57,12 +57,11 @@
               <input id="firebaseAuthPassword" type="password" autocomplete="current-password" required>
             </label>
             <button class="small-link-button firebase-forgot-password hidden" id="forgotPasswordLink" type="button">Forgot your password?</button>
+            <button class="ghost-button firebase-google-button" id="firebaseGoogleSignIn" type="button">Continue with Google</button>
             <button class="primary-button" id="firebaseEmailSignIn" type="submit">Sign In</button>
             <button class="primary-button" id="firebaseEmailRegister" type="submit">Create Account</button>
           </form>
           <div class="firebase-auth-actions">
-            <p class="firebase-auth-local-label" id="firebaseAuthLocalLabel">Continue without an account</p>
-            <button class="small-link-button" id="firebaseAuthSkip" type="button">Use this device only</button>
             <button class="small-link-button hidden" id="firebaseAuthToggle" type="button">Already have an account? Sign in</button>
             <button class="small-link-button" id="firebaseAuthTryDemo" type="button">Want to explore first? Try Demo</button>
             <button class="small-link-button" id="firebaseAuthHome" type="button">Back to Home</button>
@@ -87,18 +86,6 @@
             <h2>Password reset email sent</h2>
             <p>If an account exists for that email address, we've sent instructions to reset your password.</p>
             <button class="primary-button" id="resetPasswordSuccessBack" type="button">Back to Sign In</button>
-          </div>
-        </section>
-        <section class="local-mode-card hidden" id="localModeConfirmCard" aria-label="Continue without an account">
-          <div>
-            <p class="eyebrow">Device only</p>
-            <h2>Continue without an account</h2>
-            <p>Your progress will be saved only on this device.</p>
-            <p>You can create an account later if you wish.</p>
-          </div>
-          <div class="local-mode-actions">
-            <button class="primary-button" id="localModeContinue" type="button">Continue</button>
-            <button class="ghost-button" id="localModeBack" type="button">Back</button>
           </div>
         </section>
         <form class="display-name-card hidden" id="displayNameForm" aria-label="Display name">
@@ -140,7 +127,7 @@
             <span>Enter village password</span>
             <input id="villagePasswordInput" type="password" autocomplete="current-password" required>
           </label>
-          <div class="create-profile-buttons">
+          <div class="form-button-row">
             <button class="primary-button" type="submit">Continue</button>
             <button class="ghost-button" id="cancelVillagePassword" type="button">Back</button>
           </div>
@@ -173,64 +160,6 @@
             <input id="villageNameInput" type="text" autocomplete="organization" placeholder="Unser Dorf">
           </label>
           <button class="primary-button" type="submit">Continue</button>
-        </form>
-        <div class="profile-signin-heading hidden" id="profileSignInHeading">
-          <p class="eyebrow" id="profileSignInEyebrow">WELCOME</p>
-          <h2>
-            <span id="profileSignInTitle">Choose Profile</span>
-          </h2>
-        </div>
-        <div class="profile-grid" id="profileGrid"></div>
-        <div class="empty-profile-message hidden" id="emptyProfileMessage">
-          <p>Willkommen bei Unser Dorf.</p>
-          <p>Welcome to Unser Dorf.</p>
-          <p>Erstellen Sie Ihr erstes Profil.</p>
-          <p>Create your first profile.</p>
-        </div>
-        <div class="profile-actions" id="profileActions">
-          <button class="ghost-button" id="createProfileToggle" type="button">
-            Neues Profil erstellen
-            <span>Create New Profile</span>
-          </button>
-        </div>
-        <form class="profile-login-card hidden" id="profileLoginForm" aria-label="Profile login">
-          <div>
-            <p class="eyebrow">Welcome back</p>
-            <h2 id="profileLoginTitle">Display Name</h2>
-          </div>
-          <label>
-            <span>Password</span>
-            <input id="profileLoginPassword" type="password" autocomplete="current-password" required>
-          </label>
-          <div class="create-profile-buttons">
-            <button class="primary-button" type="submit">Sign In</button>
-            <button class="ghost-button" id="cancelProfileLogin" type="button">Back</button>
-          </div>
-          <p class="lock-error hidden" id="profileLoginError">Incorrect password.</p>
-        </form>
-        <form class="create-profile-card hidden" id="createProfileForm" aria-label="Create profile">
-          <div>
-            <p class="eyebrow">New learner</p>
-            <h2 id="createProfileTitle">Create Profile</h2>
-            <p id="createProfileIntro">Create your profile</p>
-          </div>
-          <label>
-            <span>Name</span>
-            <input id="createProfileName" type="text" autocomplete="name" required>
-          </label>
-          <label>
-            <span>Password</span>
-            <input id="createProfilePassword" type="password" autocomplete="new-password" required>
-          </label>
-          <div class="avatar-picker" aria-label="Choose avatar">
-            <span>Choose Avatar</span>
-            <div class="avatar-options" id="avatarOptions"></div>
-          </div>
-          <div class="create-profile-buttons">
-            <button class="primary-button" type="submit">Create Profile</button>
-            <button class="ghost-button" id="cancelCreateProfile" type="button">Cancel</button>
-          </div>
-          <p class="lock-error hidden" id="createProfileError"></p>
         </form>
       </div>
     </section>
@@ -335,6 +264,9 @@
             </section>
             <section class="landing-action-group" aria-label="Create your account">
               <button class="ghost-button" id="landingGetStartedMain" type="button">Create Account</button>
+            </section>
+            <section class="landing-action-group" aria-label="Continue with Google">
+              <button class="ghost-button" id="landingGoogleSignIn" type="button">Continue with Google</button>
             </section>
             <section class="landing-action-group compact" aria-label="Returning users">
               <button class="ghost-button" id="landingExistingAccountMain" type="button">Sign In</button>
@@ -1020,6 +952,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=206"></script>
+    <script type="module" src="script.js?v=207"></script>
   </body>
 </html>
