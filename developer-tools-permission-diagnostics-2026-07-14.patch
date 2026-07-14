@@ -1,0 +1,186 @@
+--- a/index.html
++++ b/index.html
+@@ -949,6 +949,6 @@
+     </main>
+ 
+     <script src="firebase-config.js?v=2"></script>
+-    <script type="module" src="script.js?v=211"></script>
++    <script type="module" src="script.js?v=212"></script>
+   </body>
+ </html>
+--- a/script.js
++++ b/script.js
+@@ -2852,14 +2852,26 @@
+ 
+ function getFirebaseUserDocRef(firebase, uid) {
+   return firebase.doc(firebase.db, ...firebase.rootPathParts, "users", uid);
++}
++
++function getFirebaseUserDocPath(firebase, uid) {
++  return [...firebase.rootPathParts, "users", uid].join("/");
+ }
+ 
+ function getFirebaseUsersCollectionRef(firebase) {
+   return firebase.collection(firebase.db, ...firebase.rootPathParts, "users");
++}
++
++function getFirebaseUsersCollectionPath(firebase) {
++  return [...firebase.rootPathParts, "users"].join("/");
+ }
+ 
+ function getFirebaseVillageDocRef(firebase, groupId) {
+   return firebase.doc(firebase.db, ...firebase.rootPathParts, "villages", groupId);
++}
++
++function getFirebaseVillageDocPath(firebase, groupId) {
++  return [...firebase.rootPathParts, "villages", groupId].join("/");
+ }
+ 
+ function getFirebaseOwnedProfileIds() {
+@@ -4381,6 +4393,27 @@
+   els.developerToolsScreen?.classList.remove("hidden");
+   scrollPageToTop(els.developerToolsScreen);
+   renderDeveloperToolsPage();
++}
++
++async function readFirestoreWithDebug(readAction, details) {
++  try {
++    console.info("[Unser Dorf Firestore read]", {
++      ...details,
++      uid: firebaseAuthUser?.uid || "",
++      email: firebaseAuthUser?.email || ""
++    });
++    return await readAction();
++  } catch (error) {
++    console.error("[Unser Dorf Firestore read failed]", {
++      ...details,
++      uid: firebaseAuthUser?.uid || "",
++      email: firebaseAuthUser?.email || "",
++      code: error?.code || "",
++      message: error?.message || String(error),
++      error
++    });
++    throw error;
++  }
+ }
+ 
+ async function renderDeveloperToolsPage() {
+@@ -4405,34 +4438,89 @@
+     );
+   } catch (error) {
+     console.error("Developer Tools failed to load.", error);
+-    setDeveloperToolsStatus(`Could not load Developer Tools data: ${getErrorMessage(error)}`, true);
++    const permissionHint = String(error?.code || "").includes("permission-denied")
++      ? " Firestore rules are blocking one of the Developer Tools reads. Check the browser console for the exact path."
++      : "";
++    setDeveloperToolsStatus(`Could not load Developer Tools data: ${getErrorMessage(error)}.${permissionHint}`, true);
+   }
+ }
+ 
+ async function isCurrentUserDeveloperFromFirestore() {
+-  if (!firebaseAuthUser || !hasCloudSyncConfig()) return false;
++  if (!firebaseAuthUser || !hasCloudSyncConfig()) {
++    console.warn("[Unser Dorf Developer Tools auth] Developer access check skipped.", {
++      hasFirebaseUser: Boolean(firebaseAuthUser),
++      hasCloudSyncConfig: hasCloudSyncConfig()
++    });
++    return false;
++  }
+   try {
+     const firebase = await getFirebaseSyncApi();
+-    const snapshot = await firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
+-    const role = sanitizeUserRole(snapshot.exists() ? snapshot.data()?.role : "");
++    const userDocPath = getFirebaseUserDocPath(firebase, firebaseAuthUser.uid);
++    console.info("[Unser Dorf Developer Tools auth] Checking current developer account.", {
++      uid: firebaseAuthUser.uid,
++      email: firebaseAuthUser.email || "",
++      provider: firebaseAuthUser.providerData?.map((provider) => provider.providerId).join(", ") || "password",
++      userDocPath
++    });
++    const snapshot = await readFirestoreWithDebug(
++      () => firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid)),
++      {
++        operation: "get current developer user document",
++        path: userDocPath
++      }
++    );
++    const data = snapshot.exists() ? snapshot.data() || {} : {};
++    const role = sanitizeUserRole(data.role);
++    const protectedAccount = Boolean(data.protectedAccount);
+     const profile = getCurrentProfile() || profileStore?.profiles?.[getFirebaseProfileId(firebaseAuthUser)];
+     if (profile && role !== profile.role) profile.role = role;
++    if (profile && protectedAccount) profile.protectedAccount = true;
++    console.info("[Unser Dorf Developer Tools auth] Current user profile check.", {
++      uid: firebaseAuthUser.uid,
++      email: firebaseAuthUser.email || "",
++      userDocPath,
++      documentExists: snapshot.exists(),
++      role,
++      protectedAccount,
++      allowed: role === "developer"
++    });
+     return role === "developer";
+   } catch (error) {
+-    console.error("Could not verify developer role from Firestore.", error);
++    console.error("[Unser Dorf Developer Tools auth] Could not verify developer role from Firestore.", {
++      uid: firebaseAuthUser?.uid || "",
++      email: firebaseAuthUser?.email || "",
++      error
++    });
+     return false;
+   }
+ }
+ 
+ async function loadDeveloperToolsData() {
+   const firebase = await getFirebaseSyncApi();
+-  const [userSnapshot, villageSnapshots] = await Promise.all([
+-    firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
+-    Promise.all(DEFAULT_GROUPS.map(async (groupInfo) => {
+-      const snapshot = await firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id));
+-      return { groupInfo, snapshot };
+-    }))
+-  ]);
++  console.info("[Unser Dorf Developer Tools] Loading developer data.", {
++    uid: firebaseAuthUser?.uid || "",
++    email: firebaseAuthUser?.email || "",
++    usersPath: getFirebaseUsersCollectionPath(firebase),
++    villagePaths: DEFAULT_GROUPS.map((groupInfo) => getFirebaseVillageDocPath(firebase, groupInfo.id))
++  });
++  const userSnapshot = await readFirestoreWithDebug(
++    () => firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
++    {
++      operation: "list developer users collection",
++      path: getFirebaseUsersCollectionPath(firebase)
++    }
++  );
++  const villageSnapshots = [];
++  for (const groupInfo of DEFAULT_GROUPS) {
++    const snapshot = await readFirestoreWithDebug(
++      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id)),
++      {
++        operation: "get developer village document",
++        path: getFirebaseVillageDocPath(firebase, groupInfo.id)
++      }
++    );
++    villageSnapshots.push({ groupInfo, snapshot });
++  }
+   const userDocs = userSnapshot.docs.map((docSnapshot) => ({
+     id: docSnapshot.id,
+     data: docSnapshot.data() || {}
+--- a/style.css
++++ b/style.css
+@@ -1951,6 +1951,14 @@
+   color: var(--muted);
+   font-size: 0.82rem;
+   font-weight: 800;
++}
++
++.build-label {
++  margin: 4px 0 0;
++  color: var(--muted);
++  font-size: 0.78rem;
++  font-weight: 650;
++  text-align: center;
+ }
+ 
+ .dashboard-heading {
