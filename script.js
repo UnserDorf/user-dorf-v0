@@ -5059,6 +5059,7 @@ function createDeveloperToolsLayout(data) {
     ["users", "Users"],
     ["villages", "Villages"],
     ["cleanup", "Cleanup"],
+    ["testing", "Testing"],
     ["diagnostics", "Diagnostics"]
   ];
   nav.replaceChildren(...sections.map(([id, label]) => {
@@ -5081,6 +5082,8 @@ function createDeveloperToolsLayout(data) {
     content.append(createDeveloperVillagesSection(data.villages));
   } else if (developerToolsActiveSection === "cleanup") {
     content.append(createDeveloperCleanupSection(data));
+  } else if (developerToolsActiveSection === "testing") {
+    content.append(createDeveloperTestingSection(data));
   } else if (developerToolsActiveSection === "diagnostics") {
     content.append(createDeveloperDiagnosticsSection(data));
   } else {
@@ -5529,6 +5532,43 @@ function createDeveloperCleanupSection(data) {
   return section;
 }
 
+function createDeveloperTestingSection(data) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card";
+  const currentUser = data.users.find((user) => user.uid && user.uid === firebaseAuthUser?.uid);
+  const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
+  const memberCount = familyZ?.memberIds?.length || 0;
+  const testingGrid = document.createElement("div");
+  testingGrid.className = "developer-overview-grid";
+
+  const personalCard = document.createElement("article");
+  personalCard.className = "developer-summary-card developer-testing-card";
+  personalCard.replaceChildren(
+    createTextElement("span", "", "Current account"),
+    createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
+    createTextElement("p", "developer-tools-empty", "Reset learning progress while keeping login, display name, developer role, and Family Z membership."),
+    createDeveloperActionButton("Reset My Learning Progress", () => openResetMyLearningProgressDialog({ includePersonalRewards: false })),
+    createDeveloperActionButton("Reset for New-User Test", () => openResetMyLearningProgressDialog({ includePersonalRewards: true }), true)
+  );
+
+  const familyCard = document.createElement("article");
+  familyCard.className = "developer-summary-card developer-testing-card";
+  familyCard.replaceChildren(
+    createTextElement("span", "", "Family Z"),
+    createTextElement("strong", "", `${memberCount} member${memberCount === 1 ? "" : "s"}`),
+    createTextElement("p", "developer-tools-empty", "Reset shared village progress without deleting the village, password, members, or admin access."),
+    createDeveloperActionButton("Reset Family Z Progress", () => openResetFamilyZProgressDialog(data), true)
+  );
+
+  testingGrid.replaceChildren(personalCard, familyCard);
+  section.replaceChildren(
+    createTextElement("h3", "", "Testing"),
+    createTextElement("p", "developer-tools-empty", "Safe reset tools for fresh family testing."),
+    testingGrid
+  );
+  return section;
+}
+
 function createDeveloperCleanupPreview(preview) {
   const wrapper = document.createElement("div");
   wrapper.className = "developer-cleanup-preview";
@@ -5783,7 +5823,13 @@ function createDeveloperVillagesSection(villages) {
         if (developerToolsLastData) els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(developerToolsLastData));
       }),
       createDeveloperActionButton("Remove stale memberships", cleanupFamilyZOrphanedMembers),
-      createDeveloperActionButton("Reset village progress", () => setDeveloperToolsStatus("Village progress reset is not enabled yet.", true))
+      createDeveloperActionButton("Reset village progress", () => {
+        if (village.id !== DEFAULT_GROUP_ID) {
+          setDeveloperToolsStatus("Only Family Z progress reset is enabled for v0 testing.", true);
+          return;
+        }
+        return openResetFamilyZProgressDialog({ villages });
+      }, true)
     );
     card.replaceChildren(
       createTextElement("h4", "", village.name),
@@ -6679,6 +6725,536 @@ function confirmFamilyZCleanup(removeCount) {
   });
 }
 
+function openResetMyLearningProgressDialog(options = {}) {
+  return new Promise((resolve) => {
+    const includePersonalRewardsByDefault = Boolean(options.includePersonalRewards);
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Reset learning progress");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card";
+    const checklist = document.createElement("div");
+    checklist.className = "developer-definition-list";
+    const personalRewardsId = "resetPersonalRewards";
+    checklist.replaceChildren(
+      createResetChecklistRow("Flashcard progress", true, true),
+      createResetChecklistRow("Vocabulary and Article Review progress", true, true),
+      createResetChecklistRow("Current study set", true, true),
+      createResetChecklistRow("Difficult words", true, true),
+      createResetChecklistRow("Streak and learning milestones", true, true),
+      createResetChecklistRow("Personal coins and Austria Album", includePersonalRewardsByDefault, false, personalRewardsId)
+    );
+    const keepList = document.createElement("ul");
+    keepList.className = "developer-tools-empty";
+    ["Account and login", "Display name", "Developer role", "Family Z membership", "Village-wide progress"].forEach((item) => {
+      const row = document.createElement("li");
+      row.textContent = `✓ ${item}`;
+      keepList.append(row);
+    });
+    const confirmationInput = document.createElement("input");
+    confirmationInput.type = "text";
+    confirmationInput.placeholder = "Type RESET";
+    confirmationInput.autocomplete = "off";
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "danger-button";
+    resetButton.textContent = "Reset Progress";
+    resetButton.disabled = true;
+    actions.replaceChildren(cancelButton, resetButton);
+    card.replaceChildren(
+      createTextElement("h3", "", "Reset your learning progress?"),
+      createTextElement("p", "", "Your account, developer access, and village membership will be kept."),
+      createTextElement("h4", "", "Reset"),
+      checklist,
+      createTextElement("h4", "", "Keep"),
+      keepList,
+      confirmationInput,
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      const includePersonalRewards = Boolean(document.querySelector(`#${personalRewardsId}`)?.checked);
+      overlay.remove();
+      resolve({ confirmed, includePersonalRewards });
+    };
+    confirmationInput.addEventListener("input", () => {
+      resetButton.disabled = confirmationInput.value.trim() !== "RESET";
+    });
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    resetButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+    };
+    document.addEventListener("keydown", handleKeydown);
+    confirmationInput.focus();
+  }).then(async ({ confirmed, includePersonalRewards }) => {
+    if (!confirmed) return;
+    await resetCurrentDeveloperLearningProgress({ includePersonalRewards });
+  });
+}
+
+function openResetFamilyZProgressDialog(data) {
+  return new Promise((resolve) => {
+    const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Reset Family Z progress");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card";
+    const keepList = document.createElement("ul");
+    keepList.className = "developer-tools-empty";
+    ["Village name", "Password/join code", `${familyZ?.memberIds?.length || 0} current member${(familyZ?.memberIds?.length || 0) === 1 ? "" : "s"}`, "Admin/developer access"].forEach((item) => {
+      const row = document.createElement("li");
+      row.textContent = `✓ ${item}`;
+      keepList.append(row);
+    });
+    const resetList = document.createElement("ul");
+    resetList.className = "developer-tools-empty";
+    ["Village coins", "Member contribution totals", "Town center progress", "Village Memories", "Collective rewards", "Recent contributions"].forEach((item) => {
+      const row = document.createElement("li");
+      row.textContent = `✓ ${item}`;
+      resetList.append(row);
+    });
+    const confirmationInput = document.createElement("input");
+    confirmationInput.type = "text";
+    confirmationInput.placeholder = "Type RESET FAMILY Z";
+    confirmationInput.autocomplete = "off";
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "danger-button";
+    resetButton.textContent = "Reset Family Z";
+    resetButton.disabled = true;
+    actions.replaceChildren(cancelButton, resetButton);
+    card.replaceChildren(
+      createTextElement("h3", "", "Reset Family Z progress?"),
+      createTextElement("p", "", "This will return the village to its starting state so new members can unlock rewards together."),
+      createTextElement("h4", "", "Family Z will keep"),
+      keepList,
+      createTextElement("h4", "", "Family Z will reset"),
+      resetList,
+      confirmationInput,
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve(confirmed);
+    };
+    confirmationInput.addEventListener("input", () => {
+      resetButton.disabled = confirmationInput.value.trim() !== "RESET FAMILY Z";
+    });
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    resetButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+    };
+    document.addEventListener("keydown", handleKeydown);
+    confirmationInput.focus();
+  }).then(async (confirmed) => {
+    if (!confirmed) return;
+    await resetFamilyZProgressForFreshTesting();
+  });
+}
+
+function createResetChecklistRow(label, checked = true, locked = false, id = "") {
+  const wrapper = document.createElement("label");
+  wrapper.className = "remember-email-option";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = checked;
+  input.disabled = locked;
+  if (id) input.id = id;
+  wrapper.replaceChildren(input, document.createTextNode(label));
+  return wrapper;
+}
+
+async function resetCurrentDeveloperLearningProgress(options = {}) {
+  if (!firebaseAuthUser) {
+    setDeveloperToolsStatus("Sign in before resetting learning progress.", true);
+    return;
+  }
+  const currentProfile = getCurrentProfile();
+  const profileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+  if (!currentProfile || !profileId) {
+    setDeveloperToolsStatus("Could not find the current developer profile.", true);
+    return;
+  }
+  const firebase = await getFirebaseSyncApi();
+  const savedAt = new Date().toISOString();
+  const resetProfile = createLearningResetProfile(currentProfile, {
+    includePersonalRewards: Boolean(options.includePersonalRewards)
+  });
+  resetProfile.id = profileId;
+  resetProfile.ownerUid = firebaseAuthUser.uid;
+  resetProfile.ownerEmail = firebaseAuthUser.email || "";
+  resetProfile.role = "developer";
+  resetProfile.protectedAccount = true;
+  resetProfile.villageId = currentProfile.villageId || currentGroupId || DEFAULT_GROUP_ID;
+
+  const userPayload = {
+    activeStudySet: normalizeActiveStudySet(resetProfile.activeStudySet),
+    difficultWords: normalizeDifficultWords(resetProfile.difficultWords),
+    role: "developer",
+    protectedAccount: true,
+    currentProfile: profileId,
+    currentGroup: resetProfile.villageId || DEFAULT_GROUP_ID,
+    profiles: {
+      [profileId]: sanitizeProfileStoreForSync(resetProfile)
+    },
+    updatedAt: firebase.serverTimestamp(),
+    updatedAtIso: savedAt
+  };
+  await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), userPayload, { merge: true });
+
+  if (resetProfile.villageId) {
+    const villagePayload = {
+      profiles: {
+        [profileId]: sanitizeProfileStoreForSync(resetProfile)
+      },
+      memberProfiles: {
+        [profileId]: sanitizeProfileStoreForSync(resetProfile)
+      },
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: savedAt
+    };
+    traceVillageWrite("resetCurrentDeveloperLearningProgress", "developer reset current learning progress", resetProfile.villageId, villagePayload, {
+      currentFirestoreVillageDocument: true,
+      currentUserDocument: true,
+      profileStores: false,
+      localStorage: false,
+      legacyMigration: false,
+      explicitVillageJoin: false,
+      adminCleanup: true
+    });
+    await firebase.setDoc(getFirebaseVillageDocRef(firebase, resetProfile.villageId), villagePayload, { merge: true });
+  }
+
+  applyCurrentLearningResetLocally(profileId, resetProfile);
+  clearLocalLearningChoiceKeys();
+  const verification = await verifyCurrentDeveloperLearningReset(firebase, profileId, options);
+  await refreshAfterDeveloperReset();
+  if (!verification.ok) {
+    setDeveloperToolsStatus(`Learning reset warning: ${verification.warnings.join(" ")}`, true);
+  } else {
+    setDeveloperToolsStatus("Learning progress reset successfully.");
+  }
+}
+
+function createLearningResetProfile(profile, options = {}) {
+  const base = {
+    ...profile,
+    dailyChallenge: {},
+    streak: {},
+    villageContribution: {},
+    achievementsUnlocked: [],
+    decks: {},
+    progress: {},
+    vocabularyProgress: {},
+    articleProgress: {},
+    difficultWords: {},
+    nounVerbProgress: {},
+    meaningMatchProgress: {},
+    prepositionProgress: {},
+    recentMeaningMatchItems: [],
+    vocabularyReviewStats: {},
+    challengeSessionsCompleted: 0,
+    flashcardSessions: {},
+    activeStudySet: {},
+    positions: {},
+    history: [],
+    lastStudyDate: "",
+    learningIntroSeen: false
+  };
+  if (options.includePersonalRewards) {
+    base.coins = 0;
+    base.contributionCoins = 0;
+    base.levelBonusesAwarded = [];
+    base.austriaAlbumSeenRewards = [];
+  }
+  return normalizeProfileData(base, {
+    id: profile.id || "",
+    name: getVillageDisplayName(profile),
+    emoji: profile.emoji || "🌿",
+    avatar: profile.avatar || "",
+    password: profile.password || ""
+  });
+}
+
+function applyCurrentLearningResetLocally(profileId, resetProfile) {
+  if (profileStore?.profiles) profileStore.profiles[profileId] = resetProfile;
+  progress = {};
+  vocabularyProgress = {};
+  articleProgress = {};
+  difficultWords = {};
+  nounVerbProgress = {};
+  meaningMatchProgress = {};
+  prepositionProgress = {};
+  recentMeaningMatchItems = [];
+  recentVocabularyWords = [];
+  flashcardStudyCards = [];
+  flashcardStudyIndex = 0;
+  currentIndex = 0;
+  vocabularyReviewCurrentIndex = 0;
+  challengeSession = createEmptyChallengeSession();
+  saveProfileStore({ localOnly: true });
+}
+
+function clearLocalLearningChoiceKeys() {
+  [
+    LEARN_GERMAN_LEVEL_STORAGE_KEY,
+    LEARN_GERMAN_CATEGORY_STORAGE_KEY,
+    LEARN_GERMAN_GOAL_STORAGE_KEY
+  ].forEach((key) => localStorage.removeItem(key));
+}
+
+async function verifyCurrentDeveloperLearningReset(firebase, profileId, options = {}) {
+  const warnings = [];
+  const snapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid)),
+    {
+      operation: "verify current developer learning reset",
+      path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid)
+    }
+  );
+  const data = snapshot.exists() ? snapshot.data() || {} : {};
+  const profile = data.profiles?.[profileId] || {};
+  if (!snapshot.exists()) warnings.push("Current user document was not found.");
+  if (sanitizeUserRole(data.role || profile.role) !== "developer") warnings.push("Developer role was not preserved.");
+  if (!Boolean(data.protectedAccount || profile.protectedAccount)) warnings.push("Protected account flag was not preserved.");
+  if (normalizeActiveStudySet(data.activeStudySet).wordIds.length) warnings.push("Top-level activeStudySet was not cleared.");
+  if (Object.keys(normalizeDifficultWords(data.difficultWords)).length) warnings.push("Top-level difficultWords was not cleared.");
+  if (Object.keys(normalizeMeaningProgress(profile.progress || {})).length) warnings.push("Flashcard progress was not cleared.");
+  if (Object.keys(normalizeVocabularyProgress(profile.vocabularyProgress || {})).length) warnings.push("Vocabulary Review progress was not cleared.");
+  if (Object.keys(normalizeArticleProgress(profile.articleProgress || {})).length) warnings.push("Article Review progress was not cleared.");
+  if (Object.keys(normalizeDifficultWords(profile.difficultWords || {})).length) warnings.push("Difficult words were not cleared.");
+  if (normalizeActiveStudySet(profile.activeStudySet).wordIds.length) warnings.push("Profile activeStudySet was not cleared.");
+  if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
+  if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
+  return { ok: warnings.length === 0, warnings };
+}
+
+async function resetFamilyZProgressForFreshTesting() {
+  const firebase = await getFirebaseSyncApi();
+  const savedAt = new Date().toISOString();
+  const villageRef = getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID);
+  const villagePath = getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID);
+  const snapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(villageRef),
+    {
+      operation: "read Family Z before progress reset",
+      path: villagePath
+    }
+  );
+  if (!snapshot.exists()) {
+    setDeveloperToolsStatus("Family Z village document was not found.", true);
+    return;
+  }
+  const data = snapshot.data() || {};
+  const groupInfo = DEFAULT_GROUPS.find((group) => group.id === DEFAULT_GROUP_ID);
+  const group = createGroupData(groupInfo, data.group || {});
+  const existingProfiles = {
+    ...(data.memberProfiles || {}),
+    ...(data.profiles || {})
+  };
+  const memberIds = normalizeGroupMemberIds([
+    ...(group.memberIds || []),
+    ...(data.memberIds || []),
+    ...Object.keys(data.memberProfiles || {}),
+    ...Object.keys(existingProfiles)
+  ]);
+  const resetProfiles = {};
+  memberIds.forEach((profileId) => {
+    const profile = existingProfiles[profileId] || data.memberProfiles?.[profileId] || profileStore?.profiles?.[profileId] || {};
+    if (!profile || !Object.keys(profile).length) return;
+    resetProfiles[profileId] = createFamilyZProgressResetProfile(profile, profileId);
+  });
+  group.memberIds = normalizeGroupMemberIds(memberIds.filter((profileId) => resetProfiles[profileId]));
+  group.villageAlbumSeenRewards = [];
+  group.townCenterStagesSeen = [];
+  group.familyLevelsReached = [];
+  group.familyAchievementsUnlocked = [];
+  const villagePayload = {
+    group,
+    profiles: sanitizeProfileStoreForSync(resetProfiles),
+    memberProfiles: sanitizeProfileStoreForSync(resetProfiles),
+    memberIds: group.memberIds,
+    villageAlbumSeenRewards: [],
+    townCenterStagesSeen: [],
+    familyLevelsReached: [],
+    familyAchievementsUnlocked: [],
+    progressResetAt: firebase.serverTimestamp(),
+    progressResetAtIso: savedAt,
+    updatedAt: firebase.serverTimestamp(),
+    updatedAtIso: savedAt
+  };
+  traceVillageWrite("resetFamilyZProgressForFreshTesting", "developer reset Family Z progress", DEFAULT_GROUP_ID, villagePayload, {
+    currentFirestoreVillageDocument: true,
+    currentUserDocument: true,
+    profileStores: false,
+    localStorage: false,
+    legacyMigration: false,
+    explicitVillageJoin: false,
+    adminCleanup: true
+  });
+  await firebase.setDoc(villageRef, villagePayload, { merge: true });
+  await updateFamilyZMemberUserDocsForProgressReset(firebase, resetProfiles, savedAt);
+  applyFamilyZProgressResetLocally(group, resetProfiles);
+  const verification = await verifyFamilyZProgressReset(firebase, group.memberIds);
+  await refreshAfterDeveloperReset();
+  if (!verification.ok) {
+    setDeveloperToolsStatus(`Family Z reset warning: ${verification.warnings.join(" ")}`, true);
+  } else {
+    setDeveloperToolsStatus("Family Z has been reset for fresh testing.");
+  }
+}
+
+function createFamilyZProgressResetProfile(profile, profileId) {
+  const resetProfile = normalizeProfileData(
+    {
+      ...profile,
+      id: profileId,
+      coins: 0,
+      contributionCoins: 0,
+      levelBonusesAwarded: [],
+      villageContribution: {},
+      familyLevelsReached: [],
+      familyAchievementsUnlocked: [],
+      history: []
+    },
+    {
+      id: profileId,
+      name: getVillageDisplayName(profile),
+      emoji: profile.emoji || "🌿",
+      avatar: profile.avatar || "",
+      password: profile.password || ""
+    }
+  );
+  resetProfile.villageId = DEFAULT_GROUP_ID;
+  return resetProfile;
+}
+
+async function updateFamilyZMemberUserDocsForProgressReset(firebase, resetProfiles, savedAt) {
+  for (const [profileId, resetProfile] of Object.entries(resetProfiles)) {
+    const ownerUid = String(resetProfile.ownerUid || "").trim();
+    if (!ownerUid) continue;
+    const userRef = getFirebaseUserDocRef(firebase, ownerUid);
+    const snapshot = await readFirestoreWithDebug(
+      () => firebase.getDoc(userRef),
+      {
+        operation: "read Family Z member user before progress reset",
+        path: getFirebaseUserDocPath(firebase, ownerUid),
+        profileId
+      }
+    );
+    if (!snapshot.exists()) continue;
+    const data = snapshot.data() || {};
+    const currentProfile = data.profiles?.[profileId];
+    const nextProfile = currentProfile
+      ? createFamilyZProgressResetProfile(currentProfile, profileId)
+      : resetProfile;
+    await firebase.setDoc(userRef, {
+      profiles: {
+        [profileId]: sanitizeProfileStoreForSync(nextProfile)
+      },
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: savedAt
+    }, { merge: true });
+  }
+}
+
+function applyFamilyZProgressResetLocally(group, resetProfiles) {
+  if (!profileStore) return;
+  profileStore.villageAlbumSeenRewards = [];
+  profileStore.townCenterStagesSeen = [];
+  profileStore.familyLevelsReached = [];
+  profileStore.familyAchievementsUnlocked = [];
+  if (profileStore.groups?.[DEFAULT_GROUP_ID]) {
+    profileStore.groups[DEFAULT_GROUP_ID] = {
+      ...profileStore.groups[DEFAULT_GROUP_ID],
+      ...group,
+      villageAlbumSeenRewards: [],
+      townCenterStagesSeen: [],
+      familyLevelsReached: [],
+      familyAchievementsUnlocked: []
+    };
+  }
+  Object.entries(resetProfiles).forEach(([profileId, resetProfile]) => {
+    if (profileStore.profiles?.[profileId]) {
+      profileStore.profiles[profileId] = resetProfile;
+    }
+  });
+  saveProfileStore({ localOnly: true });
+}
+
+async function verifyFamilyZProgressReset(firebase, expectedMemberIds = []) {
+  const warnings = [];
+  const snapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(getFirebaseVillageDocRef(firebase, DEFAULT_GROUP_ID)),
+    {
+      operation: "verify Family Z progress reset",
+      path: getFirebaseVillageDocPath(firebase, DEFAULT_GROUP_ID)
+    }
+  );
+  const data = snapshot.exists() ? snapshot.data() || {} : {};
+  const group = createGroupData(DEFAULT_GROUPS.find((item) => item.id === DEFAULT_GROUP_ID), data.group || {});
+  const profiles = data.profiles || {};
+  const memberIds = normalizeGroupMemberIds([...(group.memberIds || []), ...(data.memberIds || [])]);
+  const expected = normalizeGroupMemberIds(expectedMemberIds);
+  const villageCoins = getFamilyCoinTotal(profiles);
+  if (!snapshot.exists()) warnings.push("Family Z village document was not found after reset.");
+  if (villageCoins !== 0) warnings.push(`Village coins are ${villageCoins}, not 0.`);
+  if (normalizeVillageAlbumSeenRewardIds(group.villageAlbumSeenRewards).length) warnings.push("Village Memories seen rewards were not cleared.");
+  if (normalizeRewardIdList(group.townCenterStagesSeen).length) warnings.push("Town center seen stages were not cleared.");
+  if (normalizeRewardIdList(group.familyLevelsReached).length) warnings.push("Collective level rewards were not cleared.");
+  if (normalizeRewardIdList(group.familyAchievementsUnlocked).length) warnings.push("Collective achievement rewards were not cleared.");
+  if (JSON.stringify(memberIds) !== JSON.stringify(expected)) warnings.push("Family Z member IDs changed during reset.");
+  Object.entries(profiles).forEach(([profileId, profile]) => {
+    if (normalizeCoinCount(profile.coins) !== 0) warnings.push(`${profileId} still has coins.`);
+    if (normalizeCoinCount(profile.contributionCoins) !== 0) warnings.push(`${profileId} still has contribution coins.`);
+    if (Array.isArray(profile.history) && profile.history.length) warnings.push(`${profileId} still has recent contribution history.`);
+  });
+  return { ok: warnings.length === 0, warnings };
+}
+
+async function refreshAfterDeveloperReset() {
+  renderDashboard();
+  renderVillageMembersPreview();
+  renderVillageMembersPage();
+  if (!els.achievementCollectionScreen?.classList.contains("hidden")) renderAchievementCollection(currentView || "austria-album");
+  if (!els.learnGermanScreen?.classList.contains("hidden")) renderLearnGermanPage();
+  await renderDeveloperToolsPage();
+}
+
 async function removeDeveloperUserFromVillage(user) {
   if (!user.villageId) {
     setDeveloperToolsStatus("This user is not currently attached to a village.", true);
@@ -6849,6 +7425,8 @@ function resetProfileProgressData(profile) {
       vocabularyReviewStats: {},
       challengeSessionsCompleted: 0,
       flashcardSessions: {},
+      activeStudySet: {},
+      learningIntroSeen: false,
       positions: {},
       history: [],
       lastStudyDate: ""
