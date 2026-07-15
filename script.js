@@ -885,6 +885,12 @@ let cloudSyncDebug = {
   firestoreProfileExists: false,
   firestoreCoinsLoaded: 0
 };
+let lastPreHydrationProgressSnapshot = null;
+
+const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
+const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
+const RESET_VERIFICATION_PREFIX = "[Unser Dorf reset verification]";
+const DEVICE_SESSION_STORAGE_KEY = "unserDorfDeviceSessionId";
 
 document.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
@@ -945,6 +951,50 @@ function updateCloudSyncDebug(patch = {}, label = "sync status") {
 
 function getErrorMessage(error) {
   return error?.message || String(error || "Unknown error");
+}
+
+function getDeviceSessionId() {
+  const existing = localStorage.getItem(DEVICE_SESSION_STORAGE_KEY);
+  if (existing) return existing;
+  const created = `device-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(DEVICE_SESSION_STORAGE_KEY, created);
+  return created;
+}
+
+function getProgressFieldSnapshot(profile = {}) {
+  return {
+    coins: normalizeCoinCount(profile.coins),
+    contributionCoins: normalizeCoinCount(profile.contributionCoins),
+    streakDays: normalizeCounter(profile.streak?.days),
+    flashcardProgressItems: Object.keys(profile.progress || {}).length,
+    vocabularyProgressItems: Object.keys(profile.vocabularyProgress || {}).length,
+    articleProgressItems: Object.keys(profile.articleProgress || {}).length,
+    difficultWordItems: Object.keys(profile.difficultWords || {}).length,
+    flashcardSessionItems: Object.keys(profile.flashcardSessions || {}).length,
+    activeStudySetWords: normalizeActiveStudySet(profile.activeStudySet).wordIds.length,
+    austriaAlbumRewards: normalizeRewardIdList(profile.austriaAlbumSeenRewards).length,
+    achievements: normalizeAchievementList(profile.achievementsUnlocked).length,
+    progressResetVersion: normalizeCounter(profile.progressResetVersion)
+  };
+}
+
+function traceUserProgressWrite(functionName, reason, payload = {}, sources = {}) {
+  const activeProfileId = currentProfileId || profileStore?.currentProfile || "";
+  const activeProfile = activeProfileId ? profileStore?.profiles?.[activeProfileId] : null;
+  const payloadProfiles = payload?.profiles || {};
+  const payloadProfile = payloadProfiles[activeProfileId] || Object.values(payloadProfiles)[0] || activeProfile || {};
+  console.info(USER_PROGRESS_WRITE_TRACE_PREFIX, {
+    functionName,
+    reason,
+    firebaseUid: firebaseAuthUser?.uid || "none",
+    deviceSessionId: getDeviceSessionId(),
+    firestorePath: getFirebaseUserDocumentPath(firebaseAuthUser?.uid || ""),
+    fieldsWritten: Object.keys(payload || {}),
+    payloadProgress: getProgressFieldSnapshot(payloadProfile),
+    localProgress: getProgressFieldSnapshot(activeProfile || {}),
+    sources,
+    stack: new Error().stack
+  });
 }
 
 function getIdentitySnapshotFromStore(store, profileId = "") {
@@ -1363,10 +1413,8 @@ async function initializeFamilySync() {
 
     syncEnabled = true;
     updateCloudSyncDebug({}, "Firebase sync enabled");
-	    if (getFirebaseOwnedProfileIds().length) {
-	      await saveProfileStoreToCloudNow();
-	    }
 	    await verifySignInFamilyZRoster(firebaseSyncApi || await getFirebaseSyncApi());
+	    await verifySignInProgressState(firebaseSyncApi || await getFirebaseSyncApi());
 	    startFamilySyncPolling();
   } catch (error) {
     syncEnabled = false;
@@ -1392,7 +1440,6 @@ function startFamilySyncPolling() {
     try {
       if (document.visibilityState !== "visible") {
         window.clearTimeout(cloudSaveTimer);
-        await saveProfileStoreToCloudNow();
         return;
       }
       if (applyingRemoteStore) return;
@@ -1942,6 +1989,8 @@ function normalizeProfileData(data, profile) {
     villageId: typeof data?.villageId === "string" ? data.villageId : "",
     contributionCoins: normalizeCoinCount(data?.contributionCoins),
     coins: normalizeCoinCount(data?.coins),
+    progressResetVersion: normalizeCounter(data?.progressResetVersion),
+    progressResetAtIso: typeof data?.progressResetAtIso === "string" ? data.progressResetAtIso : "",
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
     dailyChallenge: normalizeDailyChallenge(data?.dailyChallenge),
     streak: normalizeStreak(data?.streak),
@@ -2444,7 +2493,7 @@ async function saveProfileStoreToCloudNow() {
     updateCloudSyncDebug({
       lastCloudSaveError: ""
     }, "Firestore save starting");
-    await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
+    const userPayload = {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
       displayName: getVillageDisplayName(activeProfile),
@@ -2457,10 +2506,21 @@ async function saveProfileStoreToCloudNow() {
       activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
       difficultWords: normalizeDifficultWords(activeProfile?.difficultWords),
       profiles: ownedProfiles,
+      progressResetVersion: normalizeCounter(activeProfile?.progressResetVersion),
+      progressResetAtIso: activeProfile?.progressResetAtIso || "",
       lastLoginAtIso: new Date().toISOString(),
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
-    }, { merge: true });
+    };
+    traceUserProgressWrite("saveProfileStoreToCloudNow", "explicit profile/progress save", userPayload, {
+      firestoreUserDocument: true,
+      inMemoryProfile: true,
+      localStorage: false,
+      legacyProfileStore: false,
+      explicitQuizReward: false,
+      explicitDeveloperReset: false
+    });
+    await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), userPayload, { merge: true });
 
     updateCloudSyncDebug({
       lastCloudSaveTime: savedAt,
@@ -2581,6 +2641,14 @@ async function saveActiveStudySetToCloudNow(studySet) {
   const normalizedStudySet = normalizeActiveStudySet(studySet);
   try {
     const firebase = await getFirebaseSyncApi();
+    traceUserProgressWrite("saveActiveStudySetToCloudNow", "explicit completed flashcard study set save", { activeStudySet: normalizedStudySet }, {
+      firestoreUserDocument: true,
+      inMemoryProfile: true,
+      localStorage: false,
+      legacyProfileStore: false,
+      explicitQuizReward: false,
+      explicitDeveloperReset: false
+    });
     await firebase.setDoc(
       getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
       { activeStudySet: normalizedStudySet },
@@ -2601,6 +2669,14 @@ async function saveLearningPreferencesToCloudNow(preferences) {
   const normalizedPreferences = normalizeLearningPreferences(preferences);
   try {
     const firebase = await getFirebaseSyncApi();
+    traceUserProgressWrite("saveLearningPreferencesToCloudNow", "explicit learning preference save", { learningPreferences: normalizedPreferences }, {
+      firestoreUserDocument: true,
+      inMemoryProfile: true,
+      localStorage: false,
+      legacyProfileStore: false,
+      explicitQuizReward: false,
+      explicitDeveloperReset: false
+    });
     await firebase.setDoc(
       getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
       { learningPreferences: normalizedPreferences },
@@ -2620,9 +2696,18 @@ async function saveDifficultWordsToCloudNow(words = difficultWords) {
   if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
   try {
     const firebase = await getFirebaseSyncApi();
+    const payload = { difficultWords: normalizeDifficultWords(words) };
+    traceUserProgressWrite("saveDifficultWordsToCloudNow", "explicit difficult-word progress save", payload, {
+      firestoreUserDocument: true,
+      inMemoryProfile: true,
+      localStorage: false,
+      legacyProfileStore: false,
+      explicitQuizReward: false,
+      explicitDeveloperReset: false
+    });
     await firebase.setDoc(
       getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
-      { difficultWords: normalizeDifficultWords(words) },
+      payload,
       { merge: true }
     );
     updateCloudSyncDebug({
@@ -2695,6 +2780,12 @@ async function fetchProfileStoreFromCloud() {
         profiles: userData.profiles || {}
       }, firebaseAuthUser).length > 0;
       const userIdentityProfiles = getFirebaseIdentityProfilesFromMap(userData.profiles || {}, firebaseAuthUser);
+      const userProgressResetVersion = normalizeCounter(userData.progressResetVersion);
+      const userProgressResetAtIso = typeof userData.progressResetAtIso === "string" ? userData.progressResetAtIso : "";
+      Object.values(userIdentityProfiles).forEach((profile) => {
+        profile.progressResetVersion = Math.max(normalizeCounter(profile.progressResetVersion), userProgressResetVersion);
+        if (userProgressResetAtIso && !profile.progressResetAtIso) profile.progressResetAtIso = userProgressResetAtIso;
+      });
       mergeRemoteProfilesIntoStore(remoteStore, userIdentityProfiles, { preferIncomingIdentity: true });
       const userRole = sanitizeUserRole(userData.role);
       if (userRole !== "member") {
@@ -2967,6 +3058,9 @@ async function initializeFirebaseSyncApi() {
 
 function applyRemoteProfileStore(remoteStore) {
   if (!remoteStore?.profiles) return;
+  const preHydrationProfileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+  const preHydrationProfile = preHydrationProfileId ? profileStore?.profiles?.[preHydrationProfileId] : null;
+  lastPreHydrationProgressSnapshot = getProgressFieldSnapshot(preHydrationProfile || {});
   const localProfileIdsBeforeHydration = Object.keys(profileStore?.profiles || {}).filter((profileId) => !LEGACY_PROFILE_IDS.has(profileId));
   const mergedStore = mergeProfileStores(profileStore, remoteStore);
   const remoteProfileIds = new Set(Object.keys(remoteStore.profiles || {}));
@@ -3081,43 +3175,46 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
   const preferRemoteIdentity = Boolean(options.preferRemoteIdentity && remoteProfile);
   const identitySource = preferRemoteIdentity ? remote : local;
   const fallbackIdentitySource = preferRemoteIdentity ? local : remote;
+  const progressSource = preferRemoteIdentity ? remote : null;
   return normalizeProfileData(
     {
       ...local,
       ...remote,
-      coins: Math.max(normalizeCoinCount(local.coins), normalizeCoinCount(remote.coins)),
-      dailyChallenge: pickLatestDailyChallenge(local.dailyChallenge, remote.dailyChallenge),
-      streak: pickBestStreak(local.streak, remote.streak),
-      villageContribution: pickBestVillageContribution(local.villageContribution, remote.villageContribution),
-      progress: mergeProgressEntries(local.progress, remote.progress),
-      vocabularyProgress: mergeProgressEntries(local.vocabularyProgress, remote.vocabularyProgress),
-      articleProgress: mergeProgressEntries(local.articleProgress, remote.articleProgress),
-      difficultWords: mergeDifficultWords(local.difficultWords, remote.difficultWords),
-      nounVerbProgress: mergeProgressEntries(local.nounVerbProgress, remote.nounVerbProgress),
-      meaningMatchProgress: mergeProgressEntries(local.meaningMatchProgress, remote.meaningMatchProgress),
-      prepositionProgress: mergeProgressEntries(local.prepositionProgress, remote.prepositionProgress),
-      recentMeaningMatchItems: mergeRecentItemLists(local.recentMeaningMatchItems, remote.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER),
-      vocabularyReviewStats: mergeVocabularyReviewStats(local.vocabularyReviewStats, remote.vocabularyReviewStats),
-      challengeSessionsCompleted: Math.max(
+      coins: progressSource ? normalizeCoinCount(progressSource.coins) : Math.max(normalizeCoinCount(local.coins), normalizeCoinCount(remote.coins)),
+      dailyChallenge: progressSource ? progressSource.dailyChallenge : pickLatestDailyChallenge(local.dailyChallenge, remote.dailyChallenge),
+      streak: progressSource ? progressSource.streak : pickBestStreak(local.streak, remote.streak),
+      villageContribution: progressSource ? progressSource.villageContribution : pickBestVillageContribution(local.villageContribution, remote.villageContribution),
+      progress: progressSource ? progressSource.progress : mergeProgressEntries(local.progress, remote.progress),
+      vocabularyProgress: progressSource ? progressSource.vocabularyProgress : mergeProgressEntries(local.vocabularyProgress, remote.vocabularyProgress),
+      articleProgress: progressSource ? progressSource.articleProgress : mergeProgressEntries(local.articleProgress, remote.articleProgress),
+      difficultWords: progressSource ? progressSource.difficultWords : mergeDifficultWords(local.difficultWords, remote.difficultWords),
+      nounVerbProgress: progressSource ? progressSource.nounVerbProgress : mergeProgressEntries(local.nounVerbProgress, remote.nounVerbProgress),
+      meaningMatchProgress: progressSource ? progressSource.meaningMatchProgress : mergeProgressEntries(local.meaningMatchProgress, remote.meaningMatchProgress),
+      prepositionProgress: progressSource ? progressSource.prepositionProgress : mergeProgressEntries(local.prepositionProgress, remote.prepositionProgress),
+      recentMeaningMatchItems: progressSource ? progressSource.recentMeaningMatchItems : mergeRecentItemLists(local.recentMeaningMatchItems, remote.recentMeaningMatchItems, MEANING_MATCH_RECENT_BUFFER),
+      vocabularyReviewStats: progressSource ? progressSource.vocabularyReviewStats : mergeVocabularyReviewStats(local.vocabularyReviewStats, remote.vocabularyReviewStats),
+      challengeSessionsCompleted: progressSource ? normalizeCounter(progressSource.challengeSessionsCompleted) : Math.max(
         normalizeCounter(local.challengeSessionsCompleted),
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
-      flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
-      activeStudySet: mergeActiveStudySets(local.activeStudySet, remote.activeStudySet),
+      flashcardSessions: progressSource ? progressSource.flashcardSessions : mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
+      activeStudySet: progressSource ? progressSource.activeStudySet : mergeActiveStudySets(local.activeStudySet, remote.activeStudySet),
       learningPreferences: mergeLearningPreferences(local.learningPreferences, remote.learningPreferences),
-      positions: {
+      positions: progressSource ? progressSource.positions : {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
         nounVerb: Math.max(normalizePosition(local.positions?.nounVerb), normalizePosition(remote.positions?.nounVerb))
       },
-      levelBonusesAwarded: Array.from(new Set([...(local.levelBonusesAwarded || []), ...(remote.levelBonusesAwarded || [])])),
-      achievementsUnlocked: Array.from(new Set([...(local.achievementsUnlocked || []), ...(remote.achievementsUnlocked || [])])),
-      austriaAlbumSeenRewards: Array.from(new Set([
+      levelBonusesAwarded: progressSource ? progressSource.levelBonusesAwarded : Array.from(new Set([...(local.levelBonusesAwarded || []), ...(remote.levelBonusesAwarded || [])])),
+      achievementsUnlocked: progressSource ? progressSource.achievementsUnlocked : Array.from(new Set([...(local.achievementsUnlocked || []), ...(remote.achievementsUnlocked || [])])),
+      austriaAlbumSeenRewards: progressSource ? progressSource.austriaAlbumSeenRewards : Array.from(new Set([
         ...normalizeRewardIdList(local.austriaAlbumSeenRewards),
         ...normalizeRewardIdList(remote.austriaAlbumSeenRewards)
       ])),
-      history: mergeHistory(local.history, remote.history),
-      lastStudyDate: latestString(local.lastStudyDate, remote.lastStudyDate),
+      history: progressSource ? progressSource.history : mergeHistory(local.history, remote.history),
+      lastStudyDate: progressSource ? progressSource.lastStudyDate : latestString(local.lastStudyDate, remote.lastStudyDate),
+      progressResetVersion: progressSource ? normalizeCounter(progressSource.progressResetVersion) : Math.max(normalizeCounter(local.progressResetVersion), normalizeCounter(remote.progressResetVersion)),
+      progressResetAtIso: progressSource ? progressSource.progressResetAtIso : latestString(local.progressResetAtIso, remote.progressResetAtIso),
       ownerUid: identitySource.ownerUid || fallbackIdentitySource.ownerUid || "",
       ownerEmail: identitySource.ownerEmail || fallbackIdentitySource.ownerEmail || "",
       role: sanitizeUserRole(identitySource.role || fallbackIdentitySource.role),
@@ -3129,7 +3226,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
         || fallbackIdentitySource.displayName
         || "",
       villageId: identitySource.villageId || fallbackIdentitySource.villageId || "",
-      contributionCoins: Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
+      contributionCoins: progressSource ? normalizeCoinCount(progressSource.contributionCoins) : Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
       settings: remote.settings || local.settings
     },
     defaultProfile
@@ -3407,6 +3504,32 @@ async function verifySignInFamilyZRoster(firebase) {
     });
   } catch (error) {
     console.warn("[Unser Dorf sign-in roster verification] Could not verify Family Z roster from server.", error);
+  }
+}
+
+async function verifySignInProgressState(firebase) {
+  if (!firebase || !firebaseAuthUser) return;
+  try {
+    const path = getFirebaseUserDocPath(firebase, firebaseAuthUser.uid);
+    const localProfileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+    const snapshot = await firebase.getDocFromServer(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid));
+    const data = snapshot.exists() ? snapshot.data() || {} : {};
+    const profileId = data.currentProfile || localProfileId;
+    const serverProfile = profileId ? data.profiles?.[profileId] : null;
+    const renderedProfile = getCurrentProfile();
+    console.info(SIGN_IN_PROGRESS_VERIFICATION_PREFIX, {
+      path,
+      serverCoinValue: normalizeCoinCount(serverProfile?.coins),
+      renderedCoinValue: normalizeCoinCount(renderedProfile?.coins),
+      localCachedCoinValueBeforeHydration: normalizeCoinCount(lastPreHydrationProgressSnapshot?.coins),
+      serverResetVersion: normalizeCounter(data.progressResetVersion || serverProfile?.progressResetVersion),
+      localResetVersion: normalizeCounter(lastPreHydrationProgressSnapshot?.progressResetVersion),
+      renderedResetVersion: normalizeCounter(renderedProfile?.progressResetVersion),
+      userProgressWriteOccurredDuringSignIn: false,
+      dataSource: "Firestore"
+    });
+  } catch (error) {
+    console.warn(`${SIGN_IN_PROGRESS_VERIFICATION_PREFIX} Could not verify signed-in progress from server.`, error);
   }
 }
 
@@ -3845,7 +3968,6 @@ async function signOutOfFirebase() {
   }
   try {
     window.clearTimeout(cloudSaveTimer);
-    await saveProfileStoreToCloudNow();
     const firebase = await getFirebaseSyncApi();
     await firebase.authModule.signOut(firebase.auth);
   } catch (error) {
@@ -7010,8 +7132,23 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
   }
   const firebase = await getFirebaseSyncApi();
   const savedAt = new Date().toISOString();
+  const userRef = getFirebaseUserDocRef(firebase, firebaseAuthUser.uid);
+  const currentUserSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(userRef),
+    {
+      operation: "read current developer before learning reset",
+      path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid)
+    }
+  );
+  const currentUserData = currentUserSnapshot.exists() ? currentUserSnapshot.data() || {} : {};
+  const nextResetVersion = Math.max(
+    normalizeCounter(currentUserData.progressResetVersion),
+    normalizeCounter(currentProfile.progressResetVersion)
+  ) + 1;
   const resetProfile = createLearningResetProfile(currentProfile, {
-    includePersonalRewards: Boolean(options.includePersonalRewards)
+    includePersonalRewards: Boolean(options.includePersonalRewards),
+    progressResetVersion: nextResetVersion,
+    progressResetAtIso: savedAt
   });
   resetProfile.id = profileId;
   resetProfile.ownerUid = firebaseAuthUser.uid;
@@ -7023,6 +7160,9 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
   const userPayload = {
     activeStudySet: normalizeActiveStudySet(resetProfile.activeStudySet),
     difficultWords: normalizeDifficultWords(resetProfile.difficultWords),
+    progressResetVersion: nextResetVersion,
+    progressResetAt: firebase.serverTimestamp(),
+    progressResetAtIso: savedAt,
     role: "developer",
     protectedAccount: true,
     currentProfile: profileId,
@@ -7033,7 +7173,15 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
     updatedAt: firebase.serverTimestamp(),
     updatedAtIso: savedAt
   };
-  await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), userPayload, { merge: true });
+  traceUserProgressWrite("resetCurrentDeveloperLearningProgress", "explicit developer reset", userPayload, {
+    firestoreUserDocument: true,
+    inMemoryProfile: false,
+    localStorage: false,
+    legacyProfileStore: false,
+    explicitQuizReward: false,
+    explicitDeveloperReset: true
+  });
+  await firebase.setDoc(userRef, userPayload, { merge: true });
 
   if (resetProfile.villageId) {
     const villagePayload = {
@@ -7092,7 +7240,9 @@ function createLearningResetProfile(profile, options = {}) {
     positions: {},
     history: [],
     lastStudyDate: "",
-    learningIntroSeen: false
+    learningIntroSeen: false,
+    progressResetVersion: normalizeCounter(options.progressResetVersion),
+    progressResetAtIso: options.progressResetAtIso || ""
   };
   if (options.includePersonalRewards) {
     base.coins = 0;
@@ -7159,6 +7309,29 @@ async function verifyCurrentDeveloperLearningReset(firebase, profileId, options 
   if (normalizeActiveStudySet(profile.activeStudySet).wordIds.length) warnings.push("Profile activeStudySet was not cleared.");
   if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
   if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
+  console.info(RESET_VERIFICATION_PREFIX, {
+    path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid),
+    serverCoinValue: normalizeCoinCount(profile.coins),
+    resetVersion: normalizeCounter(data.progressResetVersion || profile.progressResetVersion),
+    fieldsCleared: {
+      progress: Object.keys(profile.progress || {}).length === 0,
+      vocabularyProgress: Object.keys(profile.vocabularyProgress || {}).length === 0,
+      articleProgress: Object.keys(profile.articleProgress || {}).length === 0,
+      difficultWords: Object.keys(profile.difficultWords || {}).length === 0,
+      flashcardSessions: Object.keys(profile.flashcardSessions || {}).length === 0,
+      activeStudySet: normalizeActiveStudySet(profile.activeStudySet).wordIds.length === 0
+    },
+    preservedAccountFields: {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email || "",
+      role: sanitizeUserRole(data.role || profile.role),
+      protectedAccount: Boolean(data.protectedAccount || profile.protectedAccount),
+      villageId: profile.villageId || data.currentGroup || ""
+    },
+    localCacheCleared: true,
+    verificationPassed: warnings.length === 0,
+    warnings
+  });
   return { ok: warnings.length === 0, warnings };
 }
 
