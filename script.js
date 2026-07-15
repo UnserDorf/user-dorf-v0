@@ -502,11 +502,13 @@ const els = {
   learnEstimate: document.querySelector("#learnEstimate"),
   learnProgressList: document.querySelector("#learnProgressList"),
   learnDifficultPanel: document.querySelector("#learnDifficultPanel"),
+  learnDifficultToggle: document.querySelector("#learnDifficultToggle"),
   learnDifficultSummary: document.querySelector("#learnDifficultSummary"),
   learnDifficultActions: document.querySelector("#learnDifficultActions"),
   learnDifficultVocabulary: document.querySelector("#learnDifficultVocabulary"),
   learnDifficultArticles: document.querySelector("#learnDifficultArticles"),
   learnShortcutPanel: document.querySelector("#learnShortcutPanel"),
+  learnShortcutToggle: document.querySelector("#learnShortcutToggle"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
@@ -2512,7 +2514,6 @@ async function syncCurrentProfileToVillageDoc(firebase, savedAt, options = {}) {
 async function saveActiveStudySetToCloudNow(studySet) {
   if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
   const normalizedStudySet = normalizeActiveStudySet(studySet);
-  if (!normalizedStudySet.wordIds.length) return;
   try {
     const firebase = await getFirebaseSyncApi();
     await firebase.setDoc(
@@ -9220,6 +9221,13 @@ function renderLearnGermanPage() {
   }
 }
 
+function toggleLearnPanel(panel, toggle) {
+  if (!panel || !toggle) return;
+  const nextExpanded = panel.classList.contains("is-collapsed");
+  panel.classList.toggle("is-collapsed", !nextExpanded);
+  toggle.setAttribute("aria-expanded", String(nextExpanded));
+}
+
 function renderLearnGermanProgress(recommendation) {
   if (!els.learnProgressList) return;
   els.learnProgressList.classList.toggle("hidden", !recommendation.pathSteps?.length);
@@ -9273,7 +9281,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
       pathSteps: getLearnGermanPathSteps("vocabulary-review", state)
     };
   }
-  if (!state.articleComplete) {
+  if (state.nounCount > 0 && !state.articleComplete) {
     return {
       action: "article-review",
       eyebrow: "Today's Progress",
@@ -9311,18 +9319,20 @@ function getLearnGermanContextLine(state, goal = getLearnGermanGoal()) {
 }
 
 function getLearnGermanPathSteps(nextStep, state) {
-  const articleIsComplete = state.nounCount > 0 && state.articleComplete;
-  return [
+  const steps = [
     { label: "Flashcards", status: nextStep === "flashcards" ? "current" : "complete" },
     {
       label: "Vocabulary Review",
       status: nextStep === "vocabulary-review" ? "current" : state.vocabularyComplete ? "complete" : "future"
-    },
-    {
-      label: "Article Review",
-      status: nextStep === "article-review" ? "current" : articleIsComplete ? "complete" : "future"
     }
   ];
+  if (state.nounCount > 0) {
+    steps.push({
+      label: "Article Review",
+      status: nextStep === "article-review" ? "current" : state.articleComplete ? "complete" : "future"
+    });
+  }
+  return steps;
 }
 
 function getGuidedLearningState(profile = getCurrentProfile()) {
@@ -9524,6 +9534,7 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
   selectedLearningLevel = level;
   flashcardStudyLevel = level;
   flashcardStudyCategory = category;
+  if (forceNew) clearCompletedStudySetForNewFlashcardSession();
   loadOrCreateFlashcardSession(forceNew);
   currentView = "learning-flashcards";
   closeLearningDeckSelector();
@@ -9545,6 +9556,14 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
   els.actionBar.classList.add("hidden");
   renderLearningFlashcard();
   scrollPageToTop(els.learningFlashcardsScreen);
+}
+
+function clearCompletedStudySetForNewFlashcardSession() {
+  const profile = getCurrentProfile();
+  if (!profile?.activeStudySet?.wordIds?.length) return;
+  profile.activeStudySet = normalizeActiveStudySet();
+  saveProfileStore({ localOnly: true });
+  saveActiveStudySetToCloudNow(profile.activeStudySet);
 }
 
 function showLevelSelection(path) {
@@ -10048,13 +10067,13 @@ function beginPendingChallenge() {
     articles: { mode: "article-quiz", filter: "smartArticle", resume: true }
   };
   if (action === "vocabulary-review") {
-    startChallengeSession("vocabulary", selectedLearningLevel);
+    startChallengeSession("vocabulary", selectedLearningLevel, { useStudySet: guidedLearningActive });
     showVocabularyReviewQuiz();
     return;
   }
   const route = routes[action];
   if (!route) return;
-  if (action === "articles") startChallengeSession("articles", selectedLearningLevel);
+  if (action === "articles") startChallengeSession("articles", selectedLearningLevel, { useStudySet: guidedLearningActive });
   openStudyRoute(route);
 }
 
@@ -10084,28 +10103,28 @@ function discardIncompleteChallengeSession() {
   pendingChallengeAction = "";
 }
 
-function startChallengeSession(type, level = selectedLearningLevel) {
-  const selection = buildChallengeQuestionSelection(type, level);
+function startChallengeSession(type, level = selectedLearningLevel, options = {}) {
+  const selection = buildChallengeQuestionSelection(type, level, options);
   challengeSession = {
     ...createEmptyChallengeSession(),
     type,
     level,
     category: type === "vocabulary" ? selectedChallengeCategory : "",
     questionIds: selection.cards.map((card) => card.id),
-    questionCount: CHALLENGE_QUESTION_COUNT,
+    questionCount: selection.cards.length || CHALLENGE_QUESTION_COUNT,
     studySetUsed: selection.studySetUsed,
     studySetReviewedCount: selection.studySetReviewedCount,
     studySetQuestionCount: selection.studySetQuestionCount
   };
 }
 
-function buildChallengeQuestionSelection(type, level = selectedLearningLevel) {
+function buildChallengeQuestionSelection(type, level = selectedLearningLevel, options = {}) {
   const defaultCards = type === "articles"
     ? getArticleChallengeCards(level)
     : getChallengeVocabularyDeck(level, selectedChallengeCategory);
   const fallbackCards = shuffleCards(defaultCards).slice(0, CHALLENGE_QUESTION_COUNT);
   const studySet = getActiveStudySet();
-  if (!studySet.wordIds.length || !defaultCards.length) {
+  if (!options.useStudySet || !studySet.wordIds.length || !defaultCards.length) {
     return createChallengeQuestionSelection(fallbackCards, studySet, 0);
   }
 
@@ -10118,24 +10137,18 @@ function buildChallengeQuestionSelection(type, level = selectedLearningLevel) {
     return createChallengeQuestionSelection(fallbackCards, studySet, 0);
   }
 
-  const targetStudyCount = type === "articles"
-    ? Math.min(studyMatches.length, CHALLENGE_QUESTION_COUNT)
-    : Math.min(studyMatches.length, Math.ceil(CHALLENGE_QUESTION_COUNT * 0.8));
+  const targetStudyCount = studyMatches.length;
   const studyCards = pickWeightedStudySetCards(studyMatches, targetStudyCount, type);
-  const selectedIds = new Set(studyCards.map((card) => card.id));
-  const defaultFill = shuffleCards(defaultCards)
-    .filter((card) => !selectedIds.has(card.id))
-    .slice(0, Math.max(CHALLENGE_QUESTION_COUNT - studyCards.length, 0));
-  return createChallengeQuestionSelection([...studyCards, ...defaultFill], studySet, studyCards.length);
+  return createChallengeQuestionSelection(studyCards, studySet, studyCards.length, studyCards.length);
 }
 
-function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuestionCount) {
+function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuestionCount, maxQuestions = CHALLENGE_QUESTION_COUNT) {
   const uniqueCards = [];
   const seen = new Set();
   const seenWords = new Set();
   cardsForQuiz.forEach((card) => {
     const wordKey = getStudySetCardMatchKey(card);
-    if (!card?.id || seen.has(card.id) || seenWords.has(wordKey) || uniqueCards.length >= CHALLENGE_QUESTION_COUNT) return;
+    if (!card?.id || seen.has(card.id) || seenWords.has(wordKey) || uniqueCards.length >= maxQuestions) return;
     seen.add(card.id);
     seenWords.add(wordKey);
     uniqueCards.push(card);
@@ -10840,6 +10853,12 @@ function bindEvents() {
   });
   els.learnGoalIncrease?.addEventListener("click", () => {
     setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
+  });
+  els.learnDifficultToggle?.addEventListener("click", () => {
+    toggleLearnPanel(els.learnDifficultPanel, els.learnDifficultToggle);
+  });
+  els.learnShortcutToggle?.addEventListener("click", () => {
+    toggleLearnPanel(els.learnShortcutPanel, els.learnShortcutToggle);
   });
   els.learnDifficultVocabulary?.addEventListener("click", () => startFocusedDifficultReview("vocabulary"));
   els.learnDifficultArticles?.addEventListener("click", () => startFocusedDifficultReview("articles"));
@@ -11579,7 +11598,7 @@ function renderCard() {
     ? articleChallengeActive
       ? `Question ${Math.min(challengeSession.answered + (articleQuizAnswered ? 0 : 1), getChallengeSessionQuestionCount())} of ${getChallengeSessionQuestionCount()}`
       : `${isArticleQuiz ? "Question" : "Card"} ${currentIndex + 1} of ${visibleCards.length}`
-    : `${isArticleQuiz ? "Question" : "Card"} 0 of 0`;
+    : isArticleQuiz ? "Loading your review..." : "Card 0 of 0";
   els.emptyState.classList.toggle("hidden", Boolean(card));
   els.previousCard.classList.remove("hidden");
   els.nextCard.classList.remove("hidden");
@@ -11598,9 +11617,9 @@ function renderCard() {
   updateRatingButtonLabels(mode);
 
   if (!card) {
-    els.promptLabel.textContent = "No cards";
+    els.promptLabel.textContent = isArticleQuiz ? "Article Review" : "No cards";
     els.articleQuizResult.classList.add("hidden");
-    els.questionText.textContent = "Nothing to study";
+    els.questionText.textContent = isArticleQuiz ? "Loading your review..." : "Nothing to study";
     els.questionTranslation.textContent = "";
     els.questionTranslation.classList.add("hidden");
     return;
@@ -12598,9 +12617,9 @@ function renderVocabularyReviewQuiz() {
     ? vocabularyChallengeActive
       ? `Question ${Math.min(challengeSession.answered + (vocabularyReviewQuizState.hasAnswered ? 0 : 1), getChallengeSessionQuestionCount())} of ${getChallengeSessionQuestionCount()}`
       : `Card ${vocabularyReviewCurrentIndex + 1} of ${visibleVocabularyReviewCards.length}`
-    : "0 / 0";
+    : "Loading your review...";
   if (!card) {
-    els.nounVerbPrompt.textContent = "No vocabulary words";
+    els.nounVerbPrompt.textContent = "Loading your review...";
     els.nounVerbEmptyState.querySelector("h2").textContent = "No vocabulary words available";
     els.nounVerbEmptyState.querySelector("p").textContent = `The ${challengeSession.level || selectedLearningLevel} vocabulary dataset could not be loaded.`;
     els.nounVerbOptions.replaceChildren();

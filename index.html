@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=236">
+    <link rel="stylesheet" href="style.css?v=238">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -446,24 +446,36 @@
           </article>
         </section>
 
-        <section class="learn-difficult-panel" id="learnDifficultPanel" aria-label="Review difficult words">
-          <div>
-            <p class="eyebrow">Focused Review</p>
-            <h3>Review Difficult Words</h3>
-            <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
-          </div>
-          <div class="learn-difficult-actions" id="learnDifficultActions">
-            <button class="ghost-button" id="learnDifficultVocabulary" type="button">Start Review</button>
-            <button class="small-link-button hidden" id="learnDifficultArticles" type="button">Review difficult noun articles</button>
+        <section class="learn-difficult-panel learn-collapsible is-collapsed" id="learnDifficultPanel" aria-label="Review difficult words">
+          <button class="learn-panel-toggle" id="learnDifficultToggle" type="button" aria-expanded="false">
+            <span>Focused Review</span>
+            <strong>Review Difficult Words</strong>
+          </button>
+          <div class="learn-panel-body">
+            <div>
+              <p class="eyebrow">Focused Review</p>
+              <h3>Review Difficult Words</h3>
+              <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
+            </div>
+            <div class="learn-difficult-actions" id="learnDifficultActions">
+              <button class="ghost-button" id="learnDifficultVocabulary" type="button">Start Review</button>
+              <button class="small-link-button hidden" id="learnDifficultArticles" type="button">Review difficult noun articles</button>
+            </div>
           </div>
         </section>
 
-        <section class="learn-shortcut-panel" id="learnShortcutPanel" aria-label="Learning shortcuts">
-          <p>Or jump to:</p>
-          <div class="learn-shortcut-grid">
-            <button class="ghost-button" type="button" data-learn-action="flashcards">📇 Flashcards</button>
-            <button class="ghost-button" type="button" data-learn-action="vocabulary-review">📝 Vocabulary Review</button>
-            <button class="ghost-button" type="button" data-learn-action="article-review">🔤 Article Review</button>
+        <section class="learn-shortcut-panel learn-collapsible is-collapsed" id="learnShortcutPanel" aria-label="Learning shortcuts">
+          <button class="learn-panel-toggle" id="learnShortcutToggle" type="button" aria-expanded="false">
+            <span>Optional</span>
+            <strong>Or jump to</strong>
+          </button>
+          <div class="learn-panel-body">
+            <p>Or jump to:</p>
+            <div class="learn-shortcut-grid">
+              <button class="ghost-button" type="button" data-learn-action="flashcards">📇 Flashcards</button>
+              <button class="ghost-button" type="button" data-learn-action="vocabulary-review">📝 Vocabulary Review</button>
+              <button class="ghost-button" type="button" data-learn-action="article-review">🔤 Article Review</button>
+            </div>
           </div>
         </section>
       </section>
@@ -907,14 +919,14 @@
             <img id="studyChallengeBanner" src="assets/town-center-stage-1.png" alt="">
           </div>
           <div class="card-meta">
-            <span id="cardCounter">0 / 0</span>
+            <span id="cardCounter">Loading your review...</span>
             <span id="cardMode">German -> English</span>
           </div>
           <p class="study-set-notice hidden" id="articleQuizStudySetNotice"></p>
 
           <div class="question-area">
             <p class="eyebrow" id="promptLabel">German</p>
-            <h2 id="questionText">Vocabulary loading</h2>
+            <h2 id="questionText">Loading your review...</h2>
             <p class="question-translation hidden" id="questionTranslation"></p>
           </div>
 
@@ -965,7 +977,7 @@
             <img id="nounVerbChallengeBanner" src="assets/town-center-stage-1.png" alt="">
           </div>
           <div class="card-meta">
-            <span id="nounVerbCounter">0 / 0</span>
+            <span id="nounVerbCounter">Loading your review...</span>
             <span id="nounVerbTitle">Noun-Verb Pairs</span>
           </div>
           <p class="study-set-notice hidden" id="vocabularyReviewStudySetNotice"></p>
@@ -1013,6 +1025,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=236"></script>
+    <script type="module" src="script.js?v=238"></script>
   </body>
 </html>
