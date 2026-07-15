@@ -568,8 +568,48 @@
               </label>
             </div>
           </fieldset>
-          <button class="primary-button" type="submit">Start Studying</button>
+          <button class="primary-button" type="submit">Continue</button>
         </form>
+      </section>
+
+      <section class="learning-goal-screen hidden" id="learningGoalScreen" aria-label="Today's Goal">
+        <div class="flashcard-page-heading learning-goal-heading">
+          <button class="small-link-button" id="learningGoalBack" type="button">← Back</button>
+          <p class="eyebrow">Today’s Goal</p>
+          <h2>How many new words would you like to study?</h2>
+        </div>
+        <article class="learning-goal-card">
+          <div class="learning-goal-choice">
+            <button class="learn-goal-stepper" id="learningGoalDecrease" type="button" aria-label="Study fewer words">−</button>
+            <strong><span id="learningGoalValue">20</span> words</strong>
+            <button class="learn-goal-stepper" id="learningGoalIncrease" type="button" aria-label="Study more words">+</button>
+          </div>
+          <p class="learn-goal-note">Maximum: 50 words</p>
+          <p class="learn-estimate" id="learningGoalEstimate">Estimated time: 4–5 minutes</p>
+          <div class="learning-goal-selection">
+            <span id="learningGoalSelectionSummary">A1 · Nouns</span>
+            <button class="small-link-button" id="learningGoalChange" type="button">Change</button>
+          </div>
+          <div class="learning-goal-change-panel hidden" id="learningGoalChangePanel">
+            <fieldset>
+              <legend>Level</legend>
+              <div class="learning-goal-options" id="learningGoalLevelOptions">
+                <button type="button" data-goal-level="A1">A1</button>
+                <button type="button" data-goal-level="A2">A2</button>
+                <button type="button" data-goal-level="B1">B1</button>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Word type</legend>
+              <div class="learning-goal-options" id="learningGoalCategoryOptions">
+                <button type="button" data-goal-category="nouns">Nouns</button>
+                <button type="button" data-goal-category="verbs">Verbs</button>
+                <button type="button" data-goal-category="other">Other Words</button>
+              </div>
+            </fieldset>
+          </div>
+          <button class="primary-button" id="learningGoalStart" type="button">▶ Start Learning</button>
+        </article>
       </section>
 
       <section class="learning-flashcards-screen hidden" id="learningFlashcardsScreen" aria-live="polite">
@@ -1025,6 +1065,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=240"></script>
+    <script type="module" src="script.js?v=241"></script>
   </body>
 </html>

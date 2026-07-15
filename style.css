@@ -13252,3 +13252,126 @@ body:has(#developerToolsScreen:not(.hidden)) {
     min-height: 42px;
   }
 }
+
+/* Today's Goal step for new flashcard sessions. */
+.learning-goal-screen {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+
+.learning-goal-card {
+  border: 1px solid rgba(190, 177, 153, 0.28);
+  border-radius: 18px;
+  background: rgba(255, 250, 241, 0.72);
+  box-shadow: 0 12px 30px rgba(55, 49, 36, 0.06);
+  padding: clamp(16px, 3vw, 24px);
+  display: grid;
+  gap: 14px;
+}
+
+.learning-goal-heading h2,
+.learning-goal-heading p {
+  margin: 0;
+}
+
+.learning-goal-choice {
+  display: grid;
+  grid-template-columns: 44px minmax(140px, auto) 44px;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.learning-goal-choice strong {
+  min-width: 140px;
+  color: var(--green);
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 850;
+  text-align: center;
+}
+
+.learning-goal-selection {
+  border: 1px solid rgba(77, 130, 94, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.learning-goal-selection span {
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.learning-goal-change-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.learning-goal-change-panel fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.learning-goal-change-panel legend {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 820;
+}
+
+.learning-goal-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-goal-options button {
+  min-height: 42px;
+  border: 1px solid rgba(77, 130, 94, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--green);
+  cursor: pointer;
+  font-weight: 820;
+}
+
+.learning-goal-options button.selected {
+  border-color: rgba(77, 130, 94, 0.5);
+  background: rgba(235, 246, 231, 0.95);
+  box-shadow: 0 8px 18px rgba(77, 130, 94, 0.1);
+}
+
+.learning-goal-card > .primary-button {
+  min-height: 48px;
+}
+
+@media (max-width: 520px) {
+  .learning-goal-screen {
+    gap: 12px;
+  }
+
+  .learning-goal-card {
+    padding: 14px;
+  }
+
+  .learning-goal-choice {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .learning-goal-choice strong {
+    min-width: 0;
+  }
+
+  .learning-goal-selection {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

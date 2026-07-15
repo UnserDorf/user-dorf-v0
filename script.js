@@ -525,6 +525,18 @@ const els = {
   flashcardSetupForm: document.querySelector("#flashcardSetupForm"),
   flashcardSetupBack: document.querySelector("#flashcardSetupBack"),
   flashcardSetupLevel: document.querySelector("#flashcardSetupLevel"),
+  learningGoalScreen: document.querySelector("#learningGoalScreen"),
+  learningGoalBack: document.querySelector("#learningGoalBack"),
+  learningGoalDecrease: document.querySelector("#learningGoalDecrease"),
+  learningGoalIncrease: document.querySelector("#learningGoalIncrease"),
+  learningGoalValue: document.querySelector("#learningGoalValue"),
+  learningGoalEstimate: document.querySelector("#learningGoalEstimate"),
+  learningGoalSelectionSummary: document.querySelector("#learningGoalSelectionSummary"),
+  learningGoalChange: document.querySelector("#learningGoalChange"),
+  learningGoalChangePanel: document.querySelector("#learningGoalChangePanel"),
+  learningGoalStart: document.querySelector("#learningGoalStart"),
+  learningGoalLevelOptions: document.querySelector("#learningGoalLevelOptions"),
+  learningGoalCategoryOptions: document.querySelector("#learningGoalCategoryOptions"),
   learningFlashcardsScreen: document.querySelector("#learningFlashcardsScreen"),
   learningFlashcard: document.querySelector("#learningFlashcard"),
   learningFlashcardsBack: document.querySelector("#learningFlashcardsBack"),
@@ -803,6 +815,7 @@ let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
 let selectedChallengeCategory = "nouns";
 let pendingChallengeAction = "";
+let learningGoalBackTarget = "learn-german";
 let guidedLearningActive = false;
 let learnGermanReturnActive = false;
 let pendingFlashcardResumeKey = "";
@@ -1950,6 +1963,7 @@ function normalizeProfileData(data, profile) {
     flashcardSessions: normalizeFlashcardSessions(data?.flashcardSessions),
     activeStudySet: normalizeActiveStudySet(data?.activeStudySet),
     learningIntroSeen: Boolean(data?.learningIntroSeen ?? profile?.learningIntroSeen),
+    learningPreferences: normalizeLearningPreferences(data?.learningPreferences || profile?.learningPreferences),
     positions: normalizePositions(data?.positions),
     settings: {
       mode: data?.settings?.mode || "de-en",
@@ -1984,7 +1998,7 @@ function normalizeFlashcardSessions(value) {
         ratings: normalizeFlashcardRatings(session?.ratings),
         sessionId: typeof session?.sessionId === "string" ? session.sessionId : "",
         studyDate: typeof session?.studyDate === "string" ? session.studyDate : "",
-        requestedWordCount: normalizeFlashcardSessionGoal(session?.requestedWordCount || session?.studyGoal || session?.todayGoal || session?.deckSize),
+        studyGoal: normalizeFlashcardSessionGoal(session?.studyGoal || session?.requestedWordCount || session?.todayGoal || session?.deckSize),
         completed: Boolean(session?.completed),
         updatedAt: typeof session?.updatedAt === "string" ? session.updatedAt : ""
       }
@@ -1992,14 +2006,31 @@ function normalizeFlashcardSessions(value) {
   );
 }
 
-function normalizeFlashcardSessionGoal(value = getLearnGermanGoal()) {
+function normalizeFlashcardSessionGoal(value = LEARN_GERMAN_DEFAULT_GOAL) {
   const numericValue = Number(value);
-  const safeValue = Number.isFinite(numericValue) ? numericValue : getLearnGermanGoal();
+  const safeValue = Number.isFinite(numericValue) ? numericValue : LEARN_GERMAN_DEFAULT_GOAL;
   return clamp(
     Math.round(safeValue / LEARN_GERMAN_GOAL_STEP) * LEARN_GERMAN_GOAL_STEP,
     LEARN_GERMAN_MIN_GOAL,
     LEARN_GERMAN_MAX_GOAL
   );
+}
+
+function normalizeLearningPreferences(value = {}) {
+  const level = LEARNING_LEVELS.includes(value?.level) ? value.level : "";
+  const category = ["nouns", "verbs", "other"].includes(value?.category) ? value.category : "";
+  return {
+    studyGoal: normalizeFlashcardSessionGoal(value?.studyGoal),
+    level,
+    category,
+    updatedAt: typeof value?.updatedAt === "string" ? value.updatedAt : ""
+  };
+}
+
+function mergeLearningPreferences(localPreferences, remotePreferences) {
+  const local = normalizeLearningPreferences(localPreferences);
+  const remote = normalizeLearningPreferences(remotePreferences);
+  return latestString(local.updatedAt, remote.updatedAt) === local.updatedAt ? local : remote;
 }
 
 function normalizeActiveStudySet(value) {
@@ -2565,6 +2596,26 @@ async function saveActiveStudySetToCloudNow(studySet) {
   }
 }
 
+async function saveLearningPreferencesToCloudNow(preferences) {
+  if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
+  const normalizedPreferences = normalizeLearningPreferences(preferences);
+  try {
+    const firebase = await getFirebaseSyncApi();
+    await firebase.setDoc(
+      getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
+      { learningPreferences: normalizedPreferences },
+      { merge: true }
+    );
+    updateCloudSyncDebug({
+      lastCloudSaveTime: new Date().toISOString(),
+      lastCloudSaveError: ""
+    }, "Firestore learningPreferences save complete");
+  } catch (error) {
+    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore learningPreferences save failed");
+    console.warn("Could not sync learning preferences to Firebase. Local preferences are still saved.", error);
+  }
+}
+
 async function saveDifficultWordsToCloudNow(words = difficultWords) {
   if (!hasCloudSyncConfig() || !firebaseAuthUser) return;
   try {
@@ -3053,6 +3104,7 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
       ),
       flashcardSessions: mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
       activeStudySet: mergeActiveStudySets(local.activeStudySet, remote.activeStudySet),
+      learningPreferences: mergeLearningPreferences(local.learningPreferences, remote.learningPreferences),
       positions: {
         vocabulary: Math.max(normalizePosition(local.positions?.vocabulary), normalizePosition(remote.positions?.vocabulary)),
         article: Math.max(normalizePosition(local.positions?.article), normalizePosition(remote.positions?.article)),
@@ -3107,7 +3159,7 @@ function mergeFlashcardSessions(localSessions = {}, remoteSessions = {}) {
         ...normalizeFlashcardRatings(localSession.ratings),
         ...normalizeFlashcardRatings(remoteSession.ratings)
       },
-      requestedWordCount: normalizeFlashcardSessionGoal(newest.requestedWordCount || localSession.requestedWordCount || remoteSession.requestedWordCount),
+      studyGoal: normalizeFlashcardSessionGoal(newest.studyGoal || localSession.studyGoal || remoteSession.studyGoal || newest.requestedWordCount || localSession.requestedWordCount || remoteSession.requestedWordCount),
       completed: Boolean(localSession.completed || remoteSession.completed),
       updatedAt: latestString(localSession.updatedAt, remoteSession.updatedAt)
     };
@@ -4284,6 +4336,7 @@ function showDashboard() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLegacyStudyUi();
   scrollPageToTop(els.dashboardScreen);
@@ -4315,6 +4368,7 @@ function showLearnGermanPage() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLearnIntroPanel();
   hideLegacyStudyUi();
@@ -4357,6 +4411,7 @@ function hideAuthenticatedAppViews() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLegacyStudyUi();
 }
@@ -4397,6 +4452,7 @@ function showDemoScreen() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -4530,6 +4586,7 @@ function showCoinChallenges() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   if (els.challengeSelectedLevel) els.challengeSelectedLevel.textContent = selectedLearningLevel;
   if (els.articleSelectedLevel) els.articleSelectedLevel.textContent = selectedLearningLevel;
@@ -4568,6 +4625,7 @@ function showAchievementCollection(page = "austria-album") {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -4595,6 +4653,7 @@ function showStudyView(options = {}) {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.nounVerbStage.classList.add("hidden");
   els.appShell.classList.toggle("clean-article-practice", cleanArticlePractice);
@@ -4632,6 +4691,7 @@ function showNounVerbQuiz() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -4661,6 +4721,7 @@ function showVocabularyReviewQuiz() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -4689,6 +4750,7 @@ function showMeaningMatchQuiz() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -4716,6 +4778,7 @@ function showPrepositionQuiz() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -7250,6 +7313,7 @@ function applyFamilyZProgressResetLocally(group, resetProfiles) {
     }
   });
   saveProfileStore({ localOnly: true });
+  saveLearningPreferencesToCloudNow(profile.learningPreferences);
 }
 
 async function verifyFamilyZProgressReset(firebase, expectedMemberIds = []) {
@@ -7543,6 +7607,7 @@ function showVillageMembers() {
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -9179,11 +9244,15 @@ function chooseLevelFromLearningIntro() {
 }
 
 function getStoredLearnGermanLevel() {
+  const profileLevel = getCurrentProfile()?.learningPreferences?.level;
+  if (LEARNING_LEVELS.includes(profileLevel)) return profileLevel;
   const level = localStorage.getItem(LEARN_GERMAN_LEVEL_STORAGE_KEY);
   return LEARNING_LEVELS.includes(level) ? level : "";
 }
 
 function getStoredLearnGermanCategory() {
+  const profileCategory = getCurrentProfile()?.learningPreferences?.category;
+  if (["nouns", "verbs", "other"].includes(profileCategory)) return profileCategory;
   const category = localStorage.getItem(LEARN_GERMAN_CATEGORY_STORAGE_KEY);
   return ["nouns", "verbs", "other"].includes(category) ? category : "";
 }
@@ -9191,12 +9260,26 @@ function getStoredLearnGermanCategory() {
 function rememberLearnGermanChoices(level = selectedLearningLevel, category = flashcardStudyCategory) {
   if (LEARNING_LEVELS.includes(level)) localStorage.setItem(LEARN_GERMAN_LEVEL_STORAGE_KEY, level);
   if (["nouns", "verbs", "other"].includes(category)) localStorage.setItem(LEARN_GERMAN_CATEGORY_STORAGE_KEY, category);
+  updateLearningPreferences({ level, category });
 }
 
 function getLearnGermanGoal() {
+  const profileGoal = getCurrentProfile()?.learningPreferences?.studyGoal;
+  if (Number.isFinite(Number(profileGoal))) return normalizeFlashcardSessionGoal(profileGoal);
   const saved = Number(localStorage.getItem(LEARN_GERMAN_GOAL_STORAGE_KEY));
   if (!Number.isFinite(saved)) return LEARN_GERMAN_DEFAULT_GOAL;
   return clamp(Math.round(saved / LEARN_GERMAN_GOAL_STEP) * LEARN_GERMAN_GOAL_STEP, LEARN_GERMAN_MIN_GOAL, LEARN_GERMAN_MAX_GOAL);
+}
+
+function updateLearningPreferences(updates = {}) {
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  profile.learningPreferences = normalizeLearningPreferences({
+    ...(profile.learningPreferences || {}),
+    ...updates,
+    updatedAt: new Date().toISOString()
+  });
+  saveProfileStore({ localOnly: true });
 }
 
 function setLearnGermanGoal(value) {
@@ -9208,7 +9291,9 @@ function setLearnGermanGoal(value) {
     LEARN_GERMAN_MAX_GOAL
   );
   localStorage.setItem(LEARN_GERMAN_GOAL_STORAGE_KEY, String(nextGoal));
+  updateLearningPreferences({ studyGoal: nextGoal });
   renderLearnGermanPage();
+  if (currentView === "learning-goal") renderLearningGoalScreen();
 }
 
 function getLearnGermanTimeEstimate(wordCount = getLearnGermanGoal()) {
@@ -9292,6 +9377,19 @@ function renderLearnGermanProgress(recommendation) {
 function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   const state = getGuidedLearningState(profile);
   if (!state.wordCount) {
+    const resumable = getMostRecentFlashcardSession("", { incompleteOnly: true });
+    if (resumable) {
+      return {
+        action: "resume-flashcards",
+        eyebrow: "Today's Progress",
+        title: `${resumable.level} · ${getFlashcardCategoryLabel(resumable.category)} · ${resumable.total} ${resumable.total === 1 ? "word" : "words"}`,
+        meta: `Resume Card ${formatResumePosition(resumable.index, resumable.total)} of ${resumable.total}.`,
+        buttonLabel: "▶ Continue Flashcards",
+        showGoal: false,
+        hasStudySet: false,
+        pathSteps: getLearnGermanPathSteps("flashcards", state)
+      };
+    }
     const goal = getLearnGermanGoal();
     return {
       action: "flashcards",
@@ -9299,7 +9397,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
       title: getLearnGermanContextLine(state, goal),
       meta: "Choose a level and start a new set of words.",
       buttonLabel: "▶ Start Learning",
-      showGoal: true,
+      showGoal: false,
       hasStudySet: false,
       pathSteps: getLearnGermanPathSteps("flashcards", state)
     };
@@ -9447,7 +9545,17 @@ function handleLearnGermanAction(action, options = {}) {
       return;
     }
     if (options.guided) markLearningIntroSeen();
-    showFlashcardsEntry({ guided: Boolean(options.guided) });
+    showLearningGoalScreen({ backTarget: "learn-german" });
+    return;
+  }
+  if (action === "resume-flashcards") {
+    learnGermanReturnActive = true;
+    const resumable = getMostRecentFlashcardSession("", { incompleteOnly: true });
+    if (resumable) {
+      openFlashcardDeck(resumable.level, resumable.category);
+      return;
+    }
+    showLearningGoalScreen({ backTarget: "learn-german" });
     return;
   }
   if (action === "vocabulary-review") {
@@ -9554,12 +9662,13 @@ function showFlashcardsEntry(options = {}) {
   showLevelSelection("flashcards");
 }
 
-function getMostRecentFlashcardSession(level = "") {
+function getMostRecentFlashcardSession(level = "", options = {}) {
   const profile = getFlashcardSessionProfile();
   const sessions = Object.entries(profile?.flashcardSessions || {})
     .map(([key, session]) => {
       const match = /^(A1|A2|B1)-(nouns|verbs|other)$/.exec(key);
       if (level && match?.[1] !== level) return null;
+      if (options.incompleteOnly && session.completed) return null;
       if (!match || !session.deckIds.length) return null;
       const levelCards = getFlashcardCardsForLevel(match[1]);
       const validDeckIds = session.deckIds.filter((id) => levelCards.some((card) => card.id === id));
@@ -9570,6 +9679,7 @@ function getMostRecentFlashcardSession(level = "") {
         category: match[2],
         index: clamp(session.index, 0, validDeckIds.length - 1),
         total: validDeckIds.length,
+        completed: Boolean(session.completed),
         updatedAt: session.updatedAt || ""
       };
     })
@@ -9624,6 +9734,7 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.remove("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -9664,6 +9775,7 @@ function showLevelSelection(path) {
   els.flashcardResumeScreen?.classList.add("hidden");
   els.levelSelectionScreen.classList.remove("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -9719,6 +9831,7 @@ function showFlashcardSetup() {
   els.flashcardResumeScreen?.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.remove("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
   els.searchPanel.classList.add("hidden");
@@ -9737,9 +9850,69 @@ function showFlashcardSetup() {
 function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
   const category = categoryInput?.value || "nouns";
-  const requestedGoal = getLearnGermanGoal();
+  flashcardStudyCategory = category;
   rememberLearnGermanChoices(selectedLearningLevel, category);
-  openFlashcardDeck(selectedLearningLevel, category, { forceNew: true, requestedGoal });
+  showLearningGoalScreen({ backTarget: "flashcard-setup" });
+}
+
+function showLearningGoalScreen(options = {}) {
+  currentView = "learning-goal";
+  learningGoalBackTarget = options.backTarget || "learn-german";
+  selectedLearningLevel = getStoredLearnGermanLevel() || selectedLearningLevel;
+  flashcardStudyLevel = selectedLearningLevel;
+  flashcardStudyCategory = getStoredLearnGermanCategory() || flashcardStudyCategory || "nouns";
+  els.learningGoalChangePanel?.classList.add("hidden");
+  setChallengeBackButtons(false, false);
+  renderLearningGoalScreen();
+  els.dashboardScreen.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
+  els.achievementCollectionScreen.classList.add("hidden");
+  els.coinChallengesScreen.classList.add("hidden");
+  els.challengeReadyScreen.classList.add("hidden");
+  els.challengeResultsScreen.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.levelSelectionScreen.classList.add("hidden");
+  els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.remove("hidden");
+  els.learningFlashcardsScreen.classList.add("hidden");
+  els.controlPanel.classList.add("hidden");
+  els.searchPanel.classList.add("hidden");
+  els.statsGrid.classList.add("hidden");
+  els.studyStage.classList.add("hidden");
+  els.nounVerbStage.classList.add("hidden");
+  els.actionBar.classList.add("hidden");
+  scrollPageToTop(els.learningGoalScreen);
+}
+
+function renderLearningGoalScreen() {
+  const goal = getLearnGermanGoal();
+  if (els.learningGoalValue) els.learningGoalValue.textContent = String(goal);
+  if (els.learningGoalEstimate) els.learningGoalEstimate.textContent = `Estimated time: ${getLearnGermanTimeEstimate(goal)}`;
+  if (els.learningGoalDecrease) els.learningGoalDecrease.disabled = goal <= LEARN_GERMAN_MIN_GOAL;
+  if (els.learningGoalIncrease) els.learningGoalIncrease.disabled = goal >= LEARN_GERMAN_MAX_GOAL;
+  if (els.learningGoalSelectionSummary) {
+    els.learningGoalSelectionSummary.textContent = `${selectedLearningLevel} · ${getFlashcardCategoryLabel(flashcardStudyCategory)}`;
+  }
+  els.learningGoalLevelOptions?.querySelectorAll("[data-goal-level]").forEach((button) => {
+    button.classList.toggle("selected", button.dataset.goalLevel === selectedLearningLevel);
+  });
+  els.learningGoalCategoryOptions?.querySelectorAll("[data-goal-category]").forEach((button) => {
+    button.classList.toggle("selected", button.dataset.goalCategory === flashcardStudyCategory);
+  });
+}
+
+function startLearningFromGoal() {
+  const requestedGoal = getLearnGermanGoal();
+  rememberLearnGermanChoices(selectedLearningLevel, flashcardStudyCategory);
+  openFlashcardDeck(selectedLearningLevel, flashcardStudyCategory, { forceNew: true, requestedGoal });
+}
+
+function handleLearningGoalBack() {
+  if (learningGoalBackTarget === "flashcard-setup") {
+    showFlashcardSetup();
+    return;
+  }
+  showLearnGermanPage();
 }
 
 function getFlashcardLevel(card) {
@@ -9879,7 +10052,7 @@ function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearn
   const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
   const selectedGoal = normalizeFlashcardSessionGoal(requestedGoal);
   const goalSize = Math.min(selectedGoal, availableCards.length);
-  const savedGoal = normalizeFlashcardSessionGoal(saved?.requestedWordCount || selectedGoal);
+  const savedGoal = normalizeFlashcardSessionGoal(saved?.studyGoal || selectedGoal);
   const canResume = !forceNew && savedCards.length === goalSize && savedGoal === selectedGoal && !saved.completed;
 
   if (canResume) {
@@ -9909,7 +10082,7 @@ function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearn
     studiedIds: [],
     ratings: normalizeFlashcardRatings(saved?.ratings),
     studyDate: getTodayKey(),
-    requestedWordCount: selectedGoal,
+    studyGoal: selectedGoal,
     completed: false,
     updatedAt: new Date().toISOString()
   };
@@ -9941,7 +10114,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     studiedIds: Array.from(studiedIds),
     ratings: normalizeFlashcardRatings(existing.ratings),
     studyDate: today,
-    requestedWordCount: normalizeFlashcardSessionGoal(existing.requestedWordCount || flashcardStudyCards.length || getLearnGermanGoal()),
+    studyGoal: normalizeFlashcardSessionGoal(existing.studyGoal || flashcardStudyCards.length || getLearnGermanGoal()),
     completed,
     updatedAt: new Date().toISOString()
   };
@@ -10022,7 +10195,7 @@ function renderLearningFlashcard() {
     : "No cards";
   if (hasCard) {
     logFlashcardSessionDiagnostics({
-      selectedGoal: normalizeFlashcardSessionGoal(session?.requestedWordCount || getLearnGermanGoal()),
+      selectedGoal: normalizeFlashcardSessionGoal(session?.studyGoal || getLearnGermanGoal()),
       availableWordCount: getFlashcardCardsForDeck().length,
       constructedDeckLength: flashcardStudyCards.length,
       uniqueDeckLength: new Set(flashcardStudyCards.map((item) => item.id)).size,
@@ -10176,6 +10349,7 @@ function showChallengeReady(action) {
   els.coinChallengesScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -10660,6 +10834,7 @@ function showChallengeResults() {
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
   els.flashcardSetupScreen.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
   els.learningFlashcardsScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.controlPanel.classList.add("hidden");
@@ -11226,6 +11401,32 @@ function bindEvents() {
     chooseLearningLevel(button.dataset.learningLevel);
   });
   els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
+  els.learningGoalBack?.addEventListener("click", handleLearningGoalBack);
+  els.learningGoalDecrease?.addEventListener("click", () => {
+    setLearnGermanGoal(getLearnGermanGoal() - LEARN_GERMAN_GOAL_STEP);
+  });
+  els.learningGoalIncrease?.addEventListener("click", () => {
+    setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
+  });
+  els.learningGoalChange?.addEventListener("click", () => {
+    els.learningGoalChangePanel?.classList.toggle("hidden");
+  });
+  els.learningGoalLevelOptions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-goal-level]");
+    if (!button) return;
+    selectedLearningLevel = button.dataset.goalLevel;
+    flashcardStudyLevel = selectedLearningLevel;
+    rememberLearnGermanChoices(selectedLearningLevel, flashcardStudyCategory);
+    renderLearningGoalScreen();
+  });
+  els.learningGoalCategoryOptions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-goal-category]");
+    if (!button) return;
+    flashcardStudyCategory = button.dataset.goalCategory;
+    rememberLearnGermanChoices(selectedLearningLevel, flashcardStudyCategory);
+    renderLearningGoalScreen();
+  });
+  els.learningGoalStart?.addEventListener("click", startLearningFromGoal);
   els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
   els.challengeReadyBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
