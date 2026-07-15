@@ -1984,10 +1984,21 @@ function normalizeFlashcardSessions(value) {
         ratings: normalizeFlashcardRatings(session?.ratings),
         sessionId: typeof session?.sessionId === "string" ? session.sessionId : "",
         studyDate: typeof session?.studyDate === "string" ? session.studyDate : "",
+        requestedWordCount: normalizeFlashcardSessionGoal(session?.requestedWordCount || session?.studyGoal || session?.todayGoal || session?.deckSize),
         completed: Boolean(session?.completed),
         updatedAt: typeof session?.updatedAt === "string" ? session.updatedAt : ""
       }
     ])
+  );
+}
+
+function normalizeFlashcardSessionGoal(value = getLearnGermanGoal()) {
+  const numericValue = Number(value);
+  const safeValue = Number.isFinite(numericValue) ? numericValue : getLearnGermanGoal();
+  return clamp(
+    Math.round(safeValue / LEARN_GERMAN_GOAL_STEP) * LEARN_GERMAN_GOAL_STEP,
+    LEARN_GERMAN_MIN_GOAL,
+    LEARN_GERMAN_MAX_GOAL
   );
 }
 
@@ -3096,6 +3107,7 @@ function mergeFlashcardSessions(localSessions = {}, remoteSessions = {}) {
         ...normalizeFlashcardRatings(localSession.ratings),
         ...normalizeFlashcardRatings(remoteSession.ratings)
       },
+      requestedWordCount: normalizeFlashcardSessionGoal(newest.requestedWordCount || localSession.requestedWordCount || remoteSession.requestedWordCount),
       completed: Boolean(localSession.completed || remoteSession.completed),
       updatedAt: latestString(localSession.updatedAt, remoteSession.updatedAt)
     };
@@ -9590,7 +9602,7 @@ function resumePendingFlashcardSession() {
   openFlashcardDeck(match[1], match[2]);
 }
 
-function openFlashcardDeck(level, category, { forceNew = false } = {}) {
+function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = getLearnGermanGoal() } = {}) {
   if (!LEARNING_LEVELS.includes(level) || !["nouns", "verbs", "other"].includes(category)) return;
   if (currentView === "learning-flashcards" && flashcardStudyCards.length) {
     saveCurrentFlashcardSession();
@@ -9600,7 +9612,7 @@ function openFlashcardDeck(level, category, { forceNew = false } = {}) {
   flashcardStudyLevel = level;
   flashcardStudyCategory = category;
   if (forceNew) clearCompletedStudySetForNewFlashcardSession();
-  loadOrCreateFlashcardSession(forceNew);
+  loadOrCreateFlashcardSession(forceNew, requestedGoal);
   currentView = "learning-flashcards";
   closeLearningDeckSelector();
   els.dashboardScreen.classList.add("hidden");
@@ -9725,8 +9737,9 @@ function showFlashcardSetup() {
 function startLearningFlashcards() {
   const categoryInput = els.flashcardSetupForm.querySelector('input[name="flashcardCategory"]:checked');
   const category = categoryInput?.value || "nouns";
+  const requestedGoal = getLearnGermanGoal();
   rememberLearnGermanChoices(selectedLearningLevel, category);
-  openFlashcardDeck(selectedLearningLevel, category, { forceNew: true });
+  openFlashcardDeck(selectedLearningLevel, category, { forceNew: true, requestedGoal });
 }
 
 function getFlashcardLevel(card) {
@@ -9792,8 +9805,8 @@ function toggleLearningDeckSelector() {
   els.learningFlashcardSelection.setAttribute("aria-expanded", String(!isOpen));
 }
 
-function buildLearningFlashcardOrder(cardList) {
-  const sessionSize = getLearnGermanGoal();
+function buildLearningFlashcardOrder(cardList, requestedGoal = getLearnGermanGoal()) {
+  const sessionSize = Math.min(normalizeFlashcardSessionGoal(requestedGoal), cardList.length);
   const candidates = cardList.map((card) => ({ card, weight: getFlashcardReviewWeight(card) }));
   const selected = [];
   while (candidates.length && selected.length < sessionSize) {
@@ -9828,6 +9841,19 @@ function createFlashcardSessionId(key = getFlashcardSessionKey()) {
   return `${key}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function logFlashcardSessionDiagnostics(details = {}) {
+  console.log("[Unser Dorf flashcard session]", {
+    selectedGoal: details.selectedGoal,
+    availableWordCount: details.availableWordCount,
+    constructedDeckLength: details.constructedDeckLength,
+    uniqueDeckLength: details.uniqueDeckLength,
+    currentIndex: details.currentIndex,
+    storedBatchSize: details.storedBatchSize ?? null,
+    displayedTotal: details.displayedTotal,
+    sessionId: details.sessionId || ""
+  });
+}
+
 function getFlashcardSessionProfile() {
   const profile = getCurrentProfile();
   if (!profile) return null;
@@ -9844,35 +9870,59 @@ function getFlashcardCardsForDeck(level = flashcardStudyLevel, category = flashc
     .filter((card) => getFlashcardCategory(card) === category);
 }
 
-function loadOrCreateFlashcardSession(forceNew = false) {
+function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearnGermanGoal()) {
   const profile = getFlashcardSessionProfile();
   const availableCards = getFlashcardCardsForDeck();
   const availableById = new Map(availableCards.map((card) => [card.id, card]));
   const key = getFlashcardSessionKey();
   const saved = profile?.flashcardSessions?.[key];
   const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
-  const goalSize = Math.min(getLearnGermanGoal(), availableCards.length);
-  const canResume = !forceNew && savedCards.length === goalSize && !saved.completed;
+  const selectedGoal = normalizeFlashcardSessionGoal(requestedGoal);
+  const goalSize = Math.min(selectedGoal, availableCards.length);
+  const savedGoal = normalizeFlashcardSessionGoal(saved?.requestedWordCount || selectedGoal);
+  const canResume = !forceNew && savedCards.length === goalSize && savedGoal === selectedGoal && !saved.completed;
 
   if (canResume) {
     flashcardStudyCards = savedCards;
     flashcardStudyIndex = clamp(saved.index, 0, Math.max(savedCards.length - 1, 0));
+    logFlashcardSessionDiagnostics({
+      selectedGoal,
+      availableWordCount: availableCards.length,
+      constructedDeckLength: flashcardStudyCards.length,
+      uniqueDeckLength: new Set(flashcardStudyCards.map((card) => card.id)).size,
+      currentIndex: flashcardStudyIndex,
+      storedBatchSize: saved?.batchSize || saved?.cardsPerBatch || saved?.miniSessionSize || "",
+      displayedTotal: flashcardStudyCards.length,
+      sessionId: saved?.sessionId || ""
+    });
     return;
   }
 
-  flashcardStudyCards = buildLearningFlashcardOrder(availableCards);
+  flashcardStudyCards = buildLearningFlashcardOrder(availableCards, selectedGoal);
   flashcardStudyIndex = 0;
+  const sessionId = createFlashcardSessionId(key);
   if (!profile) return;
   profile.flashcardSessions[key] = {
-    sessionId: createFlashcardSessionId(key),
+    sessionId,
     deckIds: flashcardStudyCards.map((card) => card.id),
     index: 0,
     studiedIds: [],
     ratings: normalizeFlashcardRatings(saved?.ratings),
     studyDate: getTodayKey(),
+    requestedWordCount: selectedGoal,
     completed: false,
     updatedAt: new Date().toISOString()
   };
+  logFlashcardSessionDiagnostics({
+    selectedGoal,
+    availableWordCount: availableCards.length,
+    constructedDeckLength: flashcardStudyCards.length,
+    uniqueDeckLength: new Set(flashcardStudyCards.map((card) => card.id)).size,
+    currentIndex: flashcardStudyIndex,
+    storedBatchSize: saved?.batchSize || saved?.cardsPerBatch || saved?.miniSessionSize || "",
+    displayedTotal: flashcardStudyCards.length,
+    sessionId
+  });
   saveProfileStore();
 }
 
@@ -9891,6 +9941,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     studiedIds: Array.from(studiedIds),
     ratings: normalizeFlashcardRatings(existing.ratings),
     studyDate: today,
+    requestedWordCount: normalizeFlashcardSessionGoal(existing.requestedWordCount || flashcardStudyCards.length || getLearnGermanGoal()),
     completed,
     updatedAt: new Date().toISOString()
   };
@@ -9954,6 +10005,7 @@ function getCautiousStudySetRating(firstRating, secondRating) {
 function renderLearningFlashcard() {
   const card = flashcardStudyCards[flashcardStudyIndex];
   const hasCard = Boolean(card);
+  const session = getCurrentFlashcardSession();
   els.learningFlashcard.classList.remove("hidden");
   els.flashcardCompletionCard.classList.add("hidden");
   els.learningFlashcardEmpty.classList.toggle("hidden", hasCard);
@@ -9968,6 +10020,18 @@ function renderLearningFlashcard() {
   els.learningFlashcardCounter.textContent = hasCard
     ? `Card ${flashcardStudyIndex + 1} of ${flashcardStudyCards.length}`
     : "No cards";
+  if (hasCard) {
+    logFlashcardSessionDiagnostics({
+      selectedGoal: normalizeFlashcardSessionGoal(session?.requestedWordCount || getLearnGermanGoal()),
+      availableWordCount: getFlashcardCardsForDeck().length,
+      constructedDeckLength: flashcardStudyCards.length,
+      uniqueDeckLength: new Set(flashcardStudyCards.map((item) => item.id)).size,
+      currentIndex: flashcardStudyIndex,
+      storedBatchSize: session?.batchSize || session?.cardsPerBatch || session?.miniSessionSize || "",
+      displayedTotal: flashcardStudyCards.length,
+      sessionId: session?.sessionId || ""
+    });
+  }
   if (els.learningFlashcardProgressBar) {
     const progressPercent = hasCard && flashcardStudyCards.length
       ? ((flashcardStudyIndex + 1) / flashcardStudyCards.length) * 100
