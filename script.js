@@ -806,6 +806,7 @@ let pendingChallengeAction = "";
 let guidedLearningActive = false;
 let learnGermanReturnActive = false;
 let pendingFlashcardResumeKey = "";
+let activeStudySetCountRepairPending = false;
 let recentNounVerbQuestionIds = [];
 let recentNounVerbNouns = [];
 let recentMeaningMatchItems = [];
@@ -1992,7 +1993,7 @@ function normalizeFlashcardSessions(value) {
 
 function normalizeActiveStudySet(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return { sessionId: "", reviewedAt: "", wordIds: [], words: {}, reviewStatus: normalizeStudySetReviewStatus() };
+    return { sessionId: "", reviewedAt: "", wordIds: [], wordCount: 0, words: {}, reviewStatus: normalizeStudySetReviewStatus() };
   }
   const words = {};
   Object.entries(value.words || {}).forEach(([wordId, word]) => {
@@ -2009,16 +2010,38 @@ function normalizeActiveStudySet(value) {
       sessionId: typeof word?.sessionId === "string" ? word.sessionId : ""
     };
   });
-  const wordIds = Array.isArray(value.wordIds)
+  const storedWordIds = Array.isArray(value.wordIds)
     ? value.wordIds.map(String).filter((wordId) => Boolean(words[wordId]))
-    : Object.keys(words);
+    : [];
+  const wordIds = Array.from(new Set([...storedWordIds, ...Object.keys(words)]))
+    .filter((wordId) => Boolean(words[wordId]));
+  if (isActiveStudySetCountInconsistent(value, wordIds, words)) {
+    activeStudySetCountRepairPending = true;
+  }
   return {
     sessionId: typeof value.sessionId === "string" ? value.sessionId : "",
     reviewedAt: typeof value.reviewedAt === "string" ? value.reviewedAt : "",
-    wordIds: Array.from(new Set(wordIds)),
+    wordIds,
+    wordCount: wordIds.length,
     words,
     reviewStatus: normalizeStudySetReviewStatus(value.reviewStatus)
   };
+}
+
+function isActiveStudySetCountInconsistent(value, normalizedWordIds = [], normalizedWords = {}) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const storedWordIds = Array.isArray(value.wordIds)
+    ? value.wordIds.map(String).filter(Boolean)
+    : [];
+  const storedUniqueWordIdCount = new Set(storedWordIds).size;
+  const wordsObjectCount = Object.keys(value.words || {}).length;
+  const normalizedCount = normalizedWordIds.length;
+  const storedWordCount = Number(value.wordCount);
+  return (
+    (storedWordIds.length > 0 && storedUniqueWordIdCount !== normalizedCount)
+    || (wordsObjectCount > 0 && Object.keys(normalizedWords).length !== normalizedCount)
+    || (Number.isFinite(storedWordCount) && storedWordCount !== normalizedCount)
+  );
 }
 
 function normalizeStudySetReviewStatus(value = {}) {
@@ -9115,13 +9138,13 @@ function hideLearnIntroPanel() {
 function shouldShowLearningIntro(profile = getCurrentProfile()) {
   if (!profile || profile.learningIntroSeen) return false;
   const state = getGuidedLearningState(profile);
-  return !state.studySet.wordIds.length && !hasCompletedLearningActivity(profile);
+  return !state.wordCount && !hasCompletedLearningActivity(profile);
 }
 
 function hasCompletedLearningActivity(profile = getCurrentProfile()) {
   if (!profile) return false;
   const sessions = normalizeFlashcardSessions(profile.flashcardSessions);
-  const hasStudiedFlashcards = Object.values(sessions).some((session) => normalizeCounter(session?.studiedIds?.length) > 0 || Boolean(session?.completed));
+  const hasStudiedFlashcards = Object.values(sessions).some((session) => new Set(session?.studiedIds || []).size > 0 || Boolean(session?.completed));
   const vocabularyStats = normalizeVocabularyReviewStats(profile.vocabularyReviewStats);
   const hasVocabularyReview = normalizeCounter(vocabularyStats.answered) > 0;
   const hasArticleReview = Object.values(profile.articleProgress || {}).some((entry) => normalizeCounter(entry?.articleCorrectCount) + normalizeCounter(entry?.articleWrongCount) > 0);
@@ -9256,7 +9279,7 @@ function renderLearnGermanProgress(recommendation) {
 
 function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   const state = getGuidedLearningState(profile);
-  if (!state.studySet.wordIds.length) {
+  if (!state.wordCount) {
     const goal = getLearnGermanGoal();
     return {
       action: "flashcards",
@@ -9274,7 +9297,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
       action: "vocabulary-review",
       eyebrow: "Today's Progress",
       title: getLearnGermanContextLine(state),
-      meta: `You studied ${state.studySet.wordIds.length} ${state.studySet.wordIds.length === 1 ? "word" : "words"}. Now check what you remember.`,
+      meta: `You studied ${state.wordCount} ${state.wordCount === 1 ? "word" : "words"}. Now check what you remember.`,
       buttonLabel: "▶ Continue to Vocabulary Review",
       showGoal: false,
       hasStudySet: true,
@@ -9314,7 +9337,7 @@ function getLearnGermanContextLine(state, goal = getLearnGermanGoal()) {
   const categories = Array.from(new Set(words.map((word) => word.category).filter(Boolean)));
   const level = levels.length === 1 ? levels[0] : "Mixed levels";
   const category = categories.length === 1 ? getFlashcardCategoryLabel(categories[0]) : "Mixed words";
-  const count = state.studySet.wordIds.length;
+  const count = state.wordCount || state.studySet.wordIds.length;
   return `${level} · ${category} · ${count} ${count === 1 ? "word" : "words"}`;
 }
 
@@ -9336,18 +9359,60 @@ function getLearnGermanPathSteps(nextStep, state) {
 }
 
 function getGuidedLearningState(profile = getCurrentProfile()) {
-  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
+  const rawStudySet = profile?.activeStudySet;
+  const activeStudySet = normalizeActiveStudySet(rawStudySet);
   const reviewStatus = normalizeStudySetReviewStatus(activeStudySet.reviewStatus);
   const studyWords = activeStudySet.wordIds
     .map((wordId) => activeStudySet.words[wordId])
     .filter(Boolean);
   const nounCount = studyWords.filter((word) => isStudySetNoun(word)).length;
+  const wordCount = activeStudySet.wordIds.length;
+  const complete = Boolean(
+    wordCount
+    && reviewStatus.vocabularyCompletedAt
+    && (nounCount === 0 || reviewStatus.articleCompletedAt)
+  );
+  logStudySetCountDiagnostics(rawStudySet, activeStudySet, {
+    displayedCount: wordCount,
+    sessionCompleted: complete
+  });
+  repairActiveStudySetCountIfNeeded(profile, rawStudySet, activeStudySet);
   return {
     studySet: activeStudySet,
+    wordCount,
     nounCount,
     vocabularyComplete: Boolean(reviewStatus.vocabularyCompletedAt),
     articleComplete: Boolean(reviewStatus.articleCompletedAt)
   };
+}
+
+function logStudySetCountDiagnostics(rawStudySet, normalizedStudySet, details = {}) {
+  const storedWordIds = Array.isArray(rawStudySet?.wordIds) ? rawStudySet.wordIds.map(String).filter(Boolean) : [];
+  const wordsObjectCount = rawStudySet?.words && typeof rawStudySet.words === "object"
+    ? Object.keys(rawStudySet.words).length
+    : 0;
+  console.log("[Unser Dorf study-set count]", {
+    storedWordCount: rawStudySet?.wordCount ?? null,
+    wordIdsLength: storedWordIds.length,
+    uniqueWordIdsCount: new Set(storedWordIds).size,
+    wordsObjectCount,
+    normalizedWordIdsCount: normalizedStudySet.wordIds.length,
+    displayedCount: details.displayedCount,
+    sessionCompletedStatus: Boolean(details.sessionCompleted)
+  });
+}
+
+function repairActiveStudySetCountIfNeeded(profile, rawStudySet, normalizedStudySet) {
+  if (!profile || !rawStudySet || !activeStudySetCountRepairPending) return;
+  const needsRepair = isActiveStudySetCountInconsistent(rawStudySet, normalizedStudySet.wordIds, normalizedStudySet.words);
+  if (!needsRepair && !normalizedStudySet.wordIds.length) {
+    activeStudySetCountRepairPending = false;
+    return;
+  }
+  activeStudySetCountRepairPending = false;
+  profile.activeStudySet = normalizedStudySet;
+  saveProfileStore({ localOnly: true });
+  saveActiveStudySetToCloudNow(normalizedStudySet);
 }
 
 function isStudySetNoun(word) {
@@ -10010,7 +10075,7 @@ function moveLearningFlashcard(direction, studiedCard = null) {
 function showFlashcardCompletion() {
   const profile = getFlashcardSessionProfile();
   const session = profile?.flashcardSessions?.[getFlashcardSessionKey()];
-  els.flashcardCompletionCount.textContent = normalizeCounter(session?.studiedIds?.length);
+  els.flashcardCompletionCount.textContent = normalizeCounter(new Set(session?.studiedIds || []).size);
   if (els.flashcardContinueStudying) {
     els.flashcardContinueStudying.textContent = "▶ Continue to Vocabulary Review";
   }
@@ -10156,13 +10221,21 @@ function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuesti
   return {
     cards: uniqueCards,
     studySetUsed: studySetQuestionCount > 0,
-    studySetReviewedCount: studySet?.wordIds?.length || 0,
+    studySetReviewedCount: getStudySetWordCount(studySet),
     studySetQuestionCount
   };
 }
 
 function getActiveStudySet() {
-  return normalizeActiveStudySet(getCurrentProfile()?.activeStudySet);
+  const profile = getCurrentProfile();
+  const rawStudySet = profile?.activeStudySet;
+  const activeStudySet = normalizeActiveStudySet(rawStudySet);
+  repairActiveStudySetCountIfNeeded(profile, rawStudySet, activeStudySet);
+  return activeStudySet;
+}
+
+function getStudySetWordCount(studySet) {
+  return normalizeActiveStudySet(studySet).wordIds.length;
 }
 
 function getStudySetPreviewForChallengeAction(action) {
@@ -10178,7 +10251,7 @@ function getStudySetPreviewForChallengeAction(action) {
   });
   return {
     count: matches.length,
-    reviewedCount: studySet.wordIds.length
+    reviewedCount: getStudySetWordCount(studySet)
   };
 }
 
