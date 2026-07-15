@@ -886,6 +886,10 @@ let cloudSyncDebug = {
   firestoreCoinsLoaded: 0
 };
 let lastPreHydrationProgressSnapshot = null;
+let userProgressHydratedFromServer = false;
+let userProgressHydrationInProgress = false;
+let studySessionWriteCountSinceSignIn = 0;
+let lastLearningHydrationSnapshot = null;
 
 const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
 const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
@@ -978,7 +982,69 @@ function getProgressFieldSnapshot(profile = {}) {
   };
 }
 
+function getLearningCountSnapshotFromProfile(profile = {}) {
+  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
+  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions || {});
+  const incompleteSessions = Object.values(sessions).filter((session) => session.deckIds?.length && !session.completed);
+  const newestIncompleteSession = incompleteSessions
+    .sort((first, second) => String(second.updatedAt || "").localeCompare(String(first.updatedAt || "")))[0] || null;
+  return {
+    activeStudySetCount: activeStudySet.wordIds.length,
+    activeStudySetSessionId: activeStudySet.sessionId || "",
+    unfinishedDeckCount: newestIncompleteSession ? new Set(newestIncompleteSession.deckIds || []).size : 0,
+    unfinishedSessionId: newestIncompleteSession?.sessionId || "",
+    unfinishedStudyGoal: normalizeFlashcardSessionGoal(newestIncompleteSession?.studyGoal || newestIncompleteSession?.deckIds?.length || 0)
+  };
+}
+
+function getLearningCountSnapshotFromUserDoc(userData = {}, profileId = "") {
+  const profile = profileId ? userData.profiles?.[profileId] : null;
+  const topLevelStudySet = normalizeActiveStudySet(userData.activeStudySet);
+  const profileSnapshot = getLearningCountSnapshotFromProfile(profile || {});
+  return {
+    topLevelActiveStudySetCount: topLevelStudySet.wordIds.length,
+    topLevelActiveStudySetSessionId: topLevelStudySet.sessionId || "",
+    profileActiveStudySetCount: profileSnapshot.activeStudySetCount,
+    profileActiveStudySetSessionId: profileSnapshot.activeStudySetSessionId,
+    profileUnfinishedDeckCount: profileSnapshot.unfinishedDeckCount,
+    profileUnfinishedSessionId: profileSnapshot.unfinishedSessionId,
+    profileUnfinishedStudyGoal: profileSnapshot.unfinishedStudyGoal
+  };
+}
+
+function getAuthoritativeLearningDisplayCount(profile = getCurrentProfile()) {
+  const snapshot = getLearningCountSnapshotFromProfile(profile || {});
+  return snapshot.activeStudySetCount || snapshot.unfinishedDeckCount || 0;
+}
+
+function isAuthenticatedLearningHydrating() {
+  return Boolean(firebaseAuthUser && hasCloudSyncConfig() && !userProgressHydratedFromServer);
+}
+
+function logLearningHydration(details = {}) {
+  console.info("[Unser Dorf learning hydration]", {
+    deviceSessionId: getDeviceSessionId(),
+    firebaseUid: firebaseAuthUser?.uid || "none",
+    localCachedWordCountBeforeHydration: lastLearningHydrationSnapshot?.localCachedWordCount ?? null,
+    serverWordCount: lastLearningHydrationSnapshot?.serverWordCount ?? null,
+    serverSessionId: lastLearningHydrationSnapshot?.serverSessionId || "",
+    localSessionId: lastLearningHydrationSnapshot?.localSessionId || "",
+    renderedWordCount: getAuthoritativeLearningDisplayCount(),
+    hydrationComplete: userProgressHydratedFromServer,
+    localStateDiscarded: Boolean(lastLearningHydrationSnapshot?.localStateDiscarded),
+    studySessionWriteOccurredDuringSignIn: studySessionWriteCountSinceSignIn > 0,
+    ...details
+  });
+}
+
 function traceUserProgressWrite(functionName, reason, payload = {}, sources = {}) {
+  if (userProgressHydrationInProgress && (
+    Object.prototype.hasOwnProperty.call(payload, "activeStudySet")
+    || Object.prototype.hasOwnProperty.call(payload, "profiles")
+    || Object.prototype.hasOwnProperty.call(payload, "learningPreferences")
+  )) {
+    studySessionWriteCountSinceSignIn += 1;
+  }
   const activeProfileId = currentProfileId || profileStore?.currentProfile || "";
   const activeProfile = activeProfileId ? profileStore?.profiles?.[activeProfileId] : null;
   const payloadProfiles = payload?.profiles || {};
@@ -1398,10 +1464,23 @@ async function initializeFamilySync() {
 	    await waitForFirebaseAuthState();
 	    if (!firebaseAuthUser) {
 	      syncEnabled = false;
+	      userProgressHydratedFromServer = false;
+	      userProgressHydrationInProgress = false;
 	      updateCloudSyncDebug({ userDocLoaded: false }, "No Firebase user signed in");
 	      return;
 	    }
 	    villageRosterWriteCountSinceSignIn = 0;
+	    studySessionWriteCountSinceSignIn = 0;
+	    userProgressHydratedFromServer = false;
+	    userProgressHydrationInProgress = true;
+	    lastLearningHydrationSnapshot = {
+	      localCachedWordCount: getAuthoritativeLearningDisplayCount(getCurrentProfile()),
+	      localSessionId: getLearningCountSnapshotFromProfile(getCurrentProfile() || {}).activeStudySetSessionId
+	        || getLearningCountSnapshotFromProfile(getCurrentProfile() || {}).unfinishedSessionId,
+	      serverWordCount: null,
+	      serverSessionId: "",
+	      localStateDiscarded: false
+	    };
 	    const remoteStore = await fetchProfileStoreFromCloud();
 
     if (remoteStore) {
@@ -1409,6 +1488,12 @@ async function initializeFamilySync() {
     } else {
       profileDataSource = "localStorage";
     }
+    userProgressHydratedFromServer = true;
+    userProgressHydrationInProgress = false;
+    logLearningHydration({
+      renderedWordCountAfterHydration: getAuthoritativeLearningDisplayCount(),
+      renderedWordCountBeforeHydration: null
+    });
     ensureBootstrapDeveloperRole();
 
     syncEnabled = true;
@@ -1419,6 +1504,8 @@ async function initializeFamilySync() {
   } catch (error) {
     syncEnabled = false;
     firebaseSyncAvailable = false;
+    userProgressHydratedFromServer = false;
+    userProgressHydrationInProgress = false;
     updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, "Firebase sync unavailable");
     console.error("Firebase sync unavailable. User will remain signed out until Firebase authentication works.", error);
   }
@@ -2812,6 +2899,32 @@ async function fetchProfileStoreFromCloud() {
       }
       remoteStore.currentGroup = normalizeGroupId(userData.currentGroup || remoteStore.currentGroup, remoteStore.groups);
       remoteStore.currentProfile = String(userData.currentProfile || "");
+      const serverLearningSnapshot = getLearningCountSnapshotFromUserDoc(userData, remoteStore.currentProfile || getFirebaseProfileId(firebaseAuthUser));
+      const serverWordCount = serverLearningSnapshot.topLevelActiveStudySetCount
+        || serverLearningSnapshot.profileActiveStudySetCount
+        || serverLearningSnapshot.profileUnfinishedDeckCount
+        || 0;
+      const serverSessionId = serverLearningSnapshot.topLevelActiveStudySetSessionId
+        || serverLearningSnapshot.profileActiveStudySetSessionId
+        || serverLearningSnapshot.profileUnfinishedSessionId
+        || "";
+      lastLearningHydrationSnapshot = {
+        ...(lastLearningHydrationSnapshot || {}),
+        serverWordCount,
+        serverSessionId,
+        serverLearningSnapshot,
+        localStateDiscarded: Boolean(
+          lastLearningHydrationSnapshot
+          && Number(lastLearningHydrationSnapshot.localCachedWordCount) !== Number(serverWordCount)
+        )
+      };
+      console.info("[Unser Dorf learning hydration] Server user document study state.", {
+        path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid),
+        profileId: remoteStore.currentProfile || getFirebaseProfileId(firebaseAuthUser),
+        ...serverLearningSnapshot,
+        authoritativeCount: serverWordCount,
+        authoritativeSessionId: serverSessionId
+      });
       consolidateFirebaseIdentityProfiles(remoteStore, {
         preferProfileId: remoteStore.currentProfile
       });
@@ -3537,7 +3650,8 @@ async function verifySignInProgressState(firebase) {
       serverResetVersion: normalizeCounter(data.progressResetVersion || serverProfile?.progressResetVersion),
       localResetVersion: normalizeCounter(lastPreHydrationProgressSnapshot?.progressResetVersion),
       renderedResetVersion: normalizeCounter(renderedProfile?.progressResetVersion),
-      userProgressWriteOccurredDuringSignIn: false,
+      userProgressWriteOccurredDuringSignIn: studySessionWriteCountSinceSignIn > 0,
+      studySessionWritesDuringSignIn: studySessionWriteCountSinceSignIn,
       dataSource: "Firestore"
     });
   } catch (error) {
@@ -3966,6 +4080,8 @@ async function handleFirebaseSignedIn(user) {
   firebaseAuthUser = user || null;
   firebaseAuthReady = true;
   syncEnabled = false;
+  userProgressHydratedFromServer = false;
+  userProgressHydrationInProgress = Boolean(firebaseAuthUser);
   updateCloudSyncDebug({ userDocLoaded: false }, "Firebase signed in");
   updateFirebaseAuthStatus("Signed in. Loading your progress...");
   await initializeFamilySync();
@@ -3987,6 +4103,8 @@ async function signOutOfFirebase() {
   }
   firebaseAuthUser = null;
   syncEnabled = false;
+  userProgressHydratedFromServer = false;
+  userProgressHydrationInProgress = false;
   saveCurrentPosition();
   closeSettingsMenu();
   showLandingScreen();
@@ -4325,6 +4443,8 @@ function refreshVisibleProfileState() {
   els.currentProfileLabel.textContent = getVillageDisplayName(profile);
   if (currentView === "dashboard") {
     renderDashboard();
+  } else if (currentView === "learn-german") {
+    renderLearnGermanPage();
   } else if (currentView === "achievements") {
     renderAchievementCollection();
   } else if (currentView === "coin-challenges") {
@@ -9545,6 +9665,10 @@ function getLearnGermanTimeEstimate(wordCount = getLearnGermanGoal()) {
 }
 
 function renderLearnGermanPage() {
+  if (isAuthenticatedLearningHydrating()) {
+    renderLearnGermanHydrationLoading();
+    return;
+  }
   const recommendation = getLearnGermanRecommendation();
   const goal = getLearnGermanGoal();
   els.learnRecommendationCard?.classList.toggle("complete", recommendation.action === "complete");
@@ -9581,6 +9705,28 @@ function renderLearnGermanPage() {
     els.learnRecommendationPrimary.dataset.learnAction = recommendation.action;
     els.learnRecommendationActions.replaceChildren(els.learnRecommendationPrimary);
   }
+}
+
+function renderLearnGermanHydrationLoading() {
+  if (els.learnRecommendationCard) {
+    els.learnRecommendationCard.classList.remove("complete", "has-study-set");
+  }
+  if (els.learnRecommendationEyebrow) els.learnRecommendationEyebrow.textContent = "Today's Progress";
+  if (els.learnRecommendationTitle) els.learnRecommendationTitle.textContent = "Loading your learning progress…";
+  if (els.learnRecommendationMeta) els.learnRecommendationMeta.textContent = "Checking your latest study set from cloud sync.";
+  els.learnGoalControls?.classList.add("hidden");
+  els.learnGoalNote?.classList.add("hidden");
+  els.learnEstimate?.classList.add("hidden");
+  els.learnProgressList?.classList.add("hidden");
+  els.learnProgressList?.replaceChildren();
+  if (els.learnRecommendationActions) {
+    const loading = createTextElement("p", "learn-loading-note", "Please wait a moment.");
+    els.learnRecommendationActions.replaceChildren(loading);
+  }
+  logLearningHydration({
+    renderedWordCountBeforeHydration: null,
+    loadingStateShown: true
+  });
 }
 
 function toggleLearnPanel(panel, toggle) {
