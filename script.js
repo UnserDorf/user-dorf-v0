@@ -2649,11 +2649,21 @@ async function saveActiveStudySetToCloudNow(studySet) {
       explicitQuizReward: false,
       explicitDeveloperReset: false
     });
-    await firebase.setDoc(
-      getFirebaseUserDocRef(firebase, firebaseAuthUser.uid),
-      { activeStudySet: normalizedStudySet },
-      { merge: true }
-    );
+    const userRef = getFirebaseUserDocRef(firebase, firebaseAuthUser.uid);
+    const profileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+    if (!normalizedStudySet.wordIds.length && firebase.updateDoc) {
+      const clearPayload = { activeStudySet: {} };
+      if (profileId) clearPayload[`profiles.${profileId}.activeStudySet`] = {};
+      await firebase.updateDoc(userRef, clearPayload);
+    } else {
+      const payload = { activeStudySet: normalizedStudySet };
+      if (profileId) payload.profiles = { [profileId]: { activeStudySet: normalizedStudySet } };
+      await firebase.setDoc(
+        userRef,
+        payload,
+        { merge: true }
+      );
+    }
     updateCloudSyncDebug({
       lastCloudSaveTime: new Date().toISOString(),
       lastCloudSaveError: ""
@@ -2793,8 +2803,9 @@ async function fetchProfileStoreFromCloud() {
           if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].role = userRole;
         });
       }
+      const hasTopLevelActiveStudySet = Object.prototype.hasOwnProperty.call(userData, "activeStudySet");
       const remoteActiveStudySet = normalizeActiveStudySet(userData.activeStudySet);
-      if (remoteActiveStudySet.wordIds.length) {
+      if (hasTopLevelActiveStudySet) {
         getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
           if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].activeStudySet = remoteActiveStudySet;
         });
@@ -3052,6 +3063,7 @@ async function initializeFirebaseSyncApi() {
 	    getDocsFromServer: firestoreModule.getDocsFromServer || firestoreModule.getDocs,
 	    deleteDoc: firestoreModule.deleteDoc,
     setDoc: firestoreModule.setDoc,
+    updateDoc: firestoreModule.updateDoc,
     serverTimestamp: firestoreModule.serverTimestamp
   };
 }
@@ -7182,6 +7194,57 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
     explicitDeveloperReset: true
   });
   await firebase.setDoc(userRef, userPayload, { merge: true });
+  if (firebase.updateDoc) {
+    const profilePath = `profiles.${profileId}`;
+    const overwritePayload = {
+      activeStudySet: {},
+      difficultWords: {},
+      progressResetVersion: nextResetVersion,
+      progressResetAt: firebase.serverTimestamp(),
+      progressResetAtIso: savedAt,
+      [`${profilePath}.dailyChallenge`]: {},
+      [`${profilePath}.streak`]: {},
+      [`${profilePath}.villageContribution`]: {},
+      [`${profilePath}.achievementsUnlocked`]: [],
+      [`${profilePath}.decks`]: {},
+      [`${profilePath}.progress`]: {},
+      [`${profilePath}.vocabularyProgress`]: {},
+      [`${profilePath}.articleProgress`]: {},
+      [`${profilePath}.difficultWords`]: {},
+      [`${profilePath}.nounVerbProgress`]: {},
+      [`${profilePath}.meaningMatchProgress`]: {},
+      [`${profilePath}.prepositionProgress`]: {},
+      [`${profilePath}.recentMeaningMatchItems`]: [],
+      [`${profilePath}.vocabularyReviewStats`]: {},
+      [`${profilePath}.challengeSessionsCompleted`]: 0,
+      [`${profilePath}.flashcardSessions`]: {},
+      [`${profilePath}.activeStudySet`]: {},
+      [`${profilePath}.learningPreferences`]: resetProfile.learningPreferences,
+      [`${profilePath}.positions`]: {},
+      [`${profilePath}.history`]: [],
+      [`${profilePath}.lastStudyDate`]: "",
+      [`${profilePath}.learningIntroSeen`]: false,
+      [`${profilePath}.progressResetVersion`]: nextResetVersion,
+      [`${profilePath}.progressResetAtIso`]: savedAt,
+      updatedAt: firebase.serverTimestamp(),
+      updatedAtIso: savedAt
+    };
+    if (options.includePersonalRewards) {
+      overwritePayload[`${profilePath}.coins`] = 0;
+      overwritePayload[`${profilePath}.contributionCoins`] = 0;
+      overwritePayload[`${profilePath}.levelBonusesAwarded`] = [];
+      overwritePayload[`${profilePath}.austriaAlbumSeenRewards`] = [];
+    }
+    traceUserProgressWrite("resetCurrentDeveloperLearningProgress", "explicit developer reset field overwrite", overwritePayload, {
+      firestoreUserDocument: true,
+      inMemoryProfile: false,
+      localStorage: false,
+      legacyProfileStore: false,
+      explicitQuizReward: false,
+      explicitDeveloperReset: true
+    });
+    await firebase.updateDoc(userRef, overwritePayload);
+  }
 
   if (resetProfile.villageId) {
     const villagePayload = {
@@ -7237,6 +7300,12 @@ function createLearningResetProfile(profile, options = {}) {
     challengeSessionsCompleted: 0,
     flashcardSessions: {},
     activeStudySet: {},
+    learningPreferences: normalizeLearningPreferences({
+      studyGoal: LEARN_GERMAN_DEFAULT_GOAL,
+      level: "",
+      category: "",
+      updatedAt: options.progressResetAtIso || new Date().toISOString()
+    }),
     positions: {},
     history: [],
     lastStudyDate: "",
@@ -9894,7 +9963,7 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
   selectedLearningLevel = level;
   flashcardStudyLevel = level;
   flashcardStudyCategory = category;
-  if (forceNew) clearCompletedStudySetForNewFlashcardSession();
+  if (forceNew) prepareNewFlashcardStudySession(requestedGoal);
   loadOrCreateFlashcardSession(forceNew, requestedGoal);
   currentView = "learning-flashcards";
   closeLearningDeckSelector();
@@ -9919,10 +9988,27 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
   scrollPageToTop(els.learningFlashcardsScreen);
 }
 
-function clearCompletedStudySetForNewFlashcardSession() {
+function prepareNewFlashcardStudySession(requestedGoal = getLearnGermanGoal()) {
   const profile = getCurrentProfile();
-  if (!profile?.activeStudySet?.wordIds?.length) return;
+  if (!profile) return;
+  const now = new Date().toISOString();
+  profile.flashcardSessions = normalizeFlashcardSessions(profile.flashcardSessions);
+  Object.entries(profile.flashcardSessions).forEach(([key, session]) => {
+    profile.flashcardSessions[key] = {
+      ...session,
+      completed: true,
+      supersededByNewSession: true,
+      updatedAt: now
+    };
+  });
   profile.activeStudySet = normalizeActiveStudySet();
+  profile.learningPreferences = normalizeLearningPreferences({
+    ...(profile.learningPreferences || {}),
+    studyGoal: requestedGoal,
+    level: selectedLearningLevel,
+    category: flashcardStudyCategory,
+    updatedAt: now
+  });
   saveProfileStore({ localOnly: true });
   saveActiveStudySetToCloudNow(profile.activeStudySet);
 }
@@ -10076,6 +10162,7 @@ function renderLearningGoalScreen() {
 
 function startLearningFromGoal() {
   const requestedGoal = getLearnGermanGoal();
+  logTodayGoalSelected(requestedGoal);
   rememberLearnGermanChoices(selectedLearningLevel, flashcardStudyCategory);
   openFlashcardDeck(selectedLearningLevel, flashcardStudyCategory, { forceNew: true, requestedGoal });
 }
@@ -10200,6 +10287,32 @@ function logFlashcardSessionDiagnostics(details = {}) {
   });
 }
 
+function logTodayGoalSelected(goal, details = {}) {
+  console.info("[Unser Dorf Today's Goal selected]", {
+    goalSize: normalizeFlashcardSessionGoal(goal),
+    level: selectedLearningLevel,
+    category: flashcardStudyCategory,
+    timestamp: new Date().toISOString(),
+    ...details
+  });
+}
+
+function logStudySessionLifecycle(label, session = {}, details = {}) {
+  const deckIds = Array.isArray(session.deckIds) ? session.deckIds.map(String).filter(Boolean) : [];
+  console.info(`[Unser Dorf ${label} study session]`, {
+    deckLength: deckIds.length,
+    goalSize: normalizeFlashcardSessionGoal(session.studyGoal || details.goalSize || deckIds.length),
+    wordIdsLength: deckIds.length,
+    timestamp: session.updatedAt || new Date().toISOString(),
+    sessionId: session.sessionId || "",
+    level: details.level || flashcardStudyLevel,
+    category: details.category || flashcardStudyCategory,
+    currentIndex: normalizeCounter(session.index),
+    completed: Boolean(session.completed),
+    source: details.source || ""
+  });
+}
+
 function getFlashcardSessionProfile() {
   const profile = getCurrentProfile();
   if (!profile) return null;
@@ -10231,6 +10344,12 @@ function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearn
   if (canResume) {
     flashcardStudyCards = savedCards;
     flashcardStudyIndex = clamp(saved.index, 0, Math.max(savedCards.length - 1, 0));
+    logStudySessionLifecycle("loaded", saved, {
+      goalSize,
+      level: flashcardStudyLevel,
+      category: flashcardStudyCategory,
+      source: "resume existing incomplete session"
+    });
     logFlashcardSessionDiagnostics({
       selectedGoal,
       availableWordCount: availableCards.length,
@@ -10259,6 +10378,12 @@ function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearn
     completed: false,
     updatedAt: new Date().toISOString()
   };
+  logStudySessionLifecycle("created", profile.flashcardSessions[key], {
+    goalSize,
+    level: flashcardStudyLevel,
+    category: flashcardStudyCategory,
+    source: forceNew ? "new requested study set" : "no resumable session"
+  });
   logFlashcardSessionDiagnostics({
     selectedGoal,
     availableWordCount: availableCards.length,
@@ -10337,6 +10462,15 @@ function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSes
     wordIds,
     words,
     reviewStatus: normalizeStudySetReviewStatus()
+  });
+  console.info("[Unser Dorf completed activeStudySet]", {
+    sessionId: profile.activeStudySet.sessionId,
+    deckLength: deckIds.length,
+    completedWordIds: completedIds.length,
+    activeStudySetWordCount: profile.activeStudySet.wordIds.length,
+    timestamp: now,
+    level: flashcardStudyLevel,
+    category: flashcardStudyCategory
   });
   return true;
 }
