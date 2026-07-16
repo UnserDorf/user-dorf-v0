@@ -5913,6 +5913,7 @@ function createDeveloperTestingSection(data) {
     createTextElement("span", "", "Current account"),
     createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
     createTextElement("p", "developer-tools-empty", "Reset learning progress while keeping login, display name, developer role, and Family Z membership."),
+    createDeveloperActionButton("🧹 Reset to First-Time User", openResetToFirstTimeUserDialog, true),
     createDeveloperActionButton("Reset My Learning Progress", () => openResetMyLearningProgressDialog({ includePersonalRewards: false })),
     createDeveloperActionButton("Reset for New-User Test", () => openResetMyLearningProgressDialog({ includePersonalRewards: true }), true)
   );
@@ -7174,6 +7175,60 @@ function openResetMyLearningProgressDialog(options = {}) {
   });
 }
 
+function openResetToFirstTimeUserDialog() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("section");
+    overlay.className = "developer-confirmation-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Reset to first-time user");
+    const card = document.createElement("article");
+    card.className = "developer-confirmation-card";
+    const actions = document.createElement("div");
+    actions.className = "developer-confirmation-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "ghost-button";
+    cancelButton.textContent = "Cancel";
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "danger-button";
+    resetButton.textContent = "Reset";
+    actions.replaceChildren(cancelButton, resetButton);
+    card.replaceChildren(
+      createTextElement("h3", "", "Reset to First-Time User"),
+      createTextElement("p", "", "This will reset all learning progress and first-time experience data for this account. Your account and village membership will remain intact."),
+      actions
+    );
+    overlay.append(card);
+    document.body.append(overlay);
+
+    let handleKeydown = null;
+    const finish = (confirmed) => {
+      if (handleKeydown) document.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve(confirmed);
+    };
+    cancelButton.addEventListener("click", () => finish(false), { once: true });
+    resetButton.addEventListener("click", () => finish(true), { once: true });
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) finish(false);
+    });
+    handleKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+    };
+    document.addEventListener("keydown", handleKeydown);
+    resetButton.focus();
+  }).then(async (confirmed) => {
+    if (!confirmed) return;
+    await resetCurrentDeveloperLearningProgress({
+      includePersonalRewards: true,
+      firstTimeUserReset: true,
+      successMessage: "Reset to First-Time User complete."
+    });
+  });
+}
+
 function openResetFamilyZProgressDialog(data) {
   return new Promise((resolve) => {
     const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
@@ -7318,6 +7373,9 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
     updatedAt: firebase.serverTimestamp(),
     updatedAtIso: savedAt
   };
+  if (options.firstTimeUserReset) {
+    Object.assign(userPayload, createFirstTimeExperienceResetPayload("", savedAt));
+  }
   traceUserProgressWrite("resetCurrentDeveloperLearningProgress", "explicit developer reset", userPayload, {
     firestoreUserDocument: true,
     inMemoryProfile: false,
@@ -7362,6 +7420,9 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
     };
+    if (options.firstTimeUserReset) {
+      Object.assign(overwritePayload, createFirstTimeExperienceResetPayload(profilePath, savedAt));
+    }
     if (options.includePersonalRewards) {
       overwritePayload[`${profilePath}.coins`] = 0;
       overwritePayload[`${profilePath}.contributionCoins`] = 0;
@@ -7403,14 +7464,30 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
   }
 
   applyCurrentLearningResetLocally(profileId, resetProfile);
-  clearLocalLearningChoiceKeys();
+  clearLocalLearningState(options);
   const verification = await verifyCurrentDeveloperLearningReset(firebase, profileId, options);
   await refreshAfterDeveloperReset();
   if (!verification.ok) {
     setDeveloperToolsStatus(`Learning reset warning: ${verification.warnings.join(" ")}`, true);
   } else {
-    setDeveloperToolsStatus("Learning progress reset successfully.");
+    setDeveloperToolsStatus(options.successMessage || "Learning progress reset successfully.");
   }
+}
+
+function createFirstTimeExperienceResetPayload(profilePath = "", savedAt = new Date().toISOString()) {
+  const prefix = profilePath ? `${profilePath}.` : "";
+  return {
+    [`${prefix}learningIntroSeen`]: false,
+    [`${prefix}onboardingCompleted`]: false,
+    [`${prefix}hasSeenWelcome`]: false,
+    [`${prefix}hasSeenHowItWorks`]: false,
+    [`${prefix}hasDismissedHowItWorks`]: false,
+    [`${prefix}hasChosenFirstLevel`]: false,
+    [`${prefix}hasCompletedFirstFlashcards`]: false,
+    [`${prefix}hasStartedReviews`]: false,
+    [`${prefix}hasSeenContinueLearning`]: false,
+    [`${prefix}firstTimeExperienceResetAtIso`]: savedAt
+  };
 }
 
 function createLearningResetProfile(profile, options = {}) {
@@ -7443,6 +7520,15 @@ function createLearningResetProfile(profile, options = {}) {
     history: [],
     lastStudyDate: "",
     learningIntroSeen: false,
+    onboardingCompleted: false,
+    hasSeenWelcome: false,
+    hasSeenHowItWorks: false,
+    hasDismissedHowItWorks: false,
+    hasChosenFirstLevel: false,
+    hasCompletedFirstFlashcards: false,
+    hasStartedReviews: false,
+    hasSeenContinueLearning: false,
+    firstTimeExperienceResetAtIso: options.firstTimeUserReset ? (options.progressResetAtIso || "") : (profile.firstTimeExperienceResetAtIso || ""),
     progressResetVersion: normalizeCounter(options.progressResetVersion),
     progressResetAtIso: options.progressResetAtIso || ""
   };
@@ -7480,12 +7566,22 @@ function applyCurrentLearningResetLocally(profileId, resetProfile) {
   saveProfileStore({ localOnly: true });
 }
 
-function clearLocalLearningChoiceKeys() {
+function clearLocalLearningState(options = {}) {
   [
+    STORAGE_KEY,
+    ARTICLE_STORAGE_KEY,
     LEARN_GERMAN_LEVEL_STORAGE_KEY,
     LEARN_GERMAN_CATEGORY_STORAGE_KEY,
-    LEARN_GERMAN_GOAL_STORAGE_KEY
-  ].forEach((key) => localStorage.removeItem(key));
+    LEARN_GERMAN_GOAL_STORAGE_KEY,
+    ...(options.firstTimeUserReset ? [DEVICE_ONBOARDING_KEY] : [])
+  ].forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    } catch (error) {
+      console.warn("[Unser Dorf reset] Could not clear local learning key.", { key, error });
+    }
+  });
 }
 
 async function verifyCurrentDeveloperLearningReset(firebase, profileId, options = {}) {
@@ -7509,6 +7605,8 @@ async function verifyCurrentDeveloperLearningReset(firebase, profileId, options 
   if (Object.keys(normalizeArticleProgress(profile.articleProgress || {})).length) warnings.push("Article Review progress was not cleared.");
   if (Object.keys(normalizeDifficultWords(profile.difficultWords || {})).length) warnings.push("Difficult words were not cleared.");
   if (normalizeActiveStudySet(profile.activeStudySet).wordIds.length) warnings.push("Profile activeStudySet was not cleared.");
+  if (options.firstTimeUserReset && Boolean(profile.learningIntroSeen || data.learningIntroSeen)) warnings.push("How Learning Works intro flag was not reset.");
+  if (options.firstTimeUserReset && Boolean(profile.hasSeenContinueLearning || data.hasSeenContinueLearning)) warnings.push("Continue Learning first-time flag was not reset.");
   if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
   if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
   console.info(RESET_VERIFICATION_PREFIX, {
