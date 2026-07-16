@@ -893,11 +893,15 @@ let userProgressHydratedFromServer = false;
 let userProgressHydrationInProgress = false;
 let studySessionWriteCountSinceSignIn = 0;
 let lastLearningHydrationSnapshot = null;
+let browserHistoryApplying = false;
+let lastBrowserHistoryKey = "";
+let pendingBrowserRoute = null;
 
 const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
 const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
 const RESET_VERIFICATION_PREFIX = "[Unser Dorf reset verification]";
 const DEVICE_SESSION_STORAGE_KEY = "unserDorfDeviceSessionId";
+const HISTORY_STATE_KEY = "unser-dorf-route";
 
 document.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
@@ -925,6 +929,274 @@ function scrollPageToTop(target = null) {
       }
     });
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
+}
+
+function getHistoryRouteForCurrentView() {
+  const route = {
+    key: HISTORY_STATE_KEY,
+    view: currentView || "dashboard"
+  };
+  if (currentView === "auth") route.mode = firebaseAuthMode || "signup";
+  if (currentView === "village-password") route.groupId = pendingVillageJoinId || currentGroupId || "";
+  if (currentView === "level-selection") route.path = selectedLearningPath || "flashcards";
+  if (currentView === "flashcard-setup") {
+    route.level = selectedLearningLevel;
+    route.category = flashcardStudyCategory;
+  }
+  if (currentView === "learning-goal") {
+    route.backTarget = learningGoalBackTarget || "learn-german";
+    route.level = selectedLearningLevel;
+    route.category = flashcardStudyCategory;
+  }
+  if (currentView === "learning-flashcards" || currentView === "flashcard-complete") {
+    route.level = flashcardStudyLevel || selectedLearningLevel;
+    route.category = flashcardStudyCategory;
+  }
+  if (currentView === "challenge-ready") {
+    route.action = pendingChallengeAction || "vocabulary-review";
+    route.returnTarget = getReviewReturnTarget();
+  }
+  if (currentView === "vocabulary-review" || currentView === "noun-verb" || currentView === "meaning-match" || currentView === "prepositions") {
+    route.returnTarget = getReviewReturnTarget();
+  }
+  return route;
+}
+
+function getBrowserHistoryHash(route = getHistoryRouteForCurrentView()) {
+  const params = new URLSearchParams();
+  const view = route.view || "dashboard";
+  params.set("view", view);
+  ["mode", "groupId", "path", "level", "category", "action", "returnTarget", "backTarget"].forEach((key) => {
+    if (route[key]) params.set(key, route[key]);
+  });
+  return `#${params.toString()}`;
+}
+
+function getBrowserHistoryKey(route = getHistoryRouteForCurrentView()) {
+  return JSON.stringify({
+    view: route.view || "",
+    path: route.path || "",
+    mode: route.mode || "",
+    groupId: route.groupId || "",
+    level: route.level || "",
+    category: route.category || "",
+    action: route.action || "",
+    returnTarget: route.returnTarget || "",
+    backTarget: route.backTarget || ""
+  });
+}
+
+function syncBrowserHistory(options = {}) {
+  if (browserHistoryApplying || !window.history?.pushState) return;
+  const route = options.route || getHistoryRouteForCurrentView();
+  if (!isHistoryManagedView(route.view)) return;
+  const key = getBrowserHistoryKey(route);
+  if (!options.replace && key === lastBrowserHistoryKey) return;
+  const method = options.replace || window.history.state?.key !== HISTORY_STATE_KEY ? "replaceState" : "pushState";
+  const nextUrl = `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(route)}`;
+  window.history[method](route, "", nextUrl);
+  lastBrowserHistoryKey = key;
+}
+
+function isHistoryManagedView(view = currentView) {
+  return new Set([
+    "landing",
+    "demo",
+    "auth",
+    "reset-password",
+    "display-name",
+    "village-selection",
+    "join-village",
+    "village-password",
+    "dashboard",
+    "learn-german",
+    "learn-intro",
+    "level-selection",
+    "flashcard-setup",
+    "learning-goal",
+    "learning-flashcards",
+    "flashcard-complete",
+    "coin-challenges",
+    "challenge-ready",
+    "challenge-results",
+    "vocabulary-review",
+    "noun-verb",
+    "meaning-match",
+    "prepositions",
+    "austria-album",
+    "village-album",
+    "achievement-milestones",
+    "town-center",
+    "village-members",
+    "settings",
+    "developer-tools"
+  ]).has(view);
+}
+
+function readRouteFromLocation() {
+  const params = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+  const view = params.get("view") || "";
+  if (!view) return null;
+  return {
+    key: HISTORY_STATE_KEY,
+    view,
+    mode: params.get("mode") || "",
+    groupId: params.get("groupId") || "",
+    path: params.get("path") || "",
+    level: params.get("level") || "",
+    category: params.get("category") || "",
+    action: params.get("action") || "",
+    returnTarget: params.get("returnTarget") || "",
+    backTarget: params.get("backTarget") || ""
+  };
+}
+
+function getBrowserRouteState(eventState = null) {
+  if (eventState?.key === HISTORY_STATE_KEY) return eventState;
+  return readRouteFromLocation();
+}
+
+function canApplyAuthenticatedRoute(route) {
+  if (!route) return false;
+  if (["landing", "demo", "auth", "reset-password"].includes(route.view)) return true;
+  if (["display-name", "village-selection", "join-village", "village-password"].includes(route.view)) {
+    return Boolean(firebaseAuthUser || currentProfileId || profileStore?.currentProfile);
+  }
+  return Boolean(currentProfileId && getCurrentProfile());
+}
+
+function applyBrowserRoute(route) {
+  if (!route || !isHistoryManagedView(route.view)) return false;
+  if (!canApplyAuthenticatedRoute(route)) {
+    pendingBrowserRoute = route;
+    return false;
+  }
+  browserHistoryApplying = true;
+  try {
+    if (route.view !== "settings") closeSettingsMenu();
+    if (route.level && LEARNING_LEVELS.includes(route.level)) {
+      selectedLearningLevel = route.level;
+      flashcardStudyLevel = route.level;
+    }
+    if (route.category && ["nouns", "verbs", "other"].includes(route.category)) {
+      flashcardStudyCategory = route.category;
+    }
+    if (route.returnTarget) setReviewReturnTarget(route.returnTarget);
+    switch (route.view) {
+      case "landing":
+        showLandingScreen();
+        break;
+      case "demo":
+        showDemoScreen();
+        break;
+      case "auth":
+        if (firebaseAuthUser) routeAfterIdentityReady();
+        else showFirebaseAuthScreen(route.mode || "signin");
+        break;
+      case "reset-password":
+        showResetPasswordScreen();
+        break;
+      case "display-name":
+        showDisplayNameSetup(currentProfileId || profileStore?.currentProfile);
+        break;
+      case "village-selection":
+        showVillageSelection();
+        break;
+      case "join-village":
+        showVillageSelection();
+        showJoinVillageOptions();
+        break;
+      case "village-password":
+        showVillagePassword(route.groupId || pendingVillageJoinId || currentGroupId);
+        break;
+      case "dashboard":
+        showDashboard();
+        break;
+      case "learn-german":
+        showLearnGermanPage();
+        break;
+      case "learn-intro":
+        showLearnGermanPage();
+        showLearnIntroPanel({ firstTime: shouldShowRegisteredUserIntroduction() });
+        break;
+      case "level-selection":
+        showLevelSelection(route.path || selectedLearningPath || "flashcards");
+        break;
+      case "flashcard-setup":
+        showFlashcardSetup();
+        break;
+      case "learning-goal":
+        showLearningGoalScreen({ backTarget: route.backTarget || "learn-german" });
+        break;
+      case "learning-flashcards":
+        openFlashcardDeck(route.level || flashcardStudyLevel || selectedLearningLevel, route.category || flashcardStudyCategory);
+        break;
+      case "flashcard-complete":
+        if (route.level || route.category) openFlashcardDeck(route.level || flashcardStudyLevel || selectedLearningLevel, route.category || flashcardStudyCategory);
+        showFlashcardCompletion();
+        break;
+      case "coin-challenges":
+        showCoinChallenges();
+        break;
+      case "challenge-ready":
+        showChallengeReady(route.action || pendingChallengeAction || "vocabulary-review");
+        break;
+      case "challenge-results":
+        showChallengeResults();
+        break;
+      case "vocabulary-review":
+        showVocabularyReviewQuiz();
+        break;
+      case "noun-verb":
+        showNounVerbQuiz();
+        break;
+      case "meaning-match":
+        showMeaningMatchQuiz();
+        break;
+      case "prepositions":
+        showPrepositionQuiz();
+        break;
+      case "austria-album":
+      case "village-album":
+      case "achievement-milestones":
+      case "town-center":
+        showAchievementCollection(route.view);
+        break;
+      case "village-members":
+        showVillageMembers();
+        break;
+      case "settings":
+        if (!currentProfileId) showDashboard();
+        openSettingsPanel();
+        break;
+      case "developer-tools":
+        showDeveloperTools();
+        break;
+      default:
+        return false;
+    }
+    lastBrowserHistoryKey = getBrowserHistoryKey(getHistoryRouteForCurrentView());
+    return true;
+  } finally {
+    browserHistoryApplying = false;
+  }
+}
+
+function applyPendingBrowserRouteIfReady() {
+  if (!pendingBrowserRoute || !canApplyAuthenticatedRoute(pendingBrowserRoute)) return false;
+  const route = pendingBrowserRoute;
+  pendingBrowserRoute = null;
+  return applyBrowserRoute(route);
+}
+
+function initializeBrowserHistory() {
+  const initialRoute = getBrowserRouteState(window.history.state);
+  if (initialRoute) pendingBrowserRoute = initialRoute;
+  window.addEventListener("popstate", (event) => {
+    const route = getBrowserRouteState(event.state);
+    if (!route) return;
+    applyBrowserRoute(route);
   });
 }
 
@@ -1310,6 +1582,7 @@ async function init() {
   try {
     installV0DebugTools();
     cleanupObsoleteLocalIdentityData();
+    initializeBrowserHistory();
     bindLockEvents();
     await unlockApp();
   } catch (error) {
@@ -1886,6 +2159,7 @@ function selectVillage(groupId) {
 }
 
 function showVillageSelection() {
+  currentView = "village-selection";
   villageSelectionMode = "choose";
   pendingProfileId = "";
   pendingVillageJoinId = "";
@@ -1918,9 +2192,11 @@ function showVillageSelection() {
   renderVillageCards();
   renderGroupSelectors();
   scrollPageToTop(els.profileScreen);
+  syncBrowserHistory();
 }
 
 function showJoinVillageOptions() {
+  currentView = "join-village";
   villageSelectionMode = "join";
   pendingVillageJoinId = "";
   verifiedVillageJoinId = "";
@@ -1937,6 +2213,7 @@ function showJoinVillageOptions() {
   els.villageSelectionHelper?.classList.remove("hidden");
   renderVillageCards();
   scrollPageToTop(els.profileScreen);
+  syncBrowserHistory();
 }
 
 function showCreateVillageComingSoon() {
@@ -1983,6 +2260,7 @@ function enterSelectedVillage() {
 function showVillagePassword(groupId = pendingVillageJoinId || currentGroupId) {
   const group = profileStore?.groups?.[groupId];
   if (!group) return;
+  currentView = "village-password";
   pendingVillageJoinId = group.id;
   els.profileScreen.classList.remove("village-landing-mode");
   hideProfileOnboardingPanels();
@@ -1995,6 +2273,7 @@ function showVillagePassword(groupId = pendingVillageJoinId || currentGroupId) {
   els.villagePasswordForm?.classList.remove("hidden");
   scrollPageToTop(els.profileScreen);
   els.villagePasswordInput?.focus();
+  syncBrowserHistory();
 }
 
 function handleVillagePassword(event) {
@@ -3700,7 +3979,17 @@ function routeAfterIdentityReady() {
   if (profileId && groupId) {
     currentGroupId = groupId;
     profileStore.currentGroup = groupId;
-    completeProfileLogin(profileId);
+    if (pendingBrowserRoute) {
+      browserHistoryApplying = true;
+      try {
+        completeProfileLogin(profileId);
+      } finally {
+        browserHistoryApplying = false;
+      }
+    } else {
+      completeProfileLogin(profileId);
+    }
+    if (applyPendingBrowserRouteIfReady()) return;
     if (shouldShowRegisteredUserIntroduction(profile)) {
       showRegisteredUserIntroduction();
     }
@@ -3779,6 +4068,7 @@ function getVillageDisplayName(profile) {
 
 function showDisplayNameSetup(profileId = currentProfileId || profileStore?.currentProfile) {
   const profile = profileStore?.profiles?.[profileId] || null;
+  currentView = "display-name";
   currentProfileId = profileId || "";
   els.appShell.classList.add("locked");
   els.landingScreen?.classList.add("hidden");
@@ -3793,6 +4083,7 @@ function showDisplayNameSetup(profileId = currentProfileId || profileStore?.curr
   els.displayNameForm?.classList.remove("hidden");
   scrollPageToTop(els.profileScreen);
   els.displayNameInput?.focus();
+  syncBrowserHistory();
 }
 
 function handleDisplayNameSubmit(event) {
@@ -3880,6 +4171,7 @@ function hideProfileOnboardingPanels() {
 }
 
 function showFirebaseAuthScreen(mode = "signup", message = "") {
+  currentView = "auth";
   firebaseAuthMode = mode === "signin" ? "signin" : "signup";
   currentProfileId = "";
   pendingProfileId = "";
@@ -3902,6 +4194,7 @@ function showFirebaseAuthScreen(mode = "signup", message = "") {
   updateFirebaseAuthStatus(message);
   scrollPageToTop(els.profileScreen);
   els.firebaseAuthEmail?.focus();
+  syncBrowserHistory();
 }
 
 function preloadFirebaseAuthForSignIn() {
@@ -3988,6 +4281,7 @@ function returnAuthToHome() {
 }
 
 function showResetPasswordScreen() {
+  currentView = "reset-password";
   els.appShell.classList.add("locked");
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
@@ -4008,6 +4302,7 @@ function showResetPasswordScreen() {
   }
   scrollPageToTop(els.profileScreen);
   els.resetPasswordEmail?.focus();
+  syncBrowserHistory();
 }
 
 function showResetPasswordSuccess() {
@@ -4610,6 +4905,7 @@ function showDashboard() {
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLegacyStudyUi();
   scrollPageToTop(els.dashboardScreen);
+  syncBrowserHistory();
 }
 
 function showLearnGermanPage() {
@@ -4645,6 +4941,7 @@ function showLearnGermanPage() {
   hideLearnIntroPanel();
   hideLegacyStudyUi();
   scrollPageToTop(els.learnGermanScreen);
+  syncBrowserHistory();
 }
 
 function showLandingScreen() {
@@ -4669,6 +4966,7 @@ function showLandingScreen() {
   hideRewardDebugPage();
   resetLoggedOutTransientUi();
   scrollPageToTop(els.landingScreen);
+  syncBrowserHistory({ replace: true });
 }
 
 function hideAuthenticatedAppViews() {
@@ -4734,6 +5032,7 @@ function showDemoScreen() {
   els.actionBar.classList.add("hidden");
   renderOnboardingPage();
   scrollPageToTop(els.demoScreen);
+  syncBrowserHistory();
 }
 
 function renderOnboardingPage() {
@@ -4877,6 +5176,7 @@ function showCoinChallenges() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   scrollPageToTop(els.coinChallengesScreen);
+  syncBrowserHistory();
 }
 
 function showAchievementCollection(page = "austria-album") {
@@ -4908,6 +5208,7 @@ function showAchievementCollection(page = "austria-album") {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   scrollPageToTop(els.achievementCollectionScreen);
+  syncBrowserHistory();
 }
 
 function showStudyView(options = {}) {
@@ -4978,6 +5279,7 @@ function showNounVerbQuiz() {
   resumeNounVerbPosition();
   generateNounVerbQuestion("open quiz", nounVerbCurrentIndex);
   renderNounVerbQuiz();
+  syncBrowserHistory();
 }
 
 function showVocabularyReviewQuiz() {
@@ -5009,6 +5311,7 @@ function showVocabularyReviewQuiz() {
   generateVocabularyReviewQuestion("open quiz", vocabularyReviewCurrentIndex);
   renderVocabularyReviewQuiz();
   scrollPageToTop(els.nounVerbStage);
+  syncBrowserHistory();
 }
 
 function showMeaningMatchQuiz() {
@@ -5038,6 +5341,7 @@ function showMeaningMatchQuiz() {
   applyMeaningMatchSmartOrder();
   generateMeaningMatchQuestion("open quiz", meaningMatchCurrentIndex);
   renderMeaningMatchQuiz();
+  syncBrowserHistory();
 }
 
 function showPrepositionQuiz() {
@@ -5067,6 +5371,7 @@ function showPrepositionQuiz() {
   applyPrepositionOrder();
   generatePrepositionQuestion("open quiz", prepositionCurrentIndex);
   renderPrepositionQuiz();
+  syncBrowserHistory();
 }
 
 function setChallengeBackButtons(showStudyButton, showNounVerbButton) {
@@ -5256,6 +5561,7 @@ function openSettingsPanel() {
   }
   els.settingsPanel.classList.remove("hidden");
   els.settingsToggle?.setAttribute("aria-expanded", "true");
+  syncBrowserHistory({ route: { key: HISTORY_STATE_KEY, view: "settings" } });
   if (window.matchMedia("(min-width: 1200px)").matches) {
     showSettingsDetailView();
     return;
@@ -5330,6 +5636,7 @@ function showDeveloperTools() {
   els.developerToolsScreen?.classList.remove("hidden");
   scrollPageToTop(els.developerToolsScreen);
   renderDeveloperToolsPage();
+  syncBrowserHistory();
 }
 
 function returnToSettingsFromDeveloperTools() {
@@ -8157,6 +8464,7 @@ function showVillageMembers() {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   scrollPageToTop(els.villageMembersScreen);
+  syncBrowserHistory();
 }
 
 function renderVillageMembersPage() {
@@ -9760,6 +10068,7 @@ function showLearnIntroPanel(options = {}) {
   els.learnDifficultPanel?.classList.add("hidden");
   els.learnShortcutPanel?.classList.add("hidden");
   scrollPageToTop(els.learnIntroPanel || els.learnGermanScreen);
+  syncBrowserHistory({ replace: firstTime });
 }
 
 function hideLearnIntroPanel() {
@@ -10430,6 +10739,7 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
   els.actionBar.classList.add("hidden");
   renderLearningFlashcard();
   scrollPageToTop(els.learningFlashcardsScreen);
+  syncBrowserHistory();
 }
 
 function prepareNewFlashcardStudySession(requestedGoal = getLearnGermanGoal()) {
@@ -10489,6 +10799,7 @@ function showLevelSelection(path) {
   els.actionBar.classList.add("hidden");
   renderLevelSelectionState();
   scrollPageToTop(els.levelSelectionScreen);
+  syncBrowserHistory();
 }
 
 function chooseLearningLevel(level) {
@@ -10550,6 +10861,7 @@ function showFlashcardSetup() {
     input.checked = input.value === flashcardStudyCategory;
   });
   scrollPageToTop(els.flashcardSetupScreen);
+  syncBrowserHistory();
 }
 
 function startLearningFlashcards() {
@@ -10587,6 +10899,7 @@ function showLearningGoalScreen(options = {}) {
   els.nounVerbStage.classList.add("hidden");
   els.actionBar.classList.add("hidden");
   scrollPageToTop(els.learningGoalScreen);
+  syncBrowserHistory();
 }
 
 function renderLearningGoalScreen() {
@@ -11073,6 +11386,7 @@ function showFlashcardCompletion() {
   els.learningFlashcard.classList.add("hidden");
   els.flashcardCompletionCard.classList.remove("hidden");
   scrollPageToTop(els.learningFlashcardsScreen);
+  syncBrowserHistory();
 }
 
 function handleChallengeAction(action) {
@@ -11128,6 +11442,7 @@ function showChallengeReady(action) {
   els.actionBar.classList.add("hidden");
   els.challengeReadyScreen.classList.remove("hidden");
   scrollPageToTop(els.challengeReadyScreen);
+  syncBrowserHistory();
 }
 
 function beginPendingChallenge() {
@@ -11570,6 +11885,7 @@ function advanceChallengeSession(type, moveNext) {
 }
 
 function showChallengeResults() {
+  currentView = "challenge-results";
   const wasComplete = challengeSession.complete;
   challengeSession.complete = true;
   if (!wasComplete) {
@@ -11613,6 +11929,7 @@ function showChallengeResults() {
   els.actionBar.classList.add("hidden");
   els.challengeResultsScreen.classList.remove("hidden");
   scrollPageToTop(els.challengeResultsScreen);
+  syncBrowserHistory();
 }
 
 function getChallengeSessionQuestionCount(session = challengeSession) {
