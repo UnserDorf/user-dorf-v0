@@ -821,6 +821,7 @@ let reviewReturnTarget = "";
 let learningGoalBackTarget = "learn-german";
 let guidedLearningActive = false;
 let learnGermanReturnActive = false;
+let developerPreviewNewUserExperience = false;
 let pendingFlashcardResumeKey = "";
 let activeStudySetCountRepairPending = false;
 let recentNounVerbQuestionIds = [];
@@ -4907,6 +4908,7 @@ function hideLegacyStudyUi() {
 
 function showDashboard() {
   discardIncompleteChallengeSession();
+  developerPreviewNewUserExperience = false;
   reviewReturnTarget = "";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
@@ -5659,6 +5661,7 @@ function setDeveloperToolsStatus(message = "", isError = false) {
 }
 
 function showDeveloperTools() {
+  developerPreviewNewUserExperience = false;
   currentView = "developer-tools";
   closeSettingsMenu();
   hideAuthenticatedAppViews();
@@ -6263,6 +6266,15 @@ function createDeveloperTestingSection(data) {
     createTextElement("span", "", "Current account"),
     createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
     createDeveloperTestingActionCard({
+      title: "👀 Preview New User Experience",
+      description: "Temporarily view the first registered-user introduction without changing your account or learning data.",
+      keeps: ["Firebase UID", "Display name", "Family membership", "Developer role", "All permissions"],
+      resets: ["Nothing. This is preview only."],
+      actionLabel: "Preview New User Experience",
+      handler: startNewUserExperiencePreview,
+      destructive: false
+    }),
+    createDeveloperTestingActionCard({
       title: "Replay First Learning Experience",
       description: "Replay the learning introduction exactly as a newly registered learner would experience it after creating an account.",
       keeps: ["Account", "Display name", "Family membership", "Developer access"],
@@ -6324,6 +6336,27 @@ function createDeveloperTestingList(title, items = []) {
   });
   wrapper.replaceChildren(createTextElement("span", "", title), list);
   return wrapper;
+}
+
+function startNewUserExperiencePreview() {
+  if (!firebaseAuthUser || !getCurrentProfile()) {
+    setDeveloperToolsStatus("Sign in as the developer account before previewing onboarding.", true);
+    return;
+  }
+  setDeveloperToolsStatus("Preview mode: no account, village, or learning data will be changed.");
+  developerPreviewNewUserExperience = true;
+  guidedLearningActive = true;
+  learnGermanReturnActive = true;
+  showLearnGermanPage();
+  showLearnIntroPanel({ firstTime: true, preview: true });
+}
+
+function endNewUserExperiencePreview() {
+  developerPreviewNewUserExperience = false;
+  guidedLearningActive = false;
+  learnGermanReturnActive = false;
+  hideLearnIntroPanel();
+  showDashboard();
 }
 
 function createDeveloperCleanupPreview(preview) {
@@ -10091,6 +10124,7 @@ function setLearnIntroContent({ firstTime = false } = {}) {
 
 function showLearnIntroPanel(options = {}) {
   const firstTime = Boolean(options.firstTime);
+  developerPreviewNewUserExperience = Boolean(options.preview);
   currentView = "learn-intro";
   setLearnIntroContent({ firstTime });
   els.learnGermanScreen?.classList.add("intro-focused-mode");
@@ -10099,6 +10133,7 @@ function showLearnIntroPanel(options = {}) {
   els.learnRecommendationPanel?.classList.add("hidden");
   els.learnDifficultPanel?.classList.add("hidden");
   els.learnShortcutPanel?.classList.add("hidden");
+  updateLearnIntroPreviewControls();
   scrollPageToTop(els.learnIntroPanel || els.learnGermanScreen);
   syncBrowserHistory({ replace: firstTime });
 }
@@ -10108,9 +10143,28 @@ function hideLearnIntroPanel() {
   els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   setLearnIntroContent({ firstTime: false });
   els.learnIntroPanel?.classList.add("hidden");
+  removeLearnIntroPreviewControls();
   els.learnRecommendationPanel?.classList.remove("hidden");
   els.learnDifficultPanel?.classList.remove("hidden");
   els.learnShortcutPanel?.classList.remove("hidden");
+}
+
+function updateLearnIntroPreviewControls() {
+  removeLearnIntroPreviewControls();
+  if (!developerPreviewNewUserExperience) return;
+  const card = els.learnIntroPanel?.querySelector(".learn-intro-card");
+  if (!card) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "small-link-button learn-intro-preview-exit";
+  button.dataset.previewExit = "true";
+  button.textContent = "Exit Preview";
+  button.addEventListener("click", endNewUserExperiencePreview);
+  card.append(button);
+}
+
+function removeLearnIntroPreviewControls() {
+  els.learnIntroPanel?.querySelectorAll("[data-preview-exit]").forEach((node) => node.remove());
 }
 
 function shouldShowRegisteredUserIntroduction(profile = getCurrentProfile()) {
@@ -10157,6 +10211,10 @@ function markLearningIntroSeen() {
 }
 
 function chooseLevelFromLearningIntro() {
+  if (developerPreviewNewUserExperience) {
+    endNewUserExperiencePreview();
+    return;
+  }
   markLearningIntroSeen();
   els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   learnGermanReturnActive = true;

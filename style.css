@@ -12421,6 +12421,10 @@ body:has(#developerToolsScreen:not(.hidden)) {
   min-width: min(100%, 240px);
 }
 
+.learn-intro-preview-exit {
+  justify-self: start;
+}
+
 .learn-german-screen.first-time-intro-mode {
   max-width: min(860px, calc(100vw - 28px));
   gap: 0;
