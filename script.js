@@ -896,6 +896,7 @@ let lastLearningHydrationSnapshot = null;
 let browserHistoryApplying = false;
 let lastBrowserHistoryKey = "";
 let pendingBrowserRoute = null;
+let browserHistoryIndex = 0;
 
 const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
 const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
@@ -989,14 +990,29 @@ function getBrowserHistoryKey(route = getHistoryRouteForCurrentView()) {
 
 function syncBrowserHistory(options = {}) {
   if (browserHistoryApplying || !window.history?.pushState) return;
-  const route = options.route || getHistoryRouteForCurrentView();
+  const route = { ...(options.route || getHistoryRouteForCurrentView()) };
   if (!isHistoryManagedView(route.view)) return;
   const key = getBrowserHistoryKey(route);
   if (!options.replace && key === lastBrowserHistoryKey) return;
   const method = options.replace || window.history.state?.key !== HISTORY_STATE_KEY ? "replaceState" : "pushState";
+  route.index = method === "pushState" ? browserHistoryIndex + 1 : browserHistoryIndex;
   const nextUrl = `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(route)}`;
   window.history[method](route, "", nextUrl);
+  browserHistoryIndex = route.index;
   lastBrowserHistoryKey = key;
+}
+
+function navigateAppBack(fallback = showDashboard) {
+  if (
+    window.history?.back
+    && window.history.state?.key === HISTORY_STATE_KEY
+    && Number.isFinite(Number(window.history.state.index))
+    && Number(window.history.state.index) > 0
+  ) {
+    window.history.back();
+    return;
+  }
+  fallback();
 }
 
 function isHistoryManagedView(view = currentView) {
@@ -1048,7 +1064,8 @@ function readRouteFromLocation() {
     category: params.get("category") || "",
     action: params.get("action") || "",
     returnTarget: params.get("returnTarget") || "",
-    backTarget: params.get("backTarget") || ""
+    backTarget: params.get("backTarget") || "",
+    index: Number(window.history.state?.index) || 0
   };
 }
 
@@ -1074,6 +1091,7 @@ function applyBrowserRoute(route) {
   }
   browserHistoryApplying = true;
   try {
+    browserHistoryIndex = Number(route.index) || 0;
     if (route.view !== "settings") closeSettingsMenu();
     if (route.level && LEARNING_LEVELS.includes(route.level)) {
       selectedLearningLevel = route.level;
@@ -1192,10 +1210,26 @@ function applyPendingBrowserRouteIfReady() {
 
 function initializeBrowserHistory() {
   const initialRoute = getBrowserRouteState(window.history.state);
-  if (initialRoute) pendingBrowserRoute = initialRoute;
+  if (initialRoute) {
+    browserHistoryIndex = Number(initialRoute.index) || 0;
+    if (window.history?.replaceState && window.history.state?.key !== HISTORY_STATE_KEY) {
+      const normalizedInitialRoute = {
+        ...initialRoute,
+        key: HISTORY_STATE_KEY,
+        index: browserHistoryIndex
+      };
+      window.history.replaceState(
+        normalizedInitialRoute,
+        "",
+        `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(normalizedInitialRoute)}`
+      );
+    }
+    pendingBrowserRoute = initialRoute;
+  }
   window.addEventListener("popstate", (event) => {
     const route = getBrowserRouteState(event.state);
     if (!route) return;
+    browserHistoryIndex = Number(route.index) || 0;
     applyBrowserRoute(route);
   });
 }
@@ -12187,7 +12221,7 @@ function bindSettingsEvents() {
     showResetPasswordScreen();
   });
   bindOptionalEvent(els.openDeveloperTools, "#openDeveloperTools", "click", showDeveloperTools);
-  bindOptionalEvent(els.developerToolsBack, "#developerToolsBack", "click", returnToSettingsFromDeveloperTools);
+  bindOptionalEvent(els.developerToolsBack, "#developerToolsBack", "click", () => navigateAppBack(returnToSettingsFromDeveloperTools));
   bindOptionalEvent(els.developerToolsRefresh, "#developerToolsRefresh", "click", renderDeveloperToolsPage);
   bindOptionalEvent(els.deleteAccountButton, "#deleteAccountButton", "click", openDeleteAccountConfirmation);
   bindOptionalEvent(els.cancelDeleteAccount, "#cancelDeleteAccount", "click", closeDeleteAccountConfirmation);
@@ -12225,24 +12259,26 @@ function bindEvents() {
     event.preventDefault();
     handlePasswordResetSubmit();
   });
-  els.resetPasswordBack?.addEventListener("click", returnToSignInFromResetPassword);
+  els.resetPasswordBack?.addEventListener("click", () => navigateAppBack(returnToSignInFromResetPassword));
   els.resetPasswordSuccessBack?.addEventListener("click", returnToSignInFromResetPassword);
   els.firebaseAuthToggle?.addEventListener("click", toggleFirebaseAuthMode);
   els.firebaseAuthTryDemo?.addEventListener("click", returnAuthToDemo);
-  els.firebaseAuthHome?.addEventListener("click", returnAuthToHome);
-  els.villageSelectionBack?.addEventListener("click", handleVillageSelectionBack);
+  els.firebaseAuthHome?.addEventListener("click", () => navigateAppBack(returnAuthToHome));
+  els.villageSelectionBack?.addEventListener("click", () => navigateAppBack(handleVillageSelectionBack));
   els.joinVillageButton?.addEventListener("click", showJoinVillageOptions);
   els.createVillageButton?.addEventListener("click", showCreateVillageComingSoon);
   els.villagePasswordForm?.addEventListener("submit", handleVillagePassword);
   els.namingCeremonyForm?.addEventListener("submit", handleNamingCeremonySubmit);
-  els.cancelVillagePassword?.addEventListener("click", showVillageSelection);
+  els.cancelVillagePassword?.addEventListener("click", () => navigateAppBack(showVillageSelection));
   els.villageMembersBack?.addEventListener("click", showDashboard);
   els.learnGermanBack?.addEventListener("click", showDashboard);
   els.learnHowItWorks?.addEventListener("click", showLearnIntroPanel);
   els.learnIntroBack?.addEventListener("click", () => {
-    hideLearnIntroPanel();
-    currentView = "learn-german";
-    scrollPageToTop(els.learnGermanScreen);
+    navigateAppBack(() => {
+      hideLearnIntroPanel();
+      currentView = "learn-german";
+      scrollPageToTop(els.learnGermanScreen);
+    });
   });
   els.learnIntroChooseLevel?.addEventListener("click", chooseLevelFromLearningIntro);
   els.learnGoalDecrease?.addEventListener("click", () => {
@@ -12397,21 +12433,23 @@ function bindEvents() {
   els.demoNext?.addEventListener("click", handleDemoNext);
 
   els.studyChallengeBack.addEventListener("click", (event) => {
+    event?.preventDefault();
     if (currentView === "study" && challengeSession.type === "articles") {
-      returnFromReviewFlow(event);
+      navigateAppBack(() => returnFromReviewFlow(event));
       return;
     }
-    returnToCoinChallenges(event);
+    navigateAppBack(() => returnToCoinChallenges(event));
   });
   els.articleQuizNext.addEventListener("click", () => {
     advanceChallengeSession("articles", () => moveCard(1));
   });
   els.nounVerbChallengeBack.addEventListener("click", (event) => {
+    event?.preventDefault();
     if (currentView === "vocabulary-review") {
-      returnFromReviewFlow(event);
+      navigateAppBack(() => returnFromReviewFlow(event));
       return;
     }
-    returnToCoinChallenges(event);
+    navigateAppBack(() => returnToCoinChallenges(event));
   });
 
   els.ratingButtons.addEventListener("click", (event) => {
@@ -12488,8 +12526,8 @@ function bindEvents() {
     returnToLearnGermanOrDashboard();
     showNextPendingCelebration();
   });
-  els.levelSelectionBack.addEventListener("click", returnToLearnGermanOrDashboard);
-  els.flashcardResumeBack?.addEventListener("click", returnToLearnGermanOrDashboard);
+  els.levelSelectionBack.addEventListener("click", () => navigateAppBack(returnToLearnGermanOrDashboard));
+  els.flashcardResumeBack?.addEventListener("click", () => navigateAppBack(returnToLearnGermanOrDashboard));
   els.flashcardResumeContinue?.addEventListener("click", resumePendingFlashcardSession);
   els.flashcardChooseAnotherDeck?.addEventListener("click", () => showLevelSelection("flashcards"));
   els.levelSelectionScreen.addEventListener("click", (event) => {
@@ -12497,8 +12535,8 @@ function bindEvents() {
     if (!button) return;
     chooseLearningLevel(button.dataset.learningLevel);
   });
-  els.flashcardSetupBack.addEventListener("click", () => showLevelSelection("flashcards"));
-  els.learningGoalBack?.addEventListener("click", handleLearningGoalBack);
+  els.flashcardSetupBack.addEventListener("click", () => navigateAppBack(() => showLevelSelection("flashcards")));
+  els.learningGoalBack?.addEventListener("click", () => navigateAppBack(handleLearningGoalBack));
   els.learningGoalDecrease?.addEventListener("click", () => {
     setLearnGermanGoal(getLearnGermanGoal() - LEARN_GERMAN_GOAL_STEP);
   });
@@ -12524,11 +12562,11 @@ function bindEvents() {
     renderLearningGoalScreen();
   });
   els.learningGoalStart?.addEventListener("click", startLearningFromGoal);
-  els.challengeLevelBack.addEventListener("click", () => showLevelSelection("challenges"));
-  els.challengeReadyBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
+  els.challengeLevelBack.addEventListener("click", () => navigateAppBack(() => showLevelSelection("challenges")));
+  els.challengeReadyBack.addEventListener("click", () => navigateAppBack(returnToManualLevelSelectionOrLearnGerman));
   els.challengeReadyStart.addEventListener("click", beginPendingChallenge);
-  els.learningFlashcardsBack.addEventListener("click", showFlashcardSetup);
-  els.flashcardCompletionBack.addEventListener("click", showFlashcardSetup);
+  els.learningFlashcardsBack.addEventListener("click", () => navigateAppBack(showFlashcardSetup));
+  els.flashcardCompletionBack.addEventListener("click", () => navigateAppBack(showFlashcardSetup));
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
@@ -12539,7 +12577,7 @@ function bindEvents() {
     showDirectChallenge("vocabulary-review", { returnTarget: "continue-learning" });
   });
   els.flashcardReturnDashboard.addEventListener("click", returnToLearnGermanOrDashboard);
-  els.challengeResultsBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
+  els.challengeResultsBack.addEventListener("click", () => navigateAppBack(returnToManualLevelSelectionOrLearnGerman));
   els.flashcardSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     startLearningFlashcards();
