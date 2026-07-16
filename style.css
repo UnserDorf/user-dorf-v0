@@ -12167,10 +12167,10 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-german-screen {
-  width: min(860px, 100%);
+  width: min(760px, 100%);
   margin: 0 auto;
   display: grid;
-  gap: clamp(14px, 2.2vw, 20px);
+  gap: clamp(18px, 3vw, 28px);
   overflow: visible;
   padding-bottom: max(72px, calc(28px + env(safe-area-inset-bottom)));
 }
@@ -12203,13 +12203,25 @@ body:has(#developerToolsScreen:not(.hidden)) {
 .learn-recommendation-panel,
 .learn-difficult-panel,
 .learn-shortcut-panel {
-  border: 1px solid rgba(190, 177, 153, 0.22);
+  border: 1px solid rgba(190, 177, 153, 0.16);
   border-radius: 18px;
-  background: rgba(255, 250, 241, 0.58);
-  box-shadow: 0 12px 30px rgba(55, 49, 36, 0.052);
+  background: rgba(255, 250, 241, 0.42);
+  box-shadow: none;
   padding: clamp(14px, 2vw, 18px);
   display: grid;
   gap: 12px;
+}
+
+.learn-recommendation-panel {
+  background: rgba(255, 250, 241, 0.68);
+  border-color: rgba(190, 177, 153, 0.24);
+}
+
+.learn-difficult-panel,
+.learn-shortcut-panel {
+  background: transparent;
+  border-color: rgba(190, 177, 153, 0.14);
+  padding: clamp(10px, 1.6vw, 14px);
 }
 
 .learn-intro-panel {
@@ -12383,7 +12395,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   background: transparent;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: 13px;
 }
 
 .learn-recommendation-card h3,
@@ -12393,15 +12405,15 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-recommendation-card h3 {
   color: var(--ink);
-  font-size: clamp(1.08rem, 2vw, 1.28rem);
-  font-weight: 830;
+  font-size: clamp(1.02rem, 1.8vw, 1.18rem);
+  font-weight: 780;
   line-height: 1.2;
 }
 
 .learn-recommendation-card p {
   color: #665f54;
-  font-size: 0.94rem;
-  font-weight: 650;
+  font-size: 0.92rem;
+  font-weight: 620;
   line-height: 1.35;
 }
 
@@ -12461,7 +12473,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-progress-stack {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .learn-path {
@@ -12472,11 +12484,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-path-step {
-  min-height: 42px;
+  min-height: 36px;
   gap: 5px;
-  padding: 10px 12px;
-  font-size: 0.88rem;
-  font-weight: 820;
+  padding: 8px 10px;
+  font-size: 0.84rem;
+  font-weight: 760;
   line-height: 1.15;
 }
 
@@ -12485,30 +12497,35 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-session-bubble {
-  min-width: min(100%, 150px);
+  min-width: min(100%, 132px);
+}
+
+.learn-session-bubble .learn-path-label {
+  font-size: 0.84rem;
+  line-height: 1.15;
 }
 
 .learn-path-step.complete,
 .learn-path-step.is-complete {
-  border-color: rgba(77, 130, 94, 0.18);
-  background: rgba(235, 246, 231, 0.74);
+  border-color: rgba(77, 130, 94, 0.14);
+  background: rgba(235, 246, 231, 0.54);
   color: var(--green);
 }
 
 .learn-path-step.current,
 .learn-path-step.is-current {
-  border-color: rgba(77, 130, 94, 0.4);
-  background: rgba(235, 246, 231, 0.95);
+  border-color: rgba(77, 130, 94, 0.34);
+  background: rgba(235, 246, 231, 0.78);
   color: var(--green);
-  box-shadow: 0 8px 18px rgba(77, 130, 94, 0.1);
+  box-shadow: none;
 }
 
 .learn-path-step.future,
 .learn-path-step.is-future {
-  border-color: rgba(190, 177, 153, 0.2);
-  background: rgba(255, 253, 248, 0.6);
+  border-color: rgba(190, 177, 153, 0.14);
+  background: rgba(255, 253, 248, 0.42);
   color: #7b7468;
-  opacity: 0.62;
+  opacity: 0.72;
 }
 
 .learn-path-label {
@@ -12518,10 +12535,10 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-path-next {
   border-radius: 999px;
-  background: var(--green);
-  color: #fffdf8;
-  padding: 2px 6px;
-  font-size: 0.66rem;
+  background: rgba(77, 130, 94, 0.12);
+  color: var(--green);
+  padding: 2px 5px;
+  font-size: 0.62rem;
   font-weight: 850;
   letter-spacing: 0;
 }
@@ -12532,42 +12549,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
   font-weight: 800;
 }
 
-.learn-loop-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding-top: 2px;
-}
-
-.learn-loop-bubble {
-  min-height: 32px;
-  border-radius: 12px;
-  padding: 6px 8px;
-  gap: 2px;
-  background: rgba(235, 246, 231, 0.48);
-  box-shadow: none;
-}
-
-.learn-loop-bubble .learn-path-label {
-  font-size: 0.74rem;
-  font-weight: 840;
-}
-
-.learn-loop-bubble .learn-path-next {
-  display: none;
-}
-
-.learn-loop-arrow {
-  font-size: 0.86rem;
-  opacity: 0.72;
-}
-
 .learn-recommendation-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .learn-complete-title {
@@ -12579,12 +12565,12 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-recommendation-actions .primary-button,
 .learn-recommendation-actions .ghost-button {
-  min-height: 44px;
-  font-size: 0.92rem;
+  min-height: 46px;
+  font-size: 0.95rem;
 }
 
 .learn-recommendation-actions .primary-button {
-  min-width: min(100%, 220px);
+  min-width: min(100%, 260px);
 }
 
 .learn-shortcut-grid {
@@ -12594,11 +12580,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-shortcut-grid .ghost-button {
-  min-height: 44px;
+  min-height: 40px;
   justify-content: center;
-  border-color: rgba(77, 130, 94, 0.18);
-  background: rgba(255, 253, 248, 0.52);
-  font-size: 0.88rem;
+  border-color: rgba(77, 130, 94, 0.12);
+  background: rgba(255, 253, 248, 0.38);
+  font-size: 0.84rem;
 }
 
 @media (max-width: 720px) {
@@ -12648,8 +12634,8 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
   .learn-recommendation-panel,
   .learn-shortcut-panel {
-    border-radius: 18px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 12px;
   }
 
   .learn-intro-card {
@@ -12705,7 +12691,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   }
 
   .learn-path-step {
-    flex: 1 1 132px;
+    flex: 1 1 112px;
     justify-content: space-between;
     border-radius: 12px;
   }
@@ -12724,20 +12710,6 @@ body:has(#developerToolsScreen:not(.hidden)) {
     font-size: 0.88rem;
   }
 
-  .learn-loop-row {
-    justify-content: center;
-    gap: 5px;
-  }
-
-  .learn-loop-bubble {
-    flex: 1 1 74px;
-    min-height: 30px;
-    padding: 6px 5px;
-  }
-
-  .learn-loop-bubble .learn-path-label {
-    font-size: 0.68rem;
-  }
 }
 
 /* iPhone learning flow polish: compact quiz cards with atmospheric village background. */
@@ -12937,16 +12909,16 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-panel-toggle {
   width: 100%;
-  min-height: 46px;
+  min-height: 42px;
   border: 0;
   border-radius: 14px;
-  background: rgba(255, 253, 248, 0.62);
+  background: rgba(255, 253, 248, 0.38);
   color: var(--green);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-align: left;
   cursor: pointer;
 }
@@ -12971,14 +12943,14 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-panel-toggle strong {
   color: var(--green);
-  font-size: 0.96rem;
-  font-weight: 850;
+  font-size: 0.9rem;
+  font-weight: 780;
 }
 
 .learn-panel-body {
   display: grid;
-  gap: 12px;
-  padding-top: 12px;
+  gap: 10px;
+  padding-top: 10px;
 }
 
 .learn-collapsible.is-collapsed .learn-panel-body {
@@ -13562,9 +13534,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .clean-quiz-mode.vocabulary-review-mode .noun-verb-card .eyebrow {
-  color: #665f54;
-  font-size: 0.84rem;
-  font-weight: 820;
+  display: none;
 }
 
 .clean-quiz-mode.vocabulary-review-mode #nounVerbPrompt {

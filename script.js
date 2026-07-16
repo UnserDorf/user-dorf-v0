@@ -9766,25 +9766,16 @@ function renderLearnGermanProgress(recommendation) {
       path.append(createLearnFlowArrow());
     }
   });
-  const loop = document.createElement("div");
-  loop.className = "learn-loop-row";
-  getOverallLearningLoopSteps(recommendation).forEach((step, index) => {
-    loop.append(createLearnFlowBubble(step, { variant: "loop" }));
-    if (index < 3) {
-      loop.append(createLearnFlowArrow("learn-flow-arrow learn-loop-arrow"));
-    }
-  });
-  stack.append(path, loop);
+  stack.append(path);
   els.learnProgressList.replaceChildren(stack);
 }
 
 function createLearnFlowBubble(step, { variant = "session" } = {}) {
   const item = document.createElement("div");
   item.className = `learn-flow-bubble learn-path-step learn-${variant}-bubble ${step.status} is-${step.status}`;
-  const icon = step.icon || getLearnPathStepIcon(step.label);
-  const marker = step.status === "complete" ? "✓" : step.status === "future" ? "○" : "";
+  const marker = step.status === "complete" ? "✓" : "";
   const markerText = marker ? `${marker} ` : "";
-  const label = createTextElement("span", "learn-path-label", `${markerText}${icon ? `${icon} ` : ""}${step.label}`);
+  const label = createTextElement("span", "learn-path-label", `${markerText}${step.label}`);
   item.append(label);
   if (step.status === "current") {
     item.append(createTextElement("strong", "learn-path-next", "NEXT"));
@@ -9796,40 +9787,6 @@ function createLearnFlowArrow(className = "learn-flow-arrow learn-path-arrow") {
   return createTextElement("span", className, "→");
 }
 
-function getLearnPathStepIcon(label) {
-  const icons = {
-    Flashcards: "📚",
-    "Vocabulary Review": "✅",
-    "Article Review": "🔤",
-    Learn: "📚",
-    Review: "✅",
-    Earn: "🪙",
-    Build: "🏡"
-  };
-  return icons[label] || "";
-}
-
-function getOverallLearningLoopSteps(recommendation) {
-  const action = recommendation?.action || "flashcards";
-  const loop = [
-    { label: "Learn", status: "future" },
-    { label: "Review", status: "future" },
-    { label: "Earn", status: "future" },
-    { label: "Build", status: "future" }
-  ];
-  if (action === "vocabulary-review" || action === "article-review") {
-    loop[0].status = "complete";
-    loop[1].status = "current";
-  } else if (action === "complete") {
-    loop.forEach((step) => {
-      step.status = "complete";
-    });
-  } else {
-    loop[0].status = "current";
-  }
-  return loop.map((step) => ({ ...step, icon: getLearnPathStepIcon(step.label) }));
-}
-
 function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   const state = getGuidedLearningState(profile);
   if (!state.wordCount) {
@@ -9837,10 +9794,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
     if (resumable) {
       return {
         action: "resume-flashcards",
-        eyebrow: "Today's Progress",
+        eyebrow: "Today's Session",
         title: `${resumable.level} · ${getFlashcardCategoryLabel(resumable.category)} · ${resumable.total} ${resumable.total === 1 ? "word" : "words"}`,
-        meta: `Resume Card ${formatResumePosition(resumable.index, resumable.total)} of ${resumable.total}.`,
-        buttonLabel: "▶ Continue Flashcards",
+        meta: "Continue where you left off.",
+        buttonLabel: "Continue Flashcards",
         showGoal: false,
         hasStudySet: false,
         pathSteps: getLearnGermanPathSteps("flashcards", state)
@@ -9849,10 +9806,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
     const goal = getLearnGermanGoal();
     return {
       action: "flashcards",
-      eyebrow: "Today's Progress",
+      eyebrow: "Today's Session",
       title: getLearnGermanContextLine(state, goal),
       meta: "Choose a level and start a new set of words.",
-      buttonLabel: "▶ Start Learning",
+      buttonLabel: "Start Learning",
       showGoal: false,
       hasStudySet: false,
       pathSteps: getLearnGermanPathSteps("flashcards", state)
@@ -9861,10 +9818,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   if (!state.vocabularyComplete) {
     return {
       action: "vocabulary-review",
-      eyebrow: "Today's Progress",
+      eyebrow: "Today's Session",
       title: getLearnGermanContextLine(state),
-      meta: `You studied ${state.wordCount} ${state.wordCount === 1 ? "word" : "words"}. Now check what you remember.`,
-      buttonLabel: "▶ Continue to Vocabulary Review",
+      meta: "Continue where you left off.",
+      buttonLabel: "Continue Vocabulary Review",
       showGoal: false,
       hasStudySet: true,
       pathSteps: getLearnGermanPathSteps("vocabulary-review", state)
@@ -9873,10 +9830,10 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   if (state.nounCount > 0 && !state.articleComplete) {
     return {
       action: "article-review",
-      eyebrow: "Today's Progress",
+      eyebrow: "Today's Session",
       title: getLearnGermanContextLine(state),
-      meta: "Now practise der, die, and das for the nouns in your study set.",
-      buttonLabel: "▶ Continue to Article Review",
+      meta: "Continue where you left off.",
+      buttonLabel: "Continue Article Review",
       showGoal: false,
       hasStudySet: true,
       pathSteps: getLearnGermanPathSteps("article-review", state)
@@ -9884,7 +9841,7 @@ function getLearnGermanRecommendation(profile = getCurrentProfile()) {
   }
   return {
     action: "complete",
-    eyebrow: "Today's Progress",
+    eyebrow: "Today's Session",
     title: getLearnGermanContextLine(state),
     meta: "You completed this study set. Ready to learn more words?",
     buttonLabel: "Start a New Study Set",
@@ -13512,13 +13469,13 @@ function generateVocabularyReviewQuestion(reason, targetIndex = vocabularyReview
 function renderVocabularyReviewQuiz() {
   const card = getCurrentVocabularyReviewCard();
   const hasCard = Boolean(card);
-  renderVocabularyReviewContextLine();
+  hideVocabularyReviewContextLine();
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
   els.nounVerbTitle.textContent = "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
-  els.nounVerbInstruction.textContent = "Choose the English meaning.";
+  els.nounVerbInstruction.textContent = "";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
   els.ratingButtons.classList.add("hidden");
@@ -13564,18 +13521,12 @@ function renderVocabularyReviewQuiz() {
   if (vocabularyReviewQuizState.hasAnswered) renderVocabularyReviewResult(card);
 }
 
-function renderVocabularyReviewContextLine() {
+function hideVocabularyReviewContextLine() {
   const element = els.vocabularyReviewStudySetNotice;
   if (!element) return;
-  const shouldShow = Boolean(challengeSession.type === "vocabulary" && challengeSession.studySetUsed && challengeSession.studySetReviewedCount);
-  element.classList.toggle("hidden", !shouldShow);
-  element.classList.toggle("vocabulary-review-context-line", shouldShow);
-  if (!shouldShow) {
-    element.replaceChildren();
-    return;
-  }
-  const count = normalizeCounter(challengeSession.studySetReviewedCount);
-  element.textContent = `From your latest ${count} ${count === 1 ? "flashcard" : "flashcards"}`;
+  element.classList.add("hidden");
+  element.classList.remove("vocabulary-review-context-line");
+  element.replaceChildren();
 }
 
 function buildVocabularyReviewChoices(card) {
