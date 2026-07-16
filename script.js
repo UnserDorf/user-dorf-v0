@@ -9743,23 +9743,78 @@ function renderLearnGermanProgress(recommendation) {
     els.learnProgressList.replaceChildren();
     return;
   }
+  const stack = document.createElement("div");
+  stack.className = "learn-progress-stack";
   const path = document.createElement("div");
-  path.className = "learn-path";
+  path.className = "learn-path learn-session-path";
   recommendation.pathSteps.forEach((step, index) => {
-    const item = document.createElement("div");
-    item.className = `learn-path-step ${step.status}`;
-    const marker = step.status === "complete" ? "✓ " : step.status === "future" ? "○ " : "";
-    const label = createTextElement("span", "learn-path-label", `${marker}${step.label}`);
-    item.append(label);
-    if (step.status === "current") {
-      item.append(createTextElement("strong", "learn-path-next", "NEXT"));
-    }
-    path.append(item);
+    path.append(createLearnFlowBubble(step, { variant: "session" }));
     if (index < recommendation.pathSteps.length - 1) {
-      path.append(createTextElement("span", "learn-path-arrow", "→"));
+      path.append(createLearnFlowArrow());
     }
   });
-  els.learnProgressList.replaceChildren(path);
+  const loop = document.createElement("div");
+  loop.className = "learn-loop-row";
+  getOverallLearningLoopSteps(recommendation).forEach((step, index) => {
+    loop.append(createLearnFlowBubble(step, { variant: "loop" }));
+    if (index < 3) {
+      loop.append(createLearnFlowArrow("learn-flow-arrow learn-loop-arrow"));
+    }
+  });
+  stack.append(path, loop);
+  els.learnProgressList.replaceChildren(stack);
+}
+
+function createLearnFlowBubble(step, { variant = "session" } = {}) {
+  const item = document.createElement("div");
+  item.className = `learn-flow-bubble learn-path-step learn-${variant}-bubble ${step.status} is-${step.status}`;
+  const icon = step.icon || getLearnPathStepIcon(step.label);
+  const marker = step.status === "complete" ? "✓" : step.status === "future" ? "○" : "";
+  const markerText = marker ? `${marker} ` : "";
+  const label = createTextElement("span", "learn-path-label", `${markerText}${icon ? `${icon} ` : ""}${step.label}`);
+  item.append(label);
+  if (step.status === "current") {
+    item.append(createTextElement("strong", "learn-path-next", "NEXT"));
+  }
+  return item;
+}
+
+function createLearnFlowArrow(className = "learn-flow-arrow learn-path-arrow") {
+  return createTextElement("span", className, "→");
+}
+
+function getLearnPathStepIcon(label) {
+  const icons = {
+    Flashcards: "📚",
+    "Vocabulary Review": "✅",
+    "Article Review": "🔤",
+    Learn: "📚",
+    Review: "✅",
+    Earn: "🪙",
+    Build: "🏡"
+  };
+  return icons[label] || "";
+}
+
+function getOverallLearningLoopSteps(recommendation) {
+  const action = recommendation?.action || "flashcards";
+  const loop = [
+    { label: "Learn", status: "future" },
+    { label: "Review", status: "future" },
+    { label: "Earn", status: "future" },
+    { label: "Build", status: "future" }
+  ];
+  if (action === "vocabulary-review" || action === "article-review") {
+    loop[0].status = "complete";
+    loop[1].status = "current";
+  } else if (action === "complete") {
+    loop.forEach((step) => {
+      step.status = "complete";
+    });
+  } else {
+    loop[0].status = "current";
+  }
+  return loop.map((step) => ({ ...step, icon: getLearnPathStepIcon(step.label) }));
 }
 
 function getLearnGermanRecommendation(profile = getCurrentProfile()) {
@@ -9847,12 +9902,14 @@ function getLearnGermanPathSteps(nextStep, state) {
       status: nextStep === "vocabulary-review" ? "current" : state.vocabularyComplete ? "complete" : "future"
     }
   ];
-  if (state.nounCount > 0) {
-    steps.push({
-      label: "Article Review",
-      status: nextStep === "article-review" ? "current" : state.articleComplete ? "complete" : "future"
-    });
-  }
+  steps.push({
+    label: "Article Review",
+    status: nextStep === "article-review"
+      ? "current"
+      : state.articleComplete || (nextStep === "complete" && state.vocabularyComplete)
+        ? "complete"
+        : "future"
+  });
   return steps;
 }
 
