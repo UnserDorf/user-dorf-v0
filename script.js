@@ -897,6 +897,7 @@ let browserHistoryApplying = false;
 let lastBrowserHistoryKey = "";
 let pendingBrowserRoute = null;
 let browserHistoryIndex = 0;
+let browserHistoryInitialized = false;
 
 const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
 const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
@@ -994,10 +995,11 @@ function syncBrowserHistory(options = {}) {
   if (!isHistoryManagedView(route.view)) return;
   const key = getBrowserHistoryKey(route);
   if (!options.replace && key === lastBrowserHistoryKey) return;
-  const method = options.replace || window.history.state?.key !== HISTORY_STATE_KEY ? "replaceState" : "pushState";
+  const method = options.replace || !browserHistoryInitialized ? "replaceState" : "pushState";
   route.index = method === "pushState" ? browserHistoryIndex + 1 : browserHistoryIndex;
   const nextUrl = `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(route)}`;
   window.history[method](route, "", nextUrl);
+  browserHistoryInitialized = true;
   browserHistoryIndex = route.index;
   lastBrowserHistoryKey = key;
 }
@@ -1224,6 +1226,7 @@ function initializeBrowserHistory() {
         `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(normalizedInitialRoute)}`
       );
     }
+    browserHistoryInitialized = true;
     pendingBrowserRoute = initialRoute;
   }
   window.addEventListener("popstate", (event) => {
