@@ -1977,7 +1977,7 @@ function enterSelectedVillage() {
       console.warn("Could not persist new village membership immediately.", error);
     });
   }
-  completeProfileLogin(profileId);
+  routeAfterIdentityReady();
 }
 
 function showVillagePassword(groupId = pendingVillageJoinId || currentGroupId) {
@@ -2103,6 +2103,9 @@ function normalizeProfileData(data, profile) {
     activeStudySet: normalizeActiveStudySet(data?.activeStudySet),
     learningIntroSeen: Boolean(data?.learningIntroSeen ?? profile?.learningIntroSeen),
     forceFirstTimeExperience: Boolean(data?.forceFirstTimeExperience ?? profile?.forceFirstTimeExperience),
+    registeredIntroCompleted: data?.registeredIntroCompleted === undefined && profile?.registeredIntroCompleted === undefined
+      ? true
+      : Boolean(data?.registeredIntroCompleted ?? profile?.registeredIntroCompleted),
     learningPreferences: normalizeLearningPreferences(data?.learningPreferences || profile?.learningPreferences),
     positions: normalizePositions(data?.positions),
     settings: {
@@ -2597,6 +2600,7 @@ async function saveProfileStoreToCloudNow() {
       activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
       difficultWords: normalizeDifficultWords(activeProfile?.difficultWords),
       forceFirstTimeExperience: Boolean(activeProfile?.forceFirstTimeExperience),
+      registeredIntroCompleted: activeProfile?.registeredIntroCompleted === false ? false : true,
       profiles: ownedProfiles,
       progressResetVersion: normalizeCounter(activeProfile?.progressResetVersion),
       progressResetAtIso: activeProfile?.progressResetAtIso || "",
@@ -3697,8 +3701,8 @@ function routeAfterIdentityReady() {
     currentGroupId = groupId;
     profileStore.currentGroup = groupId;
     completeProfileLogin(profileId);
-    if (profile?.forceFirstTimeExperience) {
-      showForcedFirstTimeLearningExperience();
+    if (shouldShowRegisteredUserIntroduction(profile)) {
+      showRegisteredUserIntroduction();
     }
     return;
   }
@@ -3737,6 +3741,8 @@ function ensureIdentityProfile() {
         emoji: "🌿",
         avatar: "",
         demoCompleted: true,
+        registeredIntroCompleted: false,
+        learningIntroSeen: false,
         ownerUid: firebaseAuthUser?.uid || "",
         ownerEmail: firebaseAuthUser?.email || "",
         role: shouldBootstrapDeveloperRole() ? "developer" : "member",
@@ -7543,6 +7549,7 @@ function createFirstTimeExperienceResetPayload(profilePath = "", savedAt = new D
     [`${prefix}hasStartedReviews`]: false,
     [`${prefix}hasSeenContinueLearning`]: false,
     [`${prefix}forceFirstTimeExperience`]: true,
+    [`${prefix}registeredIntroCompleted`]: false,
     [`${prefix}firstTimeExperienceResetAtIso`]: savedAt
   };
 }
@@ -7586,6 +7593,7 @@ function createLearningResetProfile(profile, options = {}) {
     hasStartedReviews: false,
     hasSeenContinueLearning: false,
     forceFirstTimeExperience: Boolean(options.firstTimeUserReset),
+    registeredIntroCompleted: options.firstTimeUserReset ? false : profile.registeredIntroCompleted !== false,
     firstTimeExperienceResetAtIso: options.firstTimeUserReset ? (options.progressResetAtIso || "") : (profile.firstTimeExperienceResetAtIso || ""),
     progressResetVersion: normalizeCounter(options.progressResetVersion),
     progressResetAtIso: options.progressResetAtIso || ""
@@ -7666,6 +7674,7 @@ async function verifyCurrentDeveloperLearningReset(firebase, profileId, options 
   if (options.firstTimeUserReset && Boolean(profile.learningIntroSeen || data.learningIntroSeen)) warnings.push("How Learning Works intro flag was not reset.");
   if (options.firstTimeUserReset && Boolean(profile.hasSeenContinueLearning || data.hasSeenContinueLearning)) warnings.push("Continue Learning first-time flag was not reset.");
   if (options.firstTimeUserReset && !Boolean(profile.forceFirstTimeExperience || data.forceFirstTimeExperience)) warnings.push("First-time experience force flag was not set.");
+  if (options.firstTimeUserReset && (profile.registeredIntroCompleted !== false && data.registeredIntroCompleted !== false)) warnings.push("Registered introduction was not reset.");
   if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
   if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
   console.info(RESET_VERIFICATION_PREFIX, {
@@ -9730,25 +9739,46 @@ function continueGuidedLearning() {
   handleLearnGermanAction(getLearnGermanRecommendation().action, { guided: true });
 }
 
-function showLearnIntroPanel() {
+function setLearnIntroContent({ firstTime = false } = {}) {
+  const eyebrow = els.learnIntroPanel?.querySelector(".learn-intro-heading .eyebrow");
+  const title = els.learnIntroPanel?.querySelector(".learn-intro-heading h3");
+  if (eyebrow) eyebrow.textContent = firstTime ? "Welcome to Unser Dorf" : "How Learning Works";
+  if (title) title.textContent = firstTime ? "Learn German. Help your village grow." : "Learn German. Help your village grow.";
+  if (els.learnIntroChooseLevel) {
+    els.learnIntroChooseLevel.textContent = firstTime ? "Start Learning" : "Choose Your Level";
+  }
+}
+
+function showLearnIntroPanel(options = {}) {
+  const firstTime = Boolean(options.firstTime);
   currentView = "learn-intro";
+  setLearnIntroContent({ firstTime });
+  els.learnGermanScreen?.classList.toggle("first-time-intro-mode", firstTime);
   els.learnIntroPanel?.classList.remove("hidden");
   els.learnRecommendationPanel?.classList.add("hidden");
+  els.learnDifficultPanel?.classList.add("hidden");
   els.learnShortcutPanel?.classList.add("hidden");
   scrollPageToTop(els.learnIntroPanel || els.learnGermanScreen);
 }
 
 function hideLearnIntroPanel() {
+  els.learnGermanScreen?.classList.remove("first-time-intro-mode");
+  setLearnIntroContent({ firstTime: false });
   els.learnIntroPanel?.classList.add("hidden");
   els.learnRecommendationPanel?.classList.remove("hidden");
+  els.learnDifficultPanel?.classList.remove("hidden");
   els.learnShortcutPanel?.classList.remove("hidden");
 }
 
-function showForcedFirstTimeLearningExperience() {
+function shouldShowRegisteredUserIntroduction(profile = getCurrentProfile()) {
+  return Boolean(profile && (profile.forceFirstTimeExperience || profile.registeredIntroCompleted === false));
+}
+
+function showRegisteredUserIntroduction() {
   guidedLearningActive = true;
   learnGermanReturnActive = true;
   showLearnGermanPage();
-  showLearnIntroPanel();
+  showLearnIntroPanel({ firstTime: true });
 }
 
 function shouldShowLearningIntro(profile = getCurrentProfile()) {
@@ -9770,16 +9800,22 @@ function hasCompletedLearningActivity(profile = getCurrentProfile()) {
 
 function markLearningIntroSeen() {
   const profile = getCurrentProfile();
-  if (!profile || profile.learningIntroSeen) return;
+  if (!profile) return;
+  const needsUpdate = !profile.learningIntroSeen || profile.forceFirstTimeExperience || profile.registeredIntroCompleted === false;
+  if (!needsUpdate) return;
   profile.learningIntroSeen = true;
   if (profile.forceFirstTimeExperience) {
     profile.forceFirstTimeExperience = false;
+  }
+  if (profile.registeredIntroCompleted === false) {
+    profile.registeredIntroCompleted = true;
   }
   saveProfileStore({ immediate: true });
 }
 
 function chooseLevelFromLearningIntro() {
   markLearningIntroSeen();
+  els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   learnGermanReturnActive = true;
   guidedLearningActive = true;
   showFlashcardsEntry({ guided: false });

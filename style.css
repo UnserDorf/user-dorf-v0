@@ -12318,6 +12318,71 @@ body:has(#developerToolsScreen:not(.hidden)) {
   gap: 12px;
 }
 
+.learn-german-screen.first-time-intro-mode {
+  max-width: min(720px, calc(100vw - 28px));
+  gap: 0;
+  align-content: center;
+  min-height: min(760px, calc(100vh - 140px));
+  padding-top: clamp(18px, 5vh, 44px);
+}
+
+.learn-german-screen.first-time-intro-mode .learn-german-heading,
+.learn-german-screen.first-time-intro-mode #learnIntroBack,
+.learn-german-screen.first-time-intro-mode .learn-recommendation-panel,
+.learn-german-screen.first-time-intro-mode .learn-difficult-panel,
+.learn-german-screen.first-time-intro-mode .learn-shortcut-panel {
+  display: none;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-panel {
+  gap: 0;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-card {
+  padding: clamp(18px, 4vw, 28px);
+  gap: clamp(14px, 2.5vw, 20px);
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-heading {
+  gap: 7px;
+  text-align: center;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-heading .eyebrow {
+  color: var(--green);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-heading h3 {
+  color: #4f493f;
+  font-size: clamp(1rem, 2.3vw, 1.18rem);
+  font-weight: 760;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-loop {
+  margin-top: 2px;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-steps {
+  gap: 6px;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-steps li {
+  padding-bottom: 7px;
+}
+
+.learn-german-screen.first-time-intro-mode .learn-intro-note {
+  text-align: center;
+}
+
+.learn-german-screen.first-time-intro-mode #learnIntroChooseLevel {
+  justify-self: center;
+  min-width: min(100%, 260px);
+}
+
 .learn-intro-card {
   border: 1px solid rgba(190, 177, 153, 0.22);
   border-radius: 18px;
@@ -12773,6 +12838,12 @@ body:has(#developerToolsScreen:not(.hidden)) {
   .learn-how-link {
     align-self: stretch;
     justify-content: center;
+  }
+
+  .learn-german-screen.first-time-intro-mode {
+    max-width: min(100%, calc(100vw - 24px));
+    min-height: auto;
+    padding-top: 10px;
   }
 
   .learn-recommendation-panel,
