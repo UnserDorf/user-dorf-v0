@@ -9742,8 +9742,8 @@ function continueGuidedLearning() {
 function setLearnIntroContent({ firstTime = false } = {}) {
   const eyebrow = els.learnIntroPanel?.querySelector(".learn-intro-heading .eyebrow");
   const title = els.learnIntroPanel?.querySelector(".learn-intro-heading h3");
-  if (eyebrow) eyebrow.textContent = firstTime ? "Welcome to Unser Dorf" : "How Learning Works";
-  if (title) title.textContent = firstTime ? "Learn German. Help your village grow." : "Learn German. Help your village grow.";
+  if (eyebrow) eyebrow.textContent = firstTime ? "Welcome to Unser Dorf" : "Learn German";
+  if (title) title.textContent = "Learn German. Help your village grow.";
   if (els.learnIntroChooseLevel) {
     els.learnIntroChooseLevel.textContent = firstTime ? "Start Learning" : "Choose Your Level";
   }
@@ -9753,6 +9753,7 @@ function showLearnIntroPanel(options = {}) {
   const firstTime = Boolean(options.firstTime);
   currentView = "learn-intro";
   setLearnIntroContent({ firstTime });
+  els.learnGermanScreen?.classList.add("intro-focused-mode");
   els.learnGermanScreen?.classList.toggle("first-time-intro-mode", firstTime);
   els.learnIntroPanel?.classList.remove("hidden");
   els.learnRecommendationPanel?.classList.add("hidden");
@@ -9762,6 +9763,7 @@ function showLearnIntroPanel(options = {}) {
 }
 
 function hideLearnIntroPanel() {
+  els.learnGermanScreen?.classList.remove("intro-focused-mode");
   els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   setLearnIntroContent({ firstTime: false });
   els.learnIntroPanel?.classList.add("hidden");
