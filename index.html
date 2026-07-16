@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=243">
+    <link rel="stylesheet" href="style.css?v=244">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -394,10 +394,19 @@
 
       <section class="learn-german-screen hidden" id="learnGermanScreen" aria-label="Learn German">
         <div class="learn-german-heading">
-          <button class="small-link-button" id="learnGermanBack" type="button">← Dashboard</button>
-          <h2>📚 Learn German</h2>
-          <p>Learn new words with flashcards, then test what you remember in short reviews. Earn coins and help your village grow.</p>
-          <button class="small-link-button learn-how-link" id="learnHowItWorks" type="button">How it works</button>
+          <button class="small-link-button learn-back-button" id="learnGermanBack" type="button">← Dashboard</button>
+          <article class="learn-hero-card">
+            <div class="learn-hero-copy">
+              <h2>📚 Learn German</h2>
+              <ul class="learn-hero-list">
+                <li>Study new words</li>
+                <li>Review what you learn</li>
+                <li>Earn coins</li>
+                <li>Help your village grow</li>
+              </ul>
+            </div>
+            <button class="small-link-button learn-how-link" id="learnHowItWorks" type="button">How learning works</button>
+          </article>
         </div>
 
         <section class="learn-intro-panel hidden" id="learnIntroPanel" aria-label="How learning works">
