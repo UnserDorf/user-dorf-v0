@@ -9871,12 +9871,30 @@ function renderLearnGermanProgress(recommendation) {
 function createLearnFlowBubble(step, { variant = "session" } = {}) {
   const item = document.createElement("div");
   item.className = `learn-flow-bubble learn-path-step learn-${variant}-bubble ${step.status} is-${step.status}`;
-  const marker = step.status === "complete" ? "✓" : "";
-  const markerText = marker ? `${marker} ` : "";
-  const label = createTextElement("span", "learn-path-label", `${markerText}${step.label}`);
+  const label = document.createElement("span");
+  label.className = "learn-path-label";
+  const marker = step.status === "complete" ? "✓ " : "";
+  const title = createTextElement("strong", "learn-path-title", `${marker}${step.label}`);
+  label.append(title);
+  if (step.caption) {
+    label.append(createTextElement("span", "learn-path-caption", step.caption));
+  }
   item.append(label);
   if (step.status === "current") {
     item.append(createTextElement("strong", "learn-path-next", "NEXT"));
+  }
+  if (Array.isArray(step.substeps) && step.substeps.length) {
+    const substeps = document.createElement("div");
+    substeps.className = "learn-path-substeps";
+    step.substeps.forEach((substep) => {
+      const substepRow = createTextElement(
+        "span",
+        `learn-path-substep is-${substep.status}`,
+        `${substep.status === "complete" ? "✓" : "○"} ${substep.label}`
+      );
+      substeps.append(substepRow);
+    });
+    item.append(substeps);
   }
   return item;
 }
@@ -9963,22 +9981,40 @@ function getLearnGermanContextLine(state, goal = getLearnGermanGoal()) {
 }
 
 function getLearnGermanPathSteps(nextStep, state) {
-  const steps = [
-    { label: "Flashcards", status: nextStep === "flashcards" ? "current" : "complete" },
+  const reviewComplete = Boolean(state.vocabularyComplete && (state.nounCount === 0 || state.articleComplete));
+  const reviewCurrent = nextStep === "vocabulary-review" || nextStep === "article-review";
+  return [
     {
-      label: "Vocabulary Review",
-      status: nextStep === "vocabulary-review" ? "current" : state.vocabularyComplete ? "complete" : "future"
+      label: "📚 Learn",
+      caption: "Flashcards",
+      status: nextStep === "flashcards" ? "current" : state.wordCount ? "complete" : "future"
+    },
+    {
+      label: "✅ Review",
+      caption: reviewComplete ? "Vocabulary + Article Review" : "Vocabulary + Article Review",
+      status: reviewCurrent ? "current" : reviewComplete ? "complete" : "future",
+      substeps: [
+        {
+          label: "Vocabulary",
+          status: state.vocabularyComplete ? "complete" : "future"
+        },
+        {
+          label: "Article",
+          status: state.articleComplete || (state.nounCount === 0 && state.vocabularyComplete) ? "complete" : "future"
+        }
+      ]
+    },
+    {
+      label: "🪙 Earn",
+      caption: "Coins",
+      status: nextStep === "complete" ? "complete" : "future"
+    },
+    {
+      label: "🏡 Build",
+      caption: "Village",
+      status: nextStep === "complete" ? "complete" : "future"
     }
   ];
-  steps.push({
-    label: "Article Review",
-    status: nextStep === "article-review"
-      ? "current"
-      : state.articleComplete || (nextStep === "complete" && state.vocabularyComplete)
-        ? "complete"
-        : "future"
-  });
-  return steps;
 }
 
 function getGuidedLearningState(profile = getCurrentProfile()) {

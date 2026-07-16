@@ -12277,10 +12277,14 @@ body:has(#developerToolsScreen:not(.hidden)) {
   text-align: center;
 }
 
-.learn-intro-loop span:not(.learn-intro-arrow),
-.learn-flow-bubble .learn-path-label {
+.learn-intro-loop span:not(.learn-intro-arrow) {
   font-size: 1.15rem;
   line-height: 1;
+}
+
+.learn-flow-bubble .learn-path-label {
+  font-size: 0.82rem;
+  line-height: 1.15;
 }
 
 .learn-intro-loop strong,
@@ -12486,7 +12490,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
 .learn-path-step {
   min-height: 36px;
   gap: 5px;
-  padding: 8px 10px;
+  padding: 9px 10px;
   font-size: 0.84rem;
   font-weight: 760;
   line-height: 1.15;
@@ -12497,12 +12501,50 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-session-bubble {
-  min-width: min(100%, 132px);
+  min-width: min(100%, 126px);
 }
 
 .learn-session-bubble .learn-path-label {
+  display: grid;
+  gap: 3px;
   font-size: 0.84rem;
   line-height: 1.15;
+}
+
+.learn-path-title {
+  display: block;
+  color: inherit;
+  font-size: 0.84rem !important;
+  line-height: 1.15;
+}
+
+.learn-path-caption {
+  display: block;
+  color: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  opacity: 0.82;
+}
+
+.learn-path-substeps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  width: 100%;
+}
+
+.learn-path-substep {
+  color: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1.1;
+  opacity: 0.78;
+}
+
+.learn-path-substep.is-complete {
+  opacity: 1;
 }
 
 .learn-path-step.complete,
