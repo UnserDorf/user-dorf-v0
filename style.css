@@ -13450,3 +13450,248 @@ body:has(#developerToolsScreen:not(.hidden)) {
     flex-direction: column;
   }
 }
+
+/* Vocabulary Review polish: simplified start/quiz screens with reliable scrolling. */
+.challenge-ready-screen.vocabulary-review-ready {
+  width: min(520px, 100%);
+  padding: clamp(12px, 3vw, 24px) 0;
+}
+
+.vocabulary-review-ready .challenge-ready-card {
+  min-height: 0;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(18px, 3vw, 28px);
+  text-align: left;
+}
+
+.vocabulary-review-ready .challenge-ready-card h2 {
+  color: var(--green);
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  line-height: 1.12;
+}
+
+.vocabulary-review-ready #challengeReadyDescription {
+  color: #665f54;
+  font-size: 0.98rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.vocabulary-review-ready #challengeReadyMeta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 820;
+}
+
+.vocabulary-review-ready .challenge-ready-card .primary-button {
+  width: min(100%, 260px);
+  min-height: 48px;
+  justify-self: start;
+  margin-top: 2px;
+}
+
+.app-shell.clean-quiz-mode.vocabulary-review-mode {
+  height: auto;
+  min-height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-stage:not(.hidden) {
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+  align-items: start;
+  padding: clamp(10px, 1.8vw, 18px) 0 max(18px, env(safe-area-inset-bottom));
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-card {
+  width: min(100%, 640px);
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto auto;
+  gap: clamp(8px, 1.2vw, 12px);
+  padding: clamp(14px, 2vw, 20px);
+  background: var(--surface-warm);
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-card .challenge-village-banner {
+  display: none;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .card-meta {
+  justify-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.clean-quiz-mode.vocabulary-review-mode #nounVerbCounter {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 820;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-card .card-meta span:last-child {
+  color: var(--green);
+  font-size: clamp(1rem, 2vw, 1.16rem);
+  font-weight: 850;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .vocabulary-review-context-line {
+  margin: -2px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #7b7468;
+  font-size: 0.82rem;
+  font-weight: 680;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .question-area {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 8px;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-card .eyebrow {
+  color: #665f54;
+  font-size: 0.84rem;
+  font-weight: 820;
+}
+
+.clean-quiz-mode.vocabulary-review-mode #nounVerbPrompt {
+  color: var(--ink);
+  font-size: clamp(2.35rem, 6vw, 4rem);
+  line-height: 1.04;
+  hyphens: none;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options {
+  width: min(100%, 560px);
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  justify-self: center;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button {
+  min-width: 0;
+  min-height: 52px;
+  border: 1px solid rgba(77, 130, 94, 0.22);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.82);
+  color: var(--ink);
+  padding: 10px 12px;
+  display: grid;
+  place-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: center;
+  font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+  font-weight: 780;
+  line-height: 1.18;
+  box-shadow: none;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button:hover,
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button:focus-visible {
+  border-color: rgba(77, 130, 94, 0.48);
+  background: rgba(235, 246, 231, 0.8);
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button.correct {
+  border-color: rgba(77, 130, 94, 0.58);
+  background: rgba(219, 241, 214, 0.92);
+  color: var(--green);
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button.incorrect {
+  border-color: rgba(173, 111, 82, 0.46);
+  background: rgba(250, 232, 220, 0.92);
+  color: #8d4f36;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-result {
+  width: min(100%, 560px);
+  min-height: 0;
+  justify-self: center;
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  line-height: 1.24;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .quiz-result-label,
+.clean-quiz-mode.vocabulary-review-mode .quiz-result-answer {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-next {
+  width: min(100%, 260px);
+  min-height: 44px;
+  justify-self: center;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .vocabulary-review-ready .challenge-ready-card {
+    padding: 16px;
+  }
+
+  .vocabulary-review-ready .challenge-ready-card .primary-button {
+    width: 100%;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-stage:not(.hidden) {
+    padding: 6px 0 max(12px, env(safe-area-inset-bottom));
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-card {
+    width: min(100%, 430px);
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-options {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-options button {
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode #nounVerbPrompt {
+    font-size: clamp(2.2rem, 10vw, 3.35rem);
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-result {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    font-size: 0.84rem;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-next {
+    width: 100%;
+  }
+}

@@ -586,6 +586,8 @@ const els = {
   challengeReadyTitle: document.querySelector("#challengeReadyTitle"),
   challengeReadyDescription: document.querySelector("#challengeReadyDescription"),
   challengeReadyStudySetNotice: document.querySelector("#challengeReadyStudySetNotice"),
+  challengeReadyMeta: document.querySelector("#challengeReadyMeta"),
+  challengeReadyPrompt: document.querySelector("#challengeReadyPrompt"),
   challengeReadyStart: document.querySelector("#challengeReadyStart"),
   dashboardWelcome: document.querySelector("#dashboardWelcome"),
   dashboardVillageName: document.querySelector("#dashboardVillageName"),
@@ -4937,6 +4939,7 @@ function showNounVerbQuiz() {
   els.appShell.classList.add("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -4964,6 +4967,7 @@ function showVocabularyReviewQuiz() {
   setChallengeBackButtons(false, true);
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
+  els.appShell.classList.add("vocabulary-review-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
@@ -4995,6 +4999,7 @@ function showMeaningMatchQuiz() {
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.add("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   els.appShell.classList.add("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
@@ -5024,6 +5029,7 @@ function showPrepositionQuiz() {
   els.appShell.classList.add("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -5302,7 +5308,7 @@ function showDeveloperTools() {
   hideAuthenticatedAppViews();
   hideLegacyStudyUi();
   els.profileScreen?.classList.add("hidden");
-  els.appShell?.classList.remove("locked", "landing-mode", "onboarding-mode", "clean-article-practice", "clean-quiz-mode", "article-quiz-mode", "meaning-match-mode");
+  els.appShell?.classList.remove("locked", "landing-mode", "onboarding-mode", "clean-article-practice", "clean-quiz-mode", "article-quiz-mode", "meaning-match-mode", "vocabulary-review-mode");
   els.developerToolsScreen?.classList.remove("hidden");
   scrollPageToTop(els.developerToolsScreen);
   renderDeveloperToolsPage();
@@ -10842,17 +10848,30 @@ function showChallengeReady(action) {
   currentView = "challenge-ready";
   const isVocabulary = action === "vocabulary-review";
   const studySetPreview = getStudySetPreviewForChallengeAction(action);
-  els.challengeReadyLevel.textContent = isVocabulary
-    ? `${selectedLearningLevel} • ${getFlashcardCategoryLabel(selectedChallengeCategory)} Review`
-    : `${selectedLearningLevel} Review`;
+  els.challengeReadyScreen?.classList.toggle("vocabulary-review-ready", isVocabulary);
+  els.challengeReadyLevel.classList.toggle("hidden", isVocabulary);
+  els.challengeReadyLevel.textContent = isVocabulary ? "" : `${selectedLearningLevel} Review`;
   els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary Review" : "Article Review";
   els.challengeReadyDescription.textContent = isVocabulary
-    ? "Review German vocabulary."
+    ? "Review the words you just studied."
     : "Practice der, die, das.";
-  renderStudySetNotice(els.challengeReadyStudySetNotice, {
-    studySetUsed: studySetPreview.count > 0,
-    studySetReviewedCount: studySetPreview.reviewedCount
-  });
+  if (isVocabulary) {
+    els.challengeReadyStudySetNotice?.classList.add("hidden");
+    els.challengeReadyStudySetNotice?.replaceChildren();
+    const recentCount = normalizeCounter(studySetPreview.reviewedCount || studySetPreview.count);
+    const questionCount = getChallengeSessionQuestionCount();
+    els.challengeReadyMeta.textContent = `${recentCount} recent ${recentCount === 1 ? "word" : "words"} • ${questionCount} ${questionCount === 1 ? "question" : "questions"}`;
+    els.challengeReadyPrompt?.classList.add("hidden");
+    els.challengeReadyStart.textContent = "Start Review";
+  } else {
+    renderStudySetNotice(els.challengeReadyStudySetNotice, {
+      studySetUsed: studySetPreview.count > 0,
+      studySetReviewedCount: studySetPreview.reviewedCount
+    });
+    els.challengeReadyMeta.textContent = "10 Questions";
+    els.challengeReadyPrompt?.classList.remove("hidden");
+    els.challengeReadyStart.textContent = "Start";
+  }
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
@@ -13439,10 +13458,7 @@ function generateVocabularyReviewQuestion(reason, targetIndex = vocabularyReview
 function renderVocabularyReviewQuiz() {
   const card = getCurrentVocabularyReviewCard();
   const hasCard = Boolean(card);
-  renderStudySetNotice(
-    els.vocabularyReviewStudySetNotice,
-    challengeSession.type === "vocabulary" ? challengeSession : null
-  );
+  renderVocabularyReviewContextLine();
   if (hasCard) {
     vocabularyReviewCurrentIndex = visibleVocabularyReviewCards.findIndex((item) => item.id === card.id);
   }
@@ -13480,7 +13496,7 @@ function renderVocabularyReviewQuiz() {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.vocabularyChoice = choice;
-      button.textContent = `${String.fromCharCode(65 + index)}) ${choice}`;
+      button.textContent = choice;
       button.disabled = vocabularyReviewQuizState.hasAnswered;
       button.classList.toggle("correct", vocabularyReviewQuizState.hasAnswered && choice === card.english);
       button.classList.toggle(
@@ -13492,6 +13508,20 @@ function renderVocabularyReviewQuiz() {
   );
 
   if (vocabularyReviewQuizState.hasAnswered) renderVocabularyReviewResult(card);
+}
+
+function renderVocabularyReviewContextLine() {
+  const element = els.vocabularyReviewStudySetNotice;
+  if (!element) return;
+  const shouldShow = Boolean(challengeSession.type === "vocabulary" && challengeSession.studySetUsed && challengeSession.studySetReviewedCount);
+  element.classList.toggle("hidden", !shouldShow);
+  element.classList.toggle("vocabulary-review-context-line", shouldShow);
+  if (!shouldShow) {
+    element.replaceChildren();
+    return;
+  }
+  const count = normalizeCounter(challengeSession.studySetReviewedCount);
+  element.textContent = `From your latest ${count} ${count === 1 ? "flashcard" : "flashcards"}`;
 }
 
 function buildVocabularyReviewChoices(card) {
@@ -13564,7 +13594,9 @@ function renderVocabularyReviewResult(card) {
   els.nounVerbResult.classList.add(isCorrect ? "success" : "error");
   els.nounVerbResult.innerHTML = `
     <span class="quiz-result-label">${isCorrect ? "✅ Correct!" : "❌ Not quite"}</span>
-    <span class="quiz-result-answer">${escapeHtml(card.word)} = ${escapeHtml(capitalizeFirst(card.english))}</span>
+    <span class="quiz-result-answer">${isCorrect
+      ? `${escapeHtml(card.word)} = ${escapeHtml(capitalizeFirst(card.english))}`
+      : `Correct answer: ${escapeHtml(capitalizeFirst(card.english))}`}</span>
   `;
   els.nounVerbOptions.querySelectorAll("button").forEach((button) => {
     const answer = button.dataset.vocabularyChoice;
