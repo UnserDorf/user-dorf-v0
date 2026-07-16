@@ -4016,20 +4016,14 @@ function routeAfterIdentityReady() {
   if (profileId && groupId) {
     currentGroupId = groupId;
     profileStore.currentGroup = groupId;
-    if (pendingBrowserRoute) {
-      browserHistoryApplying = true;
-      try {
-        completeProfileLogin(profileId);
-      } finally {
-        browserHistoryApplying = false;
-      }
-    } else {
-      completeProfileLogin(profileId);
-    }
-    if (applyPendingBrowserRouteIfReady()) return;
     if (shouldShowRegisteredUserIntroduction(profile)) {
+      completeProfileLogin(profileId, { showDashboard: false });
       showRegisteredUserIntroduction();
+      return;
     }
+    completeProfileLogin(profileId, { showDashboard: false });
+    if (applyPendingBrowserRouteIfReady()) return;
+    showDashboard();
     return;
   }
   showVillageSelection();
@@ -4837,9 +4831,10 @@ function handleVillageNameSubmit(event) {
   routeAfterIdentityReady();
 }
 
-function completeProfileLogin(profileId) {
+function completeProfileLogin(profileId, options = {}) {
   const profile = profileStore.profiles[profileId];
   if (!profile) return;
+  const showHome = options.showDashboard !== false;
   currentProfileId = profileId;
   assignProfileToFirebaseUser(profileId);
   pendingProfileId = "";
@@ -4864,7 +4859,7 @@ function completeProfileLogin(profileId) {
   updateFilterOptions();
   currentIndex = 0;
   applyModeAndFilter();
-  showDashboard();
+  if (showHome) showDashboard();
 }
 
 function getCurrentProfile() {
