@@ -14042,3 +14042,261 @@ body:has(#developerToolsScreen:not(.hidden)) {
     width: 100%;
   }
 }
+
+/* UX consistency pass: shared polish across mature and older screens. */
+:root {
+  --radius-card: 18px;
+  --radius-control: 12px;
+  --ux-shadow-soft: 0 12px 30px rgba(55, 49, 36, 0.07);
+  --ux-surface-warm: rgba(255, 250, 241, 0.86);
+  --ux-line-soft: rgba(190, 177, 153, 0.28);
+}
+
+.primary-button,
+.ghost-button,
+.small-link-button,
+.settings-section button,
+.level-selection-card,
+.learn-goal-stepper,
+.learning-goal-options button,
+.challenge-category-selector label span,
+.flashcard-choice-grid label span {
+  border-radius: var(--radius-control);
+}
+
+.primary-button,
+.ghost-button,
+.settings-section button {
+  min-height: 44px;
+}
+
+.primary-button {
+  box-shadow: 0 10px 24px rgba(71, 115, 91, 0.14);
+}
+
+.ghost-button,
+.small-link-button {
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.ghost-button:hover,
+.small-link-button:hover,
+.settings-section button:hover {
+  transform: translateY(-1px);
+}
+
+.firebase-auth-card,
+.display-name-card,
+.village-selection,
+.village-password-card,
+.village-name-card,
+.demo-card,
+.collection-page-intro,
+.level-selection-card,
+.flashcard-resume-card,
+.flashcard-setup-card,
+.learning-flashcard,
+.flashcard-completion-card,
+.challenge-ready-card,
+.challenge-results-card,
+.village-members-page-card,
+.developer-tools-warning,
+.settings-panel,
+.settings-section {
+  border-color: var(--ux-line-soft);
+  border-radius: var(--radius-card);
+  background: var(--ux-surface-warm);
+  box-shadow: var(--ux-shadow-soft);
+}
+
+.settings-panel {
+  border-radius: 16px;
+}
+
+.settings-section {
+  background: rgba(255, 253, 248, 0.68);
+  box-shadow: none;
+}
+
+.dashboard-heading,
+.reward-page-heading,
+.level-selection-heading,
+.flashcard-page-heading,
+.challenge-page-heading {
+  gap: 8px;
+}
+
+.dashboard-heading h2,
+.reward-page-heading h2,
+.level-selection-heading h2,
+.flashcard-page-heading h2,
+.challenge-page-heading h2,
+.firebase-auth-card h2,
+.display-name-card h2,
+.village-selection-heading h2,
+.village-password-card h2,
+.village-name-card h2 {
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.reward-page-heading .small-link-button,
+.level-selection-heading .small-link-button,
+.flashcard-page-heading .small-link-button,
+.challenge-page-heading .small-link-button,
+.challenge-ready-card .small-link-button,
+.challenge-results-card .small-link-button,
+.flashcard-completion-card .small-link-button {
+  min-height: 40px;
+  padding: 0 12px;
+  justify-self: start;
+}
+
+.level-selection-screen,
+.flashcard-resume-screen,
+.flashcard-setup-screen,
+.learning-flashcards-screen,
+.challenge-ready-screen,
+.challenge-results-screen {
+  padding-top: clamp(12px, 2.4vw, 24px);
+}
+
+.level-selection-card {
+  min-height: 154px;
+  box-shadow: var(--ux-shadow-soft);
+}
+
+.flashcard-choice-grid label span {
+  min-height: 92px;
+}
+
+.learning-goal-card,
+.learn-recommendation-panel,
+.learn-intro-card,
+.learn-hero-card,
+.learn-difficult-panel,
+.learn-shortcut-panel {
+  border-color: var(--ux-line-soft);
+  box-shadow: var(--ux-shadow-soft);
+}
+
+.learn-difficult-panel,
+.learn-shortcut-panel {
+  box-shadow: none;
+}
+
+.collection-page-intro {
+  padding: clamp(14px, 2.4vw, 22px);
+}
+
+.developer-tools-screen,
+.village-members-screen,
+.achievement-collection-screen {
+  padding-bottom: max(80px, calc(34px + env(safe-area-inset-bottom)));
+}
+
+@media (min-width: 900px) {
+  .achievement-collection-screen,
+  .village-members-screen,
+  .developer-tools-screen,
+  .learn-german-screen,
+  .coin-challenges-screen {
+    width: min(1040px, 100%);
+  }
+
+  .level-selection-screen,
+  .flashcard-setup-screen,
+  .learning-flashcards-screen {
+    width: min(840px, 100%);
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-screen,
+  .landing-screen,
+  .demo-screen,
+  .achievement-collection-screen,
+  .learn-german-screen,
+  .coin-challenges-screen,
+  .village-members-screen,
+  .developer-tools-screen {
+    gap: 14px;
+    padding-top: 8px;
+    padding-bottom: max(84px, calc(32px + env(safe-area-inset-bottom)));
+  }
+
+  .primary-button,
+  .ghost-button,
+  .settings-section button {
+    min-height: 46px;
+  }
+
+  .firebase-auth-card,
+  .display-name-card,
+  .village-selection,
+  .village-password-card,
+  .village-name-card,
+  .demo-card,
+  .level-selection-card,
+  .flashcard-resume-card,
+  .flashcard-setup-card,
+  .learning-flashcard,
+  .flashcard-completion-card,
+  .challenge-ready-card,
+  .challenge-results-card {
+    border-radius: 16px;
+  }
+
+  .level-selection-grid,
+  .flashcard-choice-grid,
+  .challenge-selection-grid {
+    gap: 10px;
+  }
+
+  .level-selection-card {
+    min-height: 118px;
+    padding: 16px;
+  }
+
+  .flashcard-setup-card {
+    gap: 16px;
+  }
+
+  .learning-flashcard-meta,
+  .flashcard-page-heading,
+  .level-selection-heading,
+  .challenge-page-heading {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing-card,
+  .profile-panel,
+  .firebase-auth-card,
+  .display-name-card,
+  .village-selection,
+  .village-password-card,
+  .village-name-card {
+    width: min(100%, calc(100vw - 24px));
+  }
+
+  .landing-card {
+    gap: 18px;
+  }
+
+  .landing-hero {
+    max-height: 34vh;
+  }
+
+  .settings-panel {
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(78vh, 640px);
+  }
+
+  .reward-title-stack,
+  .developer-tools-heading,
+  .challenge-page-heading {
+    text-align: left;
+  }
+}
