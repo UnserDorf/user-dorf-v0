@@ -481,6 +481,7 @@ const els = {
   demoSignIn: document.querySelector("#demoSignIn"),
   demoNext: document.querySelector("#demoNext"),
   dashboardScreen: document.querySelector("#dashboardScreen"),
+  dashboardContinueButton: document.querySelector(".dashboard-continue-button"),
   learnGermanScreen: document.querySelector("#learnGermanScreen"),
   learnGermanBack: document.querySelector("#learnGermanBack"),
   learnHowItWorks: document.querySelector("#learnHowItWorks"),
@@ -862,6 +863,7 @@ let firebaseAuthMode = "signup";
 let villageSelectionMode = "choose";
 let demoPageIndex = 0;
 let demoFinalScreenActive = false;
+let registeredDemoActive = false;
 let applyingRemoteStore = false;
 let firebaseSyncApi = null;
 let firebaseSyncPromise = null;
@@ -940,6 +942,7 @@ function getHistoryRouteForCurrentView() {
     key: HISTORY_STATE_KEY,
     view: currentView || "dashboard"
   };
+  if (currentView === "demo" && registeredDemoActive) route.mode = "registered";
   if (currentView === "auth") route.mode = firebaseAuthMode || "signup";
   if (currentView === "village-password") route.groupId = pendingVillageJoinId || currentGroupId || "";
   if (currentView === "level-selection") route.path = selectedLearningPath || "flashcards";
@@ -1079,6 +1082,9 @@ function getBrowserRouteState(eventState = null) {
 
 function canApplyAuthenticatedRoute(route) {
   if (!route) return false;
+  if (route.view === "demo" && route.mode === "registered") {
+    return Boolean(currentProfileId && getCurrentProfile());
+  }
   if (["landing", "demo", "auth", "reset-password"].includes(route.view)) return true;
   if (["display-name", "village-selection", "join-village", "village-password"].includes(route.view)) {
     return Boolean(firebaseAuthUser || currentProfileId || profileStore?.currentProfile);
@@ -1109,7 +1115,7 @@ function applyBrowserRoute(route) {
         showLandingScreen();
         break;
       case "demo":
-        showDemoScreen();
+        showDemoScreen({ registered: route.mode === "registered" });
         break;
       case "auth":
         if (firebaseAuthUser) routeAfterIdentityReady();
@@ -5029,13 +5035,16 @@ function resetLoggedOutTransientUi() {
   els.levelCelebration?.classList.add("hidden");
 }
 
-function showDemoScreen() {
+function showDemoScreen(options = {}) {
   discardIncompleteChallengeSession();
+  registeredDemoActive = Boolean(options.registered);
   currentView = "demo";
   demoPageIndex = 0;
   demoFinalScreenActive = false;
-  currentProfileId = "";
-  pendingProfileId = "";
+  if (!registeredDemoActive) {
+    currentProfileId = "";
+    pendingProfileId = "";
+  }
   els.profileScreen.classList.add("hidden");
   els.appShell.classList.remove("locked");
   els.appShell.classList.remove("landing-mode");
@@ -5096,7 +5105,7 @@ function renderOnboardingPage() {
     els.demoBody.replaceChildren(...bodyNodes);
   }
   if (els.demoProgress) els.demoProgress.textContent = page.progress;
-  if (els.demoBack) els.demoBack.textContent = page.backLabel;
+  if (els.demoBack) els.demoBack.textContent = registeredDemoActive ? "Skip" : page.backLabel;
   els.demoSignIn?.classList.add("hidden");
   if (els.demoNext) els.demoNext.textContent = page.nextLabel;
 }
@@ -5117,9 +5126,9 @@ function renderDemoFinalScreen() {
     );
   }
   if (els.demoProgress) els.demoProgress.textContent = "🌱";
-  if (els.demoBack) els.demoBack.textContent = "Back to Home";
-  els.demoSignIn?.classList.remove("hidden");
-  if (els.demoNext) els.demoNext.textContent = "Create your account";
+  if (els.demoBack) els.demoBack.textContent = registeredDemoActive ? "Go to Dashboard" : "Back to Home";
+  els.demoSignIn?.classList.toggle("hidden", registeredDemoActive);
+  if (els.demoNext) els.demoNext.textContent = registeredDemoActive ? "Go to Dashboard" : "Create your account";
 }
 
 function moveDemoPage(direction) {
@@ -5133,7 +5142,21 @@ function moveDemoPage(direction) {
 }
 
 function completeDemoScreen() {
+  if (registeredDemoActive) {
+    completeRegisteredDemo();
+    return;
+  }
   showLandingScreen();
+}
+
+function completeRegisteredDemo() {
+  const profile = getCurrentProfile();
+  if (profile) {
+    profile.registeredIntroCompleted = true;
+    saveProfileStore({ immediate: true });
+  }
+  registeredDemoActive = false;
+  showDashboard();
 }
 
 function skipLandingToVillageSelection() {
@@ -5146,6 +5169,10 @@ function startGetStartedFlow() {
 
 function handleDemoNext() {
   if (demoFinalScreenActive) {
+    if (registeredDemoActive) {
+      completeRegisteredDemo();
+      return;
+    }
     startGetStartedFlow();
     return;
   }
@@ -5436,6 +5463,7 @@ function renderDashboard() {
   renderVillageName();
   els.levelCoins.textContent = normalizeCoinCount(profile.coins);
   els.dashboardFamilyCoins.textContent = familySummary.totalCoins;
+  renderDashboardLearningAction(profile);
   renderProgressCards(profile);
   renderAchievementPreview(getAchievementStates());
   renderRewardPreviews(profile, familySummary.totalCoins);
@@ -5443,6 +5471,16 @@ function renderDashboard() {
   renderHouseholdMembers();
   saveProfileStore();
   showNextPendingCelebration();
+}
+
+function renderDashboardLearningAction(profile) {
+  if (!els.dashboardContinueButton) return;
+  const hasStartedLearning = Boolean(
+    profile?.learningIntroSeen
+    || hasCompletedLearningActivity(profile)
+    || normalizeActiveStudySet(profile?.activeStudySet).wordIds.length
+  );
+  els.dashboardContinueButton.textContent = hasStartedLearning ? "▶ Continue Learning" : "▶ Start Learning";
 }
 
 function renderProgressCards(profile) {
@@ -7921,7 +7959,6 @@ function createFirstTimeExperienceResetPayload(profilePath = "", savedAt = new D
     [`${prefix}hasStartedReviews`]: false,
     [`${prefix}hasSeenContinueLearning`]: false,
     [`${prefix}forceFirstTimeExperience`]: true,
-    [`${prefix}registeredIntroCompleted`]: false,
     [`${prefix}firstTimeExperienceResetAtIso`]: savedAt
   };
 }
@@ -7965,7 +8002,7 @@ function createLearningResetProfile(profile, options = {}) {
     hasStartedReviews: false,
     hasSeenContinueLearning: false,
     forceFirstTimeExperience: Boolean(options.firstTimeUserReset),
-    registeredIntroCompleted: options.firstTimeUserReset ? false : profile.registeredIntroCompleted !== false,
+    registeredIntroCompleted: profile.registeredIntroCompleted !== false,
     firstTimeExperienceResetAtIso: options.firstTimeUserReset ? (options.progressResetAtIso || "") : (profile.firstTimeExperienceResetAtIso || ""),
     progressResetVersion: normalizeCounter(options.progressResetVersion),
     progressResetAtIso: options.progressResetAtIso || ""
@@ -8046,7 +8083,6 @@ async function verifyCurrentDeveloperLearningReset(firebase, profileId, options 
   if (options.firstTimeUserReset && Boolean(profile.learningIntroSeen || data.learningIntroSeen)) warnings.push("How Learning Works intro flag was not reset.");
   if (options.firstTimeUserReset && Boolean(profile.hasSeenContinueLearning || data.hasSeenContinueLearning)) warnings.push("Continue Learning first-time flag was not reset.");
   if (options.firstTimeUserReset && !Boolean(profile.forceFirstTimeExperience || data.forceFirstTimeExperience)) warnings.push("First-time experience force flag was not set.");
-  if (options.firstTimeUserReset && (profile.registeredIntroCompleted !== false && data.registeredIntroCompleted !== false)) warnings.push("Registered introduction was not reset.");
   if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
   if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
   console.info(RESET_VERIFICATION_PREFIX, {
@@ -10041,6 +10077,11 @@ function handleDashboardAction(action) {
   }
   if (action === "continue-learning") {
     showLearnGermanPage();
+    if (shouldShowLearningIntro()) {
+      guidedLearningActive = true;
+      learnGermanReturnActive = true;
+      showLearnIntroPanel();
+    }
     return;
   }
   if (action === "flashcards") {
@@ -10168,14 +10209,13 @@ function removeLearnIntroPreviewControls() {
 }
 
 function shouldShowRegisteredUserIntroduction(profile = getCurrentProfile()) {
-  return Boolean(profile && (profile.forceFirstTimeExperience || profile.registeredIntroCompleted === false));
+  return Boolean(profile && profile.registeredIntroCompleted === false);
 }
 
 function showRegisteredUserIntroduction() {
-  guidedLearningActive = true;
-  learnGermanReturnActive = true;
-  showLearnGermanPage();
-  showLearnIntroPanel({ firstTime: true });
+  guidedLearningActive = false;
+  learnGermanReturnActive = false;
+  showDemoScreen({ registered: true });
 }
 
 function shouldShowLearningIntro(profile = getCurrentProfile()) {
