@@ -817,6 +817,7 @@ let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
 let selectedChallengeCategory = "nouns";
 let pendingChallengeAction = "";
+let reviewReturnTarget = "";
 let learningGoalBackTarget = "learn-german";
 let guidedLearningActive = false;
 let learnGermanReturnActive = false;
@@ -4568,6 +4569,7 @@ function hideLegacyStudyUi() {
 
 function showDashboard() {
   discardIncompleteChallengeSession();
+  reviewReturnTarget = "";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
   currentView = "dashboard";
@@ -4577,6 +4579,7 @@ function showDashboard() {
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   setChallengeBackButtons(false, false);
   renderDashboard();
   els.landingScreen?.classList.add("hidden");
@@ -4600,6 +4603,7 @@ function showDashboard() {
 
 function showLearnGermanPage() {
   discardIncompleteChallengeSession();
+  reviewReturnTarget = "";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
   currentView = "learn-german";
@@ -4609,6 +4613,7 @@ function showLearnGermanPage() {
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   setChallengeBackButtons(false, false);
   renderLearnGermanPage();
   els.landingScreen?.classList.add("hidden");
@@ -4825,11 +4830,13 @@ function handleDemoSignIn() {
 
 function showCoinChallenges() {
   discardIncompleteChallengeSession();
+  reviewReturnTarget = "";
   currentView = "coin-challenges";
   els.appShell.classList.remove("clean-article-practice");
   els.appShell.classList.remove("clean-quiz-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
+  els.appShell.classList.remove("vocabulary-review-mode");
   setChallengeBackButtons(false, false);
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
@@ -9512,13 +9519,13 @@ function handleDashboardAction(action) {
   if (action === "vocabulary-quiz") {
     guidedLearningActive = false;
     learnGermanReturnActive = false;
-    showDirectChallenge("vocabulary-review");
+    showDirectChallenge("vocabulary-review", { returnTarget: "dashboard" });
     return;
   }
   if (action === "article-quiz") {
     guidedLearningActive = false;
     learnGermanReturnActive = false;
-    showDirectChallenge("articles");
+    showDirectChallenge("articles", { returnTarget: "dashboard" });
     return;
   }
   if (action === "village-members") {
@@ -10012,21 +10019,25 @@ function handleLearnGermanAction(action, options = {}) {
   if (action === "vocabulary-review") {
     learnGermanReturnActive = true;
     if (!options.guided) {
+      setReviewReturnTarget("learn-german");
       showLevelSelection("vocabulary-review");
       return;
     }
+    setReviewReturnTarget("continue-learning");
     prepareStudySetReviewContext("vocabulary");
-    showDirectChallenge("vocabulary-review");
+    showDirectChallenge("vocabulary-review", { returnTarget: "continue-learning" });
     return;
   }
   if (action === "article-review") {
     learnGermanReturnActive = true;
     if (!options.guided) {
+      setReviewReturnTarget("learn-german");
       showLevelSelection("article-review");
       return;
     }
+    setReviewReturnTarget("continue-learning");
     prepareStudySetReviewContext("articles");
-    showDirectChallenge("articles");
+    showDirectChallenge("articles", { returnTarget: "continue-learning" });
   }
 }
 
@@ -10038,18 +10049,42 @@ function returnToLearnGermanOrDashboard() {
   showDashboard();
 }
 
+function setReviewReturnTarget(target = "") {
+  const validTargets = new Set(["continue-learning", "learn-german", "level-selection", "reviews", "dashboard"]);
+  reviewReturnTarget = validTargets.has(target) ? target : "";
+}
+
+function getReviewReturnTarget() {
+  if (reviewReturnTarget) return reviewReturnTarget;
+  if (guidedLearningActive || learnGermanReturnActive) return "continue-learning";
+  return "reviews";
+}
+
+function returnFromReviewFlow(event) {
+  event?.preventDefault();
+  const target = getReviewReturnTarget();
+  discardIncompleteChallengeSession();
+  if (target === "continue-learning" || target === "learn-german") {
+    showLearnGermanPage();
+    return;
+  }
+  if (target === "level-selection" && isManualReviewPath()) {
+    showLevelSelection(selectedLearningPath);
+    return;
+  }
+  if (target === "dashboard") {
+    showDashboard();
+    return;
+  }
+  showCoinChallenges();
+}
+
 function isManualReviewPath(path = selectedLearningPath) {
   return path === "vocabulary-review" || path === "article-review";
 }
 
 function returnToManualLevelSelectionOrLearnGerman(event) {
-  event?.preventDefault();
-  if (isManualReviewPath()) {
-    discardIncompleteChallengeSession();
-    showLevelSelection(selectedLearningPath);
-    return;
-  }
-  returnToLearnGermanOrDashboard();
+  returnFromReviewFlow(event);
 }
 
 function prepareStudySetReviewContext(type) {
@@ -10086,12 +10121,14 @@ function markActiveStudySetReviewCompleted(type) {
 }
 
 function showDirectChallenge(action, options = {}) {
+  setReviewReturnTarget(options.returnTarget || reviewReturnTarget || "reviews");
   if (!options.keepLearningPath) selectedLearningPath = "challenges";
   showChallengeReady(action);
 }
 
 function showChallengesEntry() {
   guidedLearningActive = false;
+  setReviewReturnTarget("reviews");
   showLevelSelection("challenges");
 }
 
@@ -10225,6 +10262,7 @@ function prepareNewFlashcardStudySession(requestedGoal = getLearnGermanGoal()) {
 function showLevelSelection(path) {
   if (path === "challenges") discardIncompleteChallengeSession();
   selectedLearningPath = path;
+  els.appShell.classList.remove("vocabulary-review-mode");
   const contextLabels = {
     flashcards: "FLASHCARDS",
     "vocabulary-review": "VOCABULARY REVIEW",
@@ -10280,6 +10318,7 @@ function startManualReviewForSelectedLevel(action) {
   if (!["vocabulary-review", "articles"].includes(action)) return;
   guidedLearningActive = false;
   learnGermanReturnActive = true;
+  setReviewReturnTarget("level-selection");
   if (action === "vocabulary-review") {
     selectedChallengeCategory = "all";
   }
@@ -10840,6 +10879,7 @@ function showFlashcardCompletion() {
 
 function handleChallengeAction(action) {
   if (!["vocabulary-review", "articles"].includes(action)) return;
+  setReviewReturnTarget("reviews");
   showChallengeReady(action);
 }
 
@@ -11252,6 +11292,7 @@ function startFocusedDifficultReview(type = "vocabulary") {
   };
   guidedLearningActive = false;
   learnGermanReturnActive = true;
+  setReviewReturnTarget("learn-german");
   if (type === "articles") {
     selectedLearningPath = "";
     openStudyRoute({ mode: "article-quiz", filter: "smartArticle", resume: false });
@@ -11840,11 +11881,23 @@ function bindEvents() {
   els.demoSignIn?.addEventListener("click", handleDemoSignIn);
   els.demoNext?.addEventListener("click", handleDemoNext);
 
-  els.studyChallengeBack.addEventListener("click", returnToCoinChallenges);
+  els.studyChallengeBack.addEventListener("click", (event) => {
+    if (currentView === "study" && challengeSession.type === "articles") {
+      returnFromReviewFlow(event);
+      return;
+    }
+    returnToCoinChallenges(event);
+  });
   els.articleQuizNext.addEventListener("click", () => {
     advanceChallengeSession("articles", () => moveCard(1));
   });
-  els.nounVerbChallengeBack.addEventListener("click", returnToCoinChallenges);
+  els.nounVerbChallengeBack.addEventListener("click", (event) => {
+    if (currentView === "vocabulary-review") {
+      returnFromReviewFlow(event);
+      return;
+    }
+    returnToCoinChallenges(event);
+  });
 
   els.ratingButtons.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-rating]");
@@ -11966,8 +12019,9 @@ function bindEvents() {
   els.flashcardContinueStudying.addEventListener("click", () => {
     guidedLearningActive = true;
     learnGermanReturnActive = true;
+    setReviewReturnTarget("continue-learning");
     prepareStudySetReviewContext("vocabulary");
-    showDirectChallenge("vocabulary-review");
+    showDirectChallenge("vocabulary-review", { returnTarget: "continue-learning" });
   });
   els.flashcardReturnDashboard.addEventListener("click", returnToLearnGermanOrDashboard);
   els.challengeResultsBack.addEventListener("click", returnToManualLevelSelectionOrLearnGerman);
