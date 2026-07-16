@@ -2102,6 +2102,7 @@ function normalizeProfileData(data, profile) {
     flashcardSessions: normalizeFlashcardSessions(data?.flashcardSessions),
     activeStudySet: normalizeActiveStudySet(data?.activeStudySet),
     learningIntroSeen: Boolean(data?.learningIntroSeen ?? profile?.learningIntroSeen),
+    forceFirstTimeExperience: Boolean(data?.forceFirstTimeExperience ?? profile?.forceFirstTimeExperience),
     learningPreferences: normalizeLearningPreferences(data?.learningPreferences || profile?.learningPreferences),
     positions: normalizePositions(data?.positions),
     settings: {
@@ -2595,6 +2596,7 @@ async function saveProfileStoreToCloudNow() {
       currentProfile: currentProfileId || profileStore.currentProfile || "",
       activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
       difficultWords: normalizeDifficultWords(activeProfile?.difficultWords),
+      forceFirstTimeExperience: Boolean(activeProfile?.forceFirstTimeExperience),
       profiles: ownedProfiles,
       progressResetVersion: normalizeCounter(activeProfile?.progressResetVersion),
       progressResetAtIso: activeProfile?.progressResetAtIso || "",
@@ -3695,6 +3697,9 @@ function routeAfterIdentityReady() {
     currentGroupId = groupId;
     profileStore.currentGroup = groupId;
     completeProfileLogin(profileId);
+    if (profile?.forceFirstTimeExperience) {
+      showForcedFirstTimeLearningExperience();
+    }
     return;
   }
   showVillageSelection();
@@ -5912,10 +5917,10 @@ function createDeveloperTestingSection(data) {
   personalCard.replaceChildren(
     createTextElement("span", "", "Current account"),
     createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
-    createTextElement("p", "developer-tools-empty", "Reset learning progress while keeping login, display name, developer role, and Family Z membership."),
+    createTextElement("p", "developer-tools-empty", "Reset learning progress and show the first-time learning experience again. Account, profile, and village membership are preserved."),
     createDeveloperActionButton("🧹 Reset to First-Time User", openResetToFirstTimeUserDialog, true),
     createDeveloperActionButton("Reset My Learning Progress", () => openResetMyLearningProgressDialog({ includePersonalRewards: false })),
-    createDeveloperActionButton("Reset for New-User Test", () => openResetMyLearningProgressDialog({ includePersonalRewards: true }), true)
+    createDeveloperActionButton("Reset for New-User Test", () => openResetMyLearningProgressDialog({ includePersonalRewards: true, firstTimeUserReset: true }), true)
   );
 
   const familyCard = document.createElement("article");
@@ -7136,9 +7141,13 @@ function openResetMyLearningProgressDialog(options = {}) {
     resetButton.textContent = "Reset Progress";
     resetButton.disabled = true;
     actions.replaceChildren(cancelButton, resetButton);
+    const resetTitle = options.firstTimeUserReset ? "Reset for New-User Test?" : "Reset your learning progress?";
+    const resetMessage = options.firstTimeUserReset
+      ? "This will reset learning progress and show the first-time learning experience again. Your account, profile, and village membership will be kept."
+      : "Your account, developer access, and village membership will be kept.";
     card.replaceChildren(
-      createTextElement("h3", "", "Reset your learning progress?"),
-      createTextElement("p", "", "Your account, developer access, and village membership will be kept."),
+      createTextElement("h3", "", resetTitle),
+      createTextElement("p", "", resetMessage),
       createTextElement("h4", "", "Reset"),
       checklist,
       createTextElement("h4", "", "Keep"),
@@ -7171,7 +7180,13 @@ function openResetMyLearningProgressDialog(options = {}) {
     confirmationInput.focus();
   }).then(async ({ confirmed, includePersonalRewards }) => {
     if (!confirmed) return;
-    await resetCurrentDeveloperLearningProgress({ includePersonalRewards });
+    await resetCurrentDeveloperLearningProgress({
+      includePersonalRewards,
+      firstTimeUserReset: Boolean(options.firstTimeUserReset),
+      successMessage: options.firstTimeUserReset
+        ? "New-user test reset complete. Sign back in to see the first-time learning experience."
+        : ""
+    });
   });
 }
 
@@ -7347,6 +7362,7 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
   ) + 1;
   const resetProfile = createLearningResetProfile(currentProfile, {
     includePersonalRewards: Boolean(options.includePersonalRewards),
+    firstTimeUserReset: Boolean(options.firstTimeUserReset),
     progressResetVersion: nextResetVersion,
     progressResetAtIso: savedAt
   });
@@ -7486,6 +7502,7 @@ function createFirstTimeExperienceResetPayload(profilePath = "", savedAt = new D
     [`${prefix}hasCompletedFirstFlashcards`]: false,
     [`${prefix}hasStartedReviews`]: false,
     [`${prefix}hasSeenContinueLearning`]: false,
+    [`${prefix}forceFirstTimeExperience`]: true,
     [`${prefix}firstTimeExperienceResetAtIso`]: savedAt
   };
 }
@@ -7528,6 +7545,7 @@ function createLearningResetProfile(profile, options = {}) {
     hasCompletedFirstFlashcards: false,
     hasStartedReviews: false,
     hasSeenContinueLearning: false,
+    forceFirstTimeExperience: Boolean(options.firstTimeUserReset),
     firstTimeExperienceResetAtIso: options.firstTimeUserReset ? (options.progressResetAtIso || "") : (profile.firstTimeExperienceResetAtIso || ""),
     progressResetVersion: normalizeCounter(options.progressResetVersion),
     progressResetAtIso: options.progressResetAtIso || ""
@@ -7607,6 +7625,7 @@ async function verifyCurrentDeveloperLearningReset(firebase, profileId, options 
   if (normalizeActiveStudySet(profile.activeStudySet).wordIds.length) warnings.push("Profile activeStudySet was not cleared.");
   if (options.firstTimeUserReset && Boolean(profile.learningIntroSeen || data.learningIntroSeen)) warnings.push("How Learning Works intro flag was not reset.");
   if (options.firstTimeUserReset && Boolean(profile.hasSeenContinueLearning || data.hasSeenContinueLearning)) warnings.push("Continue Learning first-time flag was not reset.");
+  if (options.firstTimeUserReset && !Boolean(profile.forceFirstTimeExperience || data.forceFirstTimeExperience)) warnings.push("First-time experience force flag was not set.");
   if (options.includePersonalRewards && normalizeCoinCount(profile.coins) !== 0) warnings.push("Personal coins were not reset.");
   if (options.includePersonalRewards && normalizeRewardIdList(profile.austriaAlbumSeenRewards).length) warnings.push("Austria Album progress was not reset.");
   console.info(RESET_VERIFICATION_PREFIX, {
@@ -9685,6 +9704,13 @@ function hideLearnIntroPanel() {
   els.learnShortcutPanel?.classList.remove("hidden");
 }
 
+function showForcedFirstTimeLearningExperience() {
+  guidedLearningActive = true;
+  learnGermanReturnActive = true;
+  showLearnGermanPage();
+  showLearnIntroPanel();
+}
+
 function shouldShowLearningIntro(profile = getCurrentProfile()) {
   if (!profile || profile.learningIntroSeen) return false;
   const state = getGuidedLearningState(profile);
@@ -9706,6 +9732,9 @@ function markLearningIntroSeen() {
   const profile = getCurrentProfile();
   if (!profile || profile.learningIntroSeen) return;
   profile.learningIntroSeen = true;
+  if (profile.forceFirstTimeExperience) {
+    profile.forceFirstTimeExperience = false;
+  }
   saveProfileStore({ immediate: true });
 }
 
