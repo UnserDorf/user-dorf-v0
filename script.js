@@ -5917,10 +5917,24 @@ function createDeveloperTestingSection(data) {
   personalCard.replaceChildren(
     createTextElement("span", "", "Current account"),
     createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
-    createTextElement("p", "developer-tools-empty", "Reset learning progress and show the first-time learning experience again. Account, profile, and village membership are preserved."),
-    createDeveloperActionButton("🧹 Reset to First-Time User", openResetToFirstTimeUserDialog, true),
-    createDeveloperActionButton("Reset My Learning Progress", () => openResetMyLearningProgressDialog({ includePersonalRewards: false })),
-    createDeveloperActionButton("Reset for New-User Test", () => openResetMyLearningProgressDialog({ includePersonalRewards: true, firstTimeUserReset: true }), true)
+    createDeveloperTestingActionCard({
+      title: "Replay First Learning Experience",
+      description: "Replay the learning introduction exactly as a newly registered learner would experience it after creating an account.",
+      keeps: ["Account", "Display name", "Family membership", "Developer access"],
+      resets: ["Learning progress", "Learning introduction", "First learning session"],
+      actionLabel: "Replay First Learning Experience",
+      handler: openReplayFirstLearningExperienceDialog,
+      destructive: true
+    }),
+    createDeveloperTestingActionCard({
+      title: "Reset Learning Progress",
+      description: "Clear your learning history and start studying from the beginning without replaying onboarding.",
+      keeps: ["Account", "Display name", "Village membership", "Developer access", "Onboarding state"],
+      resets: ["Flashcards", "Vocabulary Review", "Article Review", "Difficult words", "Streaks", "Study history"],
+      actionLabel: "Reset Learning Progress",
+      handler: () => openResetMyLearningProgressDialog({ includePersonalRewards: false }),
+      destructive: false
+    })
   );
 
   const familyCard = document.createElement("article");
@@ -5939,6 +5953,32 @@ function createDeveloperTestingSection(data) {
     testingGrid
   );
   return section;
+}
+
+function createDeveloperTestingActionCard({ title, description, keeps = [], resets = [], actionLabel, handler, destructive = false }) {
+  const card = document.createElement("section");
+  card.className = "developer-testing-action";
+  card.replaceChildren(
+    createTextElement("h4", "", title),
+    createTextElement("p", "developer-tools-empty", description),
+    createDeveloperTestingList("Keeps", keeps),
+    createDeveloperTestingList("Resets", resets),
+    createDeveloperActionButton(actionLabel, handler, destructive)
+  );
+  return card;
+}
+
+function createDeveloperTestingList(title, items = []) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-testing-list";
+  const list = document.createElement("ul");
+  items.forEach((item) => {
+    const row = document.createElement("li");
+    row.textContent = item;
+    list.append(row);
+  });
+  wrapper.replaceChildren(createTextElement("span", "", title), list);
+  return wrapper;
 }
 
 function createDeveloperCleanupPreview(preview) {
@@ -7141,7 +7181,7 @@ function openResetMyLearningProgressDialog(options = {}) {
     resetButton.textContent = "Reset Progress";
     resetButton.disabled = true;
     actions.replaceChildren(cancelButton, resetButton);
-    const resetTitle = options.firstTimeUserReset ? "Reset for New-User Test?" : "Reset your learning progress?";
+    const resetTitle = options.firstTimeUserReset ? "Replay First Learning Experience?" : "Reset Learning Progress?";
     const resetMessage = options.firstTimeUserReset
       ? "This will reset learning progress and show the first-time learning experience again. Your account, profile, and village membership will be kept."
       : "Your account, developer access, and village membership will be kept.";
@@ -7184,19 +7224,19 @@ function openResetMyLearningProgressDialog(options = {}) {
       includePersonalRewards,
       firstTimeUserReset: Boolean(options.firstTimeUserReset),
       successMessage: options.firstTimeUserReset
-        ? "New-user test reset complete. Sign back in to see the first-time learning experience."
+        ? "Replay First Learning Experience is ready. Sign back in to see the first-time learning flow."
         : ""
     });
   });
 }
 
-function openResetToFirstTimeUserDialog() {
+function openReplayFirstLearningExperienceDialog() {
   return new Promise((resolve) => {
     const overlay = document.createElement("section");
     overlay.className = "developer-confirmation-overlay";
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", "Reset to first-time user");
+    overlay.setAttribute("aria-label", "Replay first learning experience");
     const card = document.createElement("article");
     card.className = "developer-confirmation-card";
     const actions = document.createElement("div");
@@ -7211,8 +7251,8 @@ function openResetToFirstTimeUserDialog() {
     resetButton.textContent = "Reset";
     actions.replaceChildren(cancelButton, resetButton);
     card.replaceChildren(
-      createTextElement("h3", "", "Reset to First-Time User"),
-      createTextElement("p", "", "This will reset all learning progress and first-time experience data for this account. Your account and village membership will remain intact."),
+      createTextElement("h3", "", "Replay First Learning Experience?"),
+      createTextElement("p", "", "This will reset learning progress and show the first-time learning introduction again. Your account, display name, Family membership, and developer access will remain intact."),
       actions
     );
     overlay.append(card);
@@ -7239,7 +7279,7 @@ function openResetToFirstTimeUserDialog() {
     await resetCurrentDeveloperLearningProgress({
       includePersonalRewards: true,
       firstTimeUserReset: true,
-      successMessage: "Reset to First-Time User complete."
+      successMessage: "Replay First Learning Experience is ready. Sign back in to see the first-time learning flow."
     });
   });
 }
