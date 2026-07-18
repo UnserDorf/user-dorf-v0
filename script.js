@@ -10821,10 +10821,7 @@ function prepareStudySetReviewContext(type) {
     selectedLearningLevel = firstWord.level;
   }
   if (type === "vocabulary") {
-    const firstCategory = words.find((word) => word.category)?.category;
-    if (["nouns", "verbs", "other"].includes(firstCategory)) {
-      selectedChallengeCategory = firstCategory;
-    }
+    selectedChallengeCategory = "all";
   }
 }
 
@@ -10844,6 +10841,34 @@ function markActiveStudySetReviewCompleted(type) {
   profile.activeStudySet.reviewStatus = reviewStatus;
   saveProfileStore({ localOnly: true });
   saveActiveStudySetToCloudNow(profile.activeStudySet);
+}
+
+function getGuidedArticleReviewQuestionCount() {
+  const studySet = getActiveStudySet();
+  if (!studySet.wordIds.length) return 0;
+  const words = studySet.wordIds.map((wordId) => studySet.words[wordId]).filter(Boolean);
+  const firstWord = words[0];
+  const level = LEARNING_LEVELS.includes(firstWord?.level) ? firstWord.level : selectedLearningLevel;
+  const matches = getStudySetQuizMatches(studySet, getArticleChallengeCards(level), {
+    type: "articles",
+    level
+  });
+  return matches.length;
+}
+
+function continueAfterGuidedChallengeResult(completedSession) {
+  if (completedSession?.type === "vocabulary") {
+    const articleQuestionCount = getGuidedArticleReviewQuestionCount();
+    if (articleQuestionCount > 0) {
+      prepareStudySetReviewContext("articles");
+      setReviewReturnTarget("continue-learning");
+      showDirectChallenge("articles", { returnTarget: "continue-learning" });
+      showNextPendingCelebration();
+      return;
+    }
+  }
+  showLearnGermanPage();
+  showNextPendingCelebration();
 }
 
 function showDirectChallenge(action, options = {}) {
@@ -11413,12 +11438,14 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
   const key = getFlashcardSessionKey();
   const existing = profile.flashcardSessions[key] || {};
   const today = getTodayKey();
+  const deckIds = Array.from(new Set(flashcardStudyCards.map((card) => card.id).filter(Boolean)));
   const studiedIds = new Set(existing.studyDate === today ? existing.studiedIds || [] : []);
   if (studiedCard?.id) studiedIds.add(studiedCard.id);
+  if (completed) deckIds.forEach((wordId) => studiedIds.add(wordId));
   profile.flashcardSessions[key] = {
     sessionId: existing.sessionId || createFlashcardSessionId(key),
-    deckIds: flashcardStudyCards.map((card) => card.id),
-    index: flashcardStudyIndex,
+    deckIds,
+    index: completed ? Math.max(deckIds.length - 1, 0) : flashcardStudyIndex,
     studiedIds: Array.from(studiedIds),
     ratings: normalizeFlashcardRatings(existing.ratings),
     studyDate: today,
@@ -11427,10 +11454,30 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     updatedAt: new Date().toISOString()
   };
   const activeStudySetUpdated = completed ? updateActiveStudySetFromFlashcardSession(profile, key) : false;
+  if (completed) verifyCompletedFlashcardSession(profile.flashcardSessions[key], profile.activeStudySet);
   saveProfileStore({ localOnly: true });
   if (activeStudySetUpdated) {
     saveActiveStudySetToCloudNow(profile.activeStudySet);
   }
+}
+
+function verifyCompletedFlashcardSession(session, activeStudySet) {
+  const deckIds = Array.from(new Set((session?.deckIds || []).map(String).filter(Boolean)));
+  const studiedIds = Array.from(new Set((session?.studiedIds || []).map(String).filter(Boolean)));
+  const studySet = normalizeActiveStudySet(activeStudySet);
+  const countsMatch = deckIds.length === studiedIds.length && deckIds.length === studySet.wordIds.length;
+  const missingStudiedIds = deckIds.filter((wordId) => !studiedIds.includes(wordId));
+  const missingStudySetIds = deckIds.filter((wordId) => !studySet.wordIds.includes(wordId));
+  if (countsMatch && !missingStudiedIds.length && !missingStudySetIds.length) return true;
+  console.warn("[Unser Dorf flashcard completion mismatch]", {
+    sessionId: session?.sessionId || "",
+    deckCount: deckIds.length,
+    studiedCount: studiedIds.length,
+    activeStudySetCount: studySet.wordIds.length,
+    missingStudiedIds,
+    missingStudySetIds
+  });
+  return false;
 }
 
 function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey()) {
@@ -11629,7 +11676,12 @@ function moveLearningFlashcard(direction, studiedCard = null) {
 function showFlashcardCompletion() {
   const profile = getFlashcardSessionProfile();
   const session = profile?.flashcardSessions?.[getFlashcardSessionKey()];
-  els.flashcardCompletionCount.textContent = normalizeCounter(new Set(session?.studiedIds || []).size);
+  const activeStudySet = normalizeActiveStudySet(profile?.activeStudySet);
+  verifyCompletedFlashcardSession(session, activeStudySet);
+  const completionCount = activeStudySet.wordIds.length
+    || new Set(session?.studiedIds || []).size
+    || new Set(session?.deckIds || []).size;
+  els.flashcardCompletionCount.textContent = normalizeCounter(completionCount);
   if (els.flashcardContinueStudying) {
     els.flashcardContinueStudying.textContent = "▶ Continue to Vocabulary Review";
   }
@@ -11651,6 +11703,7 @@ function showChallengeReady(action) {
   currentView = "challenge-ready";
   const isVocabulary = action === "vocabulary-review";
   const studySetPreview = getStudySetPreviewForChallengeAction(action);
+  const guidedStudySetReview = Boolean(guidedLearningActive && studySetPreview.count);
   els.challengeReadyScreen?.classList.toggle("vocabulary-review-ready", isVocabulary);
   els.challengeReadyLevel.classList.toggle("hidden", isVocabulary);
   els.challengeReadyLevel.textContent = isVocabulary ? "" : `${selectedLearningLevel} Review`;
@@ -11662,7 +11715,7 @@ function showChallengeReady(action) {
     els.challengeReadyStudySetNotice?.classList.add("hidden");
     els.challengeReadyStudySetNotice?.replaceChildren();
     const recentCount = normalizeCounter(studySetPreview.reviewedCount || studySetPreview.count);
-    const questionCount = getChallengeSessionQuestionCount();
+    const questionCount = guidedStudySetReview ? studySetPreview.count : CHALLENGE_QUESTION_COUNT;
     els.challengeReadyMeta.textContent = `${recentCount} recent ${recentCount === 1 ? "word" : "words"} • ${questionCount} ${questionCount === 1 ? "question" : "questions"}`;
     els.challengeReadyPrompt?.classList.add("hidden");
     els.challengeReadyStart.textContent = "Start Review";
@@ -11671,7 +11724,9 @@ function showChallengeReady(action) {
       studySetUsed: studySetPreview.count > 0,
       studySetReviewedCount: studySetPreview.reviewedCount
     });
-    els.challengeReadyMeta.textContent = "10 Questions";
+    els.challengeReadyMeta.textContent = guidedStudySetReview
+      ? `${studySetPreview.count} ${studySetPreview.count === 1 ? "Question" : "Questions"}`
+      : "10 Questions";
     els.challengeReadyPrompt?.classList.remove("hidden");
     els.challengeReadyStart.textContent = "Start";
   }
@@ -11709,7 +11764,14 @@ function beginPendingChallenge() {
   }
   const route = routes[action];
   if (!route) return;
-  if (action === "articles") startChallengeSession("articles", selectedLearningLevel, { useStudySet: guidedLearningActive });
+  if (action === "articles") {
+    if (guidedLearningActive && !getGuidedArticleReviewQuestionCount()) {
+      console.info("[Unser Dorf guided learning] Skipping Article Review because this study set has no eligible nouns.");
+      showLearnGermanPage();
+      return;
+    }
+    startChallengeSession("articles", selectedLearningLevel, { useStudySet: guidedLearningActive });
+  }
   openStudyRoute(route);
 }
 
@@ -11747,7 +11809,7 @@ function startChallengeSession(type, level = selectedLearningLevel, options = {}
     level,
     category: type === "vocabulary" ? selectedChallengeCategory : "",
     questionIds: selection.cards.map((card) => card.id),
-    questionCount: selection.cards.length || CHALLENGE_QUESTION_COUNT,
+    questionCount: options.useStudySet ? selection.cards.length : selection.cards.length || CHALLENGE_QUESTION_COUNT,
     studySetUsed: selection.studySetUsed,
     studySetReviewedCount: selection.studySetReviewedCount,
     studySetQuestionCount: selection.studySetQuestionCount
@@ -11755,36 +11817,40 @@ function startChallengeSession(type, level = selectedLearningLevel, options = {}
 }
 
 function buildChallengeQuestionSelection(type, level = selectedLearningLevel, options = {}) {
+  const guidedStudySetReview = Boolean(options.useStudySet);
   const defaultCards = type === "articles"
     ? getArticleChallengeCards(level)
-    : getChallengeVocabularyDeck(level, selectedChallengeCategory);
+    : getChallengeVocabularyDeck(level, guidedStudySetReview ? "all" : selectedChallengeCategory);
   const fallbackCards = shuffleCards(defaultCards).slice(0, CHALLENGE_QUESTION_COUNT);
   const studySet = getActiveStudySet();
-  if (!options.useStudySet || !studySet.wordIds.length || !defaultCards.length) {
+  if (!guidedStudySetReview || !studySet.wordIds.length || !defaultCards.length) {
     return createChallengeQuestionSelection(fallbackCards, studySet, 0);
   }
 
   const studyMatches = getStudySetQuizMatches(studySet, defaultCards, {
     type,
     level,
-    category: type === "vocabulary" ? selectedChallengeCategory : ""
+    category: ""
   });
   if (!studyMatches.length) {
-    return createChallengeQuestionSelection(fallbackCards, studySet, 0);
+    return createChallengeQuestionSelection([], studySet, 0, 0);
   }
 
   const targetStudyCount = studyMatches.length;
   const studyCards = pickWeightedStudySetCards(studyMatches, targetStudyCount, type);
-  return createChallengeQuestionSelection(studyCards, studySet, studyCards.length, studyCards.length);
+  return createChallengeQuestionSelection(studyCards, studySet, studyCards.length, studyCards.length, {
+    dedupeWords: false
+  });
 }
 
-function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuestionCount, maxQuestions = CHALLENGE_QUESTION_COUNT) {
+function createChallengeQuestionSelection(cardsForQuiz, studySet, studySetQuestionCount, maxQuestions = CHALLENGE_QUESTION_COUNT, options = {}) {
   const uniqueCards = [];
   const seen = new Set();
   const seenWords = new Set();
+  const dedupeWords = options.dedupeWords !== false;
   cardsForQuiz.forEach((card) => {
     const wordKey = getStudySetCardMatchKey(card);
-    if (!card?.id || seen.has(card.id) || seenWords.has(wordKey) || uniqueCards.length >= maxQuestions) return;
+    if (!card?.id || seen.has(card.id) || (dedupeWords && seenWords.has(wordKey)) || uniqueCards.length >= maxQuestions) return;
     seen.add(card.id);
     seenWords.add(wordKey);
     uniqueCards.push(card);
@@ -12158,9 +12224,13 @@ function showChallengeResults() {
   els.challengeResultCorrect.textContent = `${correct} / ${questionCount}`;
   els.challengeResultCoins.textContent = `+${challengeSession.coinsEarned}`;
   if (els.challengeResultsContinue) {
-    els.challengeResultsContinue.textContent = guidedLearningActive
-      ? "Continue to Learn German"
-      : "Continue";
+    if (guidedLearningActive && challengeSession.type === "vocabulary" && getGuidedArticleReviewQuestionCount() > 0) {
+      els.challengeResultsContinue.textContent = "Continue to Article Review";
+    } else if (guidedLearningActive) {
+      els.challengeResultsContinue.textContent = "Finish Session";
+    } else {
+      els.challengeResultsContinue.textContent = "Continue";
+    }
   }
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
@@ -12733,10 +12803,10 @@ function bindEvents() {
     moveNounVerbCard(1);
   });
   els.challengeResultsContinue.addEventListener("click", () => {
+    const completedSession = { ...challengeSession };
     challengeSession = createEmptyChallengeSession();
     if (guidedLearningActive) {
-      showLearnGermanPage();
-      showNextPendingCelebration();
+      continueAfterGuidedChallengeResult(completedSession);
       return;
     }
     guidedLearningActive = false;
