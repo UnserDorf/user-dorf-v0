@@ -10245,8 +10245,8 @@ function continueGuidedLearning() {
 function setLearnIntroContent({ firstTime = false } = {}) {
   const eyebrow = els.learnIntroPanel?.querySelector(".learn-intro-heading .eyebrow");
   const title = els.learnIntroPanel?.querySelector(".learn-intro-heading h3");
-  if (eyebrow) eyebrow.textContent = firstTime ? "Welcome to Unser Dorf" : "Learn German";
-  if (title) title.textContent = "Learn German. Help your village grow.";
+  if (eyebrow) eyebrow.textContent = "📚 Learn German";
+  if (title) title.textContent = "Learn new words, review what you've learned, earn coins, and help your village grow.";
   if (els.learnIntroChooseLevel) {
     els.learnIntroChooseLevel.textContent = firstTime ? "Start Learning" : "Choose Your Level";
   }
