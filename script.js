@@ -78,7 +78,7 @@ const ONBOARDING_PAGES = [
     nextLabel: "Next"
   },
   {
-    illustration: "assets/practice-hero.png",
+    illustration: "./assets/practice-hero.png",
     illustrationAlt: "Article practice in Unser Dorf",
     title: "🏆 Practice",
     body: [
@@ -5095,6 +5095,14 @@ function renderOnboardingPage() {
     image.src = page.illustration;
     image.alt = page.illustrationAlt || "";
     image.loading = "eager";
+    image.onerror = () => {
+      console.warn("Demo image failed to load.", {
+        requestedPath: page.illustration,
+        fallbackPath: "assets/learn-hero.png"
+      });
+      image.onerror = null;
+      image.src = "assets/learn-hero.png";
+    };
     els.demoIllustration.replaceChildren(image);
   }
   if (els.demoTitle) els.demoTitle.textContent = page.title;
@@ -5115,6 +5123,7 @@ function renderOnboardingPage() {
   }
   if (els.demoProgress) els.demoProgress.textContent = page.progress;
   if (els.demoBack) els.demoBack.textContent = registeredDemoActive ? "Skip" : page.backLabel;
+  els.demoBack?.classList.remove("hidden");
   els.demoSignIn?.classList.add("hidden");
   if (els.demoNext) els.demoNext.textContent = page.nextLabel;
 }
@@ -5131,11 +5140,14 @@ function renderDemoFinalScreen() {
   if (els.demoTitle) els.demoTitle.textContent = "Your village grew!";
   if (els.demoBody) {
     els.demoBody.replaceChildren(
-      createTextElement("p", "", "That's how Unser Dorf works.")
+      createTextElement("p", "", "Every learning session helps your village grow.")
     );
   }
-  if (els.demoProgress) els.demoProgress.textContent = "🌱";
-  if (els.demoBack) els.demoBack.textContent = registeredDemoActive ? "Go to Dashboard" : "Back to Home";
+  if (els.demoProgress) els.demoProgress.textContent = "● ● ● ● ●";
+  if (els.demoBack) {
+    els.demoBack.textContent = "Back to Home";
+    els.demoBack.classList.toggle("hidden", registeredDemoActive);
+  }
   els.demoSignIn?.classList.toggle("hidden", registeredDemoActive);
   if (els.demoNext) els.demoNext.textContent = registeredDemoActive ? "Go to Dashboard" : "Create your account";
 }
