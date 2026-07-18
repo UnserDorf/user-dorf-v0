@@ -12629,7 +12629,6 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-recommendation-panel .eyebrow,
-.learn-difficult-panel .eyebrow,
 .learn-shortcut-panel p {
   margin: 0;
   color: var(--muted);
@@ -12639,8 +12638,9 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-difficult-panel {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr);
   align-items: center;
+  column-gap: 16px;
 }
 
 .learn-difficult-panel h3,
@@ -12650,7 +12650,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
 .learn-difficult-panel h3 {
   color: var(--green);
-  font-size: 1.02rem;
+  font-size: 1.04rem;
   font-weight: 850;
   line-height: 1.2;
 }
@@ -12667,13 +12667,17 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-difficult-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
+.learn-difficult-actions.has-articles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .learn-difficult-actions .ghost-button {
+  width: 100%;
   min-height: 42px;
   border-color: rgba(77, 130, 94, 0.22);
   background: rgba(255, 253, 248, 0.72);
@@ -12930,11 +12934,15 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
   .learn-difficult-actions {
     display: grid;
+    grid-template-columns: 1fr;
     justify-content: stretch;
   }
 
-  .learn-difficult-actions .ghost-button,
-  .learn-difficult-actions .small-link-button {
+  .learn-difficult-actions.has-articles {
+    grid-template-columns: 1fr;
+  }
+
+  .learn-difficult-actions .ghost-button {
     width: 100%;
   }
 
@@ -13361,11 +13369,6 @@ body:has(#developerToolsScreen:not(.hidden)) {
   display: none;
 }
 
-.learn-difficult-panel .learn-panel-body {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-}
-
 .learn-shortcut-panel .learn-panel-body {
   gap: 10px;
 }
@@ -13547,10 +13550,6 @@ body:has(#developerToolsScreen:not(.hidden)) {
   .learn-shortcut-panel {
     padding: 12px;
     border-radius: 16px;
-  }
-
-  .learn-difficult-panel .learn-panel-body {
-    grid-template-columns: 1fr;
   }
 
   .learn-panel-toggle {

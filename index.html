@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=252">
+    <link rel="stylesheet" href="style.css?v=253">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -455,21 +455,14 @@
           </article>
         </section>
 
-        <section class="learn-difficult-panel learn-collapsible is-collapsed" id="learnDifficultPanel" aria-label="Review difficult words">
-          <button class="learn-panel-toggle" id="learnDifficultToggle" type="button" aria-expanded="false">
-            <span>Focused Review</span>
-            <strong>Review Difficult Words</strong>
-          </button>
-          <div class="learn-panel-body">
-            <div>
-              <p class="eyebrow">Focused Review</p>
-              <h3>Review Difficult Words</h3>
-              <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
-            </div>
-            <div class="learn-difficult-actions" id="learnDifficultActions">
-              <button class="ghost-button" id="learnDifficultVocabulary" type="button">Start Review</button>
-              <button class="small-link-button hidden" id="learnDifficultArticles" type="button">Review difficult noun articles</button>
-            </div>
+        <section class="learn-difficult-panel" id="learnDifficultPanel" aria-label="Review difficult words">
+          <div class="learn-difficult-copy">
+            <h3>⭐ Review Difficult Words</h3>
+            <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
+          </div>
+          <div class="learn-difficult-actions" id="learnDifficultActions">
+            <button class="ghost-button" id="learnDifficultVocabulary" type="button">Review Vocabulary</button>
+            <button class="ghost-button hidden" id="learnDifficultArticles" type="button">Review Articles</button>
           </div>
         </section>
 
@@ -1074,6 +1067,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=268"></script>
+    <script type="module" src="script.js?v=269"></script>
   </body>
 </html>

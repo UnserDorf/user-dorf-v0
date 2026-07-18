@@ -503,7 +503,6 @@ const els = {
   learnEstimate: document.querySelector("#learnEstimate"),
   learnProgressList: document.querySelector("#learnProgressList"),
   learnDifficultPanel: document.querySelector("#learnDifficultPanel"),
-  learnDifficultToggle: document.querySelector("#learnDifficultToggle"),
   learnDifficultSummary: document.querySelector("#learnDifficultSummary"),
   learnDifficultActions: document.querySelector("#learnDifficultActions"),
   learnDifficultVocabulary: document.querySelector("#learnDifficultVocabulary"),
@@ -12191,18 +12190,18 @@ function renderDifficultWordsPanel() {
   els.learnDifficultPanel.classList.toggle("is-empty", count === 0);
   if (!count) {
     els.learnDifficultSummary.textContent = "Nothing needs extra review right now.";
+    els.learnDifficultActions?.classList.remove("has-articles");
     els.learnDifficultVocabulary?.classList.add("hidden");
     els.learnDifficultArticles?.classList.add("hidden");
     return;
   }
-  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word needs" : "words need"} attention`;
+  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word needs" : "words need"} extra practice.`;
+  els.learnDifficultActions?.classList.toggle("has-articles", nounCount > 0);
   els.learnDifficultVocabulary?.classList.remove("hidden");
-  els.learnDifficultVocabulary.textContent = "Start Review";
+  els.learnDifficultVocabulary.textContent = "Review Vocabulary";
   els.learnDifficultArticles?.classList.toggle("hidden", nounCount === 0);
   if (els.learnDifficultArticles) {
-    els.learnDifficultArticles.textContent = nounCount
-      ? `Review ${nounCount} difficult ${nounCount === 1 ? "noun article" : "noun articles"}`
-      : "No difficult nouns right now";
+    els.learnDifficultArticles.textContent = "Review Articles";
   }
 }
 
@@ -12676,9 +12675,6 @@ function bindEvents() {
   });
   els.learnGoalIncrease?.addEventListener("click", () => {
     setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
-  });
-  els.learnDifficultToggle?.addEventListener("click", () => {
-    toggleLearnPanel(els.learnDifficultPanel, els.learnDifficultToggle);
   });
   els.learnShortcutToggle?.addEventListener("click", () => {
     toggleLearnPanel(els.learnShortcutPanel, els.learnShortcutToggle);
