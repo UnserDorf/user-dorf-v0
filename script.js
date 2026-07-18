@@ -11807,8 +11807,8 @@ function showChallengeReady(action) {
   const studySetPreview = getStudySetPreviewForChallengeAction(action);
   const guidedStudySetReview = Boolean(guidedLearningActive && studySetPreview.count);
   els.challengeReadyScreen?.classList.toggle("vocabulary-review-ready", isVocabulary);
-  els.challengeReadyLevel.classList.toggle("hidden", isVocabulary);
-  els.challengeReadyLevel.textContent = isVocabulary ? "" : `${selectedLearningLevel} Review`;
+  els.challengeReadyLevel.classList.remove("hidden");
+  els.challengeReadyLevel.textContent = isVocabulary ? "VOCABULARY REVIEW" : "ARTICLE REVIEW";
   els.challengeReadyTitle.textContent = isVocabulary ? "Vocabulary Review" : "Article Review";
   els.challengeReadyDescription.textContent = isVocabulary
     ? "Review the words you just studied."
@@ -11830,7 +11830,7 @@ function showChallengeReady(action) {
       ? `${studySetPreview.count} ${studySetPreview.count === 1 ? "Question" : "Questions"}`
       : "10 Questions";
     els.challengeReadyPrompt?.classList.remove("hidden");
-    els.challengeReadyStart.textContent = "Start";
+    els.challengeReadyStart.textContent = "Start Review";
   }
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
@@ -12189,13 +12189,13 @@ function renderDifficultWordsPanel() {
   const nounCount = articleCandidates.length;
   els.learnDifficultPanel.classList.toggle("is-empty", count === 0);
   if (!count) {
-    els.learnDifficultSummary.textContent = "Nothing needs extra review right now.";
+    els.learnDifficultSummary.textContent = "No words";
     els.learnDifficultActions?.classList.remove("has-articles");
     els.learnDifficultVocabulary?.classList.add("hidden");
     els.learnDifficultArticles?.classList.add("hidden");
     return;
   }
-  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word needs" : "words need"} extra practice.`;
+  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word" : "words"}`;
   els.learnDifficultActions?.classList.toggle("has-articles", nounCount > 0);
   els.learnDifficultVocabulary?.classList.remove("hidden");
   els.learnDifficultVocabulary.textContent = "Review Vocabulary";
@@ -13493,7 +13493,7 @@ function renderCard() {
     els.promptLabel.textContent = "English";
     els.questionText.textContent = card.english;
   } else if (isArticleQuiz) {
-    els.promptLabel.textContent = "Choose the correct article.";
+    els.promptLabel.textContent = "ARTICLE REVIEW";
     els.questionText.textContent = card.word;
   } else if (mode === "article") {
     els.promptLabel.textContent = "Choose the article";
@@ -14461,7 +14461,7 @@ function renderVocabularyReviewQuiz() {
   }
   els.nounVerbTitle.textContent = "Vocabulary Review";
   els.vocabularyReviewDebug?.classList.add("hidden");
-  els.nounVerbInstruction.textContent = "";
+  els.nounVerbInstruction.textContent = "VOCABULARY REVIEW";
   els.nounVerbStage.classList.toggle("noun-verb-result-visible", vocabularyReviewQuizState.hasAnswered);
   els.showAnswer.classList.add("hidden");
   els.ratingButtons.classList.add("hidden");

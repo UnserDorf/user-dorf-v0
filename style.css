@@ -12638,9 +12638,16 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-difficult-panel {
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr);
-  align-items: center;
-  column-gap: 16px;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.learn-difficult-copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .learn-difficult-panel h3,
@@ -12656,9 +12663,13 @@ body:has(#developerToolsScreen:not(.hidden)) {
 }
 
 .learn-difficult-panel p:not(.eyebrow) {
-  color: #665f54;
-  font-size: 0.9rem;
-  font-weight: 650;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(219, 235, 213, 0.58);
+  padding: 5px 10px;
+  color: var(--green);
+  font-size: 0.86rem;
+  font-weight: 800;
   line-height: 1.35;
 }
 
@@ -12930,6 +12941,12 @@ body:has(#developerToolsScreen:not(.hidden)) {
 
   .learn-difficult-panel {
     grid-template-columns: 1fr;
+  }
+
+  .learn-difficult-copy {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .learn-difficult-actions {
@@ -13435,7 +13452,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   overflow-wrap: normal;
 }
 
-.clean-quiz-mode .noun-verb-options,
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options,
 .article-quiz-mode .article-quiz-options {
   display: grid;
   gap: clamp(8px, 1.4vw, 12px);
@@ -13450,7 +13467,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.clean-quiz-mode .noun-verb-options button,
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-options button,
 .article-quiz-mode .article-quiz-options button {
   min-width: 0;
   min-height: clamp(48px, 8vh, 62px);
@@ -13463,7 +13480,7 @@ body:has(#developerToolsScreen:not(.hidden)) {
   line-height: 1.16;
 }
 
-.clean-quiz-mode .noun-verb-result,
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-result,
 .article-quiz-mode .article-quiz-result {
   min-height: 58px;
   margin: 0;
@@ -14324,5 +14341,324 @@ body:has(#developerToolsScreen:not(.hidden)) {
   .developer-tools-heading,
   .challenge-page-heading {
     text-align: left;
+  }
+}
+
+/* Shared learning-flow shell: flashcard completion, reviews, quiz questions, and results. */
+.learning-flashcards-screen,
+.challenge-ready-screen,
+.challenge-results-screen,
+.clean-quiz-mode .noun-verb-stage:not(.hidden),
+.article-quiz-mode .study-stage:not(.hidden) {
+  width: min(720px, 100%);
+  margin-inline: auto;
+  padding-top: clamp(10px, 2vw, 18px);
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.learning-flow-card,
+.clean-quiz-mode .noun-verb-card.learning-flow-card,
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-card {
+  width: min(680px, 100%);
+  max-width: 680px;
+  margin-inline: auto;
+  border: 1px solid var(--ux-line-soft);
+  border-radius: 20px;
+  background: rgba(255, 250, 241, 0.9);
+  box-shadow: var(--ux-shadow-soft);
+  padding: clamp(18px, 3vw, 26px);
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  text-align: center;
+  min-height: 0;
+}
+
+.learning-flow-card > .small-link-button,
+.learning-flow-card > .challenge-back-button,
+.clean-quiz-mode .noun-verb-card.learning-flow-card > .challenge-back-button,
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-card > .challenge-back-button {
+  position: static;
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 12px;
+  margin: 0;
+  z-index: 2;
+}
+
+.learning-flow-label,
+.learning-flow-card .eyebrow.learning-flow-label,
+.clean-quiz-mode .noun-verb-card .eyebrow.learning-flow-label,
+.article-quiz-mode .flashcard.article-quiz-card .eyebrow.learning-flow-label {
+  margin: 0;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.learning-flow-card h2,
+.challenge-ready-card.learning-flow-card h2,
+.challenge-results-card.learning-flow-card h2,
+.flashcard-completion-card.learning-flow-card h2 {
+  margin: 0;
+  color: var(--green);
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.learning-flow-card p {
+  margin: 0;
+}
+
+.learning-flow-cue {
+  justify-self: center;
+  border-radius: 999px;
+  background: rgba(219, 235, 213, 0.62);
+  padding: 6px 12px;
+  color: #5f6f57;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.challenge-ready-card.learning-flow-card #challengeReadyDescription,
+.flashcard-completion-card.learning-flow-card > p:not(.eyebrow):not(.learning-flow-cue) {
+  color: #4d463d;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.challenge-ready-card.learning-flow-card #challengeReadyMeta {
+  justify-self: center;
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.76);
+  border: 1px solid rgba(190, 177, 153, 0.24);
+  padding: 10px 14px;
+  color: #433d34;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.challenge-ready-card.learning-flow-card .study-set-notice {
+  justify-self: stretch;
+  margin: 0;
+}
+
+.flashcard-completion-actions,
+.challenge-ready-card.learning-flow-card .primary-button,
+.challenge-results-card.learning-flow-card .primary-button {
+  margin-top: 4px;
+}
+
+.flashcard-completion-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.flashcard-completion-actions .primary-button,
+.flashcard-completion-actions .ghost-button,
+.challenge-ready-card.learning-flow-card .primary-button,
+.challenge-results-card.learning-flow-card .primary-button {
+  width: min(100%, 360px);
+  justify-self: center;
+  min-height: 48px;
+}
+
+.challenge-results-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.challenge-results-summary div {
+  border-radius: 14px;
+  border: 1px solid rgba(190, 177, 153, 0.24);
+  background: rgba(255, 253, 248, 0.74);
+  padding: 12px;
+}
+
+.learning-flow-question-card .challenge-village-banner,
+.clean-quiz-mode .noun-verb-card.learning-flow-question-card .challenge-village-banner,
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-question-card .challenge-village-banner {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  max-height: none;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.learning-flow-question-card .challenge-village-banner::after,
+.clean-quiz-mode .noun-verb-card.learning-flow-question-card .challenge-village-banner::after,
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-question-card .challenge-village-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 250, 241, 0.72);
+}
+
+.learning-flow-question-card .challenge-village-banner img,
+.clean-quiz-mode .noun-verb-card.learning-flow-question-card .challenge-village-banner img,
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-question-card .challenge-village-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.learning-flow-question-card > :not(.challenge-village-banner),
+.clean-quiz-mode .noun-verb-card.learning-flow-question-card > :not(.challenge-village-banner),
+.article-quiz-mode .flashcard.article-quiz-card.learning-flow-question-card > :not(.challenge-village-banner) {
+  position: relative;
+  z-index: 1;
+}
+
+.learning-flow-meta,
+.clean-quiz-mode .noun-verb-card .learning-flow-meta,
+.article-quiz-mode .flashcard.article-quiz-card .learning-flow-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: #756b5e;
+  font-size: 0.86rem;
+  font-weight: 780;
+}
+
+.learning-flow-question-area,
+.clean-quiz-mode .noun-verb-card .learning-flow-question-area,
+.article-quiz-mode .flashcard.article-quiz-card .learning-flow-question-area {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 0 2px;
+}
+
+.learning-flow-question-area h2,
+.clean-quiz-mode .noun-verb-card .learning-flow-question-area h2,
+.article-quiz-mode .flashcard.article-quiz-card .learning-flow-question-area h2,
+.article-quiz-card #questionText,
+.clean-quiz-mode.vocabulary-review-mode #nounVerbPrompt {
+  margin: 0;
+  color: #252119;
+  font-size: clamp(2.3rem, 8vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.clean-quiz-mode .noun-verb-options,
+.article-quiz-mode .article-quiz-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.clean-quiz-mode .noun-verb-options button,
+.article-quiz-mode .article-quiz-options button {
+  min-height: 58px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: clamp(1rem, 2.6vw, 1.12rem);
+  line-height: 1.2;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.clean-quiz-mode .noun-verb-result,
+.article-quiz-mode .article-quiz-result {
+  margin: 0;
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-result.hidden,
+.article-quiz-mode .article-quiz-result.hidden {
+  display: none;
+}
+
+.clean-quiz-mode.vocabulary-review-mode .noun-verb-next,
+.article-quiz-mode .article-quiz-next {
+  width: min(100%, 360px);
+  justify-self: center;
+  min-height: 48px;
+  margin: 0;
+}
+
+.clean-quiz-mode .noun-verb-stage:not(.hidden),
+.article-quiz-mode .study-stage:not(.hidden) {
+  min-height: auto;
+}
+
+@media (max-width: 760px) {
+  .learning-flashcards-screen,
+  .challenge-ready-screen,
+  .challenge-results-screen,
+  .clean-quiz-mode .noun-verb-stage:not(.hidden),
+  .article-quiz-mode .study-stage:not(.hidden) {
+    width: 100%;
+    padding-top: 8px;
+  }
+
+  .learning-flow-card,
+  .clean-quiz-mode .noun-verb-card.learning-flow-card,
+  .article-quiz-mode .flashcard.article-quiz-card.learning-flow-card {
+    width: min(100%, calc(100vw - 24px));
+    border-radius: 16px;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .learning-flow-meta,
+  .clean-quiz-mode .noun-verb-card .learning-flow-meta,
+  .article-quiz-mode .flashcard.article-quiz-card .learning-flow-meta {
+    align-items: flex-start;
+    font-size: 0.82rem;
+  }
+
+  .learning-flow-question-area h2,
+  .clean-quiz-mode .noun-verb-card .learning-flow-question-area h2,
+  .article-quiz-mode .flashcard.article-quiz-card .learning-flow-question-area h2,
+  .article-quiz-card #questionText,
+  .clean-quiz-mode.vocabulary-review-mode #nounVerbPrompt {
+    font-size: clamp(2rem, 12vw, 3.25rem);
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-options,
+  .article-quiz-mode .article-quiz-options {
+    gap: 8px;
+  }
+
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-options button,
+  .article-quiz-mode .article-quiz-options button {
+    min-height: 54px;
+    padding: 10px 12px;
+  }
+
+  .challenge-results-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .clean-quiz-mode.vocabulary-review-mode .noun-verb-options,
+  .article-quiz-mode .article-quiz-options {
+    grid-template-columns: 1fr;
   }
 }
