@@ -2463,6 +2463,10 @@ function normalizeProfileData(data, profile) {
     vocabularyReviewStats: normalizeVocabularyReviewStats(data?.vocabularyReviewStats),
     challengeSessionsCompleted: normalizeCounter(data?.challengeSessionsCompleted),
     flashcardSessions: normalizeFlashcardSessions(data?.flashcardSessions),
+    flashcardsReviewed: Math.max(
+      normalizeCounter(data?.flashcardsReviewed),
+      getLegacyFlashcardsReviewedCount(data?.flashcardSessions)
+    ),
     activeStudySet: normalizeActiveStudySet(data?.activeStudySet),
     learningIntroSeen: Boolean(data?.learningIntroSeen ?? profile?.learningIntroSeen),
     forceFirstTimeExperience: Boolean(data?.forceFirstTimeExperience ?? profile?.forceFirstTimeExperience),
@@ -3696,6 +3700,9 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
         normalizeCounter(remote.challengeSessionsCompleted)
       ),
       flashcardSessions: progressSource ? progressSource.flashcardSessions : mergeFlashcardSessions(local.flashcardSessions, remote.flashcardSessions),
+      flashcardsReviewed: progressSource
+        ? normalizeCounter(progressSource.flashcardsReviewed)
+        : Math.max(normalizeCounter(local.flashcardsReviewed), normalizeCounter(remote.flashcardsReviewed)),
       activeStudySet: progressSource ? progressSource.activeStudySet : mergeActiveStudySets(local.activeStudySet, remote.activeStudySet),
       learningPreferences: mergeLearningPreferences(local.learningPreferences, remote.learningPreferences),
       positions: progressSource ? progressSource.positions : {
@@ -8065,6 +8072,7 @@ async function resetCurrentDeveloperLearningProgress(options = {}) {
       [`${profilePath}.vocabularyReviewStats`]: {},
       [`${profilePath}.challengeSessionsCompleted`]: 0,
       [`${profilePath}.flashcardSessions`]: {},
+      [`${profilePath}.flashcardsReviewed`]: 0,
       [`${profilePath}.activeStudySet`]: {},
       [`${profilePath}.learningPreferences`]: resetProfile.learningPreferences,
       [`${profilePath}.positions`]: {},
@@ -8166,6 +8174,7 @@ function createLearningResetProfile(profile, options = {}) {
     vocabularyReviewStats: {},
     challengeSessionsCompleted: 0,
     flashcardSessions: {},
+    flashcardsReviewed: 0,
     activeStudySet: {},
     learningPreferences: normalizeLearningPreferences({
       studyGoal: LEARN_GERMAN_DEFAULT_GOAL,
@@ -8658,6 +8667,7 @@ function resetProfileProgressData(profile) {
       vocabularyReviewStats: {},
       challengeSessionsCompleted: 0,
       flashcardSessions: {},
+      flashcardsReviewed: 0,
       activeStudySet: {},
       learningIntroSeen: false,
       positions: {},
@@ -9667,11 +9677,24 @@ function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) 
 }
 
 function getFlashcardsReviewedCount(profile = getCurrentProfile()) {
-  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions);
+  return Math.max(
+    normalizeCounter(profile?.flashcardsReviewed),
+    getLegacyFlashcardsReviewedCount(profile?.flashcardSessions)
+  );
+}
+
+function getLegacyFlashcardsReviewedCount(flashcardSessions = {}) {
+  const sessions = normalizeFlashcardSessions(flashcardSessions);
   return Object.values(sessions).reduce((total, session) => {
     const ratings = normalizeFlashcardRatings(session.ratings);
     return total + Object.keys(ratings).length;
   }, 0);
+}
+
+function recordFlashcardReview(profile = getCurrentProfile()) {
+  if (!profile) return 0;
+  profile.flashcardsReviewed = getFlashcardsReviewedCount(profile) + 1;
+  return profile.flashcardsReviewed;
 }
 
 function shouldShowRewardDebugPage() {
@@ -9956,6 +9979,7 @@ function getRewardDebugProgressSnapshot() {
 
 function addRewardDebugFlashcardReviews(amount) {
   const profile = getCurrentProfile();
+  const existingReviewCount = getFlashcardsReviewedCount(profile);
   profile.flashcardSessions = normalizeFlashcardSessions(profile.flashcardSessions);
   const key = "reward-debug-flashcards";
   const session = profile.flashcardSessions[key] || { deckIds: [], index: 0, studiedIds: [], ratings: {}, studyDate: getTodayKey(), completed: false, updatedAt: "" };
@@ -9969,6 +9993,7 @@ function addRewardDebugFlashcardReviews(amount) {
   });
   session.updatedAt = new Date().toISOString();
   profile.flashcardSessions[key] = session;
+  profile.flashcardsReviewed = existingReviewCount + amount;
   recordDailyActivity("vocabulary");
   checkAchievements("flashcards");
 }
@@ -10077,6 +10102,7 @@ function resetRewardDebugProgress() {
   profile.meaningMatchProgress = meaningMatchProgress;
   profile.prepositionProgress = prepositionProgress;
   profile.flashcardSessions = {};
+  profile.flashcardsReviewed = 0;
   profile.challengeSessionsCompleted = 0;
   profile.vocabularyReviewStats = normalizeVocabularyReviewStats({});
   profile.streak = normalizeStreak({});
@@ -11740,6 +11766,7 @@ function updateFlashcardStudyRating(card, rating) {
     },
     updatedAt: new Date().toISOString()
   };
+  recordFlashcardReview(profile);
 }
 
 function rateLearningFlashcard(rating) {
@@ -13561,6 +13588,7 @@ function rateCard(rating) {
     meaningStatus: normalizeMeaningStatus(rating),
     updatedAt: new Date().toISOString()
   };
+  recordFlashcardReview(getCurrentProfile());
   recordStudyHistory("flashcard", card, normalizeMeaningStatus(rating));
   recordDailyActivity("vocabulary");
   saveProgress();
