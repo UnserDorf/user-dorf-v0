@@ -901,6 +901,7 @@ let lastBrowserHistoryKey = "";
 let pendingBrowserRoute = null;
 let browserHistoryIndex = 0;
 let browserHistoryInitialized = false;
+let developerPreviewBaseline = null;
 
 const USER_PROGRESS_WRITE_TRACE_PREFIX = "[Unser Dorf user progress write trace]";
 const SIGN_IN_PROGRESS_VERIFICATION_PREFIX = "[Unser Dorf sign-in progress verification]";
@@ -995,7 +996,11 @@ function getBrowserHistoryKey(route = getHistoryRouteForCurrentView()) {
 
 function syncBrowserHistory(options = {}) {
   if (browserHistoryApplying || !window.history?.pushState) return;
-  const route = { ...(options.route || getHistoryRouteForCurrentView()) };
+  if (developerPreviewMode && !options.allowPreviewHistory) return;
+  const route = {
+    key: HISTORY_STATE_KEY,
+    ...(options.route || getHistoryRouteForCurrentView())
+  };
   if (!isHistoryManagedView(route.view)) return;
   const key = getBrowserHistoryKey(route);
   if (!options.replace && key === lastBrowserHistoryKey) return;
@@ -1006,6 +1011,19 @@ function syncBrowserHistory(options = {}) {
   browserHistoryInitialized = true;
   browserHistoryIndex = route.index;
   lastBrowserHistoryKey = key;
+}
+
+function replaceBrowserHistoryWithDashboard() {
+  if (!window.history?.replaceState) return;
+  const route = {
+    key: HISTORY_STATE_KEY,
+    view: "dashboard",
+    index: Number.isFinite(Number(browserHistoryIndex)) ? Number(browserHistoryIndex) : 0
+  };
+  window.history.replaceState(route, "", `${window.location.pathname}${window.location.search}${getBrowserHistoryHash(route)}`);
+  browserHistoryInitialized = true;
+  browserHistoryIndex = route.index;
+  lastBrowserHistoryKey = getBrowserHistoryKey(route);
 }
 
 function navigateAppBack(fallback = showDashboard) {
@@ -1083,7 +1101,7 @@ function getBrowserRouteState(eventState = null) {
 function canApplyAuthenticatedRoute(route) {
   if (!route) return false;
   if (route.view === "demo" && route.mode === "registered") {
-    return Boolean(currentProfileId && getCurrentProfile());
+    return Boolean(currentProfileId && shouldShowRegisteredUserIntroduction(getCurrentProfile()));
   }
   if (["landing", "demo", "auth", "reset-password"].includes(route.view)) return true;
   if (["display-name", "village-selection", "join-village", "village-password"].includes(route.view)) {
@@ -1094,6 +1112,12 @@ function canApplyAuthenticatedRoute(route) {
 
 function applyBrowserRoute(route) {
   if (!route || !isHistoryManagedView(route.view)) return false;
+  if (shouldIgnorePendingRouteAfterLogin(route)) {
+    pendingBrowserRoute = null;
+    replaceBrowserHistoryWithDashboard();
+    showDashboard({ replaceHistory: true });
+    return true;
+  }
   if (!canApplyAuthenticatedRoute(route)) {
     pendingBrowserRoute = route;
     return false;
@@ -1211,10 +1235,23 @@ function applyBrowserRoute(route) {
 }
 
 function applyPendingBrowserRouteIfReady() {
+  if (shouldIgnorePendingRouteAfterLogin(pendingBrowserRoute)) {
+    pendingBrowserRoute = null;
+    replaceBrowserHistoryWithDashboard();
+    return false;
+  }
   if (!pendingBrowserRoute || !canApplyAuthenticatedRoute(pendingBrowserRoute)) return false;
   const route = pendingBrowserRoute;
   pendingBrowserRoute = null;
   return applyBrowserRoute(route);
+}
+
+function shouldIgnorePendingRouteAfterLogin(route) {
+  if (!route || !firebaseAuthUser || !currentProfileId || developerPreviewMode) return false;
+  if (route.view === "landing") return true;
+  if (route.view === "demo" && route.mode !== "registered") return true;
+  if (route.view === "demo" && route.mode === "registered" && !shouldShowRegisteredUserIntroduction(getCurrentProfile())) return true;
+  return false;
 }
 
 function initializeBrowserHistory() {
@@ -1237,6 +1274,10 @@ function initializeBrowserHistory() {
     pendingBrowserRoute = initialRoute;
   }
   window.addEventListener("popstate", (event) => {
+    if (developerPreviewMode) {
+      endDeveloperPreviewMode();
+      return;
+    }
     const route = getBrowserRouteState(event.state);
     if (!route) return;
     browserHistoryIndex = Number(route.index) || 0;
@@ -2859,6 +2900,7 @@ function readStorageObject(key) {
 }
 
 function saveProfileStore(options = {}) {
+  if (developerPreviewMode) return;
   const group = getCurrentGroup();
   if (group) {
     profileStore.currentGroup = group.id;
@@ -2875,7 +2917,7 @@ function saveProfileStore(options = {}) {
 }
 
 function scheduleCloudSave(options = {}) {
-  if (!syncEnabled || applyingRemoteStore) return;
+  if (!syncEnabled || applyingRemoteStore || developerPreviewMode) return;
   window.clearTimeout(cloudSaveTimer);
   if (options.immediate) {
     saveProfileStoreToCloudNow();
@@ -4443,6 +4485,7 @@ async function handleFirebaseSignedIn(user) {
 }
 
 async function signOutOfFirebase() {
+  clearDeveloperPreviewState();
   if (!firebaseAuthUser) {
     lockSharedPasswordScreen();
     return;
@@ -4920,7 +4963,13 @@ function hideLegacyStudyUi() {
 
 function showDashboard(options = {}) {
   discardIncompleteChallengeSession();
-  if (!options.preservePreview) developerPreviewMode = "";
+  if (!options.preservePreview && developerPreviewMode) {
+    const baseline = developerPreviewBaseline;
+    clearDeveloperPreviewState();
+    verifyDeveloperPreviewSafetySnapshot(baseline);
+  } else if (!options.preservePreview) {
+    developerPreviewMode = "";
+  }
   reviewReturnTarget = "";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
@@ -4951,7 +5000,7 @@ function showDashboard(options = {}) {
   els.learningFlashcardsScreen.classList.add("hidden");
   hideLegacyStudyUi();
   scrollPageToTop(els.dashboardScreen);
-  syncBrowserHistory();
+  syncBrowserHistory({ replace: Boolean(options.replaceHistory) });
 }
 
 function showLearnGermanPage() {
@@ -6331,7 +6380,7 @@ function createDeveloperTestingSection(data) {
   const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
   const memberCount = familyZ?.memberIds?.length || 0;
   const testingGrid = document.createElement("div");
-  testingGrid.className = "developer-overview-grid";
+  testingGrid.className = "developer-overview-grid developer-testing-grid";
 
   const personalCard = document.createElement("article");
   personalCard.className = "developer-summary-card developer-testing-card";
@@ -6434,9 +6483,8 @@ function startFirstVisitPreview() {
     setDeveloperToolsStatus("Sign in as the developer account before previewing onboarding.", true);
     return;
   }
+  beginDeveloperPreviewMode("first-visit");
   setDeveloperToolsStatus("Preview mode: no account, village, or learning data will be changed.");
-  developerPreviewMode = "first-visit";
-  updateDeveloperPreviewControls();
   showLandingScreen({ preview: true });
 }
 
@@ -6445,22 +6493,38 @@ function startNewUserPreview() {
     setDeveloperToolsStatus("Sign in as the developer account before previewing onboarding.", true);
     return;
   }
+  beginDeveloperPreviewMode("new-user");
   setDeveloperToolsStatus("Preview mode: no account, village, or learning data will be changed.");
-  developerPreviewMode = "new-user";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
-  updateDeveloperPreviewControls();
   showDemoScreen({ registered: true, preview: true });
 }
 
-function endDeveloperPreviewMode() {
+function beginDeveloperPreviewMode(mode) {
+  developerPreviewMode = mode;
+  developerPreviewBaseline = captureDeveloperPreviewSafetySnapshot();
+  pendingBrowserRoute = null;
+  replaceBrowserHistoryWithDashboard();
+  updateDeveloperPreviewControls();
+}
+
+function clearDeveloperPreviewState() {
   developerPreviewMode = "";
   registeredDemoActive = false;
   guidedLearningActive = false;
   learnGermanReturnActive = false;
+  demoFinalScreenActive = false;
+  pendingBrowserRoute = null;
   hideLearnIntroPanel();
   removeDeveloperPreviewControls();
-  showDashboard();
+  developerPreviewBaseline = null;
+}
+
+function endDeveloperPreviewMode() {
+  const baseline = developerPreviewBaseline;
+  clearDeveloperPreviewState();
+  verifyDeveloperPreviewSafetySnapshot(baseline);
+  showDashboard({ replaceHistory: true });
 }
 
 function updateDeveloperPreviewControls() {
@@ -6470,13 +6534,52 @@ function updateDeveloperPreviewControls() {
   button.type = "button";
   button.className = "developer-preview-exit-button";
   button.dataset.developerPreviewExit = "true";
-  button.textContent = "👤 Continue as Current User";
+  button.textContent = "Exit Preview";
   button.addEventListener("click", endDeveloperPreviewMode);
   document.body.append(button);
 }
 
 function removeDeveloperPreviewControls() {
   document.querySelectorAll("[data-developer-preview-exit]").forEach((node) => node.remove());
+}
+
+function captureDeveloperPreviewSafetySnapshot() {
+  const profile = getCurrentProfile();
+  const group = getCurrentGroup();
+  return {
+    uid: firebaseAuthUser?.uid || "",
+    email: firebaseAuthUser?.email || "",
+    displayName: getVillageDisplayName(profile),
+    displayNameConfirmed: Boolean(profile?.displayNameConfirmed),
+    villageId: profile?.villageId || "",
+    currentGroup: profileStore?.currentGroup || "",
+    memberIds: normalizeGroupMemberIds(group?.memberIds || []),
+    role: sanitizeUserRole(profile?.role),
+    protectedAccount: Boolean(profile?.protectedAccount),
+    registeredIntroCompleted: profile?.registeredIntroCompleted === false ? false : true,
+    learningIntroSeen: Boolean(profile?.learningIntroSeen),
+    forceFirstTimeExperience: Boolean(profile?.forceFirstTimeExperience),
+    coins: normalizeCoinCount(profile?.coins),
+    activeStudySetCount: normalizeActiveStudySet(profile?.activeStudySet).wordIds.length,
+    flashcardProgressCount: Object.keys(normalizeMeaningProgress(profile?.progress || {})).length,
+    vocabularyProgressCount: Object.keys(normalizeVocabularyProgress(profile?.vocabularyProgress || {})).length,
+    articleProgressCount: Object.keys(normalizeArticleProgress(profile?.articleProgress || {})).length
+  };
+}
+
+function verifyDeveloperPreviewSafetySnapshot(before) {
+  if (!before) return;
+  const after = captureDeveloperPreviewSafetySnapshot();
+  const changedFields = Object.keys(before).filter((key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
+  if (!changedFields.length) {
+    console.info("[Unser Dorf developer preview] Preview ended without changing real profile state.", { before, after });
+    return;
+  }
+  console.warn("[Unser Dorf developer preview] Real profile state changed during preview.", {
+    changedFields,
+    before,
+    after
+  });
 }
 
 function createDeveloperCleanupPreview(preview) {
@@ -11683,7 +11786,7 @@ function showFlashcardCompletion() {
     || new Set(session?.deckIds || []).size;
   els.flashcardCompletionCount.textContent = normalizeCounter(completionCount);
   if (els.flashcardContinueStudying) {
-    els.flashcardContinueStudying.textContent = "▶ Continue to Vocabulary Review";
+    els.flashcardContinueStudying.textContent = developerPreviewMode ? "Exit Preview" : "▶ Continue to Vocabulary Review";
   }
   currentView = "flashcard-complete";
   els.learningFlashcard.classList.add("hidden");
@@ -12857,6 +12960,10 @@ function bindEvents() {
   els.learningFlashcardPrevious.addEventListener("click", () => moveLearningFlashcard(-1));
   els.learningFlashcardNext.addEventListener("click", () => moveLearningFlashcard(1));
   els.flashcardContinueStudying.addEventListener("click", () => {
+    if (developerPreviewMode) {
+      endDeveloperPreviewMode();
+      return;
+    }
     guidedLearningActive = true;
     learnGermanReturnActive = true;
     setReviewReturnTarget("continue-learning");

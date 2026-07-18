@@ -11638,6 +11638,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
   gap: 10px;
 }
 
+.developer-testing-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
 .developer-summary-card {
   display: grid;
   gap: 5px;
