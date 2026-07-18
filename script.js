@@ -822,7 +822,7 @@ let reviewReturnTarget = "";
 let learningGoalBackTarget = "learn-german";
 let guidedLearningActive = false;
 let learnGermanReturnActive = false;
-let developerPreviewNewUserExperience = false;
+let developerPreviewMode = "";
 let pendingFlashcardResumeKey = "";
 let activeStudySetCountRepairPending = false;
 let recentNounVerbQuestionIds = [];
@@ -4211,15 +4211,17 @@ function hideProfileOnboardingPanels() {
 function showFirebaseAuthScreen(mode = "signup", message = "") {
   currentView = "auth";
   firebaseAuthMode = mode === "signin" ? "signin" : "signup";
-  currentProfileId = "";
-  pendingProfileId = "";
-  progress = {};
-  vocabularyProgress = {};
-  articleProgress = {};
-  nounVerbProgress = {};
-  meaningMatchProgress = {};
-  prepositionProgress = {};
-  recentMeaningMatchItems = [];
+  if (!developerPreviewMode) {
+    currentProfileId = "";
+    pendingProfileId = "";
+    progress = {};
+    vocabularyProgress = {};
+    articleProgress = {};
+    nounVerbProgress = {};
+    meaningMatchProgress = {};
+    prepositionProgress = {};
+    recentMeaningMatchItems = [];
+  }
   els.appShell.classList.add("locked");
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
@@ -4394,6 +4396,10 @@ function updateFirebaseAuthStatus(message = "", isError = false) {
 }
 
 async function handleFirebaseEmailAuth(mode) {
+  if (developerPreviewMode) {
+    updateFirebaseAuthStatus("Preview mode is UI-only. No Firebase account will be created or changed.", true);
+    return;
+  }
   const email = els.firebaseAuthEmail?.value.trim();
   const password = els.firebaseAuthPassword?.value || "";
   updateRememberedEmailPreference();
@@ -4912,9 +4918,9 @@ function hideLegacyStudyUi() {
   els.articleQuizNext?.classList.add("hidden");
 }
 
-function showDashboard() {
+function showDashboard(options = {}) {
   discardIncompleteChallengeSession();
-  developerPreviewNewUserExperience = false;
+  if (!options.preservePreview) developerPreviewMode = "";
   reviewReturnTarget = "";
   guidedLearningActive = false;
   learnGermanReturnActive = false;
@@ -4984,11 +4990,13 @@ function showLearnGermanPage() {
   syncBrowserHistory();
 }
 
-function showLandingScreen() {
+function showLandingScreen(options = {}) {
   discardIncompleteChallengeSession();
   currentView = "landing";
-  currentProfileId = "";
-  pendingProfileId = "";
+  if (!options.preview && !developerPreviewMode) {
+    currentProfileId = "";
+    pendingProfileId = "";
+  }
   hideAuthenticatedAppViews();
   els.profileScreen.classList.add("hidden");
   els.appShell.classList.remove("locked");
@@ -5004,7 +5012,7 @@ function showLandingScreen() {
   closeSettingsMenu();
   hideRewardDetail();
   hideRewardDebugPage();
-  resetLoggedOutTransientUi();
+  if (!options.preview && !developerPreviewMode) resetLoggedOutTransientUi();
   scrollPageToTop(els.landingScreen);
   syncBrowserHistory({ replace: true });
 }
@@ -5038,10 +5046,11 @@ function resetLoggedOutTransientUi() {
 function showDemoScreen(options = {}) {
   discardIncompleteChallengeSession();
   registeredDemoActive = Boolean(options.registered);
+  if (options.preview && !developerPreviewMode) developerPreviewMode = registeredDemoActive ? "new-user" : "first-visit";
   currentView = "demo";
   demoPageIndex = 0;
   demoFinalScreenActive = false;
-  if (!registeredDemoActive) {
+  if (!registeredDemoActive && !developerPreviewMode) {
     currentProfileId = "";
     pendingProfileId = "";
   }
@@ -5142,6 +5151,10 @@ function moveDemoPage(direction) {
 }
 
 function completeDemoScreen() {
+  if (developerPreviewMode && !registeredDemoActive) {
+    endDeveloperPreviewMode();
+    return;
+  }
   if (registeredDemoActive) {
     completeRegisteredDemo();
     return;
@@ -5150,6 +5163,12 @@ function completeDemoScreen() {
 }
 
 function completeRegisteredDemo() {
+  if (developerPreviewMode) {
+    registeredDemoActive = false;
+    showDashboard({ preservePreview: true });
+    updateDeveloperPreviewControls();
+    return;
+  }
   const profile = getCurrentProfile();
   if (profile) {
     profile.registeredIntroCompleted = true;
@@ -5475,6 +5494,10 @@ function renderDashboard() {
 
 function renderDashboardLearningAction(profile) {
   if (!els.dashboardContinueButton) return;
+  if (developerPreviewMode === "new-user") {
+    els.dashboardContinueButton.textContent = "▶ Start Learning";
+    return;
+  }
   const hasStartedLearning = Boolean(
     profile?.learningIntroSeen
     || hasCompletedLearningActivity(profile)
@@ -5699,7 +5722,7 @@ function setDeveloperToolsStatus(message = "", isError = false) {
 }
 
 function showDeveloperTools() {
-  developerPreviewNewUserExperience = false;
+  developerPreviewMode = "";
   currentView = "developer-tools";
   closeSettingsMenu();
   hideAuthenticatedAppViews();
@@ -6304,12 +6327,30 @@ function createDeveloperTestingSection(data) {
     createTextElement("span", "", "Current account"),
     createTextElement("strong", "", currentUser?.displayName || getIdentityDisplayName() || "Mineko"),
     createDeveloperTestingActionCard({
-      title: "👀 Preview New User Experience",
-      description: "Temporarily view the first registered-user introduction without changing your account or learning data.",
-      keeps: ["Firebase UID", "Display name", "Family membership", "Developer role", "All permissions"],
+      title: "👋 Preview First Visit",
+      description: "Launch the app exactly as someone opening Unser Dorf for the very first time.",
+      keeps: ["Current sign-in", "Firebase UID", "Firestore data", "Local user data"],
       resets: ["Nothing. This is preview only."],
-      actionLabel: "Preview New User Experience",
-      handler: startNewUserExperiencePreview,
+      actionLabel: "Preview First Visit",
+      handler: startFirstVisitPreview,
+      destructive: false
+    }),
+    createDeveloperTestingActionCard({
+      title: "🎓 Preview New User",
+      description: "Preview the flow after a learner has created an account, chosen a display name, and joined a village.",
+      keeps: ["Current sign-in", "Display name", "Village membership", "Developer role", "All permissions"],
+      resets: ["Nothing. This is preview only."],
+      actionLabel: "Preview New User",
+      handler: startNewUserPreview,
+      destructive: false
+    }),
+    createDeveloperTestingActionCard({
+      title: "👤 Continue as Current User",
+      description: "Return to the authenticated application with your real account and progress.",
+      keeps: ["Current user session"],
+      resets: ["Nothing"],
+      actionLabel: "Continue as Current User",
+      handler: endDeveloperPreviewMode,
       destructive: false
     }),
     createDeveloperTestingActionCard({
@@ -6376,25 +6417,54 @@ function createDeveloperTestingList(title, items = []) {
   return wrapper;
 }
 
-function startNewUserExperiencePreview() {
+function startFirstVisitPreview() {
   if (!firebaseAuthUser || !getCurrentProfile()) {
     setDeveloperToolsStatus("Sign in as the developer account before previewing onboarding.", true);
     return;
   }
   setDeveloperToolsStatus("Preview mode: no account, village, or learning data will be changed.");
-  developerPreviewNewUserExperience = true;
-  guidedLearningActive = true;
-  learnGermanReturnActive = true;
-  showLearnGermanPage();
-  showLearnIntroPanel({ firstTime: true, preview: true });
+  developerPreviewMode = "first-visit";
+  updateDeveloperPreviewControls();
+  showLandingScreen({ preview: true });
 }
 
-function endNewUserExperiencePreview() {
-  developerPreviewNewUserExperience = false;
+function startNewUserPreview() {
+  if (!firebaseAuthUser || !getCurrentProfile()) {
+    setDeveloperToolsStatus("Sign in as the developer account before previewing onboarding.", true);
+    return;
+  }
+  setDeveloperToolsStatus("Preview mode: no account, village, or learning data will be changed.");
+  developerPreviewMode = "new-user";
+  guidedLearningActive = false;
+  learnGermanReturnActive = false;
+  updateDeveloperPreviewControls();
+  showDemoScreen({ registered: true, preview: true });
+}
+
+function endDeveloperPreviewMode() {
+  developerPreviewMode = "";
+  registeredDemoActive = false;
   guidedLearningActive = false;
   learnGermanReturnActive = false;
   hideLearnIntroPanel();
+  removeDeveloperPreviewControls();
   showDashboard();
+}
+
+function updateDeveloperPreviewControls() {
+  removeDeveloperPreviewControls();
+  if (!developerPreviewMode) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "developer-preview-exit-button";
+  button.dataset.developerPreviewExit = "true";
+  button.textContent = "👤 Continue as Current User";
+  button.addEventListener("click", endDeveloperPreviewMode);
+  document.body.append(button);
+}
+
+function removeDeveloperPreviewControls() {
+  document.querySelectorAll("[data-developer-preview-exit]").forEach((node) => node.remove());
 }
 
 function createDeveloperCleanupPreview(preview) {
@@ -10076,6 +10146,13 @@ function handleDashboardAction(action) {
     return;
   }
   if (action === "continue-learning") {
+    if (developerPreviewMode === "new-user") {
+      guidedLearningActive = true;
+      learnGermanReturnActive = true;
+      showLearnGermanPage();
+      showLearnIntroPanel({ preview: true });
+      return;
+    }
     showLearnGermanPage();
     if (shouldShowLearningIntro()) {
       guidedLearningActive = true;
@@ -10165,7 +10242,7 @@ function setLearnIntroContent({ firstTime = false } = {}) {
 
 function showLearnIntroPanel(options = {}) {
   const firstTime = Boolean(options.firstTime);
-  developerPreviewNewUserExperience = Boolean(options.preview);
+  if (options.preview && !developerPreviewMode) developerPreviewMode = "new-user";
   currentView = "learn-intro";
   setLearnIntroContent({ firstTime });
   els.learnGermanScreen?.classList.add("intro-focused-mode");
@@ -10192,15 +10269,15 @@ function hideLearnIntroPanel() {
 
 function updateLearnIntroPreviewControls() {
   removeLearnIntroPreviewControls();
-  if (!developerPreviewNewUserExperience) return;
+  if (!developerPreviewMode) return;
   const card = els.learnIntroPanel?.querySelector(".learn-intro-card");
   if (!card) return;
   const button = document.createElement("button");
   button.type = "button";
   button.className = "small-link-button learn-intro-preview-exit";
   button.dataset.previewExit = "true";
-  button.textContent = "Exit Preview";
-  button.addEventListener("click", endNewUserExperiencePreview);
+  button.textContent = "👤 Continue as Current User";
+  button.addEventListener("click", endDeveloperPreviewMode);
   card.append(button);
 }
 
@@ -10251,11 +10328,7 @@ function markLearningIntroSeen() {
 }
 
 function chooseLevelFromLearningIntro() {
-  if (developerPreviewNewUserExperience) {
-    endNewUserExperiencePreview();
-    return;
-  }
-  markLearningIntroSeen();
+  if (!developerPreviewMode) markLearningIntroSeen();
   els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   learnGermanReturnActive = true;
   guidedLearningActive = true;
@@ -10277,6 +10350,7 @@ function getStoredLearnGermanCategory() {
 }
 
 function rememberLearnGermanChoices(level = selectedLearningLevel, category = flashcardStudyCategory) {
+  if (developerPreviewMode) return;
   if (LEARNING_LEVELS.includes(level)) localStorage.setItem(LEARN_GERMAN_LEVEL_STORAGE_KEY, level);
   if (["nouns", "verbs", "other"].includes(category)) localStorage.setItem(LEARN_GERMAN_CATEGORY_STORAGE_KEY, category);
   updateLearningPreferences({ level, category });
@@ -10291,6 +10365,7 @@ function getLearnGermanGoal() {
 }
 
 function updateLearningPreferences(updates = {}) {
+  if (developerPreviewMode) return;
   const profile = getCurrentProfile();
   if (!profile) return;
   profile.learningPreferences = normalizeLearningPreferences({
@@ -10309,8 +10384,10 @@ function setLearnGermanGoal(value) {
     LEARN_GERMAN_MIN_GOAL,
     LEARN_GERMAN_MAX_GOAL
   );
-  localStorage.setItem(LEARN_GERMAN_GOAL_STORAGE_KEY, String(nextGoal));
-  updateLearningPreferences({ studyGoal: nextGoal });
+  if (!developerPreviewMode) {
+    localStorage.setItem(LEARN_GERMAN_GOAL_STORAGE_KEY, String(nextGoal));
+    updateLearningPreferences({ studyGoal: nextGoal });
+  }
   renderLearnGermanPage();
   if (currentView === "learning-goal") renderLearningGoalScreen();
 }
@@ -10873,6 +10950,7 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
 }
 
 function prepareNewFlashcardStudySession(requestedGoal = getLearnGermanGoal()) {
+  if (developerPreviewMode) return;
   const profile = getCurrentProfile();
   if (!profile) return;
   const now = new Date().toISOString();
@@ -11219,14 +11297,44 @@ function getFlashcardCardsForDeck(level = flashcardStudyLevel, category = flashc
 }
 
 function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearnGermanGoal()) {
-  const profile = getFlashcardSessionProfile();
   const availableCards = getFlashcardCardsForDeck();
   const availableById = new Map(availableCards.map((card) => [card.id, card]));
   const key = getFlashcardSessionKey();
-  const saved = profile?.flashcardSessions?.[key];
-  const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
   const selectedGoal = normalizeFlashcardSessionGoal(requestedGoal);
   const goalSize = Math.min(selectedGoal, availableCards.length);
+
+  if (developerPreviewMode) {
+    flashcardStudyCards = buildLearningFlashcardOrder(availableCards, selectedGoal);
+    flashcardStudyIndex = 0;
+    logStudySessionLifecycle("preview", {
+      sessionId: `${key}-preview`,
+      deckIds: flashcardStudyCards.map((card) => card.id),
+      index: 0,
+      studyGoal: selectedGoal,
+      completed: false,
+      updatedAt: new Date().toISOString()
+    }, {
+      goalSize,
+      level: flashcardStudyLevel,
+      category: flashcardStudyCategory,
+      source: "developer preview only"
+    });
+    logFlashcardSessionDiagnostics({
+      selectedGoal,
+      availableWordCount: availableCards.length,
+      constructedDeckLength: flashcardStudyCards.length,
+      uniqueDeckLength: new Set(flashcardStudyCards.map((card) => card.id)).size,
+      currentIndex: flashcardStudyIndex,
+      storedBatchSize: "",
+      displayedTotal: flashcardStudyCards.length,
+      sessionId: `${key}-preview`
+    });
+    return;
+  }
+
+  const profile = getFlashcardSessionProfile();
+  const saved = profile?.flashcardSessions?.[key];
+  const savedCards = saved?.deckIds?.map((id) => availableById.get(id)).filter(Boolean) || [];
   const savedGoal = normalizeFlashcardSessionGoal(saved?.studyGoal || selectedGoal);
   const canResume = !forceNew && savedCards.length === goalSize && savedGoal === selectedGoal && !saved.completed;
 
@@ -11287,6 +11395,7 @@ function loadOrCreateFlashcardSession(forceNew = false, requestedGoal = getLearn
 }
 
 function saveCurrentFlashcardSession({ studiedCard = null, completed = false } = {}) {
+  if (developerPreviewMode) return;
   const profile = getFlashcardSessionProfile();
   if (!profile) return;
   const key = getFlashcardSessionKey();
