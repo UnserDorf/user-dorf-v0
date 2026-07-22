@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=253">
+    <link rel="stylesheet" href="style.css?v=255">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -665,10 +665,11 @@
             <p>Try another level or category.</p>
           </div>
         </article>
-        <article class="flashcard-completion-card hidden" id="flashcardCompletionCard">
+        <article class="flashcard-completion-card learning-flow-card hidden" id="flashcardCompletionCard">
           <button class="small-link-button" id="flashcardCompletionBack" type="button">← Back</button>
-          <p class="eyebrow">Flashcards</p>
+          <p class="eyebrow learning-flow-label">FLASHCARDS</p>
           <h2>Great work!</h2>
+          <p class="learning-flow-cue">Flashcards → Vocabulary → Articles</p>
           <p>You studied <strong id="flashcardCompletionCount">25</strong> words.</p>
           <div class="flashcard-completion-actions">
             <button class="primary-button" id="flashcardContinueStudying" type="button">Continue</button>
@@ -763,10 +764,11 @@
       </section>
 
       <section class="challenge-ready-screen hidden" id="challengeReadyScreen" aria-label="Challenge ready">
-        <article class="challenge-ready-card">
+        <article class="challenge-ready-card learning-flow-card">
           <button class="small-link-button" id="challengeReadyBack" type="button">← Back</button>
-          <p class="eyebrow" id="challengeReadyLevel">A1 Challenge</p>
+          <p class="eyebrow learning-flow-label" id="challengeReadyLevel">A1 Challenge</p>
           <h2 id="challengeReadyTitle">Vocabulary</h2>
+          <p class="learning-flow-cue">Flashcards → Vocabulary → Articles</p>
           <p id="challengeReadyDescription">Review German vocabulary.</p>
           <p class="study-set-notice hidden" id="challengeReadyStudySetNotice"></p>
           <strong id="challengeReadyMeta">10 Questions</strong>
@@ -776,10 +778,11 @@
       </section>
 
       <section class="challenge-results-screen hidden" id="challengeResultsScreen" aria-live="polite">
-        <article class="challenge-results-card">
+        <article class="challenge-results-card learning-flow-card">
           <button class="small-link-button" id="challengeResultsBack" type="button">← Back</button>
-          <p class="eyebrow" id="challengeResultsType">A1 Vocabulary</p>
+          <p class="eyebrow learning-flow-label" id="challengeResultsType">A1 Vocabulary</p>
           <h2>🎉 Challenge Complete!</h2>
+          <p class="learning-flow-cue">Flashcards → Vocabulary → Articles</p>
           <dl class="challenge-results-summary">
             <div>
               <dt>Correct</dt>
@@ -955,19 +958,19 @@
       </section>
 
       <section class="study-stage hidden" id="studyStage" aria-live="polite">
-        <article class="flashcard" id="flashcard">
+        <article class="flashcard learning-flow-card learning-flow-question-card" id="flashcard">
           <button class="challenge-back-button hidden" id="studyChallengeBack" type="button">← Back</button>
           <div class="challenge-village-banner" aria-hidden="true">
             <img id="studyChallengeBanner" src="assets/town-center-stage-1.png" alt="">
           </div>
-          <div class="card-meta">
+          <div class="card-meta learning-flow-meta">
             <span id="cardCounter">Loading your review...</span>
             <span id="cardMode">German -> English</span>
           </div>
           <p class="study-set-notice hidden" id="articleQuizStudySetNotice"></p>
 
-          <div class="question-area">
-            <p class="eyebrow" id="promptLabel">German</p>
+          <div class="question-area learning-flow-question-area">
+            <p class="eyebrow learning-flow-label" id="promptLabel">German</p>
             <h2 id="questionText">Loading your review...</h2>
             <p class="question-translation hidden" id="questionTranslation"></p>
           </div>
@@ -1013,18 +1016,18 @@
       </section>
 
       <section class="noun-verb-stage hidden" id="nounVerbStage" aria-live="polite">
-        <article class="noun-verb-card">
+        <article class="noun-verb-card learning-flow-card learning-flow-question-card">
           <button class="challenge-back-button hidden" id="nounVerbChallengeBack" type="button">← Back</button>
           <div class="challenge-village-banner" aria-hidden="true">
             <img id="nounVerbChallengeBanner" src="assets/town-center-stage-1.png" alt="">
           </div>
-          <div class="card-meta">
+          <div class="card-meta learning-flow-meta">
             <span id="nounVerbCounter">Loading your review...</span>
             <span id="nounVerbTitle">Noun-Verb Pairs</span>
           </div>
           <p class="study-set-notice hidden" id="vocabularyReviewStudySetNotice"></p>
-          <div class="question-area">
-            <p class="eyebrow" id="nounVerbInstruction">Choose the verb</p>
+          <div class="question-area learning-flow-question-area">
+            <p class="eyebrow learning-flow-label" id="nounVerbInstruction">Choose the verb</p>
             <h2 id="nounVerbPrompt">Loading</h2>
           </div>
 
@@ -1067,6 +1070,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=269"></script>
+    <script type="module" src="script.js?v=271"></script>
   </body>
 </html>
