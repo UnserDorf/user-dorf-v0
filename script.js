@@ -9172,7 +9172,7 @@ function createVillageRecentContributionsSection(members) {
   list.className = "village-contribution-list";
   list.replaceChildren(
     ...(activities.length
-      ? activities.slice(0, 5).map((activity) => createTextElement("p", "", activity.text))
+      ? activities.map((activity) => createTextElement("p", "", activity.text))
       : [createTextElement("p", "village-empty-note", "Recent village activity will appear here as learners study.")]
     )
   );
@@ -9259,36 +9259,107 @@ function getVillageMemberHouseStage(profile) {
   return "Stage 1";
 }
 
-function getVillageRecentContributions(members) {
-  return members.flatMap((profile) => {
-    const name = getVillageDisplayName(profile);
+function getVillageRecentContributions(members, visibleLimit = 5, candidateLimit = 30) {
+  const hydratedActivities = members.flatMap((profile) => {
+    if (!profile || typeof profile !== "object") return [];
+    const memberUid = String(profile.ownerUid || profile.id || "").trim();
+    if (!memberUid) return [];
+    const memberProfileId = String(profile.id || memberUid);
+    const name = getVillageDisplayName(profile) || "Village member";
     const activities = [];
     const coins = getVillageContributionCoins(profile);
     if (coins > 0) {
       activities.push({
+        eventId: `${memberProfileId}:coins:${profile.lastStudyDate || "undated"}`,
+        memberUid,
+        memberProfileId,
+        memberName: name,
         date: profile.lastStudyDate || "",
+        type: "coins",
         text: `${name} earned ${coins} ${coins === 1 ? "coin" : "coins"}`
       });
     }
     const completedChallenges = normalizeCounter(profile.challengeSessionsCompleted);
     if (completedChallenges > 0) {
       activities.push({
+        eventId: `${memberProfileId}:challenges:${profile.lastStudyDate || "undated"}`,
+        memberUid,
+        memberProfileId,
+        memberName: name,
         date: profile.lastStudyDate || "",
+        type: "challenges",
         text: `${name} completed ${completedChallenges} ${completedChallenges === 1 ? "Challenge" : "Challenges"}`
       });
     }
     const recentHistory = Array.isArray(profile.history) ? profile.history.slice(0, 2) : [];
-    recentHistory.forEach((entry) => {
+    recentHistory.forEach((entry, index) => {
       activities.push({
-        date: entry.studiedAt || "",
+        eventId: `${memberProfileId}:history:${entry?.studiedAt || "undated"}:${entry?.cardId || index}:${entry?.type || ""}`,
+        memberUid,
+        memberProfileId,
+        memberName: name,
+        date: entry?.studiedAt || "",
+        type: entry?.type || "study",
         text: getVillageHistoryContributionText(name, entry)
       });
     });
     return activities;
-  })
-    .filter((activity) => activity.text)
-    .sort((first, second) => String(second.date).localeCompare(String(first.date)))
-    .slice(0, 5);
+  });
+
+  const validActivities = hydratedActivities
+    .map((activity, sourceIndex) => ({
+      ...activity,
+      sourceIndex,
+      timestamp: Date.parse(activity.date)
+    }))
+    .filter((activity) => (
+      activity.eventId
+        && activity.memberUid
+        && activity.text
+        && Number.isFinite(activity.timestamp)
+    ))
+    .sort((first, second) => (
+      second.timestamp - first.timestamp
+        || first.sourceIndex - second.sourceIndex
+        || first.eventId.localeCompare(second.eventId)
+    ));
+  const candidatePool = validActivities.slice(0, Math.max(normalizeCounter(candidateLimit), 1));
+  const eventsByMember = new Map();
+  candidatePool.forEach((activity) => {
+    if (!eventsByMember.has(activity.memberUid)) eventsByMember.set(activity.memberUid, []);
+    eventsByMember.get(activity.memberUid).push(activity);
+  });
+
+  const orderedActivities = [];
+  const maxVisible = Math.max(normalizeCounter(visibleLimit), 1);
+  while (orderedActivities.length < maxVisible) {
+    let addedThisRound = false;
+    eventsByMember.forEach((memberEvents) => {
+      if (orderedActivities.length >= maxVisible || !memberEvents.length) return;
+      orderedActivities.push(memberEvents.shift());
+      addedThisRound = true;
+    });
+    if (!addedThisRound) break;
+  }
+
+  if (isCurrentUserDeveloper()) {
+    console.info("[Unser Dorf Recent Contributions diversity ranking]", {
+      totalHydratedContributionCount: hydratedActivities.length,
+      validHydratedContributionCount: validActivities.length,
+      candidatePoolSize: candidatePool.length,
+      memberUidsRepresented: [...eventsByMember.keys()],
+      candidateEventsPerMember: Object.fromEntries(
+        candidatePool.reduce((counts, activity) => {
+          counts.set(activity.memberUid, (counts.get(activity.memberUid) || 0) + 1);
+          return counts;
+        }, new Map())
+      ),
+      finalOrderedEventIds: orderedActivities.map((activity) => activity.eventId),
+      finalOrderedMemberUids: orderedActivities.map((activity) => activity.memberUid)
+    });
+  }
+
+  return orderedActivities;
 }
 
 function getVillageHistoryContributionText(name, entry) {
