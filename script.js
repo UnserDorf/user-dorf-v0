@@ -6040,11 +6040,37 @@ async function loadDeveloperToolsData() {
   const villages = villageSnapshots.map(({ groupInfo, snapshot }) => {
     const data = snapshot.exists() ? snapshot.data() || {} : {};
     const group = createGroupData(groupInfo, data.group || {});
-    const profiles = data.profiles || {};
+    const profiles = {
+      ...(data.memberProfiles || {}),
+      ...(data.profiles || {})
+    };
     const rawMemberIds = normalizeProfileIdList([
       ...(group.memberIds || []),
-      ...Object.keys(profiles)
+      ...(data.memberIds || []),
+      ...Object.keys(data.profiles || {}),
+      ...Object.keys(data.memberProfiles || {})
     ]);
+    const usersFoundFromProfileDocuments = userDocs.flatMap(({ id: uid, data: userData }) => (
+      Object.entries(userData.profiles || {})
+        .map(([profileId, profile]) => ({
+          uid,
+          profileId,
+          displayName: userData.displayName || getVillageDisplayName(profile),
+          villageId: profile?.villageId || userData.villageId || userData.currentGroup || ""
+        }))
+        .filter((user) => user.villageId === groupInfo.id)
+    ));
+    console.info("[Unser Dorf Developer Tools village roster diagnostics]", {
+      currentVillageId: groupInfo.id,
+      currentVillageName: normalizeVillageName(group.villageName) || normalizeVillageName(group.name) || groupInfo.name,
+      path: getFirebaseVillageDocPath(firebase, groupInfo.id),
+      rawSharedVillageDocument: data,
+      groupMemberIds: normalizeProfileIdList(group.memberIds || []),
+      topLevelMemberIds: normalizeProfileIdList(data.memberIds || []),
+      profileKeys: Object.keys(data.profiles || {}),
+      memberProfileKeys: Object.keys(data.memberProfiles || {}),
+      usersFoundFromProfileDocuments
+    });
     const membershipIssues = getVillageMembershipIssues({
       id: groupInfo.id,
       memberIds: rawMemberIds,
