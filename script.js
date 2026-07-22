@@ -3573,6 +3573,7 @@ async function initializeFirebaseSyncApi() {
 	    deleteDoc: firestoreModule.deleteDoc,
     setDoc: firestoreModule.setDoc,
     updateDoc: firestoreModule.updateDoc,
+    runTransaction: firestoreModule.runTransaction,
     serverTimestamp: firestoreModule.serverTimestamp
   };
 }
@@ -6863,6 +6864,248 @@ function isDeveloperUserOrphaned(user) {
   return user.source === "Village profile" || !user.uid;
 }
 
+function getAssignedVillageProfilesFromUserDocs(userDocs, villageId) {
+  const assignedProfiles = {};
+  const assignedUsers = [];
+  userDocs.forEach(({ id: uid, data: userData }) => {
+    Object.entries(userData.profiles || {}).forEach(([profileId, profileValue]) => {
+      if (!profileId || !profileValue || LEGACY_PROFILE_IDS.has(profileId)) return;
+      const resolvedVillageId = String(
+        profileValue.villageId || userData.villageId || userData.currentGroup || ""
+      ).trim();
+      if (resolvedVillageId !== villageId) return;
+      const profile = sanitizeProfileStoreForSync({
+        ...profileValue,
+        id: profileId,
+        ownerUid: profileValue.ownerUid || uid,
+        ownerEmail: profileValue.ownerEmail || userData.email || "",
+        villageId
+      });
+      assignedProfiles[profileId] = profile;
+      assignedUsers.push({
+        uid,
+        profileId,
+        displayName: userData.displayName || getVillageDisplayName(profile),
+        email: userData.email || profile.ownerEmail || ""
+      });
+    });
+  });
+  return { assignedProfiles, assignedUsers };
+}
+
+function buildVillageRosterBackfillPreview(groupInfo, userDocs, villageData = {}) {
+  const group = createGroupData(groupInfo, villageData.group || {});
+  const existingProfiles = {
+    ...(villageData.memberProfiles || {}),
+    ...(villageData.profiles || {})
+  };
+  const existingMemberIds = normalizeGroupMemberIds([
+    ...(group.memberIds || []),
+    ...(villageData.memberIds || []),
+    ...Object.keys(villageData.profiles || {}),
+    ...Object.keys(villageData.memberProfiles || {})
+  ]);
+  const { assignedProfiles, assignedUsers } = getAssignedVillageProfilesFromUserDocs(userDocs, groupInfo.id);
+  const assignedProfileIds = normalizeGroupMemberIds(Object.keys(assignedProfiles));
+  const membersToAdd = assignedProfileIds.filter((profileId) => !existingMemberIds.includes(profileId));
+  const profilesToAddOrUpdate = assignedProfileIds.map((profileId) => ({
+    profileId,
+    action: existingProfiles[profileId] ? "update" : "add",
+    displayName: getVillageDisplayName(assignedProfiles[profileId])
+  }));
+  const noLongerAssignedSharedMembers = existingMemberIds.filter((profileId) => !assignedProfileIds.includes(profileId));
+  return {
+    group,
+    existingProfiles,
+    existingMemberIds,
+    assignedProfiles,
+    assignedUsers,
+    assignedProfileIds,
+    membersToAdd,
+    profilesToAddOrUpdate,
+    noLongerAssignedSharedMembers
+  };
+}
+
+function formatVillageRosterBackfillPreview(groupInfo, preview) {
+  const formatList = (items, formatter = (item) => String(item)) => (
+    items.length ? items.map(formatter).join("\n") : "None"
+  );
+  return [
+    `Rebuild shared roster for ${groupInfo.name}?`,
+    "",
+    "Existing shared member IDs:",
+    formatList(preview.existingMemberIds),
+    "",
+    "Users found from user documents:",
+    formatList(preview.assignedUsers, (user) => `${user.displayName} — UID: ${user.uid} — Profile: ${user.profileId}`),
+    "",
+    "Members to add:",
+    formatList(preview.membersToAdd),
+    "",
+    "Profiles to add or update:",
+    formatList(preview.profilesToAddOrUpdate, (profile) => `${profile.displayName} (${profile.profileId}): ${profile.action}`),
+    "",
+    "No-longer-assigned shared members (reported only; not deleted):",
+    formatList(preview.noLongerAssignedSharedMembers),
+    "",
+    "No Firestore data will be deleted. Continue?"
+  ].join("\n");
+}
+
+async function rebuildDeveloperVillageRoster(village) {
+  if (!(await isCurrentUserDeveloperFromFirestore())) {
+    setDeveloperToolsStatus("Admin access only.", true);
+    return;
+  }
+  const groupInfo = DEFAULT_GROUPS.find((group) => group.id === village.id);
+  if (!groupInfo) {
+    setDeveloperToolsStatus(`Unknown village: ${village.id}`, true);
+    return;
+  }
+
+  const firebase = await getFirebaseSyncApi();
+  const usersPath = getFirebaseUsersCollectionPath(firebase);
+  const villagePath = getFirebaseVillageDocPath(firebase, groupInfo.id);
+  setDeveloperToolsStatus(`Building ${groupInfo.name} roster preview...`);
+
+  const [userSnapshot, villageSnapshot] = await Promise.all([
+    readFirestoreWithDebug(
+      () => (firebase.getDocsFromServer || firebase.getDocs)(getFirebaseUsersCollectionRef(firebase)),
+      { operation: "read users for shared roster preview", path: usersPath, villageId: groupInfo.id }
+    ),
+    readFirestoreWithDebug(
+      () => firebase.getDocFromServer(getFirebaseVillageDocRef(firebase, groupInfo.id)),
+      { operation: "read village for shared roster preview", path: villagePath, villageId: groupInfo.id }
+    )
+  ]);
+  const userDocs = userSnapshot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    data: docSnapshot.data() || {}
+  }));
+  const beforeData = villageSnapshot.exists() ? villageSnapshot.data() || {} : {};
+  const preview = buildVillageRosterBackfillPreview(groupInfo, userDocs, beforeData);
+
+  console.info("[Unser Dorf shared roster rebuild preview]", {
+    villageId: groupInfo.id,
+    villageName: groupInfo.name,
+    path: villagePath,
+    existingSharedMemberIds: preview.existingMemberIds,
+    usersFoundFromUserDocuments: preview.assignedUsers,
+    membersToAdd: preview.membersToAdd,
+    profilesToAddOrUpdate: preview.profilesToAddOrUpdate,
+    noLongerAssignedSharedMembers: preview.noLongerAssignedSharedMembers,
+    rawSharedVillageDocument: beforeData
+  });
+
+  if (!window.confirm(formatVillageRosterBackfillPreview(groupInfo, preview))) {
+    setDeveloperToolsStatus(`${groupInfo.name} roster rebuild cancelled. Nothing was changed.`);
+    return;
+  }
+  if (!(await isCurrentUserDeveloperFromFirestore())) {
+    setDeveloperToolsStatus("Developer access could not be reconfirmed. Nothing was changed.", true);
+    return;
+  }
+
+  const villageRef = getFirebaseVillageDocRef(firebase, groupInfo.id);
+  const savedAt = new Date().toISOString();
+  const transactionResult = await writeFirestoreWithDebug(
+    () => firebase.runTransaction(firebase.db, async (transaction) => {
+      const latestSnapshot = await transaction.get(villageRef);
+      const latestData = latestSnapshot.exists() ? latestSnapshot.data() || {} : {};
+      const latestPreview = buildVillageRosterBackfillPreview(groupInfo, userDocs, latestData);
+      const memberIds = normalizeGroupMemberIds([
+        ...latestPreview.existingMemberIds,
+        ...latestPreview.assignedProfileIds
+      ]);
+      const profiles = {
+        ...(latestData.profiles || {}),
+        ...latestPreview.assignedProfiles
+      };
+      const memberProfiles = {
+        ...(latestData.memberProfiles || {}),
+        ...latestPreview.assignedProfiles
+      };
+      const group = createGroupData(groupInfo, {
+        ...(latestData.group || {}),
+        memberIds
+      });
+      const payload = {
+        group,
+        memberIds,
+        profiles,
+        memberProfiles,
+        rosterVersion: getNextVillageRosterVersion(latestData),
+        rosterUpdatedAt: firebase.serverTimestamp(),
+        rosterUpdatedAtIso: savedAt,
+        updatedAt: firebase.serverTimestamp(),
+        updatedAtIso: savedAt
+      };
+      transaction.set(villageRef, payload, { merge: true });
+      return {
+        before: latestData,
+        payload,
+        memberIds,
+        assignedProfileIds: latestPreview.assignedProfileIds
+      };
+    }),
+    {
+      operation: "transactionally rebuild shared village roster",
+      path: villagePath,
+      villageId: groupInfo.id,
+      assignedProfileIds: preview.assignedProfileIds
+    }
+  );
+
+  const afterSnapshot = await readFirestoreWithDebug(
+    () => firebase.getDocFromServer(villageRef),
+    { operation: "verify rebuilt shared village roster", path: villagePath, villageId: groupInfo.id }
+  );
+  const afterData = afterSnapshot.exists() ? afterSnapshot.data() || {} : {};
+  const afterPreview = buildVillageRosterBackfillPreview(groupInfo, userDocs, afterData);
+  const afterGroupIds = normalizeGroupMemberIds(afterData.group?.memberIds || []);
+  const afterTopLevelIds = normalizeGroupMemberIds(afterData.memberIds || []);
+  const afterProfileIds = normalizeGroupMemberIds(Object.keys(afterData.profiles || {}));
+  const afterMemberProfileIds = normalizeGroupMemberIds(Object.keys(afterData.memberProfiles || {}));
+  const missingAfterWrite = preview.assignedProfileIds.filter((profileId) => (
+    !afterGroupIds.includes(profileId)
+      || !afterTopLevelIds.includes(profileId)
+      || !afterProfileIds.includes(profileId)
+      || !afterMemberProfileIds.includes(profileId)
+  ));
+
+  console.info("[Unser Dorf shared roster rebuild result]", {
+    villageId: groupInfo.id,
+    villageName: groupInfo.name,
+    path: villagePath,
+    beforeSharedVillageDocument: transactionResult.before,
+    writtenPayload: transactionResult.payload,
+    afterSharedVillageDocument: afterData,
+    afterGroupMemberIds: afterGroupIds,
+    afterTopLevelMemberIds: afterTopLevelIds,
+    afterProfileKeys: afterProfileIds,
+    afterMemberProfileKeys: afterMemberProfileIds,
+    usersFoundFromUserDocuments: afterPreview.assignedUsers,
+    missingAfterWrite
+  });
+
+  if (missingAfterWrite.length) {
+    setDeveloperToolsStatus(
+      `Roster write completed, but verification is missing: ${missingAfterWrite.join(", ")}.`,
+      true
+    );
+    return;
+  }
+
+  const remoteStore = await fetchProfileStoreFromCloud();
+  if (remoteStore) applyRemoteProfileStore(remoteStore);
+  await renderDeveloperToolsPage();
+  refreshVillageMembershipUi();
+  setDeveloperToolsStatus(
+    `${groupInfo.name} shared roster rebuilt successfully: ${preview.assignedProfileIds.length} assigned member${preview.assignedProfileIds.length === 1 ? "" : "s"} verified.`
+  );
+}
+
 function createDeveloperVillagesSection(villages) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
@@ -6883,6 +7126,7 @@ function createDeveloperVillagesSection(villages) {
         developerToolsActiveSection = "users";
         if (developerToolsLastData) els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(developerToolsLastData));
       }),
+      createDeveloperActionButton("Rebuild shared roster", () => rebuildDeveloperVillageRoster(village)),
       createDeveloperActionButton("Remove stale memberships", cleanupFamilyZOrphanedMembers),
       createDeveloperActionButton("Reset village progress", () => {
         if (village.id !== DEFAULT_GROUP_ID) {
