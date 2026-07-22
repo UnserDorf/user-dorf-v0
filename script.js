@@ -3036,7 +3036,9 @@ async function syncCurrentProfileToVillageDoc(firebase, savedAt, options = {}) {
   const serverGroup = createGroupData(groupInfo, villageData.group || {});
   const serverMemberIds = normalizeGroupMemberIds([
     ...normalizeProfileIdList(serverGroup.memberIds || []),
-    ...Object.keys(serverProfiles)
+    ...normalizeProfileIdList(villageData.memberIds || []),
+    ...Object.keys(serverProfiles),
+    ...Object.keys(serverMemberProfiles)
   ]);
   const alreadyMember = serverMemberIds.includes(profileId) || Boolean(serverProfiles[profileId]);
   if (!alreadyMember && !options.allowCreateMembership) {
@@ -3076,6 +3078,7 @@ async function syncCurrentProfileToVillageDoc(firebase, savedAt, options = {}) {
 
   const villagePayload = {
     group: nextGroup,
+    memberIds: nextMemberIds,
     profiles: serverProfiles,
     memberProfiles: serverMemberProfiles,
     rosterVersion: getNextVillageRosterVersion(villageData),
@@ -3224,12 +3227,32 @@ async function fetchProfileStoreFromCloud() {
 	        profileIds: Object.keys(villageData.profiles || {}),
 	        memberProfileIds: Object.keys(villageData.memberProfiles || {})
 	      });
-      mergeRemoteProfilesIntoStore(remoteStore, villageData.profiles || {});
-      remoteStore.groups[groupInfo.id] = createGroupData(groupInfo, villageData.group || {});
-      remoteStore.groups[groupInfo.id].memberIds = normalizeGroupMemberIds([
-        ...remoteStore.groups[groupInfo.id].memberIds,
-        ...Object.keys(villageData.profiles || {})
+      const villageProfiles = {
+        ...(villageData.profiles || {}),
+        ...(villageData.memberProfiles || {})
+      };
+      const villageMemberIds = normalizeGroupMemberIds([
+        ...(villageData.group?.memberIds || []),
+        ...(villageData.memberIds || []),
+        ...Object.keys(villageData.profiles || {}),
+        ...Object.keys(villageData.memberProfiles || {})
       ]);
+      const memberIdsMissingProfiles = villageMemberIds.filter((profileId) => !villageProfiles[profileId]);
+      console.info("[Unser Dorf village roster hydration]", {
+        villageId: groupInfo.id,
+        currentUserUid: firebaseAuthUser.uid,
+        groupMemberIds: normalizeGroupMemberIds(villageData.group?.memberIds || []),
+        topLevelMemberIds: normalizeGroupMemberIds(villageData.memberIds || []),
+        profileKeys: Object.keys(villageData.profiles || {}),
+        memberProfileKeys: Object.keys(villageData.memberProfiles || {}),
+        finalRosterIds: villageMemberIds,
+        memberIdsMissingProfiles
+      });
+      mergeRemoteProfilesIntoStore(remoteStore, villageProfiles);
+      remoteStore.groups[groupInfo.id] = createGroupData(groupInfo, {
+        ...(villageData.group || {}),
+        memberIds: villageMemberIds
+      });
       villageDocsLoaded.push(groupInfo.id);
       hasRemoteData = true;
     }));
