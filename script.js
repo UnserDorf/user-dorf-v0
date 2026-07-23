@@ -11048,12 +11048,7 @@ function renderLearnGermanHero(profile = getCurrentProfile()) {
   if (!els.learnHeroContent) return;
   if (hasStartedLearningExperience(profile)) {
     const title = createTextElement("h2", "", "📚 Continue Learning");
-    const line = createTextElement(
-      "p",
-      "learn-hero-compact-line",
-      "How learning works: Learn → Review → Earn coins → Build your village"
-    );
-    els.learnHeroContent.replaceChildren(title, line);
+    els.learnHeroContent.replaceChildren(title);
     return;
   }
   const title = createTextElement("h2", "", "📚 Learn German");
