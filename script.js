@@ -3073,6 +3073,15 @@ function ensureBootstrapDeveloperRole() {
   return true;
 }
 
+function getRoleForUserDocumentSave(activeProfile = getCurrentProfile()) {
+  if (shouldBootstrapDeveloperRole()) return "developer";
+  return sanitizeUserRole(activeProfile?.role || getCurrentUserRole());
+}
+
+function getProtectedAccountForUserDocumentSave(activeProfile = getCurrentProfile()) {
+  return Boolean(shouldBootstrapDeveloperRole() || activeProfile?.protectedAccount);
+}
+
 function normalizeLevelBonuses(savedLevels, coinValue) {
   if (Array.isArray(savedLevels)) return savedLevels.map(String);
   const coins = normalizeCoinCount(coinValue);
@@ -3179,8 +3188,8 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
       displayName: getVillageDisplayName(activeProfile),
       villageId: activeProfile?.villageId || currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
       villageName: getVillageName(),
-      role: getCurrentUserRole(),
-      protectedAccount: Boolean(activeProfile?.protectedAccount),
+      role: getRoleForUserDocumentSave(activeProfile),
+      protectedAccount: getProtectedAccountForUserDocumentSave(activeProfile),
       currentGroup: currentGroupId || profileStore.currentGroup || DEFAULT_GROUP_ID,
       currentProfile: currentProfileId || profileStore.currentProfile || "",
       activeStudySet: normalizeActiveStudySet(activeProfile?.activeStudySet),
@@ -6163,10 +6172,21 @@ async function writeFirestoreWithDebug(writeAction, details) {
 
 async function renderDeveloperToolsPage() {
   if (!els.developerToolsContent) return;
-  if (!(await isCurrentUserDeveloperFromFirestore())) {
-    setDeveloperToolsStatus("Admin access only.", true);
+  setDeveloperToolsStatus("Checking developer access...");
+  try {
+    const allowed = await isCurrentUserDeveloperFromFirestore();
+    if (!allowed) {
+      setDeveloperToolsStatus("Developer access required.", true);
+      els.developerToolsContent.replaceChildren(
+        createTextElement("p", "developer-tools-empty", "Developer access required.")
+      );
+      return;
+    }
+  } catch (error) {
+    console.error("[Unser Dorf Developer Tools auth] Access verification failed.", error);
+    setDeveloperToolsStatus("Unable to verify developer access. Please refresh and try again.", true);
     els.developerToolsContent.replaceChildren(
-      createTextElement("p", "developer-tools-empty", "Admin access only.")
+      createTextElement("p", "developer-tools-empty", "Unable to verify developer access.")
     );
     return;
   }
@@ -6243,32 +6263,50 @@ async function isCurrentUserDeveloperFromFirestore() {
   try {
     const firebase = await getFirebaseSyncApi();
     const userDocPath = getFirebaseUserDocPath(firebase, firebaseAuthUser.uid);
+    const profile = getCurrentProfile() || profileStore?.profiles?.[getFirebaseProfileId(firebaseAuthUser)];
+    const localRole = sanitizeUserRole(profile?.role);
+    const localProtectedAccount = Boolean(profile?.protectedAccount);
     console.info("[Unser Dorf Developer Tools auth] Checking current developer account.", {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
       provider: firebaseAuthUser.providerData?.map((provider) => provider.providerId).join(", ") || "password",
-      userDocPath
+      userDocPath,
+      localRole,
+      localProtectedAccount
     });
     const snapshot = await readFirestoreWithDebug(
-      () => firebase.getDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid)),
+      () => firebase.getDocFromServer(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid)),
       {
-        operation: "get current developer user document",
+        operation: "get current developer user document from server",
         path: userDocPath
       }
     );
     const data = snapshot.exists() ? snapshot.data() || {} : {};
-    const role = sanitizeUserRole(data.role);
+    let role = sanitizeUserRole(data.role);
     const protectedAccount = Boolean(data.protectedAccount);
-    const profile = getCurrentProfile() || profileStore?.profiles?.[getFirebaseProfileId(firebaseAuthUser)];
-    if (profile && role !== profile.role) profile.role = role;
-    if (profile && protectedAccount) profile.protectedAccount = true;
+    if (role !== "developer" && shouldBootstrapDeveloperRole(firebaseAuthUser)) {
+      console.warn("[Unser Dorf Developer Tools auth] Restoring established bootstrap developer role on current user document.", {
+        userDocPath,
+        previousRole: role,
+        protectedAccount
+      });
+      await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
+        role: "developer",
+        protectedAccount: true,
+        updatedAt: firebase.serverTimestamp(),
+        updatedAtIso: new Date().toISOString()
+      }, { merge: true });
+      role = "developer";
+    }
+    if (profile && role === "developer") profile.role = role;
+    if (profile && (protectedAccount || role === "developer")) profile.protectedAccount = true;
     console.info("[Unser Dorf Developer Tools auth] Current user profile check.", {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
       userDocPath,
       documentExists: snapshot.exists(),
       role,
-      protectedAccount,
+      protectedAccount: protectedAccount || role === "developer",
       allowed: role === "developer"
     });
     return role === "developer";
@@ -12414,10 +12452,18 @@ function showChallengeReady(action) {
 }
 
 function beginPendingChallenge() {
+  const startedAt = performance.now();
   const action = pendingChallengeAction;
   pendingChallengeAction = "";
+  console.info("[Unser Dorf Article Review startup]", {
+    stage: "click received",
+    action,
+    syncState: cloudSaveState,
+    pendingLocalProgressSave: hasPendingLocalProgressSave(),
+    hydrationComplete: userProgressHydratedFromServer
+  });
   const routes = {
-    articles: { mode: "article-quiz", filter: "smartArticle", resume: true }
+    articles: { mode: "article-quiz", filter: "smartArticle", resume: false }
   };
   if (action === "vocabulary-review") {
     startChallengeSession("vocabulary", selectedLearningLevel, { useStudySet: guidedLearningActive });
@@ -12432,9 +12478,28 @@ function beginPendingChallenge() {
       showLearnGermanPage();
       return;
     }
+    console.info("[Unser Dorf Article Review startup]", {
+      stage: "session construction started",
+      elapsedMs: Math.round(performance.now() - startedAt),
+      guidedLearningActive
+    });
     startChallengeSession("articles", selectedLearningLevel, { useStudySet: guidedLearningActive });
+    console.info("[Unser Dorf Article Review startup]", {
+      stage: "session construction completed",
+      elapsedMs: Math.round(performance.now() - startedAt),
+      questionCount: challengeSession.questionIds.length,
+      studySetUsed: challengeSession.studySetUsed
+    });
   }
   openStudyRoute(route);
+  if (action === "articles") {
+    console.info("[Unser Dorf Article Review startup]", {
+      stage: "first question rendered",
+      elapsedMs: Math.round(performance.now() - startedAt),
+      visibleQuestionCount: visibleCards.length,
+      currentIndex
+    });
+  }
 }
 
 function createEmptyChallengeSession() {
@@ -13973,9 +14038,14 @@ function applyModeAndFilter() {
   });
 
   const startedCards = applyStartLetter(filteredCards, startLetter);
-  visibleCards = (mode === "article-quiz" || mode === "article") && filter === "smartArticle"
-    ? challengeSession.focusedReview ? startedCards : applySmartArticleOrder(startedCards)
-    : applyStudyOrder(startedCards, order);
+  const isArticleChallengeSession = mode === "article-quiz"
+    && challengeSession.type === "articles"
+    && challengeQuestionIds.size > 0;
+  visibleCards = isArticleChallengeSession
+    ? orderCardsByChallengeQuestionIds(startedCards, challengeSession.questionIds)
+    : (mode === "article-quiz" || mode === "article") && filter === "smartArticle"
+      ? challengeSession.focusedReview ? startedCards : applySmartArticleOrder(startedCards)
+      : applyStudyOrder(startedCards, order);
   currentIndex = clamp(currentIndex, 0, Math.max(visibleCards.length - 1, 0));
   answerShown = false;
   selectedArticle = "";
@@ -14128,7 +14198,7 @@ function renderCard() {
   if (!card) {
     els.promptLabel.textContent = isArticleQuiz ? "Article Review" : "No cards";
     els.articleQuizResult.classList.add("hidden");
-    els.questionText.textContent = isArticleQuiz ? "Loading your review..." : "Nothing to study";
+    els.questionText.textContent = isArticleQuiz ? "No article questions available" : "Nothing to study";
     els.questionTranslation.textContent = "";
     els.questionTranslation.classList.add("hidden");
     return;
@@ -16788,6 +16858,24 @@ function applySmartArticleOrder(cardList) {
 
   const occasionalMastered = mastered.filter((_, index) => index % 6 === 0);
   return [...mainReview, ...occasionalMastered];
+}
+
+function orderCardsByChallengeQuestionIds(cardList, questionIds = []) {
+  const cardsById = new Map(cardList.map((card) => [card.id, card]));
+  const ordered = [];
+  const seen = new Set();
+  questionIds.forEach((id) => {
+    const card = cardsById.get(id);
+    if (!card || seen.has(card.id)) return;
+    seen.add(card.id);
+    ordered.push(card);
+  });
+  cardList.forEach((card) => {
+    if (!card?.id || seen.has(card.id)) return;
+    seen.add(card.id);
+    ordered.push(card);
+  });
+  return ordered;
 }
 
 function compareCardsByGerman(first, second) {
