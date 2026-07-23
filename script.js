@@ -151,7 +151,7 @@ const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const INTERNAL_BUILD_ID = "admin-profile-cleanup-2026-07-14";
 const APP_BUILD_METADATA = {
   appVersion: "v0-testing",
-  buildId: "app-version-diagnostic-2026-07-23",
+  buildId: "progress-persistence-sync-2026-07-23",
   deployedCommit: "",
   builtAt: "2026-07-23"
 };
@@ -917,6 +917,20 @@ let cloudSaveTimer = 0;
 let cloudPullTimer = 0;
 let cloudSaveInFlight = false;
 let cloudSavePending = false;
+let cloudSaveState = "clean";
+let cloudSaveReason = "";
+let cloudSaveSequence = 0;
+let cloudSavePromise = null;
+let cloudVisibilityHandlerBound = false;
+let lastSuccessfulCloudSaveTime = "";
+let lastAppliedServerProgressRevision = 0;
+let lastAcceptedServerCoinTotal = 0;
+let lastCloudSnapshotDecision = {
+  decision: "none",
+  reason: "No cloud snapshot has been evaluated.",
+  serverRevision: 0,
+  localRevision: 0
+};
 let profileDataSource = "localStorage";
 let lastIdentityProfileWasCreated = false;
 let obsoleteLocalIdentityDataDetected = false;
@@ -935,7 +949,13 @@ let cloudSyncDebug = {
   lastCloudSaveError: "",
   lastCloudLoadError: "",
   firestoreProfileExists: false,
-  firestoreCoinsLoaded: 0
+  firestoreCoinsLoaded: 0,
+  progressSaveState: "clean",
+  progressSaveReason: "",
+  progressRevision: 0,
+  lastAppliedServerProgressRevision: 0,
+  lastAcceptedServerCoinTotal: 0,
+  lastCloudSnapshotDecision: "none"
 };
 let lastPreHydrationProgressSnapshot = null;
 let userProgressHydratedFromServer = false;
@@ -1362,7 +1382,13 @@ function updateCloudSyncDebug(patch = {}, label = "sync status") {
     lastCloudSaveTime: cloudSyncDebug.lastCloudSaveTime || "none",
     lastCloudLoadTime: cloudSyncDebug.lastCloudLoadTime || "none",
     lastCloudSaveError: cloudSyncDebug.lastCloudSaveError || "none",
-    lastCloudLoadError: cloudSyncDebug.lastCloudLoadError || "none"
+    lastCloudLoadError: cloudSyncDebug.lastCloudLoadError || "none",
+    progressSaveState: cloudSyncDebug.progressSaveState || cloudSaveState,
+    progressSaveReason: cloudSyncDebug.progressSaveReason || cloudSaveReason || "none",
+    progressRevision: cloudSyncDebug.progressRevision || getCurrentProfileProgressRevision(),
+    lastAppliedServerProgressRevision: cloudSyncDebug.lastAppliedServerProgressRevision || lastAppliedServerProgressRevision,
+    lastAcceptedServerCoinTotal: cloudSyncDebug.lastAcceptedServerCoinTotal ?? lastAcceptedServerCoinTotal,
+    lastCloudSnapshotDecision: cloudSyncDebug.lastCloudSnapshotDecision || lastCloudSnapshotDecision.decision || "none"
   });
 }
 
@@ -1391,8 +1417,111 @@ function getProgressFieldSnapshot(profile = {}) {
     activeStudySetWords: normalizeActiveStudySet(profile.activeStudySet).wordIds.length,
     austriaAlbumRewards: normalizeRewardIdList(profile.austriaAlbumSeenRewards).length,
     achievements: normalizeAchievementList(profile.achievementsUnlocked).length,
-    progressResetVersion: normalizeCounter(profile.progressResetVersion)
+    progressResetVersion: normalizeCounter(profile.progressResetVersion),
+    profileProgressRevision: getCurrentProfileProgressRevision(profile),
+    flashcardsReviewedLifetime: getDurableFlashcardsReviewedCount(profile)
   };
+}
+
+function getCurrentProfileProgressRevision(profile = getCurrentProfile()) {
+  return normalizeCounter(profile?.profileProgressRevision);
+}
+
+function getLegacyFlashcardsReviewedCount(profile = getCurrentProfile()) {
+  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions);
+  return Object.values(sessions).reduce((total, session) => {
+    const ratings = normalizeFlashcardRatings(session.ratings);
+    return total + Object.keys(ratings).length;
+  }, 0);
+}
+
+function getDurableFlashcardsReviewedCount(profile = getCurrentProfile()) {
+  return Math.max(
+    normalizeCounter(profile?.flashcardsReviewedLifetime),
+    getLegacyFlashcardsReviewedCount(profile)
+  );
+}
+
+function markProfileProgressDirty(reason = "profile progress changed") {
+  if (developerPreviewMode || applyingRemoteStore || !currentProfileId) return;
+  const profile = getCurrentProfile();
+  if (!profile) return;
+  const previousRevision = Math.max(
+    getCurrentProfileProgressRevision(profile),
+    lastAppliedServerProgressRevision
+  );
+  profile.profileProgressRevision = previousRevision + 1;
+  profile.profileProgressUpdatedAtIso = new Date().toISOString();
+  profile.flashcardsReviewedLifetime = getDurableFlashcardsReviewedCount(profile);
+  cloudSaveState = cloudSaveState === "saving" ? "saving" : "dirty";
+  cloudSaveReason = reason;
+  updateCloudSyncDebug({
+    progressSaveState: cloudSaveState,
+    progressSaveReason: cloudSaveReason,
+    progressRevision: profile.profileProgressRevision
+  }, "Local progress marked dirty");
+}
+
+function canApplyCloudSnapshot(remoteStore, reason = "cloud hydration") {
+  const localProfile = getCurrentProfile();
+  const remoteProfileId = remoteStore?.currentProfile || currentProfileId || profileStore?.currentProfile || "";
+  const remoteProfile = remoteProfileId ? remoteStore?.profiles?.[remoteProfileId] : null;
+  const localRevision = getCurrentProfileProgressRevision(localProfile);
+  const serverRevision = getCurrentProfileProgressRevision(remoteProfile);
+  if (hasPendingLocalProgressSave()) {
+    rememberCloudSnapshotDecision("deferred", reason, serverRevision, localRevision);
+    return false;
+  }
+  if (serverRevision && lastAppliedServerProgressRevision && serverRevision < lastAppliedServerProgressRevision) {
+    rememberCloudSnapshotDecision("rejected-stale", reason, serverRevision, localRevision);
+    return false;
+  }
+  rememberCloudSnapshotDecision("applied", reason, serverRevision, localRevision);
+  return true;
+}
+
+function hasPendingLocalProgressSave() {
+  return Boolean(
+    cloudSaveTimer
+      || cloudSaveInFlight
+      || cloudSavePending
+      || cloudSaveState === "dirty"
+      || cloudSaveState === "scheduled"
+      || cloudSaveState === "saving"
+      || cloudSaveState === "failed"
+  );
+}
+
+function rememberCloudSnapshotDecision(decision, reason, serverRevision, localRevision) {
+  lastCloudSnapshotDecision = {
+    decision,
+    reason,
+    serverRevision: normalizeCounter(serverRevision),
+    localRevision: normalizeCounter(localRevision),
+    checkedAt: new Date().toISOString()
+  };
+  updateCloudSyncDebug({
+    lastCloudSnapshotDecision: `${decision}: ${reason}`,
+    lastAppliedServerProgressRevision,
+    progressRevision: localRevision
+  }, `Cloud snapshot ${decision}`);
+}
+
+async function flushPendingCloudSave(reason = "before cloud hydration") {
+  if (!syncEnabled || !firebaseAuthUser || developerPreviewMode) return false;
+  if (cloudSaveTimer) {
+    window.clearTimeout(cloudSaveTimer);
+    cloudSaveTimer = 0;
+  }
+  if (cloudSaveInFlight && cloudSavePromise) {
+    await cloudSavePromise;
+    return true;
+  }
+  if (cloudSaveState === "dirty" || cloudSaveState === "scheduled" || cloudSaveState === "failed" || cloudSavePending) {
+    await saveProfileStoreToCloudNow(reason);
+    return true;
+  }
+  return false;
 }
 
 function getLearningCountSnapshotFromProfile(profile = {}) {
@@ -1930,6 +2059,13 @@ function startFamilySyncPolling() {
   cloudPullTimer = window.setInterval(async () => {
     try {
       if (applyingRemoteStore) return;
+      if (hasPendingLocalProgressSave()) {
+        await flushPendingCloudSave("poll retry before cloud hydration");
+      }
+      if (hasPendingLocalProgressSave()) {
+        rememberCloudSnapshotDecision("deferred", "poll skipped until local progress is saved", 0, getCurrentProfileProgressRevision());
+        return;
+      }
       const remoteStore = await fetchProfileStoreFromCloud();
       if (remoteStore) applyRemoteProfileStore(remoteStore);
     } catch (error) {
@@ -1937,13 +2073,19 @@ function startFamilySyncPolling() {
     }
   }, 5000);
 
+  if (cloudVisibilityHandlerBound) return;
+  cloudVisibilityHandlerBound = true;
   document.addEventListener("visibilitychange", async () => {
     try {
       if (document.visibilityState !== "visible") {
-        window.clearTimeout(cloudSaveTimer);
         return;
       }
       if (applyingRemoteStore) return;
+      await flushPendingCloudSave("visibility refresh");
+      if (hasPendingLocalProgressSave()) {
+        rememberCloudSnapshotDecision("deferred", "visibility refresh skipped until local progress is saved", 0, getCurrentProfileProgressRevision());
+        return;
+      }
       const remoteStore = await fetchProfileStoreFromCloud();
       if (remoteStore) applyRemoteProfileStore(remoteStore);
     } catch (error) {
@@ -2496,6 +2638,13 @@ function normalizeProfileData(data, profile) {
     villageId: typeof data?.villageId === "string" ? data.villageId : "",
     contributionCoins: normalizeCoinCount(data?.contributionCoins),
     coins: normalizeCoinCount(data?.coins),
+    profileProgressRevision: normalizeCounter(data?.profileProgressRevision),
+    profileProgressUpdatedAtIso: typeof data?.profileProgressUpdatedAtIso === "string" ? data.profileProgressUpdatedAtIso : "",
+    flashcardsReviewedLifetime: Math.max(
+      normalizeCounter(data?.flashcardsReviewedLifetime),
+      normalizeCounter(profile?.flashcardsReviewedLifetime),
+      getLegacyFlashcardsReviewedCount(data)
+    ),
     progressResetVersion: normalizeCounter(data?.progressResetVersion),
     progressResetAtIso: typeof data?.progressResetAtIso === "string" ? data.progressResetAtIso : "",
     levelBonusesAwarded: normalizeLevelBonuses(data?.levelBonusesAwarded, data?.coins),
@@ -2954,6 +3103,9 @@ function readStorageObject(key) {
 
 function saveProfileStore(options = {}) {
   if (developerPreviewMode) return;
+  if (!options.localOnly && !options.skipDirtyMark && !applyingRemoteStore) {
+    markProfileProgressDirty(options.reason || (options.localOnly ? "local profile progress save" : "profile progress save"));
+  }
   const group = getCurrentGroup();
   if (group) {
     profileStore.currentGroup = group.id;
@@ -2973,30 +3125,45 @@ function scheduleCloudSave(options = {}) {
   if (!syncEnabled || applyingRemoteStore || developerPreviewMode) return;
   window.clearTimeout(cloudSaveTimer);
   if (options.immediate) {
-    saveProfileStoreToCloudNow();
+    cloudSaveTimer = 0;
+    saveProfileStoreToCloudNow(options.reason || "immediate profile progress save");
     return;
   }
+  cloudSaveState = "scheduled";
+  cloudSaveReason = options.reason || cloudSaveReason || "scheduled profile progress save";
+  updateCloudSyncDebug({
+    progressSaveState: cloudSaveState,
+    progressSaveReason: cloudSaveReason,
+    progressRevision: getCurrentProfileProgressRevision()
+  }, "Firestore save scheduled");
   cloudSaveTimer = window.setTimeout(() => {
-    saveProfileStoreToCloudNow();
+    cloudSaveTimer = 0;
+    saveProfileStoreToCloudNow(cloudSaveReason || "scheduled profile progress save");
   }, 450);
 }
 
-async function saveProfileStoreToCloudNow() {
+async function saveProfileStoreToCloudNow(reason = "profile progress save") {
   if (!profileStore || !hasCloudSyncConfig() || !firebaseAuthUser) return;
   if (cloudSaveInFlight) {
     cloudSavePending = true;
-    updateCloudSyncDebug({}, "Firestore save queued behind active save");
+    updateCloudSyncDebug({ progressSaveState: "saving", progressSaveReason: reason }, "Firestore save queued behind active save");
+    if (cloudSavePromise) await cloudSavePromise;
     return;
   }
   cloudSaveInFlight = true;
   cloudSavePending = false;
+  cloudSaveState = "saving";
+  cloudSaveReason = reason || cloudSaveReason || "profile progress save";
+  const saveSequence = ++cloudSaveSequence;
   consolidateFirebaseIdentityProfiles(profileStore);
   promoteFamilyAchievements(profileStore);
+  cloudSavePromise = (async () => {
   try {
     const firebase = await getFirebaseSyncApi();
     const ownedProfiles = getFirebaseOwnedProfiles();
     if (!Object.keys(ownedProfiles).length) {
-      updateCloudSyncDebug({}, "Firestore save skipped until Firebase profile exists");
+      cloudSaveState = "dirty";
+      updateCloudSyncDebug({ progressSaveState: cloudSaveState }, "Firestore save skipped until Firebase profile exists");
       return;
     }
     const savedAt = new Date().toISOString();
@@ -3005,6 +3172,7 @@ async function saveProfileStoreToCloudNow() {
     updateCloudSyncDebug({
       lastCloudSaveError: ""
     }, "Firestore save starting");
+    const progressRevision = getCurrentProfileProgressRevision(activeProfile);
     const userPayload = {
       uid: firebaseAuthUser.uid,
       email: firebaseAuthUser.email || "",
@@ -3022,6 +3190,9 @@ async function saveProfileStoreToCloudNow() {
       profiles: ownedProfiles,
       progressResetVersion: normalizeCounter(activeProfile?.progressResetVersion),
       progressResetAtIso: activeProfile?.progressResetAtIso || "",
+      profileProgressRevision: progressRevision,
+      profileProgressUpdatedAtIso: activeProfile?.profileProgressUpdatedAtIso || savedAt,
+      flashcardsReviewedLifetime: getDurableFlashcardsReviewedCount(activeProfile),
       lastLoginAtIso: new Date().toISOString(),
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
@@ -3041,16 +3212,39 @@ async function saveProfileStoreToCloudNow() {
       lastCloudSaveError: "",
       firestoreCoinsLoaded: normalizeCoinCount(activeProfile?.coins)
     }, "Firestore save complete");
+    if (saveSequence >= cloudSaveSequence) {
+      cloudSaveState = "clean";
+      cloudSaveReason = "";
+      lastSuccessfulCloudSaveTime = savedAt;
+      lastAppliedServerProgressRevision = Math.max(lastAppliedServerProgressRevision, progressRevision);
+      lastAcceptedServerCoinTotal = normalizeCoinCount(activeProfile?.coins);
+      updateCloudSyncDebug({
+        progressSaveState: cloudSaveState,
+        progressSaveReason: "",
+        progressRevision,
+        lastAppliedServerProgressRevision,
+        lastAcceptedServerCoinTotal
+      }, "Progress save accepted");
+    }
   } catch (error) {
-    updateCloudSyncDebug({ lastCloudSaveError: getErrorMessage(error) }, "Firestore save failed");
+    cloudSaveState = "failed";
+    updateCloudSyncDebug({
+      lastCloudSaveError: getErrorMessage(error),
+      progressSaveState: cloudSaveState,
+      progressSaveReason: cloudSaveReason,
+      progressRevision: getCurrentProfileProgressRevision()
+    }, "Firestore save failed");
     console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
   } finally {
     cloudSaveInFlight = false;
     if (cloudSavePending && firebaseAuthUser) {
       cloudSavePending = false;
-      saveProfileStoreToCloudNow();
+      saveProfileStoreToCloudNow(cloudSaveReason || "queued profile progress save");
     }
   }
+  })();
+  await cloudSavePromise;
+  return cloudSavePromise;
 }
 
 async function saveCurrentVillageMembershipToCloudNow(reason = "village membership change") {
@@ -3165,13 +3359,24 @@ async function saveActiveStudySetToCloudNow(studySet) {
     });
     const userRef = getFirebaseUserDocRef(firebase, firebaseAuthUser.uid);
     const profileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+    const activeProfile = profileId ? profileStore?.profiles?.[profileId] : null;
     if (!normalizedStudySet.wordIds.length && firebase.updateDoc) {
       const clearPayload = { activeStudySet: {} };
       if (profileId) clearPayload[`profiles.${profileId}.activeStudySet`] = {};
       await firebase.updateDoc(userRef, clearPayload);
     } else {
-      const payload = { activeStudySet: normalizedStudySet };
-      if (profileId) payload.profiles = { [profileId]: { activeStudySet: normalizedStudySet } };
+      const payload = {
+        activeStudySet: normalizedStudySet,
+        profileProgressRevision: getCurrentProfileProgressRevision(activeProfile),
+        flashcardsReviewedLifetime: getDurableFlashcardsReviewedCount(activeProfile)
+      };
+      if (profileId) payload.profiles = {
+        [profileId]: {
+          activeStudySet: normalizedStudySet,
+          profileProgressRevision: getCurrentProfileProgressRevision(activeProfile),
+          flashcardsReviewedLifetime: getDurableFlashcardsReviewedCount(activeProfile)
+        }
+      };
       await firebase.setDoc(
         userRef,
         payload,
@@ -3306,9 +3511,19 @@ async function fetchProfileStoreFromCloud() {
       const userIdentityProfiles = getFirebaseIdentityProfilesFromMap(userData.profiles || {}, firebaseAuthUser);
       const userProgressResetVersion = normalizeCounter(userData.progressResetVersion);
       const userProgressResetAtIso = typeof userData.progressResetAtIso === "string" ? userData.progressResetAtIso : "";
+      const userProgressRevision = normalizeCounter(userData.profileProgressRevision);
+      const userProgressUpdatedAtIso = typeof userData.profileProgressUpdatedAtIso === "string" ? userData.profileProgressUpdatedAtIso : "";
+      const userFlashcardsReviewedLifetime = normalizeCounter(userData.flashcardsReviewedLifetime);
       Object.values(userIdentityProfiles).forEach((profile) => {
         profile.progressResetVersion = Math.max(normalizeCounter(profile.progressResetVersion), userProgressResetVersion);
         if (userProgressResetAtIso && !profile.progressResetAtIso) profile.progressResetAtIso = userProgressResetAtIso;
+        profile.profileProgressRevision = Math.max(normalizeCounter(profile.profileProgressRevision), userProgressRevision);
+        if (userProgressUpdatedAtIso && !profile.profileProgressUpdatedAtIso) profile.profileProgressUpdatedAtIso = userProgressUpdatedAtIso;
+        profile.flashcardsReviewedLifetime = Math.max(
+          normalizeCounter(profile.flashcardsReviewedLifetime),
+          userFlashcardsReviewedLifetime,
+          getLegacyFlashcardsReviewedCount(profile)
+        );
       });
       mergeRemoteProfilesIntoStore(remoteStore, userIdentityProfiles, { preferIncomingIdentity: true });
       const userRole = sanitizeUserRole(userData.role);
@@ -3610,6 +3825,7 @@ async function initializeFirebaseSyncApi() {
 
 function applyRemoteProfileStore(remoteStore) {
   if (!remoteStore?.profiles) return;
+  if (!canApplyCloudSnapshot(remoteStore, "apply remote profile store")) return;
   const preHydrationProfileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
   const preHydrationProfile = preHydrationProfileId ? profileStore?.profiles?.[preHydrationProfileId] : null;
   lastPreHydrationProgressSnapshot = getProgressFieldSnapshot(preHydrationProfile || {});
@@ -3639,6 +3855,16 @@ function applyRemoteProfileStore(remoteStore) {
   }
   applyingRemoteStore = false;
   promoteFamilyAchievements(profileStore);
+  const appliedProfile = currentProfileId ? profileStore.profiles?.[currentProfileId] : null;
+  lastAppliedServerProgressRevision = Math.max(lastAppliedServerProgressRevision, getCurrentProfileProgressRevision(appliedProfile));
+  lastAcceptedServerCoinTotal = normalizeCoinCount(appliedProfile?.coins);
+  updateCloudSyncDebug({
+    lastAppliedServerProgressRevision,
+    lastAcceptedServerCoinTotal,
+    firestoreCoinsLoaded: lastAcceptedServerCoinTotal,
+    progressRevision: getCurrentProfileProgressRevision(appliedProfile),
+    progressSaveState: cloudSaveState
+  }, "Remote profile progress applied");
   logCloudIdentityDebug("Remote profile store applied", { remoteStore });
   console.info("[Unser Dorf authenticated local cache cleanup]", {
     discardedLocalProfileIds,
@@ -3779,6 +4005,15 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
         || "",
       villageId: identitySource.villageId || fallbackIdentitySource.villageId || "",
       contributionCoins: progressSource ? normalizeCoinCount(progressSource.contributionCoins) : Math.max(normalizeCoinCount(local.contributionCoins), normalizeCoinCount(remote.contributionCoins)),
+      profileProgressRevision: progressSource ? normalizeCounter(progressSource.profileProgressRevision) : Math.max(
+        normalizeCounter(local.profileProgressRevision),
+        normalizeCounter(remote.profileProgressRevision)
+      ),
+      profileProgressUpdatedAtIso: progressSource ? progressSource.profileProgressUpdatedAtIso : latestString(local.profileProgressUpdatedAtIso, remote.profileProgressUpdatedAtIso),
+      flashcardsReviewedLifetime: progressSource ? getDurableFlashcardsReviewedCount(progressSource) : Math.max(
+        getDurableFlashcardsReviewedCount(local),
+        getDurableFlashcardsReviewedCount(remote)
+      ),
       settings: remote.settings || local.settings
     },
     defaultProfile
@@ -6319,6 +6554,20 @@ function createDeveloperDiagnosticsSection(data) {
     firestoreRole: formatDeveloperRole(currentUser?.role || currentProfile.role),
     protectedAccount: String(Boolean(currentProfile.protectedAccount || currentUser?.role === "developer")),
     currentVillagePath: currentVillageId ? `unserDorf/v0Testing/villages/${currentVillageId}` : "No village",
+    progressRevision: `${getCurrentProfileProgressRevision(currentProfile)}`,
+    lastAppliedServerRevision: `${lastAppliedServerProgressRevision}`,
+    localSaveState: cloudSaveState,
+    pollingPermitted: hasPendingLocalProgressSave() ? "No - local save pending" : "Yes",
+    pendingSaveReason: cloudSaveReason || "None",
+    lastSuccessfulSave: lastSuccessfulCloudSaveTime || cloudSyncDebug.lastCloudSaveTime || "None",
+    lastSaveError: cloudSyncDebug.lastCloudSaveError || "None",
+    localCoins: `${normalizeCoinCount(currentProfile.coins)}`,
+    lastAcceptedServerCoins: `${lastAcceptedServerCoinTotal}`,
+    lifetimeFlashcardsReviewed: `${getFlashcardsReviewedCount(currentProfile)}`,
+    currentSessionReviewed: `${getCurrentSessionReviewedCount(currentProfile)}`,
+    unlockedAchievements: normalizeAchievementList(currentProfile.achievementsUnlocked).join(", ") || "None",
+    queuedCelebrations: getQueuedCelebrationDiagnosticLabel(),
+    lastCloudSnapshotDecision: `${lastCloudSnapshotDecision.decision}: ${lastCloudSnapshotDecision.reason}`,
     difficultVocabularyWords: `${difficultDiagnostics.length}`,
     difficultNouns: `${difficultNouns.length}`,
     lastFirestoreError: developerToolsLastError
@@ -6545,6 +6794,21 @@ function createDifficultWordsDiagnosticsDetails(candidates) {
   }
   details.replaceChildren(summary, list);
   return details;
+}
+
+function getCurrentSessionReviewedCount(profile = getCurrentProfile()) {
+  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions);
+  const currentSession = sessions[getFlashcardSessionKey()];
+  return Array.from(new Set((currentSession?.studiedIds || []).map(String).filter(Boolean))).length;
+}
+
+function getQueuedCelebrationDiagnosticLabel() {
+  const achievementIds = achievementNotificationQueue.map((achievement) => achievement?.id).filter(Boolean);
+  const pendingCount = pendingCelebrations.length;
+  const labels = [];
+  if (achievementIds.length) labels.push(`Achievements: ${achievementIds.join(", ")}`);
+  if (pendingCount) labels.push(`Reward popups: ${pendingCount}`);
+  return labels.join(" | ") || "None";
 }
 
 function formatDeveloperDiagnosticLabel(key) {
@@ -9923,11 +10187,7 @@ function getAchievementCurrentValue(achievement, profile = getCurrentProfile()) 
 }
 
 function getFlashcardsReviewedCount(profile = getCurrentProfile()) {
-  const sessions = normalizeFlashcardSessions(profile?.flashcardSessions);
-  return Object.values(sessions).reduce((total, session) => {
-    const ratings = normalizeFlashcardRatings(session.ratings);
-    return total + Object.keys(ratings).length;
-  }, 0);
+  return getDurableFlashcardsReviewedCount(profile);
 }
 
 function shouldShowRewardDebugPage() {
@@ -11839,6 +12099,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
   if (!profile) return;
   const key = getFlashcardSessionKey();
   const existing = profile.flashcardSessions[key] || {};
+  const countLifetimeReview = Boolean(completed && !existing.completed);
   const today = getTodayKey();
   const deckIds = Array.from(new Set(flashcardStudyCards.map((card) => card.id).filter(Boolean)));
   const studiedIds = new Set(existing.studyDate === today ? existing.studiedIds || [] : []);
@@ -11855,9 +12116,10 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
     completed,
     updatedAt: new Date().toISOString()
   };
-  const activeStudySetUpdated = completed ? updateActiveStudySetFromFlashcardSession(profile, key) : false;
+  const activeStudySetUpdated = completed ? updateActiveStudySetFromFlashcardSession(profile, key, { countLifetimeReview }) : false;
   if (completed) verifyCompletedFlashcardSession(profile.flashcardSessions[key], profile.activeStudySet);
-  saveProfileStore({ localOnly: true });
+  if (completed) checkAchievements("flashcards");
+  saveProfileStore({ localOnly: !completed, immediate: completed, reason: completed ? "completed flashcard study session" : "flashcard session progress" });
   if (activeStudySetUpdated) {
     saveActiveStudySetToCloudNow(profile.activeStudySet);
   }
@@ -11882,7 +12144,7 @@ function verifyCompletedFlashcardSession(session, activeStudySet) {
   return false;
 }
 
-function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey()) {
+function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSessionKey(), options = {}) {
   if (!profile?.flashcardSessions?.[key]) return false;
   const session = profile.flashcardSessions[key];
   if (!session.completed) return false;
@@ -11915,6 +12177,10 @@ function updateActiveStudySetFromFlashcardSession(profile, key = getFlashcardSes
 
   const wordIds = completedIds.filter((wordId) => Boolean(words[wordId]));
   if (!wordIds.length || wordIds.length !== completedIds.length) return false;
+  profile.flashcardsReviewedLifetime = Math.max(
+    normalizeCounter(profile.flashcardsReviewedLifetime),
+    getLegacyFlashcardsReviewedCount(profile)
+  ) + (options.countLifetimeReview ? wordIds.length : 0);
   profile.activeStudySet = normalizeActiveStudySet({
     sessionId: session.sessionId || key,
     reviewedAt: now,
@@ -12046,7 +12312,6 @@ function rateLearningFlashcard(rating) {
   const card = flashcardStudyCards[flashcardStudyIndex];
   if (!card || !currentProfileId) return;
   updateFlashcardStudyRating(card, rating);
-  checkAchievements("flashcards");
   progress[card.id] = {
     ...(progress[card.id] || {}),
     meaningStatus: normalizeMeaningStatus(rating),
@@ -14051,6 +14316,7 @@ function answerArticleQuiz(article) {
   const isCorrect = article === card.article;
   recordChallengeSessionAnswer("articles", isCorrect);
   updateArticleLearningProgress(card, isCorrect);
+  if (getCurrentProfile()) getCurrentProfile().articleProgress = articleProgress;
   console.log("Article button clicked", {
     selectedArticle: article,
     correctArticle: card.article,
@@ -14603,6 +14869,8 @@ function unlockAchievement(achievement, profile, reason = "") {
     return;
   }
 
+  profile.achievementsUnlocked = normalizeAchievementList(profile.achievementsUnlocked);
+  if (profile.achievementsUnlocked.includes(achievement.id)) return;
   profile.achievementsUnlocked.push(achievement.id);
   if (achievement.reward > 0) {
     profile.coins = normalizeCoinCount(profile.coins) + achievement.reward;
@@ -14619,6 +14887,7 @@ function showAchievementCelebration(achievement) {
 
 function queueAchievementNotification(achievement) {
   if (!achievement) return;
+  if (achievementNotificationQueue.some((queued) => queued?.id === achievement.id)) return;
   achievementNotificationQueue.push(achievement);
   showNextAchievementNotification();
 }
@@ -15177,10 +15446,11 @@ function answerVocabularyReviewQuiz(selectedAnswer) {
   vocabularyReviewQuizState.selectedAnswer = selectedAnswer;
   vocabularyReviewQuizState.hasAnswered = true;
   updateVocabularyReviewStats(isCorrect);
+  updateVocabularyMasteryProgress(card, isCorrect);
+  if (getCurrentProfile()) getCurrentProfile().vocabularyProgress = vocabularyProgress;
   if (isCorrect && shouldAwardFocusedReviewCoin(card, "vocabulary")) {
     awardCoins(1);
   }
-  updateVocabularyMasteryProgress(card, isCorrect);
   if (challengeSession.focusedReview) {
     updateFocusedDifficultyProgress(card, "vocabulary", isCorrect);
   }
