@@ -11995,7 +11995,8 @@ function createEmptyChallengeSession() {
     focusedReviewKind: "",
     studySetUsed: false,
     studySetReviewedCount: 0,
-    studySetQuestionCount: 0
+    studySetQuestionCount: 0,
+    rewardCelebrations: createEmptyRewardCelebrationSummary()
   };
 }
 
@@ -13087,12 +13088,13 @@ function bindEvents() {
     }
     moveNounVerbCard(1);
   });
-  els.challengeResultsContinue.addEventListener("click", () => {
-    const completedSession = { ...challengeSession };
-    challengeSession = createEmptyChallengeSession();
-    if (guidedLearningActive) {
-      continueAfterGuidedChallengeResult(completedSession);
-      return;
+	  els.challengeResultsContinue.addEventListener("click", () => {
+	    const completedSession = { ...challengeSession };
+	    challengeSession = createEmptyChallengeSession();
+	    flushChallengeRewardCelebrations(completedSession);
+	    if (guidedLearningActive) {
+	      continueAfterGuidedChallengeResult(completedSession);
+	      return;
     }
     guidedLearningActive = false;
     returnToLearnGermanOrDashboard();
@@ -13899,63 +13901,348 @@ function updateArticleLearningProgress(card, isCorrect) {
   return articleStatus;
 }
 
+function createEmptyRewardCelebrationSummary() {
+  return {
+    personalRewards: [],
+    villageRewards: [],
+    townCenterStages: [],
+    beforePersonalCoins: 0,
+    afterPersonalCoins: 0,
+    beforeSharedCoins: 0,
+    afterSharedCoins: 0
+  };
+}
+
 function awardCoins(amount) {
   if (!currentProfileId) return;
   const profile = profileStore?.profiles?.[currentProfileId];
   if (!profile) return;
-  profile.coins = normalizeCoinCount(profile.coins) + normalizeCounter(amount);
+  const awardAmount = normalizeCounter(amount);
+  if (!awardAmount) return;
+  const group = getCurrentGroup();
+  const beforePersonalCoins = normalizeCoinCount(profile.coins);
+  const beforeSharedCoins = getGroupCoinTotal(group);
+  const previousSeen = snapshotRewardSeenState(profile, group);
+  markHistoricalRewardsSeenBeforeActivity(profile, group, beforePersonalCoins, beforeSharedCoins);
+
+  profile.coins = beforePersonalCoins + awardAmount;
   awardLevelBonusIfNeeded(profile);
   celebrateFamilyLevelIfNeeded();
-  checkRewardUnlocks(profile);
-  checkTownCenterStageUnlocks();
+
+  const afterPersonalCoins = normalizeCoinCount(profile.coins);
+  const afterSharedCoins = getGroupCoinTotal(group);
+  const celebrationSummary = collectRewardCelebrationsCrossedByActivity({
+    profile,
+    group,
+    beforePersonalCoins,
+    afterPersonalCoins,
+    beforeSharedCoins,
+    afterSharedCoins,
+    previousSeen
+  });
+  queueRewardCelebrationSummary(celebrationSummary);
+  logRewardDiagnostics({
+    amount: awardAmount,
+    beforePersonalCoins,
+    afterPersonalCoins,
+    beforeSharedCoins,
+    afterSharedCoins,
+    previousSeen,
+    celebrationSummary
+  });
   saveProfileStore({ immediate: true });
+}
+
+function snapshotRewardSeenState(profile, group) {
+  return {
+    personal: new Set(normalizeRewardIdList(profile?.austriaAlbumSeenRewards)),
+    village: new Set(normalizeVillageAlbumSeenRewardIds(group?.villageAlbumSeenRewards)),
+    townCenter: new Set(normalizeRewardIdList(group?.townCenterStagesSeen))
+  };
+}
+
+function markHistoricalRewardsSeenBeforeActivity(profile, group, personalCoins, sharedCoins) {
+  if (profile) {
+    const seen = new Set(normalizeRewardIdList(profile.austriaAlbumSeenRewards));
+    AUSTRIA_ALBUM_REWARDS
+      .filter((reward) => normalizeCoinCount(personalCoins) >= reward.coins)
+      .forEach((reward) => seen.add(reward.id));
+    profile.austriaAlbumSeenRewards = [...seen];
+  }
+  if (!group) return;
+  const villageSeen = new Set(normalizeVillageAlbumSeenRewardIds(group.villageAlbumSeenRewards));
+  VILLAGE_ALBUM_REWARDS
+    .filter((reward) => normalizeCoinCount(sharedCoins) >= reward.coins)
+    .forEach((reward) => villageSeen.add(reward.id));
+  group.villageAlbumSeenRewards = [...villageSeen];
+
+  const townSeen = new Set(normalizeRewardIdList(group.townCenterStagesSeen));
+  TOWN_CENTER_STAGES
+    .filter((stage) => stage.coins > 0 && normalizeCoinCount(sharedCoins) >= stage.coins)
+    .forEach((stage) => townSeen.add(stage.id));
+  group.townCenterStagesSeen = [...townSeen];
+}
+
+function collectRewardCelebrationsCrossedByActivity({
+  profile,
+  group,
+  beforePersonalCoins,
+  afterPersonalCoins,
+  beforeSharedCoins,
+  afterSharedCoins,
+  previousSeen
+}) {
+  const summary = {
+    ...createEmptyRewardCelebrationSummary(),
+    beforePersonalCoins,
+    afterPersonalCoins,
+    beforeSharedCoins,
+    afterSharedCoins
+  };
+  if (profile) {
+    profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
+    summary.personalRewards = AUSTRIA_ALBUM_REWARDS.filter((reward) => (
+      beforePersonalCoins < reward.coins
+      && afterPersonalCoins >= reward.coins
+      && !previousSeen.personal.has(reward.id)
+    ));
+    summary.personalRewards.forEach((reward) => {
+      if (!profile.austriaAlbumSeenRewards.includes(reward.id)) profile.austriaAlbumSeenRewards.push(reward.id);
+    });
+  }
+  if (group) {
+    group.villageAlbumSeenRewards = normalizeVillageAlbumSeenRewardIds(group.villageAlbumSeenRewards);
+    group.townCenterStagesSeen = normalizeRewardIdList(group.townCenterStagesSeen);
+    summary.villageRewards = VILLAGE_ALBUM_REWARDS.filter((reward) => (
+      beforeSharedCoins < reward.coins
+      && afterSharedCoins >= reward.coins
+      && !previousSeen.village.has(reward.id)
+    ));
+    summary.villageRewards.forEach((reward) => {
+      if (!group.villageAlbumSeenRewards.includes(reward.id)) group.villageAlbumSeenRewards.push(reward.id);
+      if (reward.id === VILLAGE_NAMING_MEMORY_ID && !normalizeVillageName(group.villageName)) group.namingCeremonyReady = true;
+    });
+    summary.townCenterStages = TOWN_CENTER_STAGES.filter((stage) => (
+      stage.coins > 0
+      && beforeSharedCoins < stage.coins
+      && afterSharedCoins >= stage.coins
+      && !previousSeen.townCenter.has(stage.id)
+    ));
+    summary.townCenterStages.forEach((stage) => {
+      if (!group.townCenterStagesSeen.includes(stage.id)) group.townCenterStagesSeen.push(stage.id);
+    });
+  }
+  return summary;
+}
+
+function mergeRewardCelebrationSummary(target, source) {
+  if (!target || !source) return target || createEmptyRewardCelebrationSummary();
+  const mergeById = (existing, incoming) => {
+    const byId = new Map((existing || []).map((item) => [item.id, item]));
+    (incoming || []).forEach((item) => byId.set(item.id, item));
+    return [...byId.values()];
+  };
+  target.personalRewards = mergeById(target.personalRewards, source.personalRewards);
+  target.villageRewards = mergeById(target.villageRewards, source.villageRewards);
+  target.townCenterStages = mergeById(target.townCenterStages, source.townCenterStages);
+  target.beforePersonalCoins = target.beforePersonalCoins || source.beforePersonalCoins || 0;
+  target.afterPersonalCoins = Math.max(normalizeCoinCount(target.afterPersonalCoins), normalizeCoinCount(source.afterPersonalCoins));
+  target.beforeSharedCoins = target.beforeSharedCoins || source.beforeSharedCoins || 0;
+  target.afterSharedCoins = Math.max(normalizeCoinCount(target.afterSharedCoins), normalizeCoinCount(source.afterSharedCoins));
+  return target;
+}
+
+function hasRewardCelebrationSummary(summary) {
+  return Boolean(summary?.personalRewards?.length || summary?.villageRewards?.length || summary?.townCenterStages?.length);
+}
+
+function queueRewardCelebrationSummary(summary) {
+  if (!hasRewardCelebrationSummary(summary)) return;
+  if (challengeSession.type && !challengeSession.complete) {
+    challengeSession.rewardCelebrations = mergeRewardCelebrationSummary(
+      challengeSession.rewardCelebrations || createEmptyRewardCelebrationSummary(),
+      summary
+    );
+    return;
+  }
+  enqueueRewardCelebrationPopups(summary);
+  showNextPendingCelebration();
+}
+
+function enqueueRewardCelebrationPopups(summary) {
+  if (!hasRewardCelebrationSummary(summary)) return;
+  if (summary.personalRewards?.length) {
+    pendingCelebrations.push(() => showPersonalRewardSummaryCelebration(summary.personalRewards, summary));
+  }
+  if (summary.villageRewards?.length || summary.townCenterStages?.length) {
+    pendingCelebrations.push(() => showFamilyRewardSummaryCelebration(summary));
+  }
+}
+
+function flushChallengeRewardCelebrations(session = challengeSession) {
+  if (!hasRewardCelebrationSummary(session?.rewardCelebrations)) return;
+  enqueueRewardCelebrationPopups(session.rewardCelebrations);
 }
 
 function checkRewardUnlocks(profile) {
   if (!profile) return;
   const group = getCurrentGroup();
   if (!group) return;
-  profile.austriaAlbumSeenRewards = normalizeRewardIdList(profile.austriaAlbumSeenRewards);
-  group.villageAlbumSeenRewards = normalizeVillageAlbumSeenRewardIds(group.villageAlbumSeenRewards);
-  const sharedCoins = getGroupCoinTotal(group);
   const personalCoins = normalizeCoinCount(profile.coins);
-  const newPersonalReward = AUSTRIA_ALBUM_REWARDS.find((reward) => {
-    return personalCoins >= reward.coins && !profile.austriaAlbumSeenRewards.includes(reward.id);
-  });
-  if (newPersonalReward) {
-    profile.austriaAlbumSeenRewards.push(newPersonalReward.id);
-    showRewardUnlockCelebration(newPersonalReward, "My Austria Album");
+  const sharedCoins = getGroupCoinTotal(group);
+  markHistoricalRewardsSeenBeforeActivity(profile, group, personalCoins, sharedCoins);
+}
+
+function checkTownCenterStageUnlocks() {
+  const group = getCurrentGroup();
+  if (!group) return;
+  markHistoricalRewardsSeenBeforeActivity(getCurrentProfile(), group, normalizeCoinCount(getCurrentProfile()?.coins), getGroupCoinTotal(group));
+}
+
+function getMilestoneImageSource(milestone, track = "") {
+  if (!milestone) return "";
+  if (track === "town-center" || TOWN_CENTER_STAGES.some((stage) => stage.id === milestone.id)) {
+    return getTownCenterImageSrc(milestone);
+  }
+  if (isImagePath(milestone.image)) return milestone.image;
+  return "";
+}
+
+function renderCelebrationMilestoneImage(milestone, track = "") {
+  if (!els.levelCelebrationImageFrame || !els.levelCelebrationImage) return;
+  const imageSrc = getMilestoneImageSource(milestone, track);
+  if (!imageSrc) {
+    els.levelCelebrationImage.removeAttribute("src");
+    els.levelCelebrationImage.alt = "";
+    els.levelCelebrationImageFrame.classList.add("hidden");
+    logRewardDiagnostics({ missingImageMilestoneId: milestone?.id || "", track });
     return;
   }
-  const newVillageReward = VILLAGE_ALBUM_REWARDS.find((reward) => {
-    return sharedCoins >= reward.coins && !group.villageAlbumSeenRewards.includes(reward.id);
+  els.levelCelebrationImageFrame.classList.remove("hidden");
+  els.levelCelebrationImage.alt = milestone?.title || milestone?.name || "Unlocked milestone";
+  els.levelCelebrationImage.onerror = () => {
+    els.levelCelebrationImage.removeAttribute("src");
+    els.levelCelebrationImageFrame.classList.add("hidden");
+    logRewardDiagnostics({ missingImageMilestoneId: milestone?.id || "", imageSrc, track });
+  };
+  els.levelCelebrationImage.src = imageSrc;
+}
+
+function renderCelebrationStatus(trackLabel, text) {
+  if (!els.levelCelebrationStatus) return;
+  els.levelCelebrationStatus.replaceChildren(
+    createTextElement("span", "", trackLabel),
+    createTextElement("strong", "", text)
+  );
+  els.levelCelebrationStatus.classList.remove("hidden");
+}
+
+function getRewardDiagnosticsMembers() {
+  return getCurrentGroupProfiles().map((profile) => ({
+    profileId: profile.id,
+    uid: profile.ownerUid || "",
+    displayName: getVillageDisplayName(profile),
+    coins: normalizeCoinCount(profile.coins),
+    contributionCoins: getVillageContributionCoins(profile)
+  }));
+}
+
+function logRewardDiagnostics(details = {}) {
+  if (!isCurrentUserDeveloper()) return;
+  const profile = getCurrentProfile();
+  const group = getCurrentGroup();
+  const selected = details.celebrationSummary || {};
+  console.info("[Unser Dorf reward diagnostics]", {
+    uid: firebaseAuthUser?.uid || "",
+    profileId: currentProfileId || "",
+    personalCoins: normalizeCoinCount(profile?.coins),
+    personalCoinSource: "unserDorf/v0Testing/users/{uid}.profiles/{profileId}.coins",
+    villageId: group?.id || currentGroupId || "",
+    villageMembersIncluded: getRewardDiagnosticsMembers(),
+    calculatedSharedTotal: getGroupCoinTotal(group),
+    beforePersonalCoins: details.beforePersonalCoins,
+    afterPersonalCoins: details.afterPersonalCoins,
+    beforeSharedCoins: details.beforeSharedCoins,
+    afterSharedCoins: details.afterSharedCoins,
+    crossedPersonalMilestones: (selected.personalRewards || []).map((reward) => reward.id),
+    crossedVillageMemoryMilestones: (selected.villageRewards || []).map((reward) => reward.id),
+    crossedTownCenterMilestones: (selected.townCenterStages || []).map((stage) => stage.id),
+    alreadyAnnouncedPersonal: details.previousSeen?.personal ? [...details.previousSeen.personal] : [],
+    alreadyAnnouncedVillage: details.previousSeen?.village ? [...details.previousSeen.village] : [],
+    alreadyAnnouncedTownCenter: details.previousSeen?.townCenter ? [...details.previousSeen.townCenter] : [],
+    missingImageMilestoneId: details.missingImageMilestoneId || "",
+    imageSrc: details.imageSrc || "",
+    track: details.track || ""
   });
-  if (newVillageReward) {
-    group.villageAlbumSeenRewards.push(newVillageReward.id);
-    if (newVillageReward.id === VILLAGE_NAMING_MEMORY_ID && !normalizeVillageName(group.villageName)) {
-      group.namingCeremonyReady = true;
-      showVillageNamingCeremony();
-      return;
-    }
-    showRewardUnlockCelebration(newVillageReward, "Village Memories");
-  }
+}
+
+function showPersonalRewardSummaryCelebration(rewards, summary = {}) {
+  if (deferCelebration(() => showPersonalRewardSummaryCelebration(rewards, summary))) return;
+  const unlocked = (rewards || []).filter(Boolean);
+  const primaryReward = unlocked[unlocked.length - 1];
+  resetLevelCelebrationPresentation();
+  hideNamingCeremonyForm();
+  els.levelCelebration.classList.add("album-unlock-celebration");
+  els.levelCelebrationEyebrow.textContent = "MY PROGRESS";
+  els.levelCelebrationTitle.textContent = unlocked.length > 1 ? "New Album Rewards!" : "New Album Reward!";
+  els.levelCelebrationProfile.textContent = unlocked.length > 1 ? "You unlocked:" : "You unlocked:";
+  els.levelCelebrationLevel.textContent = unlocked.map((reward) => reward.title).join(" · ");
+  els.levelCelebrationBonus.textContent = primaryReward?.description || "Your personal Austria Album has grown.";
+  els.levelCelebrationBonus.classList.remove("hidden");
+  renderCelebrationMilestoneImage(primaryReward, "austria-album");
+  renderCelebrationStatus(
+    "My Progress",
+    `${normalizeCoinCount(summary.afterPersonalCoins)} personal coins`
+  );
+  showRewardCelebrationActions("austria-album", "View Album");
+  els.levelCelebration.classList.remove("hidden");
+}
+
+function showFamilyRewardSummaryCelebration(summary = {}) {
+  if (deferCelebration(() => showFamilyRewardSummaryCelebration(summary))) return;
+  const villageRewards = (summary.villageRewards || []).filter(Boolean);
+  const townCenterStages = (summary.townCenterStages || []).filter(Boolean);
+  const allMilestones = [...townCenterStages, ...villageRewards];
+  const primaryMilestone = allMilestones[allMilestones.length - 1];
+  resetLevelCelebrationPresentation();
+  hideNamingCeremonyForm();
+  els.levelCelebration.classList.add("album-unlock-celebration", "family-progress-celebration");
+  els.levelCelebrationEyebrow.textContent = "FAMILY Z PROGRESS";
+  els.levelCelebrationTitle.textContent = "Your village grew!";
+  els.levelCelebrationProfile.textContent = "Your learning helped Family Z reach:";
+  els.levelCelebrationLevel.textContent = allMilestones.map((item) => item.title || getTownCenterStageName(item)).join(" · ");
+  const parts = [];
+  if (townCenterStages.length) parts.push(`${townCenterStages.length} Town Center ${townCenterStages.length === 1 ? "stage" : "stages"}`);
+  if (villageRewards.length) parts.push(`${villageRewards.length} Village ${villageRewards.length === 1 ? "Memory" : "Memories"}`);
+  els.levelCelebrationBonus.textContent = parts.length
+    ? `Unlocked: ${parts.join(" and ")}.`
+    : "Your village progress has been updated.";
+  els.levelCelebrationBonus.classList.remove("hidden");
+  renderCelebrationMilestoneImage(
+    primaryMilestone,
+    townCenterStages.includes(primaryMilestone) ? "town-center" : "village-album"
+  );
+  renderCelebrationStatus(
+    "Family Z Progress",
+    `${normalizeCoinCount(summary.afterSharedCoins)} shared village coins`
+  );
+  showRewardCelebrationActions(villageRewards.length ? "village-album" : "town-center", villageRewards.length ? "View Memories" : "View Progress");
+  els.levelCelebration.classList.remove("hidden");
 }
 
 function showRewardUnlockCelebration(reward, source) {
   if (deferCelebration(() => showRewardUnlockCelebration(reward, source))) return;
   if (source === "My Austria Album") {
-    showAustriaAlbumUnlockCelebration(reward);
+    showPersonalRewardSummaryCelebration([reward], {
+      afterPersonalCoins: normalizeCoinCount(getCurrentProfile()?.coins)
+    });
     return;
   }
-  resetLevelCelebrationPresentation();
-  hideNamingCeremonyForm();
-  els.levelCelebrationTitle.textContent = "Congratulations!";
-  els.levelCelebrationProfile.textContent = "You unlocked:";
-  els.levelCelebrationLevel.textContent = reward.title;
-  els.levelCelebrationBonus.textContent = source;
-  els.levelCelebrationBonus.classList.remove("hidden");
-  showRewardCelebrationActions(source === "Village Memories" ? "village-album" : "austria-album", source === "Village Memories" ? "View Memories" : "View Album");
-  els.levelCelebration.classList.remove("hidden");
+  showFamilyRewardSummaryCelebration({
+    villageRewards: source === "Village Memories" ? [reward] : [],
+    townCenterStages: [],
+    afterSharedCoins: getGroupCoinTotal()
+  });
 }
 
 function showAustriaAlbumUnlockCelebration(reward) {
@@ -13975,20 +14262,7 @@ function showAustriaAlbumUnlockCelebration(reward) {
 }
 
 function renderAlbumUnlockImage(reward) {
-  if (!els.levelCelebrationImageFrame || !els.levelCelebrationImage) return;
-  if (!isImagePath(reward.image)) {
-    els.levelCelebrationImage.removeAttribute("src");
-    els.levelCelebrationImage.alt = "";
-    els.levelCelebrationImageFrame.classList.add("hidden");
-    return;
-  }
-  els.levelCelebrationImageFrame.classList.remove("hidden");
-  els.levelCelebrationImage.alt = reward.title;
-  els.levelCelebrationImage.onerror = () => {
-    els.levelCelebrationImage.removeAttribute("src");
-    els.levelCelebrationImageFrame.classList.add("hidden");
-  };
-  els.levelCelebrationImage.src = reward.image;
+  renderCelebrationMilestoneImage(reward, "austria-album");
 }
 
 function renderAlbumUnlockStatus() {
@@ -14002,7 +14276,7 @@ function renderAlbumUnlockStatus() {
 }
 
 function resetLevelCelebrationPresentation() {
-  els.levelCelebration.classList.remove("album-unlock-celebration");
+  els.levelCelebration.classList.remove("album-unlock-celebration", "family-progress-celebration");
   if (els.levelCelebrationEyebrow) els.levelCelebrationEyebrow.textContent = "Level up";
   if (els.levelCelebrationImage) {
     els.levelCelebrationImage.onerror = null;
@@ -14071,30 +14345,13 @@ function handleNamingCeremonySubmit(event) {
   if (currentProfileId) renderDashboard();
 }
 
-function checkTownCenterStageUnlocks() {
-  if (!profileStore) return;
-  const group = getCurrentGroup();
-  if (!group) return;
-  group.townCenterStagesSeen = normalizeRewardIdList(group.townCenterStagesSeen);
-  const sharedCoins = getGroupCoinTotal(group);
-  const newStage = TOWN_CENTER_STAGES.find((stage) => {
-    return stage.coins > 0 && sharedCoins >= stage.coins && !group.townCenterStagesSeen.includes(stage.id);
-  });
-  if (!newStage) return;
-  group.townCenterStagesSeen.push(newStage.id);
-  showTownCenterStageCelebration(newStage);
-}
-
 function showTownCenterStageCelebration(stage) {
   if (deferCelebration(() => showTownCenterStageCelebration(stage))) return;
-  resetLevelCelebrationPresentation();
-  els.levelCelebrationTitle.textContent = "Village Upgrade!";
-  els.levelCelebrationProfile.textContent = "The Town Center has unlocked:";
-  els.levelCelebrationLevel.textContent = getTownCenterStageName(stage);
-  els.levelCelebrationBonus.textContent = "";
-  els.levelCelebrationBonus.classList.add("hidden");
-  showRewardCelebrationActions("town-center", "View Progress");
-  els.levelCelebration.classList.remove("hidden");
+  showFamilyRewardSummaryCelebration({
+    villageRewards: [],
+    townCenterStages: [stage],
+    afterSharedCoins: getGroupCoinTotal()
+  });
 }
 
 function awardLevelBonusIfNeeded(profile) {
