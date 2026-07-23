@@ -32,6 +32,37 @@ const LEARN_GERMAN_DEFAULT_GOAL = 20;
 const LEARN_GERMAN_MIN_GOAL = 5;
 const LEARN_GERMAN_MAX_GOAL = 50;
 const LEARN_GERMAN_GOAL_STEP = 5;
+const GRAMMAR_CATEGORIES = {
+  cases: {
+    title: "Cases",
+    description: "Practise German case patterns.",
+    options: [
+      { id: "nominative", label: "Nominative", status: "soon" },
+      { id: "accusative", label: "Accusative", status: "soon" },
+      { id: "dative", label: "Dative", status: "soon" },
+      { id: "mixed-cases", label: "Mixed Cases", status: "soon" }
+    ]
+  },
+  prepositions: {
+    title: "Prepositions",
+    description: "Practise choosing the right German preposition.",
+    options: [
+      { id: "accusative-prepositions", label: "Accusative Prepositions", status: "soon" },
+      { id: "dative-prepositions", label: "Dative Prepositions", status: "soon" },
+      { id: "two-way-prepositions", label: "Two-Way Prepositions", status: "soon" },
+      { id: "mixed-prepositions", label: "Mixed Prepositions", status: "active", action: "prepositions" }
+    ]
+  },
+  "adjective-endings": {
+    title: "Adjective Endings",
+    description: "Practise adjective ending patterns.",
+    options: [
+      { id: "beginner", label: "Beginner", status: "soon" },
+      { id: "intermediate", label: "Intermediate", status: "soon" },
+      { id: "mixed-adjective-endings", label: "Mixed Adjective Endings", status: "soon" }
+    ]
+  }
+};
 const CHALLENGE_BANNER_ROTATION_QUESTIONS = 75;
 const CHALLENGE_BANNERS = [
   "assets/town-center-stage-1.png",
@@ -484,6 +515,7 @@ const els = {
   dashboardContinueButton: document.querySelector(".dashboard-continue-button"),
   learnGermanScreen: document.querySelector("#learnGermanScreen"),
   learnGermanBack: document.querySelector("#learnGermanBack"),
+  learnHeroContent: document.querySelector("#learnHeroContent"),
   learnHowItWorks: document.querySelector("#learnHowItWorks"),
   learnIntroPanel: document.querySelector("#learnIntroPanel"),
   learnIntroBack: document.querySelector("#learnIntroBack"),
@@ -501,14 +533,22 @@ const els = {
   learnGoalValue: document.querySelector("#learnGoalValue"),
   learnGoalNote: document.querySelector("#learnGoalNote"),
   learnEstimate: document.querySelector("#learnEstimate"),
-  learnProgressList: document.querySelector("#learnProgressList"),
-  learnDifficultPanel: document.querySelector("#learnDifficultPanel"),
+	  learnProgressList: document.querySelector("#learnProgressList"),
+	  learnVocabularyPanel: document.querySelector("#learnVocabularyPanel"),
+	  learnDifficultPanel: document.querySelector("#learnDifficultPanel"),
   learnDifficultSummary: document.querySelector("#learnDifficultSummary"),
   learnDifficultActions: document.querySelector("#learnDifficultActions"),
   learnDifficultVocabulary: document.querySelector("#learnDifficultVocabulary"),
   learnDifficultArticles: document.querySelector("#learnDifficultArticles"),
-  learnShortcutPanel: document.querySelector("#learnShortcutPanel"),
-  learnShortcutToggle: document.querySelector("#learnShortcutToggle"),
+  learnGrammarPanel: document.querySelector("#learnGrammarPanel"),
+  learnGrammarGrid: document.querySelector("#learnGrammarGrid"),
+  grammarCategoryScreen: document.querySelector("#grammarCategoryScreen"),
+  grammarCategoryBack: document.querySelector("#grammarCategoryBack"),
+  grammarCategoryEyebrow: document.querySelector("#grammarCategoryEyebrow"),
+  grammarCategoryTitle: document.querySelector("#grammarCategoryTitle"),
+  grammarCategoryDescription: document.querySelector("#grammarCategoryDescription"),
+  grammarOptionGrid: document.querySelector("#grammarOptionGrid"),
+  grammarCategoryStatus: document.querySelector("#grammarCategoryStatus"),
   achievementCollectionScreen: document.querySelector("#achievementCollectionScreen"),
   coinChallengesScreen: document.querySelector("#coinChallengesScreen"),
   levelSelectionScreen: document.querySelector("#levelSelectionScreen"),
@@ -816,6 +856,7 @@ let flashcardStudyCategory = "nouns";
 let selectedLearningPath = "";
 let selectedLearningLevel = "A1";
 let selectedChallengeCategory = "nouns";
+let selectedGrammarCategory = "prepositions";
 let pendingChallengeAction = "";
 let reviewReturnTarget = "";
 let learningGoalBackTarget = "learn-german";
@@ -966,6 +1007,9 @@ function getHistoryRouteForCurrentView() {
   if (currentView === "vocabulary-review" || currentView === "noun-verb" || currentView === "meaning-match" || currentView === "prepositions") {
     route.returnTarget = getReviewReturnTarget();
   }
+  if (currentView === "grammar-category") {
+    route.category = selectedGrammarCategory || "prepositions";
+  }
   return route;
 }
 
@@ -1063,6 +1107,7 @@ function isHistoryManagedView(view = currentView) {
     "noun-verb",
     "meaning-match",
     "prepositions",
+    "grammar-category",
     "austria-album",
     "village-album",
     "achievement-milestones",
@@ -1206,6 +1251,9 @@ function applyBrowserRoute(route) {
         break;
       case "prepositions":
         showPrepositionQuiz();
+        break;
+      case "grammar-category":
+        showGrammarCategoryPage(route.category || selectedGrammarCategory || "prepositions");
         break;
       case "austria-album":
       case "village-album":
@@ -4984,9 +5032,10 @@ function showDashboard(options = {}) {
   renderDashboard();
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
-  els.dashboardScreen.classList.remove("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.remove("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -5019,9 +5068,10 @@ function showLearnGermanPage() {
   renderLearnGermanPage();
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.add("hidden");
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.remove("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.remove("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -5066,9 +5116,10 @@ function showLandingScreen(options = {}) {
 }
 
 function hideAuthenticatedAppViews() {
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
@@ -5113,9 +5164,10 @@ function showDemoScreen(options = {}) {
   setChallengeBackButtons(false, false);
   els.landingScreen?.classList.add("hidden");
   els.demoScreen?.classList.remove("hidden");
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
@@ -5288,9 +5340,10 @@ function showCoinChallenges() {
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.remove("vocabulary-review-mode");
   setChallengeBackButtons(false, false);
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.add("hidden");
   els.developerToolsScreen?.classList.add("hidden");
   els.coinChallengesScreen.classList.remove("hidden");
@@ -5359,9 +5412,10 @@ function showStudyView(options = {}) {
     (cleanArticlePractice && !isArticleQuiz) || (isArticleQuiz && challengeSession.type === "articles"),
     false
   );
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
@@ -5399,9 +5453,10 @@ function showNounVerbQuiz() {
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
   els.appShell.classList.remove("vocabulary-review-mode");
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
@@ -5430,9 +5485,10 @@ function showVocabularyReviewQuiz() {
   els.appShell.classList.add("vocabulary-review-mode");
   els.appShell.classList.remove("article-quiz-mode");
   els.appShell.classList.remove("meaning-match-mode");
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.levelSelectionScreen.classList.add("hidden");
@@ -5464,6 +5520,7 @@ function showMeaningMatchQuiz() {
   els.appShell.classList.add("meaning-match-mode");
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
+  els.grammarCategoryScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -5494,6 +5551,7 @@ function showPrepositionQuiz() {
   els.appShell.classList.remove("vocabulary-review-mode");
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
+  els.grammarCategoryScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.flashcardResumeScreen?.classList.add("hidden");
@@ -8731,6 +8789,7 @@ function showVillageMembers() {
   renderVillageMembersPage();
   els.dashboardScreen.classList.add("hidden");
   els.learnGermanScreen?.classList.add("hidden");
+  els.grammarCategoryScreen?.classList.add("hidden");
   els.achievementCollectionScreen.classList.add("hidden");
   els.villageMembersScreen?.classList.remove("hidden");
   els.developerToolsScreen?.classList.add("hidden");
@@ -10361,10 +10420,11 @@ function showLearnIntroPanel(options = {}) {
   setLearnIntroContent({ firstTime });
   els.learnGermanScreen?.classList.add("intro-focused-mode");
   els.learnGermanScreen?.classList.toggle("first-time-intro-mode", firstTime);
-  els.learnIntroPanel?.classList.remove("hidden");
-  els.learnRecommendationPanel?.classList.add("hidden");
-  els.learnDifficultPanel?.classList.add("hidden");
-  els.learnShortcutPanel?.classList.add("hidden");
+	  els.learnIntroPanel?.classList.remove("hidden");
+	  els.learnRecommendationPanel?.classList.add("hidden");
+	  els.learnDifficultPanel?.classList.add("hidden");
+	  els.learnVocabularyPanel?.classList.add("hidden");
+	  els.learnGrammarPanel?.classList.add("hidden");
   updateLearnIntroPreviewControls();
   scrollPageToTop(els.learnIntroPanel || els.learnGermanScreen);
   syncBrowserHistory({ replace: firstTime });
@@ -10375,11 +10435,12 @@ function hideLearnIntroPanel() {
   els.learnGermanScreen?.classList.remove("first-time-intro-mode");
   setLearnIntroContent({ firstTime: false });
   els.learnIntroPanel?.classList.add("hidden");
-  removeLearnIntroPreviewControls();
-  els.learnRecommendationPanel?.classList.remove("hidden");
-  els.learnDifficultPanel?.classList.remove("hidden");
-  els.learnShortcutPanel?.classList.remove("hidden");
-}
+	  removeLearnIntroPreviewControls();
+	  els.learnRecommendationPanel?.classList.remove("hidden");
+	  els.learnDifficultPanel?.classList.remove("hidden");
+	  els.learnVocabularyPanel?.classList.remove("hidden");
+	  els.learnGrammarPanel?.classList.remove("hidden");
+	}
 
 function updateLearnIntroPreviewControls() {
   removeLearnIntroPreviewControls();
@@ -10512,11 +10573,47 @@ function getLearnGermanTimeEstimate(wordCount = getLearnGermanGoal()) {
   return `${minMinutes}–${maxMinutes} minutes`;
 }
 
+function hasStartedLearningExperience(profile = getCurrentProfile()) {
+  if (!profile) return false;
+  const studySet = normalizeActiveStudySet(profile.activeStudySet);
+  const sessions = normalizeFlashcardSessions(profile.flashcardSessions);
+  return Boolean(
+    studySet.wordIds.length
+    || Object.values(sessions).some((session) => session.deckIds?.length || session.completed)
+    || Object.keys(profile.progress || {}).length
+    || Object.keys(profile.vocabularyProgress || {}).length
+    || Object.keys(profile.articleProgress || {}).length
+    || normalizeCounter(profile.challengeSessionsCompleted) > 0
+  );
+}
+
+function renderLearnGermanHero(profile = getCurrentProfile()) {
+  if (!els.learnHeroContent) return;
+  if (hasStartedLearningExperience(profile)) {
+    const title = createTextElement("h2", "", "📚 Continue Learning");
+    const line = createTextElement(
+      "p",
+      "learn-hero-compact-line",
+      "How learning works: Learn → Review → Earn coins → Build your village"
+    );
+    els.learnHeroContent.replaceChildren(title, line);
+    return;
+  }
+  const title = createTextElement("h2", "", "📚 Learn German");
+  const list = document.createElement("ul");
+  list.className = "learn-hero-list";
+  ["Study new words", "Review what you learn", "Earn coins", "Help your village grow"].forEach((item) => {
+    list.append(createTextElement("li", "", item));
+  });
+  els.learnHeroContent.replaceChildren(title, list);
+}
+
 function renderLearnGermanPage() {
   if (isAuthenticatedLearningHydrating()) {
     renderLearnGermanHydrationLoading();
     return;
   }
+  renderLearnGermanHero();
   const recommendation = getLearnGermanRecommendation();
   const goal = getLearnGermanGoal();
   els.learnRecommendationCard?.classList.toggle("complete", recommendation.action === "complete");
@@ -10878,7 +10975,7 @@ function returnToLearnGermanOrDashboard() {
 }
 
 function setReviewReturnTarget(target = "") {
-  const validTargets = new Set(["continue-learning", "learn-german", "level-selection", "reviews", "dashboard"]);
+  const validTargets = new Set(["continue-learning", "learn-german", "level-selection", "reviews", "dashboard", "grammar-category"]);
   reviewReturnTarget = validTargets.has(target) ? target : "";
 }
 
@@ -10902,6 +10999,10 @@ function returnFromReviewFlow(event) {
   }
   if (target === "dashboard") {
     showDashboard();
+    return;
+  }
+  if (target === "grammar-category") {
+    showGrammarCategoryPage(selectedGrammarCategory || "prepositions");
     return;
   }
   showCoinChallenges();
@@ -11065,10 +11166,11 @@ function openFlashcardDeck(level, category, { forceNew = false, requestedGoal = 
   if (forceNew) prepareNewFlashcardStudySession(requestedGoal);
   loadOrCreateFlashcardSession(forceNew, requestedGoal);
   currentView = "learning-flashcards";
-  closeLearningDeckSelector();
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  closeLearningDeckSelector();
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -11126,10 +11228,11 @@ function showLevelSelection(path) {
   };
   els.levelSelectionContext.textContent = contextLabels[path] || "FLASHCARDS";
   currentView = "level-selection";
-  setChallengeBackButtons(false, false);
-  els.dashboardScreen.classList.add("hidden");
-  els.learnGermanScreen?.classList.add("hidden");
-  els.achievementCollectionScreen.classList.add("hidden");
+	  setChallengeBackButtons(false, false);
+	  els.dashboardScreen.classList.add("hidden");
+	  els.learnGermanScreen?.classList.add("hidden");
+	  els.grammarCategoryScreen?.classList.add("hidden");
+	  els.achievementCollectionScreen.classList.add("hidden");
   els.coinChallengesScreen.classList.add("hidden");
   els.challengeReadyScreen.classList.add("hidden");
   els.challengeResultsScreen.classList.add("hidden");
@@ -12189,19 +12292,94 @@ function renderDifficultWordsPanel() {
   const nounCount = articleCandidates.length;
   els.learnDifficultPanel.classList.toggle("is-empty", count === 0);
   if (!count) {
-    els.learnDifficultSummary.textContent = "No words";
+    els.learnDifficultSummary.textContent = "Nothing needs extra review right now.";
     els.learnDifficultActions?.classList.remove("has-articles");
     els.learnDifficultVocabulary?.classList.add("hidden");
     els.learnDifficultArticles?.classList.add("hidden");
     return;
   }
-  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word" : "words"}`;
+  els.learnDifficultSummary.textContent = `${count} ${count === 1 ? "word needs" : "words need"} extra practice.`;
   els.learnDifficultActions?.classList.toggle("has-articles", nounCount > 0);
   els.learnDifficultVocabulary?.classList.remove("hidden");
-  els.learnDifficultVocabulary.textContent = "Review Vocabulary";
+  els.learnDifficultVocabulary.textContent = `Review Difficult Vocabulary · ${count} ${count === 1 ? "word" : "words"}`;
   els.learnDifficultArticles?.classList.toggle("hidden", nounCount === 0);
   if (els.learnDifficultArticles) {
-    els.learnDifficultArticles.textContent = "Review Articles";
+    els.learnDifficultArticles.textContent = `Review Difficult Articles · ${nounCount} ${nounCount === 1 ? "noun" : "nouns"}`;
+  }
+}
+
+function getGrammarCategoryConfig(category = selectedGrammarCategory) {
+  return GRAMMAR_CATEGORIES[category] || GRAMMAR_CATEGORIES.prepositions;
+}
+
+function renderGrammarCategoryOptions(category = selectedGrammarCategory) {
+  if (!els.grammarOptionGrid) return;
+  const config = getGrammarCategoryConfig(category);
+  const optionButtons = config.options.map((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `grammar-option-card ${option.status === "active" ? "is-active" : "is-coming-soon"}`;
+    button.dataset.grammarOption = option.id;
+    const title = createTextElement("strong", "", option.label);
+    const status = createTextElement(
+      "span",
+      "grammar-option-status",
+      option.status === "active" ? "Start practice" : "Coming soon"
+    );
+    button.replaceChildren(title, status);
+    return button;
+  });
+  els.grammarOptionGrid.replaceChildren(...optionButtons);
+}
+
+function showGrammarCategoryPage(category = "prepositions") {
+  selectedGrammarCategory = GRAMMAR_CATEGORIES[category] ? category : "prepositions";
+  const config = getGrammarCategoryConfig(selectedGrammarCategory);
+  currentView = "grammar-category";
+  setChallengeBackButtons(false, false);
+  els.appShell.classList.remove("onboarding-mode", "landing-mode", "clean-article-practice", "clean-quiz-mode", "article-quiz-mode", "meaning-match-mode", "vocabulary-review-mode");
+  els.landingScreen?.classList.add("hidden");
+  els.demoScreen?.classList.add("hidden");
+  els.dashboardScreen?.classList.add("hidden");
+  els.learnGermanScreen?.classList.add("hidden");
+  els.achievementCollectionScreen?.classList.add("hidden");
+  els.villageMembersScreen?.classList.add("hidden");
+  els.developerToolsScreen?.classList.add("hidden");
+  els.coinChallengesScreen?.classList.add("hidden");
+  els.challengeReadyScreen?.classList.add("hidden");
+  els.levelSelectionScreen?.classList.add("hidden");
+  els.challengeResultsScreen?.classList.add("hidden");
+  els.flashcardResumeScreen?.classList.add("hidden");
+  els.flashcardSetupScreen?.classList.add("hidden");
+  els.learningGoalScreen?.classList.add("hidden");
+  els.learningFlashcardsScreen?.classList.add("hidden");
+  hideLegacyStudyUi();
+  if (els.grammarCategoryEyebrow) els.grammarCategoryEyebrow.textContent = "Grammar Practice";
+  if (els.grammarCategoryTitle) els.grammarCategoryTitle.textContent = config.title;
+  if (els.grammarCategoryDescription) els.grammarCategoryDescription.textContent = config.description;
+  els.grammarCategoryStatus?.classList.add("hidden");
+  renderGrammarCategoryOptions(selectedGrammarCategory);
+  els.grammarCategoryScreen?.classList.remove("hidden");
+  scrollPageToTop(els.grammarCategoryScreen);
+  syncBrowserHistory();
+}
+
+function handleGrammarCategoryOption(optionId = "") {
+  const config = getGrammarCategoryConfig(selectedGrammarCategory);
+  const option = config.options.find((item) => item.id === optionId);
+  if (!option) return;
+  if (option.status !== "active") {
+    if (els.grammarCategoryStatus) {
+      els.grammarCategoryStatus.textContent = `${option.label} is coming soon.`;
+      els.grammarCategoryStatus.classList.remove("hidden");
+    }
+    return;
+  }
+  els.grammarCategoryStatus?.classList.add("hidden");
+  if (option.action === "prepositions") {
+    setReviewReturnTarget("grammar-category");
+    selectedLearningPath = "";
+    showPrepositionQuiz();
   }
 }
 
@@ -12676,11 +12854,19 @@ function bindEvents() {
   els.learnGoalIncrease?.addEventListener("click", () => {
     setLearnGermanGoal(getLearnGermanGoal() + LEARN_GERMAN_GOAL_STEP);
   });
-  els.learnShortcutToggle?.addEventListener("click", () => {
-    toggleLearnPanel(els.learnShortcutPanel, els.learnShortcutToggle);
-  });
   els.learnDifficultVocabulary?.addEventListener("click", () => startFocusedDifficultReview("vocabulary"));
   els.learnDifficultArticles?.addEventListener("click", () => startFocusedDifficultReview("articles"));
+  els.learnGrammarGrid?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-grammar-category]");
+    if (!button) return;
+    showGrammarCategoryPage(button.dataset.grammarCategory);
+  });
+  els.grammarOptionGrid?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-grammar-option]");
+    if (!button) return;
+    handleGrammarCategoryOption(button.dataset.grammarOption);
+  });
+  els.grammarCategoryBack?.addEventListener("click", () => navigateAppBack(showLearnGermanPage));
   els.learnGermanScreen?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-learn-action]");
     if (!button) return;

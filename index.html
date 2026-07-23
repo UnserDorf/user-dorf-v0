@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=255">
+    <link rel="stylesheet" href="style.css?v=256">
   </head>
   <body>
     <section class="lock-screen hidden" id="lockScreen" aria-label="Password required">
@@ -396,7 +396,7 @@
         <div class="learn-german-heading">
           <button class="small-link-button learn-back-button" id="learnGermanBack" type="button">← Dashboard</button>
           <article class="learn-hero-card">
-            <div class="learn-hero-copy">
+            <div class="learn-hero-copy" id="learnHeroContent">
               <h2>📚 Learn German</h2>
               <ul class="learn-hero-list">
                 <li>Study new words</li>
@@ -455,31 +455,65 @@
           </article>
         </section>
 
-        <section class="learn-difficult-panel" id="learnDifficultPanel" aria-label="Review difficult words">
-          <div class="learn-difficult-copy">
-            <h3>⭐ Review Difficult Words</h3>
-            <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
+        <section class="learn-practice-panel" id="learnVocabularyPanel" aria-label="Vocabulary practice">
+          <div class="learn-section-heading">
+            <h3>Vocabulary Practice</h3>
+            <p>Build words, review them, earn coins, and help your village grow.</p>
           </div>
-          <div class="learn-difficult-actions" id="learnDifficultActions">
-            <button class="ghost-button" id="learnDifficultVocabulary" type="button">Review Vocabulary</button>
-            <button class="ghost-button hidden" id="learnDifficultArticles" type="button">Review Articles</button>
+          <div class="learn-loop-row" aria-label="Learn Review Earn Build">
+            <span>📚 Learn</span>
+            <span>✅ Review</span>
+            <span>🪙 Earn</span>
+            <span>🏡 Build</span>
           </div>
-        </section>
-
-        <section class="learn-shortcut-panel learn-collapsible is-collapsed" id="learnShortcutPanel" aria-label="Learning shortcuts">
-          <button class="learn-panel-toggle" id="learnShortcutToggle" type="button" aria-expanded="false">
-            <span>Optional</span>
-            <strong>Or jump to</strong>
-          </button>
-          <div class="learn-panel-body">
-            <p>Or jump to:</p>
-            <div class="learn-shortcut-grid">
-              <button class="ghost-button" type="button" data-learn-action="flashcards">📇 Flashcards</button>
-              <button class="ghost-button" type="button" data-learn-action="vocabulary-review">📝 Vocabulary Review</button>
-              <button class="ghost-button" type="button" data-learn-action="article-review">🔤 Article Review</button>
+          <div class="learn-practice-grid">
+            <button class="ghost-button" type="button" data-learn-action="flashcards">📇 Flashcards</button>
+            <button class="ghost-button" type="button" data-learn-action="vocabulary-review">📝 Vocabulary Review</button>
+            <button class="ghost-button" type="button" data-learn-action="article-review">🔤 Article Review</button>
+          </div>
+          <div class="learn-difficult-panel" id="learnDifficultPanel" aria-label="Review difficult words">
+            <div class="learn-difficult-copy">
+              <h4>⭐ Extra Practice</h4>
+              <p id="learnDifficultSummary">Nothing needs extra review right now.</p>
+            </div>
+            <div class="learn-difficult-actions" id="learnDifficultActions">
+              <button class="ghost-button" id="learnDifficultVocabulary" type="button">Review Difficult Vocabulary</button>
+              <button class="ghost-button hidden" id="learnDifficultArticles" type="button">Review Difficult Articles</button>
             </div>
           </div>
         </section>
+
+        <section class="learn-practice-panel" id="learnGrammarPanel" aria-label="Grammar practice">
+          <div class="learn-section-heading">
+            <h3>Grammar Practice</h3>
+            <p>Choose a grammar area to practise.</p>
+          </div>
+          <div class="learn-grammar-grid" id="learnGrammarGrid">
+            <button class="learn-grammar-card" type="button" data-grammar-category="cases">
+              <strong>Cases</strong>
+              <span>Nominative, accusative, dative</span>
+            </button>
+            <button class="learn-grammar-card" type="button" data-grammar-category="prepositions">
+              <strong>Prepositions</strong>
+              <span>Practise common prepositions</span>
+            </button>
+            <button class="learn-grammar-card" type="button" data-grammar-category="adjective-endings">
+              <strong>Adjective Endings</strong>
+              <span>Build adjective patterns</span>
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <section class="grammar-category-screen hidden" id="grammarCategoryScreen" aria-label="Grammar category">
+        <article class="grammar-category-card">
+          <button class="small-link-button" id="grammarCategoryBack" type="button">← Learn German</button>
+          <p class="eyebrow" id="grammarCategoryEyebrow">Grammar Practice</p>
+          <h2 id="grammarCategoryTitle">Prepositions</h2>
+          <p id="grammarCategoryDescription">Choose a practice set.</p>
+          <div class="grammar-option-grid" id="grammarOptionGrid"></div>
+          <p class="grammar-coming-soon hidden" id="grammarCategoryStatus"></p>
+        </article>
       </section>
 
       <section class="achievement-collection-screen hidden" id="achievementCollectionScreen" aria-label="Collection">
@@ -1070,6 +1104,6 @@
     </main>
 
     <script src="firebase-config.js?v=2"></script>
-    <script type="module" src="script.js?v=271"></script>
+    <script type="module" src="script.js?v=272"></script>
   </body>
 </html>
