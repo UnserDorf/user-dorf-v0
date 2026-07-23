@@ -149,6 +149,12 @@ const ONBOARDING_PAGES = [
 const ACHIEVEMENT_NOTIFICATION_DURATION_MS = 4600;
 const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const INTERNAL_BUILD_ID = "admin-profile-cleanup-2026-07-14";
+const APP_BUILD_METADATA = {
+  appVersion: "v0-testing",
+  buildId: "app-version-diagnostic-2026-07-23",
+  deployedCommit: "",
+  builtAt: "2026-07-23"
+};
 const FIREBASE_SYNC_DEFAULT_ROOT_PATH = "unserDorf/v0Testing";
 const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/shared";
 const FIREBASE_APP_MODULE_URL = "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -6293,6 +6299,9 @@ function createDeveloperOverviewSection(data) {
 }
 
 function createDeveloperDiagnosticsSection(data) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-diagnostics-stack";
+  wrapper.append(createDeveloperAppVersionCard());
   const section = document.createElement("section");
   section.className = "developer-tools-card developer-diagnostics-card";
   const firebaseConfig = getFirebaseSyncConfig().firebaseConfig;
@@ -6328,7 +6337,195 @@ function createDeveloperDiagnosticsSection(data) {
     createDifficultWordsDiagnosticsDetails(difficultDiagnostics),
     copyButton
   );
+  wrapper.append(section);
+  return wrapper;
+}
+
+function createDeveloperAppVersionCard() {
+  const versionInfo = getAppVersionInfo({ serviceWorkerStatus: "Checking..." });
+  const section = document.createElement("section");
+  section.className = "developer-tools-card developer-app-version-card";
+  const status = createTextElement("span", `developer-version-status ${versionInfo.statusClass}`.trim(), versionInfo.status);
+  const summary = document.createElement("div");
+  summary.className = "developer-app-version-summary";
+  summary.replaceChildren(
+    createTextElement("h3", "", "App Version"),
+    createTextElement("p", "", `JavaScript ${versionInfo.javascriptVersion} · CSS ${versionInfo.cssVersion}`),
+    status
+  );
+  const actions = document.createElement("div");
+  actions.className = "developer-tools-actions developer-version-actions";
+  const copyButton = createDeveloperActionButton("Copy version info", async () => {
+    const serviceWorkerStatus = await getServiceWorkerStatus();
+    const latestInfo = getAppVersionInfo({ serviceWorkerStatus });
+    await copyTextWithFallback(formatAppVersionDiagnosticText(latestInfo));
+    setDeveloperToolsStatus("Version info copied.");
+  });
+  const reloadButton = createDeveloperActionButton("Reload app", async () => {
+    window.location.reload();
+  });
+  actions.replaceChildren(copyButton, reloadButton);
+
+  const details = document.createElement("details");
+  details.className = "developer-technical-details developer-version-details";
+  details.replaceChildren(
+    createTextElement("summary", "", "Show details"),
+    createDeveloperDefinitionList(getAppVersionDetailRows(versionInfo))
+  );
+
+  section.replaceChildren(summary, actions, details);
+  hydrateDeveloperAppVersionServiceWorker(section);
   return section;
+}
+
+function getAppVersionInfo(overrides = {}) {
+  const scriptUrl = getLoadedResourceUrl("script", "script.js");
+  const cssUrl = getLoadedResourceUrl("link", "style.css");
+  const javascriptVersion = getResourceCacheVersion(scriptUrl);
+  const cssVersion = getResourceCacheVersion(cssUrl);
+  const standaloneMode = isRunningStandalone();
+  const serviceWorkerStatus = overrides.serviceWorkerStatus || getSynchronousServiceWorkerStatus();
+  return {
+    appVersion: APP_BUILD_METADATA.appVersion || "Not available",
+    buildId: APP_BUILD_METADATA.buildId || "Not available",
+    javascriptVersion,
+    cssVersion,
+    javascriptUrl: scriptUrl || "Not available",
+    cssUrl: cssUrl || "Not available",
+    deployedCommit: APP_BUILD_METADATA.deployedCommit || "Not available",
+    builtAt: APP_BUILD_METADATA.builtAt || "Not available",
+    status: "Version unavailable",
+    statusClass: "is-unknown",
+    serviceWorkerStatus,
+    url: window.location.href,
+    mode: standaloneMode ? "Standalone" : "Browser",
+    userAgent: navigator.userAgent || "Not available",
+    checkedAt: new Date().toLocaleString()
+  };
+}
+
+function getLoadedResourceUrl(selector, fileName) {
+  const elements = Array.from(document.querySelectorAll(`${selector}[src], ${selector}[href]`));
+  const match = elements.find((element) => {
+    const value = element.getAttribute("src") || element.getAttribute("href") || "";
+    return value.includes(fileName);
+  });
+  if (!match) return "";
+  const value = match.getAttribute("src") || match.getAttribute("href") || "";
+  try {
+    return new URL(value, window.location.href).href;
+  } catch {
+    return value;
+  }
+}
+
+function getResourceCacheVersion(resourceUrl) {
+  if (!resourceUrl) return "Not available";
+  try {
+    const version = new URL(resourceUrl, window.location.href).searchParams.get("v");
+    return version ? `v${version}` : "Not available";
+  } catch {
+    const match = String(resourceUrl).match(/[?&]v=([^&#]+)/);
+    return match ? `v${match[1]}` : "Not available";
+  }
+}
+
+function isRunningStandalone() {
+  return Boolean(
+    window.matchMedia?.("(display-mode: standalone)")?.matches
+      || window.navigator.standalone
+  );
+}
+
+function getSynchronousServiceWorkerStatus() {
+  if (!("serviceWorker" in navigator)) return "Not supported";
+  return navigator.serviceWorker.controller ? "Supported · controlling current page" : "Supported · not controlling current page";
+}
+
+async function hydrateDeveloperAppVersionServiceWorker(section) {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const status = await getServiceWorkerStatus();
+    const details = section.querySelector(".developer-version-details");
+    if (!details) return;
+    details.replaceChildren(
+      createTextElement("summary", "", "Show details"),
+      createDeveloperDefinitionList(getAppVersionDetailRows(getAppVersionInfo({ serviceWorkerStatus: status })))
+    );
+  } catch (error) {
+    console.warn("[Unser Dorf version diagnostics] Could not read service-worker registration.", error);
+    const details = section.querySelector(".developer-version-details");
+    if (!details) return;
+    details.replaceChildren(
+      createTextElement("summary", "", "Show details"),
+      createDeveloperDefinitionList(getAppVersionDetailRows(getAppVersionInfo({ serviceWorkerStatus: `Unavailable: ${getErrorMessage(error)}` })))
+    );
+  }
+}
+
+async function getServiceWorkerStatus() {
+  if (!("serviceWorker" in navigator)) return "Not supported";
+  const registration = await navigator.serviceWorker.getRegistration();
+  return registration
+    ? [
+        "Registered",
+        navigator.serviceWorker.controller ? "controlling current page" : "not controlling current page",
+        registration.active?.state ? `active: ${registration.active.state}` : "no active worker"
+      ].join(" · ")
+    : "Supported · not registered";
+}
+
+function getAppVersionDetailRows(info) {
+  return [
+    ["App/build", info.appVersion],
+    ["Build ID", info.buildId],
+    ["JavaScript", info.javascriptVersion],
+    ["CSS", info.cssVersion],
+    ["Commit", info.deployedCommit],
+    ["Built", info.builtAt],
+    ["Status", info.status],
+    ["Mode", info.mode],
+    ["Service worker", info.serviceWorkerStatus],
+    ["URL", info.url],
+    ["JavaScript URL", info.javascriptUrl],
+    ["CSS URL", info.cssUrl],
+    ["Checked", info.checkedAt]
+  ];
+}
+
+function formatAppVersionDiagnosticText(info) {
+  return [
+    "Unser Dorf version information",
+    `App/build: ${info.appVersion}`,
+    `Build ID: ${info.buildId}`,
+    `JavaScript: ${info.javascriptVersion}`,
+    `CSS: ${info.cssVersion}`,
+    `Commit: ${info.deployedCommit}`,
+    `Built: ${info.builtAt}`,
+    `Mode: ${info.mode}`,
+    `Service worker: ${info.serviceWorkerStatus}`,
+    `URL: ${info.url}`,
+    `User agent: ${info.userAgent}`,
+    `Checked: ${info.checkedAt}`
+  ].join("\n");
+}
+
+async function copyTextWithFallback(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.inset = "auto auto 0 0";
+  textarea.style.opacity = "0";
+  document.body.append(textarea);
+  textarea.select();
+  const copied = document.execCommand("copy");
+  textarea.remove();
+  if (!copied) throw new Error("Clipboard copy is not available in this browser.");
 }
 
 function createDifficultWordsDiagnosticsDetails(candidates) {

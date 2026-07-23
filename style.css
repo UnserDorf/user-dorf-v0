@@ -11587,6 +11587,11 @@ body:has(#developerToolsScreen:not(.hidden)) {
   gap: clamp(14px, 2vw, 20px);
 }
 
+.developer-diagnostics-stack {
+  display: grid;
+  gap: clamp(14px, 2vw, 20px);
+}
+
 .developer-tools-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -11626,6 +11631,53 @@ body:has(#developerToolsScreen:not(.hidden)) {
   margin: 0;
   color: var(--green);
   line-height: 1.12;
+}
+
+.developer-app-version-card {
+  gap: 12px;
+}
+
+.developer-app-version-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.developer-app-version-summary h3,
+.developer-app-version-summary p {
+  margin: 0;
+}
+
+.developer-app-version-summary p {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 780;
+}
+
+.developer-version-status {
+  grid-row: span 2;
+  border-radius: 999px;
+  background: rgba(236, 244, 229, 0.9);
+  color: var(--green);
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 860;
+  white-space: nowrap;
+}
+
+.developer-version-status.is-unknown {
+  background: rgba(239, 234, 224, 0.9);
+  color: var(--muted);
+}
+
+.developer-version-actions {
+  grid-template-columns: repeat(auto-fit, minmax(145px, max-content));
+  justify-content: start;
+}
+
+.developer-version-details .developer-definition-list {
+  font-size: 0.8rem;
 }
 
 .developer-system-status-card .developer-definition-list {
@@ -12085,6 +12137,20 @@ body:has(#developerToolsScreen:not(.hidden)) {
   .developer-definition-list {
     grid-template-columns: 1fr;
     gap: 2px;
+  }
+
+  .developer-app-version-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .developer-version-status {
+    grid-row: auto;
+    justify-self: start;
+    white-space: normal;
+  }
+
+  .developer-version-actions {
+    grid-template-columns: 1fr;
   }
 
   .developer-definition-list dd {
