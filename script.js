@@ -939,6 +939,9 @@ let developerToolsActiveSection = "overview";
 let developerToolsBusy = false;
 let developerToolsLastData = null;
 let developerToolsLastError = null;
+let canonicalUserDocumentLoaded = false;
+let canonicalUserRole = "member";
+let canonicalProtectedAccount = false;
 let cloudSyncDebug = {
   firebaseSignedIn: false,
   syncEnabled: false,
@@ -3150,13 +3153,26 @@ function ensureBootstrapDeveloperRole() {
   return true;
 }
 
+function rememberCanonicalUserAuthorization(userData = {}) {
+  canonicalUserDocumentLoaded = true;
+  canonicalUserRole = sanitizeUserRole(userData.role);
+  canonicalProtectedAccount = Boolean(userData.protectedAccount || canonicalUserRole === "developer");
+}
+
+function resetCanonicalUserAuthorization() {
+  canonicalUserDocumentLoaded = false;
+  canonicalUserRole = "member";
+  canonicalProtectedAccount = false;
+}
+
 function getRoleForUserDocumentSave(activeProfile = getCurrentProfile()) {
   if (shouldBootstrapDeveloperRole()) return "developer";
+  if (canonicalUserDocumentLoaded && canonicalUserRole !== "member") return canonicalUserRole;
   return sanitizeUserRole(activeProfile?.role || getCurrentUserRole());
 }
 
 function getProtectedAccountForUserDocumentSave(activeProfile = getCurrentProfile()) {
-  return Boolean(shouldBootstrapDeveloperRole() || activeProfile?.protectedAccount);
+  return Boolean(shouldBootstrapDeveloperRole() || canonicalProtectedAccount || activeProfile?.protectedAccount);
 }
 
 function normalizeLevelBonuses(savedLevels, coinValue) {
@@ -3564,6 +3580,7 @@ async function fetchEssentialUserProfileStoreFromCloud() {
     currentProfile: userData.currentProfile || "",
     profileIds: Object.keys(userData.profiles || {})
   });
+  rememberCanonicalUserAuthorization(userData);
   firestoreProfileExists = getFirebaseIdentityProfileIds({
     profiles: userData.profiles || {}
   }, firebaseAuthUser).length > 0;
@@ -3733,6 +3750,7 @@ async function fetchProfileStoreFromCloud() {
         );
       });
       mergeRemoteProfilesIntoStore(remoteStore, userIdentityProfiles, { preferIncomingIdentity: true });
+      rememberCanonicalUserAuthorization(userData);
       const userRole = sanitizeUserRole(userData.role);
       if (userRole !== "member") {
         getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
@@ -4977,6 +4995,7 @@ async function handleFirebaseSignedIn(user) {
   firebaseAuthUser = user || null;
   firebaseAuthReady = true;
   syncEnabled = false;
+  resetCanonicalUserAuthorization();
   userProgressHydratedFromServer = false;
   userProgressHydrationInProgress = Boolean(firebaseAuthUser);
   updateCloudSyncDebug({ userDocLoaded: false }, "Firebase signed in");
@@ -5001,6 +5020,7 @@ async function signOutOfFirebase() {
   }
   firebaseAuthUser = null;
   syncEnabled = false;
+  resetCanonicalUserAuthorization();
   userProgressHydratedFromServer = false;
   userProgressHydrationInProgress = false;
   saveCurrentPosition();
@@ -5314,6 +5334,7 @@ function clearLocalAccountState() {
   firebaseAuthUser = null;
   firebaseAuthReady = true;
   syncEnabled = false;
+  resetCanonicalUserAuthorization();
   currentProfileId = "";
   pendingProfileId = "";
   currentGroupId = DEFAULT_GROUP_ID;
@@ -6487,6 +6508,7 @@ async function isCurrentUserDeveloperFromFirestore() {
       }
     );
     const data = snapshot.exists() ? snapshot.data() || {} : {};
+    if (snapshot.exists()) rememberCanonicalUserAuthorization(data);
     let role = sanitizeUserRole(data.role);
     const protectedAccount = Boolean(data.protectedAccount);
     if (role !== "developer" && shouldBootstrapDeveloperRole(firebaseAuthUser)) {
@@ -6502,6 +6524,7 @@ async function isCurrentUserDeveloperFromFirestore() {
         updatedAtIso: new Date().toISOString()
       }, { merge: true });
       role = "developer";
+      rememberCanonicalUserAuthorization({ ...data, role: "developer", protectedAccount: true });
     }
     if (profile && role === "developer") profile.role = role;
     if (profile && (protectedAccount || role === "developer")) profile.protectedAccount = true;
@@ -6521,7 +6544,7 @@ async function isCurrentUserDeveloperFromFirestore() {
       email: firebaseAuthUser?.email || "",
       error
     });
-    return false;
+    throw error;
   }
 }
 
@@ -12656,6 +12679,42 @@ function showChallengeReady(action) {
   syncBrowserHistory();
 }
 
+function getArticleReviewStartupDiagnostics() {
+  const studySet = getActiveStudySet();
+  const articleCards = getArticleChallengeCards(selectedLearningLevel);
+  return {
+    level: selectedLearningLevel,
+    guidedLearningActive,
+    activeStudySetWords: studySet.wordIds.length,
+    eligibleArticleQuestions: getGuidedArticleReviewQuestionCount(),
+    articleDatasetCount: articleCards.length,
+    sessionQuestionIds: challengeSession.questionIds?.length || 0,
+    visibleQuestionCount: visibleCards.length,
+    syncState: cloudSaveState,
+    pendingLocalProgressSave: hasPendingLocalProgressSave(),
+    hydrationComplete: userProgressHydratedFromServer
+  };
+}
+
+function showChallengeStartupError(message, details = {}) {
+  console.warn("[Unser Dorf Article Review startup] Could not start review.", {
+    message,
+    ...details
+  });
+  challengeSession = createEmptyChallengeSession();
+  pendingChallengeAction = "articles";
+  if (els.challengeReadyMeta) els.challengeReadyMeta.textContent = "Article Review";
+  if (els.challengeReadyPrompt) {
+    els.challengeReadyPrompt.textContent = message;
+    els.challengeReadyPrompt.classList.remove("hidden");
+  }
+  if (els.challengeReadyStart) els.challengeReadyStart.textContent = "Try Again";
+  els.challengeReadyScreen?.classList.remove("hidden");
+  els.studyStage?.classList.add("hidden");
+  els.actionBar?.classList.add("hidden");
+  syncBrowserHistory();
+}
+
 function beginPendingChallenge() {
   const startedAt = performance.now();
   const action = pendingChallengeAction;
@@ -12678,6 +12737,7 @@ function beginPendingChallenge() {
   const route = routes[action];
   if (!route) return;
   if (action === "articles") {
+    if (guidedLearningActive) prepareStudySetReviewContext("articles");
     if (guidedLearningActive && !getGuidedArticleReviewQuestionCount()) {
       console.info("[Unser Dorf guided learning] Skipping Article Review because this study set has no eligible nouns.");
       showLearnGermanPage();
@@ -12686,22 +12746,36 @@ function beginPendingChallenge() {
     console.info("[Unser Dorf Article Review startup]", {
       stage: "session construction started",
       elapsedMs: Math.round(performance.now() - startedAt),
-      guidedLearningActive
+      ...getArticleReviewStartupDiagnostics()
     });
     startChallengeSession("articles", selectedLearningLevel, { useStudySet: guidedLearningActive });
     console.info("[Unser Dorf Article Review startup]", {
       stage: "session construction completed",
       elapsedMs: Math.round(performance.now() - startedAt),
-      questionCount: challengeSession.questionIds.length,
+      ...getArticleReviewStartupDiagnostics(),
       studySetUsed: challengeSession.studySetUsed
     });
+    if (!challengeSession.questionIds.length) {
+      showChallengeStartupError("No article questions are available for this study set yet. You can go back to Continue Learning or try again.", {
+        elapsedMs: Math.round(performance.now() - startedAt),
+        ...getArticleReviewStartupDiagnostics()
+      });
+      return;
+    }
   }
   openStudyRoute(route);
   if (action === "articles") {
+    if (!visibleCards.length) {
+      showChallengeStartupError("Article Review could not build questions for the current study set. Please try again.", {
+        elapsedMs: Math.round(performance.now() - startedAt),
+        ...getArticleReviewStartupDiagnostics()
+      });
+      return;
+    }
     console.info("[Unser Dorf Article Review startup]", {
       stage: "first question rendered",
       elapsedMs: Math.round(performance.now() - startedAt),
-      visibleQuestionCount: visibleCards.length,
+      ...getArticleReviewStartupDiagnostics(),
       currentIndex
     });
   }
@@ -14382,7 +14456,7 @@ function renderCard() {
     ? articleChallengeActive
       ? `Question ${Math.min(challengeSession.answered + (articleQuizAnswered ? 0 : 1), getChallengeSessionQuestionCount())} of ${getChallengeSessionQuestionCount()}`
       : `${isArticleQuiz ? "Question" : "Card"} ${currentIndex + 1} of ${visibleCards.length}`
-    : isArticleQuiz ? "Loading your review..." : "Card 0 of 0";
+    : isArticleQuiz ? "No article questions available" : "Card 0 of 0";
   els.emptyState.classList.toggle("hidden", Boolean(card));
   els.previousCard.classList.remove("hidden");
   els.nextCard.classList.remove("hidden");
@@ -14406,6 +14480,9 @@ function renderCard() {
     els.questionText.textContent = isArticleQuiz ? "No article questions available" : "Nothing to study";
     els.questionTranslation.textContent = "";
     els.questionTranslation.classList.add("hidden");
+    if (isArticleQuiz && challengeSession.type === "articles") {
+      console.warn("[Unser Dorf Article Review startup] Article Review rendered without a question.", getArticleReviewStartupDiagnostics());
+    }
     return;
   }
 
