@@ -921,6 +921,7 @@ let cloudSaveState = "clean";
 let cloudSaveReason = "";
 let cloudSaveSequence = 0;
 let cloudSavePromise = null;
+let cloudSaveOperationId = 0;
 let cloudVisibilityHandlerBound = false;
 let lastSuccessfulCloudSaveTime = "";
 let lastAppliedServerProgressRevision = 0;
@@ -932,6 +933,7 @@ let lastCloudSnapshotDecision = {
   localRevision: 0
 };
 let profileDataSource = "localStorage";
+let preservedLocalProgressDuringHydration = false;
 let lastIdentityProfileWasCreated = false;
 let obsoleteLocalIdentityDataDetected = false;
 let villageRosterWriteCountSinceSignIn = 0;
@@ -3250,13 +3252,17 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
     cloudSavePending = true;
     updateCloudSyncDebug({ progressSaveState: "saving", progressSaveReason: reason }, "Firestore save queued behind active save");
     if (cloudSavePromise) await cloudSavePromise;
-    return;
+    if (cloudSavePending || cloudSaveState === "dirty" || cloudSaveState === "scheduled" || cloudSaveState === "failed") {
+      return saveProfileStoreToCloudNow(reason || cloudSaveReason || "queued profile progress save");
+    }
+    return cloudSavePromise;
   }
   cloudSaveInFlight = true;
   cloudSavePending = false;
   cloudSaveState = "saving";
   cloudSaveReason = reason || cloudSaveReason || "profile progress save";
   const saveSequence = ++cloudSaveSequence;
+  const operationId = ++cloudSaveOperationId;
   consolidateFirebaseIdentityProfiles(profileStore);
   promoteFamilyAchievements(profileStore);
   cloudSavePromise = (async () => {
@@ -3271,6 +3277,7 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
     const savedAt = new Date().toISOString();
     const activeProfileId = currentProfileId || profileStore.currentProfile || "";
     const activeProfile = activeProfileId ? profileStore.profiles?.[activeProfileId] : null;
+    const localCoinsBeforeSave = normalizeCoinCount(activeProfile?.coins);
     updateCloudSyncDebug({
       lastCloudSaveError: ""
     }, "Firestore save starting");
@@ -3299,6 +3306,17 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
       updatedAt: firebase.serverTimestamp(),
       updatedAtIso: savedAt
     };
+    console.info("[Unser Dorf progress save]", {
+      operationId,
+      reason: cloudSaveReason,
+      state: "start",
+      localCoins: localCoinsBeforeSave,
+      serializedCoins: normalizeCoinCount(userPayload.profiles?.[activeProfileId]?.coins),
+      localRevision: progressRevision,
+      expectedServerRevision: lastAppliedServerProgressRevision,
+      dirtyState: cloudSaveState,
+      path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid)
+    });
     traceUserProgressWrite("saveProfileStoreToCloudNow", "explicit profile/progress save", userPayload, {
       firestoreUserDocument: true,
       inMemoryProfile: true,
@@ -3314,7 +3332,11 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
       lastCloudSaveError: "",
       firestoreCoinsLoaded: normalizeCoinCount(activeProfile?.coins)
     }, "Firestore save complete");
-    if (saveSequence >= cloudSaveSequence) {
+    const newestProfile = activeProfileId ? profileStore.profiles?.[activeProfileId] : null;
+    const newestRevision = getCurrentProfileProgressRevision(newestProfile);
+    const newestCoins = normalizeCoinCount(newestProfile?.coins);
+    const savedNewestKnownState = newestRevision === progressRevision && newestCoins === localCoinsBeforeSave;
+    if (saveSequence >= cloudSaveSequence && savedNewestKnownState && !cloudSavePending) {
       cloudSaveState = "clean";
       cloudSaveReason = "";
       lastSuccessfulCloudSaveTime = savedAt;
@@ -3327,6 +3349,25 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
         lastAppliedServerProgressRevision,
         lastAcceptedServerCoinTotal
       }, "Progress save accepted");
+      console.info("[Unser Dorf progress save]", {
+        operationId,
+        state: "accepted",
+        savedCoins: localCoinsBeforeSave,
+        savedRevision: progressRevision,
+        path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid)
+      });
+    } else {
+      cloudSavePending = true;
+      cloudSaveState = "dirty";
+      console.info("[Unser Dorf progress save]", {
+        operationId,
+        state: "newer local progress queued",
+        savedCoins: localCoinsBeforeSave,
+        currentCoins: newestCoins,
+        savedRevision: progressRevision,
+        currentRevision: newestRevision,
+        path: getFirebaseUserDocPath(firebase, firebaseAuthUser.uid)
+      });
     }
   } catch (error) {
     cloudSaveState = "failed";
@@ -3341,7 +3382,7 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
     cloudSaveInFlight = false;
     if (cloudSavePending && firebaseAuthUser) {
       cloudSavePending = false;
-      saveProfileStoreToCloudNow(cloudSaveReason || "queued profile progress save");
+      await saveProfileStoreToCloudNow(cloudSaveReason || "queued profile progress save");
     }
   }
   })();
@@ -4051,6 +4092,7 @@ async function initializeFirebaseSyncApi() {
 function applyRemoteProfileStore(remoteStore) {
   if (!remoteStore?.profiles) return;
   if (!canApplyCloudSnapshot(remoteStore, "apply remote profile store")) return;
+  preservedLocalProgressDuringHydration = false;
   const preHydrationProfileId = currentProfileId || profileStore?.currentProfile || getFirebaseProfileId(firebaseAuthUser);
   const preHydrationProfile = preHydrationProfileId ? profileStore?.profiles?.[preHydrationProfileId] : null;
   lastPreHydrationProgressSnapshot = getProgressFieldSnapshot(preHydrationProfile || {});
@@ -4095,8 +4137,19 @@ function applyRemoteProfileStore(remoteStore) {
     discardedLocalProfileIds,
     serverProfileIds: [...remoteProfileIds],
     localStorageKey: PROFILE_STORAGE_KEY,
-    action: "local roster cache replaced by Firestore hydration"
+    action: preservedLocalProgressDuringHydration
+      ? "server identity applied; newer local progress preserved for retry save"
+      : "local roster cache replaced by Firestore hydration"
   });
+  if (preservedLocalProgressDuringHydration && firebaseAuthUser) {
+    cloudSaveState = "dirty";
+    cloudSaveReason = "save newer local progress preserved during hydration";
+    scheduleCloudSave({
+      immediate: true,
+      skipDirtyMark: true,
+      reason: cloudSaveReason
+    });
+  }
   refreshVisibleProfileState();
   renderAchievementDebugPanel();
 }
@@ -4178,7 +4231,31 @@ function mergeProfileData(localProfile, remoteProfile, defaultProfile, options =
   const preferRemoteIdentity = Boolean(options.preferRemoteIdentity && remoteProfile);
   const identitySource = preferRemoteIdentity ? remote : local;
   const fallbackIdentitySource = preferRemoteIdentity ? local : remote;
-  const progressSource = preferRemoteIdentity ? remote : null;
+  const localRevision = getCurrentProfileProgressRevision(local);
+  const remoteRevision = getCurrentProfileProgressRevision(remote);
+  const localResetVersion = normalizeCounter(local.progressResetVersion);
+  const remoteResetVersion = normalizeCounter(remote.progressResetVersion);
+  const localHasNewerUnsavedProgress = Boolean(
+    preferRemoteIdentity
+      && localProfile
+      && remoteProfile
+      && localRevision > remoteRevision
+      && localResetVersion >= remoteResetVersion
+  );
+  if (localHasNewerUnsavedProgress) {
+    preservedLocalProgressDuringHydration = true;
+    console.warn("[Unser Dorf progress hydration] Preserving newer local progress over older Firestore snapshot.", {
+      localRevision,
+      remoteRevision,
+      localCoins: normalizeCoinCount(local.coins),
+      remoteCoins: normalizeCoinCount(remote.coins),
+      localResetVersion,
+      remoteResetVersion
+    });
+  }
+  const progressSource = preferRemoteIdentity
+    ? localHasNewerUnsavedProgress ? local : remote
+    : null;
   return normalizeProfileData(
     {
       ...local,
