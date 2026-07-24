@@ -151,9 +151,9 @@ const ACHIEVEMENT_NOTIFICATION_QUEUE_DELAY_MS = 220;
 const INTERNAL_BUILD_ID = "admin-profile-cleanup-2026-07-14";
 const APP_BUILD_METADATA = {
   appVersion: "v0-testing",
-  buildId: "progress-persistence-sync-2026-07-23",
+  buildId: "signin-hydration-speed-2026-07-24",
   deployedCommit: "",
-  builtAt: "2026-07-23"
+  builtAt: "2026-07-24"
 };
 const FIREBASE_SYNC_DEFAULT_ROOT_PATH = "unserDorf/v0Testing";
 const FIREBASE_SYNC_DEFAULT_DOCUMENT_PATH = "unserDorf/v0Testing/profileStores/shared";
@@ -962,6 +962,8 @@ let userProgressHydratedFromServer = false;
 let userProgressHydrationInProgress = false;
 let studySessionWriteCountSinceSignIn = 0;
 let lastLearningHydrationSnapshot = null;
+let signInSequenceCounter = 0;
+let activeSignInSequenceId = 0;
 let browserHistoryApplying = false;
 let lastBrowserHistoryKey = "";
 let pendingBrowserRoute = null;
@@ -1579,6 +1581,42 @@ function logLearningHydration(details = {}) {
   });
 }
 
+function startSignInSequenceTiming(label = "sign-in") {
+  activeSignInSequenceId = signInSequenceCounter + 1;
+  signInSequenceCounter = activeSignInSequenceId;
+  return {
+    id: activeSignInSequenceId,
+    label,
+    startedAt: performance.now(),
+    lastAt: performance.now()
+  };
+}
+
+function logSignInSequenceStage(timing, stage, details = {}) {
+  if (!timing) return;
+  const now = performance.now();
+  const elapsedMs = Math.round(now - timing.startedAt);
+  const stageMs = Math.round(now - timing.lastAt);
+  timing.lastAt = now;
+  console.info("[Unser Dorf sign-in performance]", {
+    sequenceId: timing.id,
+    label: timing.label,
+    stage,
+    stageMs,
+    elapsedMs,
+    ...details
+  });
+}
+
+function runOptionalSignInTask(label, task) {
+  Promise.resolve()
+    .then(task)
+    .catch((error) => {
+      console.warn(`[Unser Dorf sign-in performance] Optional startup task failed: ${label}.`, error);
+      updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, `${label} failed`);
+    });
+}
+
 function traceUserProgressWrite(functionName, reason, payload = {}, sources = {}) {
   if (userProgressHydrationInProgress && (
     Object.prototype.hasOwnProperty.call(payload, "activeStudySet")
@@ -2002,9 +2040,16 @@ async function initializeFamilySync() {
     return;
   }
   try {
-    await getFirebaseSyncApi();
+    const timing = startSignInSequenceTiming(firebaseAuthUser ? "returning session" : "startup");
+    const firebase = await getFirebaseSyncApi();
     firebaseSyncAvailable = true;
+    logSignInSequenceStage(timing, "Firebase modules ready");
 	    await waitForFirebaseAuthState();
+    logSignInSequenceStage(timing, "Firebase auth state ready", {
+      signedIn: Boolean(firebaseAuthUser),
+      uid: firebaseAuthUser?.uid || "none",
+      email: firebaseAuthUser?.email || "none"
+    });
 	    if (!firebaseAuthUser) {
 	      syncEnabled = false;
 	      userProgressHydratedFromServer = false;
@@ -2024,7 +2069,12 @@ async function initializeFamilySync() {
 	      serverSessionId: "",
 	      localStateDiscarded: false
 	    };
-	    const remoteStore = await fetchProfileStoreFromCloud();
+	    const remoteStore = await fetchEssentialUserProfileStoreFromCloud();
+    logSignInSequenceStage(timing, "Required user profile loaded", {
+      hasRemoteStore: Boolean(remoteStore),
+      localCachedWordCount: lastLearningHydrationSnapshot.localCachedWordCount,
+      serverWordCount: lastLearningHydrationSnapshot.serverWordCount
+    });
 
     if (remoteStore) {
       applyRemoteProfileStore(remoteStore);
@@ -2041,17 +2091,44 @@ async function initializeFamilySync() {
 
     syncEnabled = true;
     updateCloudSyncDebug({}, "Firebase sync enabled");
-	    await verifySignInFamilyZRoster(firebaseSyncApi || await getFirebaseSyncApi());
-	    await verifySignInProgressState(firebaseSyncApi || await getFirebaseSyncApi());
-	    startFamilySyncPolling();
+    logSignInSequenceStage(timing, "Initial usable account ready", {
+      profileId: profileStore?.currentProfile || "",
+      villageId: profileStore?.currentGroup || ""
+    });
+    startFamilySyncPolling();
+    logSignInSequenceStage(timing, "Background polling scheduled");
+    runOptionalSignInTask("background village hydration", () => hydrateOptionalFamilySyncAfterSignIn(firebase, timing.id));
   } catch (error) {
     syncEnabled = false;
     firebaseSyncAvailable = false;
     userProgressHydratedFromServer = false;
     userProgressHydrationInProgress = false;
     updateCloudSyncDebug({ lastCloudLoadError: getErrorMessage(error) }, "Firebase sync unavailable");
+    updateFirebaseAuthStatus("Could not load your account. Check your connection and try signing in again.", true);
     console.error("Firebase sync unavailable. User will remain signed out until Firebase authentication works.", error);
+    throw error;
   }
+}
+
+async function hydrateOptionalFamilySyncAfterSignIn(firebase, sequenceId = activeSignInSequenceId) {
+  const timing = {
+    id: sequenceId,
+    label: "background hydration",
+    startedAt: performance.now(),
+    lastAt: performance.now()
+  };
+  const remoteStore = await fetchProfileStoreFromCloud();
+  logSignInSequenceStage(timing, "Optional village/profile bundle loaded", {
+    hasRemoteStore: Boolean(remoteStore)
+  });
+  if (remoteStore) {
+    applyRemoteProfileStore(remoteStore);
+    if (currentView === "dashboard") renderDashboard();
+  }
+  await verifySignInFamilyZRoster(firebase);
+  logSignInSequenceStage(timing, "Optional roster verification finished");
+  await verifySignInProgressState(firebase);
+  logSignInSequenceStage(timing, "Optional progress verification finished");
 }
 
 function startFamilySyncPolling() {
@@ -3458,6 +3535,127 @@ async function saveDifficultWordsToCloudNow(words = difficultWords) {
   }
 }
 
+async function fetchEssentialUserProfileStoreFromCloud() {
+  if (!hasCloudSyncConfig() || !firebaseAuthUser) return null;
+  const firebase = await getFirebaseSyncApi();
+  const remoteStore = createProfileStore();
+  const userRef = getFirebaseUserDocRef(firebase, firebaseAuthUser.uid);
+  const userPath = getFirebaseUserDocPath(firebase, firebaseAuthUser.uid);
+  const userSnapshot = await firebase.getDocFromServer(userRef);
+  const userDocLoaded = userSnapshot.exists();
+  let firestoreProfileExists = false;
+
+  if (!userDocLoaded) {
+    updateCloudSyncDebug({
+      userDocLoaded: false,
+      villageDocsLoaded: [],
+      firestoreProfileExists: false,
+      lastCloudLoadTime: new Date().toISOString(),
+      lastCloudLoadError: ""
+    }, "Required Firestore user document not found");
+    return null;
+  }
+
+  const userData = userSnapshot.data() || {};
+  console.info("[Unser Dorf sign-in performance] Loaded required user document.", {
+    path: userPath,
+    uid: firebaseAuthUser.uid,
+    currentGroup: userData.currentGroup || "",
+    currentProfile: userData.currentProfile || "",
+    profileIds: Object.keys(userData.profiles || {})
+  });
+  firestoreProfileExists = getFirebaseIdentityProfileIds({
+    profiles: userData.profiles || {}
+  }, firebaseAuthUser).length > 0;
+
+  const userIdentityProfiles = getFirebaseIdentityProfilesFromMap(userData.profiles || {}, firebaseAuthUser);
+  const userProgressResetVersion = normalizeCounter(userData.progressResetVersion);
+  const userProgressResetAtIso = typeof userData.progressResetAtIso === "string" ? userData.progressResetAtIso : "";
+  const userProgressRevision = normalizeCounter(userData.profileProgressRevision);
+  const userProgressUpdatedAtIso = typeof userData.profileProgressUpdatedAtIso === "string" ? userData.profileProgressUpdatedAtIso : "";
+  const userFlashcardsReviewedLifetime = normalizeCounter(userData.flashcardsReviewedLifetime);
+  Object.values(userIdentityProfiles).forEach((profile) => {
+    profile.progressResetVersion = Math.max(normalizeCounter(profile.progressResetVersion), userProgressResetVersion);
+    if (userProgressResetAtIso && !profile.progressResetAtIso) profile.progressResetAtIso = userProgressResetAtIso;
+    profile.profileProgressRevision = Math.max(normalizeCounter(profile.profileProgressRevision), userProgressRevision);
+    if (userProgressUpdatedAtIso && !profile.profileProgressUpdatedAtIso) profile.profileProgressUpdatedAtIso = userProgressUpdatedAtIso;
+    profile.flashcardsReviewedLifetime = Math.max(
+      normalizeCounter(profile.flashcardsReviewedLifetime),
+      userFlashcardsReviewedLifetime,
+      getLegacyFlashcardsReviewedCount(profile)
+    );
+  });
+  mergeRemoteProfilesIntoStore(remoteStore, userIdentityProfiles, { preferIncomingIdentity: true });
+  const userRole = sanitizeUserRole(userData.role);
+  if (userRole !== "member") {
+    getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
+      if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].role = userRole;
+    });
+  }
+
+  const hasTopLevelActiveStudySet = Object.prototype.hasOwnProperty.call(userData, "activeStudySet");
+  const remoteActiveStudySet = normalizeActiveStudySet(userData.activeStudySet);
+  if (hasTopLevelActiveStudySet) {
+    getFirebaseIdentityProfileIds(remoteStore, firebaseAuthUser).forEach((profileId) => {
+      if (remoteStore.profiles[profileId]) remoteStore.profiles[profileId].activeStudySet = remoteActiveStudySet;
+    });
+  }
+
+  remoteStore.currentProfile = String(userData.currentProfile || getFirebaseProfileId(firebaseAuthUser));
+  consolidateFirebaseIdentityProfiles(remoteStore, {
+    preferProfileId: remoteStore.currentProfile
+  });
+  const canonicalProfileId = remoteStore.currentProfile || getFirebaseProfileId(firebaseAuthUser);
+  const canonicalProfile = canonicalProfileId ? remoteStore.profiles?.[canonicalProfileId] : null;
+  const groupId = normalizeGroupId(userData.currentGroup || canonicalProfile?.villageId || DEFAULT_GROUP_ID, remoteStore.groups);
+  remoteStore.currentGroup = groupId;
+  if (canonicalProfile) {
+    canonicalProfile.villageId = canonicalProfile.villageId || groupId;
+    keepProfileInOnlyOneGroup(remoteStore, canonicalProfileId, groupId);
+  }
+
+  const serverLearningSnapshot = getLearningCountSnapshotFromUserDoc(userData, canonicalProfileId);
+  const serverWordCount = serverLearningSnapshot.topLevelActiveStudySetCount
+    || serverLearningSnapshot.profileActiveStudySetCount
+    || serverLearningSnapshot.profileUnfinishedDeckCount
+    || 0;
+  const serverSessionId = serverLearningSnapshot.topLevelActiveStudySetSessionId
+    || serverLearningSnapshot.profileActiveStudySetSessionId
+    || serverLearningSnapshot.profileUnfinishedSessionId
+    || "";
+  lastLearningHydrationSnapshot = {
+    ...(lastLearningHydrationSnapshot || {}),
+    serverWordCount,
+    serverSessionId,
+    serverLearningSnapshot,
+    localStateDiscarded: Boolean(
+      lastLearningHydrationSnapshot
+      && Number(lastLearningHydrationSnapshot.localCachedWordCount) !== Number(serverWordCount)
+    )
+  };
+  console.info("[Unser Dorf learning hydration] Required user document study state.", {
+    path: userPath,
+    profileId: canonicalProfileId,
+    ...serverLearningSnapshot,
+    authoritativeCount: serverWordCount,
+    authoritativeSessionId: serverSessionId
+  });
+
+  updateCloudSyncDebug({
+    userDocLoaded,
+    villageDocsLoaded: [],
+    firestoreProfileExists,
+    firestoreCoinsLoaded: getIdentitySnapshotFromStore(remoteStore, remoteStore.currentProfile).coins,
+    lastCloudLoadTime: new Date().toISOString(),
+    lastCloudLoadError: ""
+  }, "Required Firestore user document load complete");
+  logCloudIdentityDebug("Required Firestore user document loaded", {
+    remoteStore,
+    userData
+  });
+  return remoteStore;
+}
+
 async function fetchProfileStoreFromCloud() {
   if (!hasCloudSyncConfig() || !firebaseAuthUser) return null;
   try {
@@ -4753,10 +4951,17 @@ async function handleFirebaseEmailAuth(mode) {
   }
   updateFirebaseAuthStatus(mode === "register" ? "Creating account..." : "Signing in...");
   try {
+    const authStartedAt = performance.now();
     const firebase = await getFirebaseSyncApi();
     const credential = mode === "register"
       ? await firebase.authModule.createUserWithEmailAndPassword(firebase.auth, email, password)
       : await firebase.authModule.signInWithEmailAndPassword(firebase.auth, email, password);
+    console.info("[Unser Dorf sign-in performance]", {
+      stage: mode === "register" ? "Firebase account created" : "Firebase password sign-in complete",
+      elapsedMs: Math.round(performance.now() - authStartedAt),
+      uid: credential.user?.uid || "none",
+      email
+    });
     await handleFirebaseSignedIn(credential.user);
   } catch (error) {
     if (mode === "register" && String(error?.code || "").includes("auth/email-already-in-use")) {
