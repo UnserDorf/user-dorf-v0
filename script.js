@@ -922,6 +922,8 @@ let cloudSaveReason = "";
 let cloudSaveSequence = 0;
 let cloudSavePromise = null;
 let cloudSaveOperationId = 0;
+let cloudSavePermissionDenied = false;
+let lastCloudSavePermissionDeniedKey = "";
 let cloudVisibilityHandlerBound = false;
 let lastSuccessfulCloudSaveTime = "";
 let lastAppliedServerProgressRevision = 0;
@@ -1496,7 +1498,16 @@ function hasPendingLocalProgressSave() {
       || cloudSaveState === "scheduled"
       || cloudSaveState === "saving"
       || cloudSaveState === "failed"
+      || cloudSaveState === "permission-denied"
   );
+}
+
+function isPermissionDeniedError(error) {
+  return String(error?.code || error?.name || error?.message || "").includes("permission-denied");
+}
+
+function getFirestoreErrorCode(error) {
+  return String(error?.code || error?.name || "unknown");
 }
 
 function rememberCloudSnapshotDecision(decision, reason, serverRevision, localRevision) {
@@ -3227,6 +3238,16 @@ function saveProfileStore(options = {}) {
 
 function scheduleCloudSave(options = {}) {
   if (!syncEnabled || applyingRemoteStore || developerPreviewMode) return;
+  if (cloudSavePermissionDenied) {
+    cloudSaveState = "permission-denied";
+    cloudSaveReason = options.reason || cloudSaveReason || "profile progress save blocked by Firestore permission";
+    updateCloudSyncDebug({
+      progressSaveState: cloudSaveState,
+      progressSaveReason: cloudSaveReason,
+      progressRevision: getCurrentProfileProgressRevision()
+    }, "Firestore save blocked by permissions");
+    return;
+  }
   window.clearTimeout(cloudSaveTimer);
   if (options.immediate) {
     cloudSaveTimer = 0;
@@ -3248,6 +3269,15 @@ function scheduleCloudSave(options = {}) {
 
 async function saveProfileStoreToCloudNow(reason = "profile progress save") {
   if (!profileStore || !hasCloudSyncConfig() || !firebaseAuthUser) return;
+  if (cloudSavePermissionDenied) {
+    cloudSaveState = "permission-denied";
+    updateCloudSyncDebug({
+      progressSaveState: cloudSaveState,
+      progressSaveReason: cloudSaveReason || reason,
+      progressRevision: getCurrentProfileProgressRevision()
+    }, "Firestore save not retried after permission-denied");
+    return false;
+  }
   if (cloudSaveInFlight) {
     cloudSavePending = true;
     updateCloudSyncDebug({ progressSaveState: "saving", progressSaveReason: reason }, "Firestore save queued behind active save");
@@ -3370,17 +3400,38 @@ async function saveProfileStoreToCloudNow(reason = "profile progress save") {
       });
     }
   } catch (error) {
-    cloudSaveState = "failed";
+    const permissionDenied = isPermissionDeniedError(error);
+    cloudSaveState = permissionDenied ? "permission-denied" : "failed";
+    if (permissionDenied) {
+      cloudSavePermissionDenied = true;
+      cloudSavePending = false;
+    }
     updateCloudSyncDebug({
       lastCloudSaveError: getErrorMessage(error),
       progressSaveState: cloudSaveState,
       progressSaveReason: cloudSaveReason,
       progressRevision: getCurrentProfileProgressRevision()
     }, "Firestore save failed");
-    console.warn("Could not sync progress to Firebase. Local progress is still saved.", error);
+    const errorKey = [
+      getFirebaseUserDocPath(await getFirebaseSyncApi(), firebaseAuthUser.uid),
+      getFirestoreErrorCode(error),
+      cloudSaveReason
+    ].join("|");
+    if (!permissionDenied || errorKey !== lastCloudSavePermissionDeniedKey) {
+      lastCloudSavePermissionDeniedKey = errorKey;
+      console.warn("[Unser Dorf progress save] Could not sync progress to Firebase. Local progress is still saved.", {
+        operationId,
+        path: getFirebaseUserDocPath(await getFirebaseSyncApi(), firebaseAuthUser.uid),
+        reason: cloudSaveReason,
+        code: getFirestoreErrorCode(error),
+        message: getErrorMessage(error),
+        permissionDenied,
+        willRetryAutomatically: !permissionDenied
+      });
+    }
   } finally {
     cloudSaveInFlight = false;
-    if (cloudSavePending && firebaseAuthUser) {
+    if (!cloudSavePermissionDenied && cloudSavePending && firebaseAuthUser) {
       cloudSavePending = false;
       await saveProfileStoreToCloudNow(cloudSaveReason || "queued profile progress save");
     }
@@ -5072,6 +5123,8 @@ async function handleFirebaseSignedIn(user) {
   firebaseAuthUser = user || null;
   firebaseAuthReady = true;
   syncEnabled = false;
+  cloudSavePermissionDenied = false;
+  lastCloudSavePermissionDeniedKey = "";
   resetCanonicalUserAuthorization();
   userProgressHydratedFromServer = false;
   userProgressHydrationInProgress = Boolean(firebaseAuthUser);
@@ -5097,6 +5150,8 @@ async function signOutOfFirebase() {
   }
   firebaseAuthUser = null;
   syncEnabled = false;
+  cloudSavePermissionDenied = false;
+  lastCloudSavePermissionDeniedKey = "";
   resetCanonicalUserAuthorization();
   userProgressHydratedFromServer = false;
   userProgressHydrationInProgress = false;
