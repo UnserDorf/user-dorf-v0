@@ -6336,26 +6336,23 @@ function returnToSettingsFromDeveloperTools() {
 
 async function readFirestoreWithDebug(readAction, details) {
   try {
-    console.info("[Unser Dorf Firestore read]", {
-      ...details,
-      uid: firebaseAuthUser?.uid || "",
-      email: firebaseAuthUser?.email || ""
-    });
+    console.info("[Unser Dorf Firestore read]", details);
     return await readAction();
   } catch (error) {
     error.firestorePath = details?.path || "";
     error.firestoreOperation = details?.operation || "";
+    error.firestoreSection = details?.section || "";
     developerToolsLastError = {
       type: "read",
       path: error.firestorePath,
       operation: error.firestoreOperation,
+      section: error.firestoreSection,
+      developerAccessVerified: Boolean(details?.developerAccessVerified),
       code: error?.code || "",
       message: error?.message || String(error)
     };
     console.error("[Unser Dorf Firestore read failed]", {
       ...details,
-      uid: firebaseAuthUser?.uid || "",
-      email: firebaseAuthUser?.email || "",
       code: error?.code || "",
       message: error?.message || String(error),
       error
@@ -6366,34 +6363,114 @@ async function readFirestoreWithDebug(readAction, details) {
 
 async function writeFirestoreWithDebug(writeAction, details) {
   try {
-    console.info("[Unser Dorf Firestore write]", {
-      ...details,
-      uid: firebaseAuthUser?.uid || "",
-      email: firebaseAuthUser?.email || ""
-    });
+    console.info("[Unser Dorf Firestore write]", details);
     const result = await writeAction();
     console.info("[Unser Dorf Firestore write success]", details);
     return result;
   } catch (error) {
     error.firestorePath = details?.path || "";
     error.firestoreOperation = details?.operation || "";
+    error.firestoreSection = details?.section || "";
     developerToolsLastError = {
       type: "write",
       path: error.firestorePath,
       operation: error.firestoreOperation,
+      section: error.firestoreSection,
+      developerAccessVerified: Boolean(details?.developerAccessVerified),
       code: error?.code || "",
       message: error?.message || String(error)
     };
     console.error("[Unser Dorf Firestore write failed]", {
       ...details,
-      uid: firebaseAuthUser?.uid || "",
-      email: firebaseAuthUser?.email || "",
       code: error?.code || "",
       message: error?.message || String(error),
       error
     });
     throw error;
   }
+}
+
+function normalizeDeveloperToolsOperationError(error, details = {}) {
+  return {
+    label: details.operation || error?.firestoreOperation || "developer-tools-operation",
+    type: details.type || developerToolsLastError?.type || "read",
+    section: details.section || error?.firestoreSection || developerToolsActiveSection || "unknown",
+    path: details.path || error?.firestorePath || "",
+    code: error?.code || "",
+    message: error?.message || String(error),
+    developerAccessVerified: Boolean(details.developerAccessVerified)
+  };
+}
+
+async function runDeveloperToolsRead(readAction, details) {
+  try {
+    const value = await readFirestoreWithDebug(readAction, {
+      ...details,
+      developerAccessVerified: true
+    });
+    return { ok: true, value };
+  } catch (error) {
+    const operationError = normalizeDeveloperToolsOperationError(error, {
+      ...details,
+      developerAccessVerified: true
+    });
+    console.error("[Unser Dorf Developer Tools operation blocked]", operationError);
+    return { ok: false, error: operationError };
+  }
+}
+
+function findDeveloperToolsError(data, operation) {
+  return (data?.errors || []).find((error) => error.label === operation);
+}
+
+function findDeveloperToolsErrorsBySection(data, section) {
+  return (data?.errors || []).filter((error) => error.section === section);
+}
+
+function hasDeveloperToolsPermissionError(errors = []) {
+  return errors.some((error) => String(error.code || "").includes("permission-denied"));
+}
+
+function createDeveloperOperationErrorCard(error) {
+  const section = document.createElement("section");
+  section.className = "developer-tools-card developer-operation-error-card";
+  const label = formatDeveloperOperationLabel(error?.label || "Developer Tools read");
+  const isPermissionError = String(error?.code || "").includes("permission-denied");
+  section.replaceChildren(
+    createTextElement("h3", "", isPermissionError ? "Firestore rules blocked this section" : "Could not load this section"),
+    createTextElement(
+      "p",
+      "developer-tools-empty",
+      isPermissionError
+        ? `Developer access was verified, but Firestore rules blocked “${label}”.`
+        : `${label} could not load.`
+    ),
+    createDeveloperDefinitionList([
+      ["Operation", label],
+      ["Type", error?.type || "read"],
+      ["Path", error?.path || "Not available"],
+      ["Code", error?.code || "Not available"],
+      ["Message", error?.message || "Not available"]
+    ])
+  );
+  return section;
+}
+
+function createDeveloperOperationErrorsSummary(errors = []) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-diagnostics-stack";
+  if (!errors.length) return wrapper;
+  errors.forEach((error) => wrapper.append(createDeveloperOperationErrorCard(error)));
+  return wrapper;
+}
+
+function formatDeveloperOperationLabel(label = "") {
+  return String(label || "Developer Tools operation")
+    .replace(/^developer\s+/i, "")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^./, (letter) => letter.toUpperCase());
 }
 
 async function renderDeveloperToolsPage() {
@@ -6422,7 +6499,15 @@ async function renderDeveloperToolsPage() {
   try {
     const data = await loadDeveloperToolsData();
     developerToolsLastData = data;
-    setDeveloperToolsStatus("Developer data loaded. Auth accounts must be deleted manually or via Cloud Function.");
+    if (data.errors?.length) {
+      const firstError = data.errors[0];
+      const permissionMessage = hasDeveloperToolsPermissionError(data.errors)
+        ? `Developer access was verified, but Firestore rules blocked “${formatDeveloperOperationLabel(firstError.label)}”. Check Diagnostics for the path.`
+        : `Developer access was verified, but ${formatDeveloperOperationLabel(firstError.label)} could not load.`;
+      setDeveloperToolsStatus(permissionMessage, true);
+    } else {
+      setDeveloperToolsStatus("Developer data loaded. Auth accounts must be deleted manually or via Cloud Function.");
+    }
     els.developerToolsContent.replaceChildren(createDeveloperToolsLayout(data));
   } catch (error) {
     console.error("Developer Tools failed to load.", error);
@@ -6462,9 +6547,13 @@ function createDeveloperToolsLayout(data) {
   const content = document.createElement("div");
   content.className = "developer-tools-section-content";
   if (developerToolsActiveSection === "users") {
-    content.append(createDeveloperUsersSection(data.users, data.villages));
+    const usersError = findDeveloperToolsError(data, "list-users");
+    content.append(usersError ? createDeveloperOperationErrorCard(usersError) : createDeveloperUsersSection(data.users, data.villages));
   } else if (developerToolsActiveSection === "villages") {
+    const villageErrors = findDeveloperToolsErrorsBySection(data, "villages");
+    if (villageErrors.length && !data.villages.length) content.append(createDeveloperOperationErrorsSummary(villageErrors));
     content.append(createDeveloperVillagesSection(data.villages));
+    if (villageErrors.length && data.villages.length) content.append(createDeveloperOperationErrorsSummary(villageErrors));
   } else if (developerToolsActiveSection === "cleanup") {
     content.append(createDeveloperCleanupSection(data));
   } else if (developerToolsActiveSection === "testing") {
@@ -6551,33 +6640,38 @@ async function isCurrentUserDeveloperFromFirestore() {
 async function loadDeveloperToolsData() {
   const firebase = await getFirebaseSyncApi();
   console.info("[Unser Dorf Developer Tools] Loading developer data.", {
-    uid: firebaseAuthUser?.uid || "",
-    email: firebaseAuthUser?.email || "",
     usersPath: getFirebaseUsersCollectionPath(firebase),
     villagePaths: DEFAULT_GROUPS.map((groupInfo) => getFirebaseVillageDocPath(firebase, groupInfo.id))
   });
-  const userSnapshot = await readFirestoreWithDebug(
-    () => firebase.getDocs(getFirebaseUsersCollectionRef(firebase)),
+  const errors = [];
+  const userResult = await runDeveloperToolsRead(
+    () => firebase.getDocsFromServer(getFirebaseUsersCollectionRef(firebase)),
     {
-      operation: "list developer users collection",
+      operation: "list-users",
+      type: "query",
+      section: "users",
       path: getFirebaseUsersCollectionPath(firebase)
     }
   );
   const villageSnapshots = [];
   for (const groupInfo of DEFAULT_GROUPS) {
-    const snapshot = await readFirestoreWithDebug(
-      () => firebase.getDoc(getFirebaseVillageDocRef(firebase, groupInfo.id)),
+    const result = await runDeveloperToolsRead(
+      () => firebase.getDocFromServer(getFirebaseVillageDocRef(firebase, groupInfo.id)),
       {
-        operation: "get developer village document",
+        operation: `load-village-${groupInfo.id}`,
+        type: "getDoc",
+        section: "villages",
         path: getFirebaseVillageDocPath(firebase, groupInfo.id)
       }
     );
-    villageSnapshots.push({ groupInfo, snapshot });
+    if (result.ok) villageSnapshots.push({ groupInfo, snapshot: result.value });
+    else errors.push(result.error);
   }
-  const userDocs = userSnapshot.docs.map((docSnapshot) => ({
+  if (!userResult.ok) errors.push(userResult.error);
+  const userDocs = userResult.ok ? userResult.value.docs.map((docSnapshot) => ({
     id: docSnapshot.id,
     data: docSnapshot.data() || {}
-  }));
+  })) : [];
   const validUserIndex = createValidUserIndex(userDocs);
   const villages = villageSnapshots.map(({ groupInfo, snapshot }) => {
     const data = snapshot.exists() ? snapshot.data() || {} : {};
@@ -6607,7 +6701,9 @@ async function loadDeveloperToolsData() {
   return {
     users: buildDeveloperUserRows(userDocs, villages),
     villages,
-    validUserIndex
+    validUserIndex,
+    errors,
+    developerAccessVerified: true
   };
 }
 
@@ -6803,6 +6899,7 @@ function createDeveloperDiagnosticsSection(data) {
   const wrapper = document.createElement("div");
   wrapper.className = "developer-diagnostics-stack";
   wrapper.append(createDeveloperAppVersionCard());
+  if (data.errors?.length) wrapper.append(createDeveloperOperationErrorsSummary(data.errors));
   const section = document.createElement("section");
   section.className = "developer-tools-card developer-diagnostics-card";
   const firebaseConfig = getFirebaseSyncConfig().firebaseConfig;
@@ -7091,6 +7188,16 @@ function formatDeveloperRole(role) {
 function createDeveloperCleanupSection(data) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
+  const usersError = findDeveloperToolsError(data, "list-users");
+  const familyZError = findDeveloperToolsError(data, `load-village-${DEFAULT_GROUP_ID}`);
+  if (usersError || familyZError) {
+    section.append(
+      createTextElement("h3", "", "Cleanup"),
+      createTextElement("p", "developer-tools-empty", "Cleanup is paused until Developer Tools can safely load users and Family Z from Firestore.")
+    );
+    section.append(createDeveloperOperationErrorCard(usersError || familyZError));
+    return section;
+  }
   const familyZ = data.villages.find((village) => village.id === DEFAULT_GROUP_ID);
   const keepOnlyPreview = getFamilyZKeepCurrentUserPreview(familyZ);
   const cleanupRows = [
@@ -7603,6 +7710,10 @@ function createDeveloperVillagesSection(villages) {
   const section = document.createElement("section");
   section.className = "developer-tools-card";
   section.append(createTextElement("h3", "", "Villages"));
+  if (!villages.length) {
+    section.append(createTextElement("p", "developer-tools-empty", "No village data loaded."));
+    return section;
+  }
   const grid = document.createElement("div");
   grid.className = "developer-village-grid";
   villages.forEach((village) => {
