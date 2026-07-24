@@ -283,7 +283,7 @@ const ACHIEVEMENTS = [
     target: 3000
   }
 ];
-const STREAK_ACTIVITY_GOAL = 10;
+const STREAK_ACTIVITY_GOAL = 1;
 const VILLAGE_NAMING_MEMORY_ID = "name-your-village";
 const VILLAGE_NAMING_ENABLED = false;
 const FUTURE_VILLAGE_NAMING_MEMORY = {
@@ -12358,6 +12358,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
   if (developerPreviewMode) return;
   const profile = getFlashcardSessionProfile();
   if (!profile) return;
+  const previousFlashcardCount = getDurableFlashcardsReviewedCount(profile);
   const key = getFlashcardSessionKey();
   const existing = profile.flashcardSessions[key] || {};
   const countLifetimeReview = Boolean(completed && !existing.completed);
@@ -12379,7 +12380,7 @@ function saveCurrentFlashcardSession({ studiedCard = null, completed = false } =
   };
   const activeStudySetUpdated = completed ? updateActiveStudySetFromFlashcardSession(profile, key, { countLifetimeReview }) : false;
   if (completed) verifyCompletedFlashcardSession(profile.flashcardSessions[key], profile.activeStudySet);
-  if (completed) checkAchievements("flashcards");
+  if (completed) checkAchievements("flashcards", { previousFlashcardCount });
   saveProfileStore({ localOnly: !completed, immediate: completed, reason: completed ? "completed flashcard study session" : "flashcard session progress" });
   if (activeStudySetUpdated) {
     saveActiveStudySetToCloudNow(profile.activeStudySet);
@@ -14669,9 +14670,7 @@ function answerArticleQuiz(article) {
     correctArticle: card.article,
     isCorrect
   });
-  if (isCorrect && shouldAwardFocusedReviewCoin(card, "articles")) {
-    awardCoins(1);
-  }
+  awardVerifiedAnswerCoin({ isCorrect, card, type: "articles" });
   if (challengeSession.focusedReview) {
     updateFocusedDifficultyProgress(card, "articles", isCorrect);
   }
@@ -14761,6 +14760,13 @@ function awardCoins(amount) {
     celebrationSummary
   });
   saveProfileStore({ immediate: true });
+}
+
+function awardVerifiedAnswerCoin({ isCorrect, card = null, type = "" } = {}) {
+  if (!isCorrect) return 0;
+  if (challengeSession.focusedReview && !shouldAwardFocusedReviewCoin(card, type)) return 0;
+  awardCoins(1);
+  return 1;
 }
 
 function snapshotRewardSeenState(profile, group) {
@@ -15175,7 +15181,7 @@ function celebrateFamilyLevelIfNeeded() {
   group.familyLevelsReached = normalizeFamilyLevelsReached(group.familyLevelsReached, Object.fromEntries(getCurrentGroupProfiles().map((profile) => [profile.id, profile])));
 }
 
-function checkAchievements(reason = "") {
+function checkAchievements(reason = "", options = {}) {
   if (reason !== "flashcards") return;
   if (!profileStore || !currentProfileId || checkingAchievements) return;
   checkingAchievements = true;
@@ -15184,11 +15190,28 @@ function checkAchievements(reason = "") {
     profile.achievementsUnlocked = normalizeAchievementList(profile.achievementsUnlocked);
     promoteFamilyAchievements(profileStore);
     const familyAchievementIds = getFamilyAchievementIds(profileStore);
+    const previousFlashcardCount = Number.isFinite(Number(options.previousFlashcardCount))
+      ? normalizeCounter(options.previousFlashcardCount)
+      : null;
+    if (previousFlashcardCount !== null) {
+      ACHIEVEMENTS
+        .filter((achievement) => achievement.metric === "flashcardsReviewed"
+          && achievement.scope !== "family"
+          && normalizeCounter(achievement.target) <= previousFlashcardCount)
+        .forEach((achievement) => {
+          if (!profile.achievementsUnlocked.includes(achievement.id)) {
+            profile.achievementsUnlocked.push(achievement.id);
+          }
+        });
+    }
 
     ACHIEVEMENTS.forEach((achievement) => {
       const isUnlocked = achievement.scope === "family"
         ? familyAchievementIds.includes(achievement.id)
         : profile.achievementsUnlocked.includes(achievement.id);
+      if (previousFlashcardCount !== null
+        && achievement.metric === "flashcardsReviewed"
+        && normalizeCounter(achievement.target) <= previousFlashcardCount) return;
       if (isUnlocked || !isAchievementConditionMet(achievement, profile)) return;
       unlockAchievement(achievement, profile, reason);
     });
@@ -15600,8 +15623,9 @@ function answerNounVerbQuiz(verb) {
     isCorrect
   });
   updateNounVerbLearningProgress(pair, isCorrect);
-  if (isCorrect) awardCoins(2);
+  awardVerifiedAnswerCoin({ isCorrect, card: pair, type: "noun-verb" });
   recordStudyHistory("noun-verb", pair, isCorrect ? "correct" : "wrong");
+  recordDailyActivity("vocabulary");
   saveNounVerbProgress();
   saveNounVerbPosition();
   renderNounVerbQuiz();
@@ -15619,7 +15643,7 @@ function renderNounVerbResult(pair) {
     <span class="quiz-result-answer">${escapeHtml(pair.phrase)}</span>
     <span class="quiz-result-meaning"><strong>English:</strong> ${escapeHtml(pair.english || "-")}</span>
     <span class="quiz-result-meaning"><strong>Example:</strong> ${escapeHtml(pair.example || "-")}</span>
-    ${isCorrect ? "<span class=\"quiz-result-reward\"><strong>Reward:</strong> 🪙🪙 +2 Coins</span>" : ""}
+    ${isCorrect ? "<span class=\"quiz-result-reward\"><strong>Reward:</strong> 🪙 +1 Coin</span>" : ""}
   `;
   els.nounVerbOptions.querySelectorAll("button").forEach((button) => {
     const verb = button.dataset.verb;
@@ -15795,9 +15819,7 @@ function answerVocabularyReviewQuiz(selectedAnswer) {
   updateVocabularyReviewStats(isCorrect);
   updateVocabularyMasteryProgress(card, isCorrect);
   if (getCurrentProfile()) getCurrentProfile().vocabularyProgress = vocabularyProgress;
-  if (isCorrect && shouldAwardFocusedReviewCoin(card, "vocabulary")) {
-    awardCoins(1);
-  }
+  awardVerifiedAnswerCoin({ isCorrect, card, type: "vocabulary" });
   if (challengeSession.focusedReview) {
     updateFocusedDifficultyProgress(card, "vocabulary", isCorrect);
   }
@@ -16394,8 +16416,9 @@ function answerMeaningMatchQuiz(choiceIndex) {
   meaningMatchQuizState.hasAnswered = true;
   const isCorrect = Boolean(choice.isCorrect);
   updateMeaningMatchLearningProgress(pair, isCorrect);
-  if (isCorrect) awardCoins(2);
+  awardVerifiedAnswerCoin({ isCorrect, card: pair, type: "meaning-match" });
   recordStudyHistory("meaning-match", pair, isCorrect ? "correct" : "wrong");
+  recordDailyActivity("vocabulary");
   saveMeaningMatchProgress();
   renderMeaningMatchQuiz();
   renderCoinChallenges();
@@ -16414,7 +16437,7 @@ function renderMeaningMatchResult(pair) {
       <span class="quiz-result-meaning">${escapeHtml(getMeaningMatchMeaning(pair))}</span>
       <span class="quiz-result-answer">${escapeHtml(pair.phrase)}</span>
       <span class="quiz-result-meaning"><strong>Example:</strong> ${escapeHtml(correctSentence)}</span>
-      <span class="quiz-result-reward"><strong>Reward:</strong> 🪙🪙 +2 Coins</span>
+      <span class="quiz-result-reward"><strong>Reward:</strong> 🪙 +1 Coin</span>
     `
     : `
       <span class="quiz-result-label">❌ Wrong</span>
@@ -16593,8 +16616,7 @@ function answerPrepositionQuiz(selectedAnswer) {
   const progressEntry = updatePrepositionLearningProgress(item, isCorrect);
   let coinsAwarded = 0;
   if (isCorrect) {
-    awardCoins(2);
-    coinsAwarded = 2;
+    coinsAwarded = awardVerifiedAnswerCoin({ isCorrect, card: item, type: "prepositions" });
   }
 
   console.log("Preposition answer handled", {
@@ -16608,6 +16630,7 @@ function answerPrepositionQuiz(selectedAnswer) {
   });
 
   recordStudyHistory("prepositions", item, isCorrect ? "correct" : "wrong");
+  recordDailyActivity("vocabulary");
   savePrepositionProgress();
   renderPrepositionQuiz();
   renderCoinChallenges();
@@ -16623,7 +16646,7 @@ function renderPrepositionResult(item) {
     <span class="quiz-result-label">${isCorrect ? "✅ Correct" : "❌ Wrong"}</span>
     ${isCorrect ? "" : "<span class=\"quiz-result-correction\">Correct answer:</span>"}
     <span class="quiz-result-answer">${escapeHtml(fullSentence)}</span>
-    ${isCorrect ? "<span class=\"quiz-result-reward\"><strong>Reward:</strong> 🪙🪙 +2 Coins</span>" : ""}
+    ${isCorrect ? "<span class=\"quiz-result-reward\"><strong>Reward:</strong> 🪙 +1 Coin</span>" : ""}
   `;
   els.nounVerbOptions.querySelectorAll("button").forEach((button) => {
     const answer = button.dataset.prepositionChoice;
