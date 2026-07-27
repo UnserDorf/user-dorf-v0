@@ -943,6 +943,7 @@ let developerToolsActiveSection = "overview";
 let developerToolsBusy = false;
 let developerToolsLastData = null;
 let developerToolsLastError = null;
+let developerToolsLastAuthCheck = null;
 let canonicalUserDocumentLoaded = false;
 let canonicalUserRole = "member";
 let canonicalProtectedAccount = false;
@@ -6613,7 +6614,7 @@ async function renderDeveloperToolsPage() {
     if (!allowed) {
       setDeveloperToolsStatus("Developer access required.", true);
       els.developerToolsContent.replaceChildren(
-        createTextElement("p", "developer-tools-empty", "Developer access required.")
+        createDeveloperAccessDiagnostic()
       );
       return;
     }
@@ -6732,6 +6733,17 @@ async function isCurrentUserDeveloperFromFirestore() {
     if (snapshot.exists()) rememberCanonicalUserAuthorization(data);
     const role = sanitizeUserRole(data.role);
     const protectedAccount = Boolean(data.protectedAccount);
+    developerToolsLastAuthCheck = {
+      uid: firebaseAuthUser.uid,
+      email: firebaseAuthUser.email || "",
+      userDocPath,
+      documentExists: snapshot.exists(),
+      role,
+      protectedAccount,
+      localRole,
+      localProtectedAccount,
+      allowed: role === "developer"
+    };
     if (profile && role === "developer") profile.role = role;
     if (profile && (protectedAccount || role === "developer")) profile.protectedAccount = true;
     console.info("[Unser Dorf Developer Tools auth] Current user profile check.", {
@@ -6752,6 +6764,31 @@ async function isCurrentUserDeveloperFromFirestore() {
     });
     throw error;
   }
+}
+
+function createDeveloperAccessDiagnostic() {
+  const details = developerToolsLastAuthCheck || {};
+  const wrapper = document.createElement("div");
+  wrapper.className = "developer-tools-empty";
+  const title = createTextElement("p", "", "Developer access required.");
+  const list = document.createElement("div");
+  list.className = "developer-diagnostics-list";
+  [
+    ["Signed in as", details.email || "(no email found)"],
+    ["Firebase UID", details.uid || "(no UID found)"],
+    ["User document", details.userDocPath || "(no Firestore path found)"],
+    ["Document exists", details.documentExists === true ? "yes" : details.documentExists === false ? "no" : "unknown"],
+    ["Firestore role", details.role || "missing"],
+    ["Protected account", details.protectedAccount === true ? "true" : details.protectedAccount === false ? "false" : "missing"],
+    ["Local role", details.localRole || "missing"],
+    ["Local protected", details.localProtectedAccount === true ? "true" : details.localProtectedAccount === false ? "false" : "missing"]
+  ].forEach(([label, value]) => {
+    const row = document.createElement("p");
+    row.textContent = `${label}: ${value}`;
+    list.append(row);
+  });
+  wrapper.append(title, list);
+  return wrapper;
 }
 
 async function loadDeveloperToolsData() {
