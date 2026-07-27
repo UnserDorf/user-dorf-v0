@@ -6730,23 +6730,8 @@ async function isCurrentUserDeveloperFromFirestore() {
     );
     const data = snapshot.exists() ? snapshot.data() || {} : {};
     if (snapshot.exists()) rememberCanonicalUserAuthorization(data);
-    let role = sanitizeUserRole(data.role);
+    const role = sanitizeUserRole(data.role);
     const protectedAccount = Boolean(data.protectedAccount);
-    if (role !== "developer" && shouldBootstrapDeveloperRole(firebaseAuthUser)) {
-      console.warn("[Unser Dorf Developer Tools auth] Restoring established bootstrap developer role on current user document.", {
-        userDocPath,
-        previousRole: role,
-        protectedAccount
-      });
-      await firebase.setDoc(getFirebaseUserDocRef(firebase, firebaseAuthUser.uid), {
-        role: "developer",
-        protectedAccount: true,
-        updatedAt: firebase.serverTimestamp(),
-        updatedAtIso: new Date().toISOString()
-      }, { merge: true });
-      role = "developer";
-      rememberCanonicalUserAuthorization({ ...data, role: "developer", protectedAccount: true });
-    }
     if (profile && role === "developer") profile.role = role;
     if (profile && (protectedAccount || role === "developer")) profile.protectedAccount = true;
     console.info("[Unser Dorf Developer Tools auth] Current user profile check.", {
